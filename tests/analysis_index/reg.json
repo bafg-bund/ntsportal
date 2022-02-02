@@ -1,0 +1,7502 @@
+[
+  {
+    "name": "Naringenin",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 0.000669451795459132
+  },
+  {
+    "name": "Naringenin",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": 0.00422395234620926
+  },
+  {
+    "name": "Naringenin",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": -9.1480913410614e-05
+  },
+  {
+    "name": "Naringenin",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": -0.00025836422370244
+  },
+  {
+    "name": "Naringenin",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 7.97912591988753e-05
+  },
+  {
+    "name": "Naringenin",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": 0.00657010950968942
+  },
+  {
+    "name": "Naringenin",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -0.000816468668305833
+  },
+  {
+    "name": "Naringenin",
+    "pol": "neg",
+    "station": "saar_gu_m",
+    "lm": 0.0233637143496602
+  },
+  {
+    "name": "Naringenin",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000528420705514638
+  },
+  {
+    "name": "Naringenin",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.00231100166684885
+  },
+  {
+    "name": "Naringenin",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -5.12436769781457e-05
+  },
+  {
+    "name": "Naringenin",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000164881640150691
+  },
+  {
+    "name": "Naringenin",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 0.000104890664952269
+  },
+  {
+    "name": "Naringenin",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.00542715081389989
+  },
+  {
+    "name": "Naringenin",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000338886943870485
+  },
+  {
+    "name": "Naringenin",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.0129833495922305
+  },
+  {
+    "name": "4-Hydroxybenzoic acid",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 4.57870330080168e-05
+  },
+  {
+    "name": "4-Hydroxybenzoic acid",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": 0.00128278116875065
+  },
+  {
+    "name": "4-Hydroxybenzoic acid",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": 0.000183564625224271
+  },
+  {
+    "name": "4-Hydroxybenzoic acid",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": -0.00126290650067462
+  },
+  {
+    "name": "4-Hydroxybenzoic acid",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 0.000815147420830546
+  },
+  {
+    "name": "4-Hydroxybenzoic acid",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": -0.00344526814232777
+  },
+  {
+    "name": "4-Hydroxybenzoic acid",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": 0.000792007529792764
+  },
+  {
+    "name": "4-Hydroxybenzoic acid",
+    "pol": "neg",
+    "station": "saar_gu_m",
+    "lm": -0.00288440364914928
+  },
+  {
+    "name": "4-Hydroxybenzoic acid",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -4.20578614530823e-05
+  },
+  {
+    "name": "4-Hydroxybenzoic acid",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000160235129627976
+  },
+  {
+    "name": "4-Hydroxybenzoic acid",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -3.73118605825428e-05
+  },
+  {
+    "name": "4-Hydroxybenzoic acid",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000180727703839782
+  },
+  {
+    "name": "4-Hydroxybenzoic acid",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 0.000155590759954518
+  },
+  {
+    "name": "4-Hydroxybenzoic acid",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.000709575943495501
+  },
+  {
+    "name": "4-Hydroxybenzoic acid",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 8.11705195337701e-05
+  },
+  {
+    "name": "4-Hydroxybenzoic acid",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000161311613709421
+  },
+  {
+    "name": "Methyl 4-hydroxybenzoate",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 2.19244403166432e-05
+  },
+  {
+    "name": "Methyl 4-hydroxybenzoate",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": 5.39391912387728e-05
+  },
+  {
+    "name": "Methyl 4-hydroxybenzoate",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": -2.0103037228795e-05
+  },
+  {
+    "name": "Methyl 4-hydroxybenzoate",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": -3.65005887477439e-05
+  },
+  {
+    "name": "Methyl 4-hydroxybenzoate",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 6.91470418999741e-05
+  },
+  {
+    "name": "Methyl 4-hydroxybenzoate",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": 1.3119830615001e-05
+  },
+  {
+    "name": "Methyl 4-hydroxybenzoate",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": 6.03411720044303e-05
+  },
+  {
+    "name": "Methyl 4-hydroxybenzoate",
+    "pol": "neg",
+    "station": "saar_gu_m",
+    "lm": -0.000273472946222848
+  },
+  {
+    "name": "Methyl 4-hydroxybenzoate",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -5.09682146097856e-06
+  },
+  {
+    "name": "Methyl 4-hydroxybenzoate",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 7.90017261361905e-05
+  },
+  {
+    "name": "Methyl 4-hydroxybenzoate",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -1.6270911614955e-05
+  },
+  {
+    "name": "Methyl 4-hydroxybenzoate",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -2.14674104050439e-05
+  },
+  {
+    "name": "Methyl 4-hydroxybenzoate",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 4.06231045622831e-05
+  },
+  {
+    "name": "Methyl 4-hydroxybenzoate",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -8.63862002716591e-06
+  },
+  {
+    "name": "Methyl 4-hydroxybenzoate",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 1.82546517555611e-05
+  },
+  {
+    "name": "Methyl 4-hydroxybenzoate",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -4.50868346935277e-05
+  },
+  {
+    "name": "5`-Deoxy-5`-(methylthio)adenosin",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000468328071858106
+  },
+  {
+    "name": "5`-Deoxy-5`-(methylthio)adenosin",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000765357348505764
+  },
+  {
+    "name": "5`-Deoxy-5`-(methylthio)adenosin",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -6.50852479937149e-05
+  },
+  {
+    "name": "5`-Deoxy-5`-(methylthio)adenosin",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000405688989866461
+  },
+  {
+    "name": "5`-Deoxy-5`-(methylthio)adenosin",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 0.000181674684281267
+  },
+  {
+    "name": "5`-Deoxy-5`-(methylthio)adenosin",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.00478960523888815
+  },
+  {
+    "name": "5`-Deoxy-5`-(methylthio)adenosin",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -3.22633361956593e-06
+  },
+  {
+    "name": "5`-Deoxy-5`-(methylthio)adenosin",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000477792078239669
+  },
+  {
+    "name": "5`-Deoxy-5`-(methylthio)adenosin",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 1.92058808840706e-05
+  },
+  {
+    "name": "5`-Deoxy-5`-(methylthio)adenosin",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": 1.71309769939316e-05
+  },
+  {
+    "name": "5`-Deoxy-5`-(methylthio)adenosin",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": -5.97522226167266e-06
+  },
+  {
+    "name": "5`-Deoxy-5`-(methylthio)adenosin",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 9.90539540740156e-06
+  },
+  {
+    "name": "5`-Deoxy-5`-(methylthio)adenosin",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": 5.75085052883064e-05
+  },
+  {
+    "name": "5`-Deoxy-5`-(methylthio)adenosin",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": 1.34757479120056e-05
+  },
+  {
+    "name": "5`-Deoxy-5`-(methylthio)adenosin",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -3.45519303827316e-05
+  },
+  {
+    "name": "5`-Deoxy-5`-(methylthio)adenosin",
+    "pol": "neg",
+    "station": "saar_gu_m",
+    "lm": -7.80009186121422e-05
+  },
+  {
+    "name": "Formononetin",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": -8.19224916487707e-06
+  },
+  {
+    "name": "Formononetin",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": 7.76943409152161e-06
+  },
+  {
+    "name": "Formononetin",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": -7.73651815964064e-06
+  },
+  {
+    "name": "Formononetin",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 2.83707770740797e-06
+  },
+  {
+    "name": "Formononetin",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": -4.34410670462943e-05
+  },
+  {
+    "name": "Formononetin",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -1.25637383229841e-05
+  },
+  {
+    "name": "Formononetin",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": -4.36748049399541e-06
+  },
+  {
+    "name": "Formononetin",
+    "pol": "neg",
+    "station": "saar_gu_m",
+    "lm": 3.42003369933339e-05
+  },
+  {
+    "name": "Formononetin",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -1.41842338283849e-06
+  },
+  {
+    "name": "Formononetin",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 2.2043893783299e-05
+  },
+  {
+    "name": "Formononetin",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 1.35579292889383e-06
+  },
+  {
+    "name": "Formononetin",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 3.41171640428084e-06
+  },
+  {
+    "name": "Formononetin",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -5.9317020610076e-05
+  },
+  {
+    "name": "Formononetin",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -1.03647229435273e-05
+  },
+  {
+    "name": "Formononetin",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 7.80059089661145e-05
+  },
+  {
+    "name": "Allopurinol",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 5.48765023708444e-05
+  },
+  {
+    "name": "Allopurinol",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -1.9631367759898e-05
+  },
+  {
+    "name": "Allopurinol",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 1.20014948052062e-05
+  },
+  {
+    "name": "Allopurinol",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 2.7705183196005e-06
+  },
+  {
+    "name": "Allopurinol",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 5.82954486930885e-05
+  },
+  {
+    "name": "Allopurinol",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -3.93587674484009e-05
+  },
+  {
+    "name": "Allopurinol",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -4.55732970396343e-05
+  },
+  {
+    "name": "Allopurinol",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 1.80039320036155e-05
+  },
+  {
+    "name": "Allopurinol",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": -3.84148403229741e-06
+  },
+  {
+    "name": "Allopurinol",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": -1.10468783333617e-05
+  },
+  {
+    "name": "Allopurinol",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": 1.42395807560523e-06
+  },
+  {
+    "name": "Allopurinol",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 1.25695136994994e-06
+  },
+  {
+    "name": "Allopurinol",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": 8.29824386390077e-06
+  },
+  {
+    "name": "Allopurinol",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -1.55022906095271e-06
+  },
+  {
+    "name": "Benzotriazole",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -4.43441729530015e-06
+  },
+  {
+    "name": "Benzotriazole",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000105978160432427
+  },
+  {
+    "name": "Benzotriazole",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 7.51999351963805e-06
+  },
+  {
+    "name": "Benzotriazole",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -1.95227133684327e-05
+  },
+  {
+    "name": "Benzotriazole",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 2.48957507198785e-06
+  },
+  {
+    "name": "Benzotriazole",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.000204146269214693
+  },
+  {
+    "name": "Benzotriazole",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -3.56251723267027e-06
+  },
+  {
+    "name": "Benzotriazole",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 9.66012911482296e-06
+  },
+  {
+    "name": "Benzotriazole",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 4.26962988598334e-06
+  },
+  {
+    "name": "Benzotriazole",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": 1.93287188823934e-05
+  },
+  {
+    "name": "Benzotriazole",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": 2.57901361756286e-05
+  },
+  {
+    "name": "Benzotriazole",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -2.55225737863159e-06
+  },
+  {
+    "name": "Triclocarban",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": -9.7040916444509e-05
+  },
+  {
+    "name": "Triclocarban",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": -0.000156725713757448
+  },
+  {
+    "name": "Triclocarban",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": -9.27812219200448e-07
+  },
+  {
+    "name": "Triclocarban",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": -8.65666722293776e-05
+  },
+  {
+    "name": "Triclocarban",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": -0.00015935016590013
+  },
+  {
+    "name": "Triclocarban",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": -0.00038372706192897
+  },
+  {
+    "name": "Triclocarban",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -8.69682231560125e-05
+  },
+  {
+    "name": "Triclocarban",
+    "pol": "neg",
+    "station": "saar_gu_m",
+    "lm": -0.000320071767187589
+  },
+  {
+    "name": "Triclocarban",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -3.58239543928585e-05
+  },
+  {
+    "name": "Triclocarban",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -4.39261564066726e-05
+  },
+  {
+    "name": "Triclocarban",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -4.81981346130254e-05
+  },
+  {
+    "name": "Triclocarban",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.000133028521052328
+  },
+  {
+    "name": "4-Acetylbenzoic acid",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": -2.95505484639909e-05
+  },
+  {
+    "name": "4-Acetylbenzoic acid",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": 0.000136407245526521
+  },
+  {
+    "name": "4-Acetylbenzoic acid",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": -0.000118372554381966
+  },
+  {
+    "name": "4-Acetylbenzoic acid",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": -0.000160410441084097
+  },
+  {
+    "name": "4-Acetylbenzoic acid",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 0.000143613879534168
+  },
+  {
+    "name": "4-Acetylbenzoic acid",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": -0.000146139920374619
+  },
+  {
+    "name": "4-Acetylbenzoic acid",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": 0.000351304333834453
+  },
+  {
+    "name": "4-Acetylbenzoic acid",
+    "pol": "neg",
+    "station": "saar_gu_m",
+    "lm": -0.000765761416442021
+  },
+  {
+    "name": "4-Acetylbenzoic acid",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -3.11890683775595e-05
+  },
+  {
+    "name": "4-Acetylbenzoic acid",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 4.57739343147492e-07
+  },
+  {
+    "name": "4-Acetylbenzoic acid",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 5.94774242997327e-05
+  },
+  {
+    "name": "4-Acetylbenzoic acid",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 2.3548741215944e-06
+  },
+  {
+    "name": "Acridone",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -2.3398386966994e-05
+  },
+  {
+    "name": "Acridone",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -1.83810551210308e-05
+  },
+  {
+    "name": "Acridone",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -1.36171998820816e-05
+  },
+  {
+    "name": "Acridone",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -4.42744472826173e-05
+  },
+  {
+    "name": "Acridone",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -1.35164960192414e-05
+  },
+  {
+    "name": "Acridone",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -9.05897248111673e-05
+  },
+  {
+    "name": "Acridone",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -3.81789706081224e-05
+  },
+  {
+    "name": "Acridone",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -4.92824854391235e-05
+  },
+  {
+    "name": "Acridone",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": 0.000205958225419975
+  },
+  {
+    "name": "Acridone",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": -2.29327534669263e-05
+  },
+  {
+    "name": "1,3-Diphenylurea",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 1.67541966494624e-06
+  },
+  {
+    "name": "1,3-Diphenylurea",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": 2.93114306944368e-07
+  },
+  {
+    "name": "1,3-Diphenylurea",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 1.29285415664695e-07
+  },
+  {
+    "name": "1,3-Diphenylurea",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": 2.67599560056517e-06
+  },
+  {
+    "name": "1,3-Diphenylurea",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -5.85009741489529e-05
+  },
+  {
+    "name": "1,3-Diphenylurea",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -3.23705145203747e-06
+  },
+  {
+    "name": "1,3-Diphenylurea",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -2.46464665878954e-06
+  },
+  {
+    "name": "1,3-Diphenylurea",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 4.36093562062397e-06
+  },
+  {
+    "name": "1,3-Diphenylurea",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -7.76052269863626e-06
+  },
+  {
+    "name": "1,3-Diphenylurea",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000144527331683178
+  },
+  {
+    "name": "2-(3-Hydroxyquinolin-2-yl)indene-1,3-dione",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 2.16596677719193e-05
+  },
+  {
+    "name": "2-(3-Hydroxyquinolin-2-yl)indene-1,3-dione",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 2.11415377207154e-05
+  },
+  {
+    "name": "2-(3-Hydroxyquinolin-2-yl)indene-1,3-dione",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000431752379946931
+  },
+  {
+    "name": "2-(3-Hydroxyquinolin-2-yl)indene-1,3-dione",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 5.34271005197204e-06
+  },
+  {
+    "name": "2-(3-Hydroxyquinolin-2-yl)indene-1,3-dione",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": 3.80411706071752e-06
+  },
+  {
+    "name": "2-(3-Hydroxyquinolin-2-yl)indene-1,3-dione",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": -5.46079170006162e-05
+  },
+  {
+    "name": "Telmisartan",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000202425935257441
+  },
+  {
+    "name": "Telmisartan",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": 0.000389144621274329
+  },
+  {
+    "name": "Telmisartan",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000154531006383036
+  },
+  {
+    "name": "Telmisartan",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.00111001516331067
+  },
+  {
+    "name": "Telmisartan",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.00137332749218441
+  },
+  {
+    "name": "Telmisartan",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000999935150936511
+  },
+  {
+    "name": "Telmisartan",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": 3.74387627286176e-05
+  },
+  {
+    "name": "Telmisartan",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": 2.68884681778313e-05
+  },
+  {
+    "name": "Telmisartan",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": 0.000187806551308973
+  },
+  {
+    "name": "Telmisartan",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": 0.000257730301635252
+  },
+  {
+    "name": "Telmisartan",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": -3.85363474264879e-06
+  },
+  {
+    "name": "Telmisartan",
+    "pol": "neg",
+    "station": "saar_gu_m",
+    "lm": 1.12432691734319e-05
+  },
+  {
+    "name": "Irbesartan",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000119475020087431
+  },
+  {
+    "name": "Irbesartan",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -6.50462075258415e-06
+  },
+  {
+    "name": "Irbesartan",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -6.89068633561551e-05
+  },
+  {
+    "name": "Irbesartan",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -1.33779003203283e-05
+  },
+  {
+    "name": "Irbesartan",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000513770024149689
+  },
+  {
+    "name": "Irbesartan",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 0.000814879099473506
+  },
+  {
+    "name": "Irbesartan",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000150759430759454
+  },
+  {
+    "name": "Irbesartan",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 1.01460092556426e-05
+  },
+  {
+    "name": "Irbesartan",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": -2.03214454770568e-05
+  },
+  {
+    "name": "Irbesartan",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": 0.00011134771905227
+  },
+  {
+    "name": "Irbesartan",
+    "pol": "neg",
+    "station": "saar_gu_m",
+    "lm": 2.74096621563826e-05
+  },
+  {
+    "name": "6-Methylthioguanine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 7.79822822758341e-06
+  },
+  {
+    "name": "6-Methylthioguanine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 3.71689185484267e-05
+  },
+  {
+    "name": "6-Methylthioguanine",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -4.52709348812137e-06
+  },
+  {
+    "name": "6-Methylthioguanine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -4.78460629593895e-05
+  },
+  {
+    "name": "6-Methylthioguanine",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -1.00586015231808e-05
+  },
+  {
+    "name": "6-Methylthioguanine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -2.67604846057273e-05
+  },
+  {
+    "name": "6-Methylthioguanine",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 2.40765554279194e-07
+  },
+  {
+    "name": "6-Methylthioguanine",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -1.63996321972646e-05
+  },
+  {
+    "name": "Benzyl-dimethyl-decylammonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -4.58390969939106e-05
+  },
+  {
+    "name": "Benzyl-dimethyl-decylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -7.4742192086573e-05
+  },
+  {
+    "name": "Benzyl-dimethyl-decylammonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -2.9060247338717e-05
+  },
+  {
+    "name": "Benzyl-dimethyl-decylammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -6.95403450059741e-05
+  },
+  {
+    "name": "Benzyl-dimethyl-decylammonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -9.30401069234973e-05
+  },
+  {
+    "name": "Benzyl-dimethyl-decylammonium",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.000402755354283691
+  },
+  {
+    "name": "Benzyl-dimethyl-decylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000116498040207141
+  },
+  {
+    "name": "Benzyl-dimethyl-decylammonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000318588394034105
+  },
+  {
+    "name": "Benzyl-dimethyl-dodecylammonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -0.00230556663673984
+  },
+  {
+    "name": "Benzyl-dimethyl-dodecylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.00391167538612847
+  },
+  {
+    "name": "Benzyl-dimethyl-dodecylammonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -0.000867433168796552
+  },
+  {
+    "name": "Benzyl-dimethyl-dodecylammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.00731456898804533
+  },
+  {
+    "name": "Benzyl-dimethyl-dodecylammonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.00520678824315624
+  },
+  {
+    "name": "Benzyl-dimethyl-dodecylammonium",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.171268348668954
+  },
+  {
+    "name": "Benzyl-dimethyl-dodecylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.00923912576852457
+  },
+  {
+    "name": "Benzyl-dimethyl-dodecylammonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.0369437908431497
+  },
+  {
+    "name": "Citalopram",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000444075322367182
+  },
+  {
+    "name": "Citalopram",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000679178409848657
+  },
+  {
+    "name": "Citalopram",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 0.000132859531916429
+  },
+  {
+    "name": "Citalopram",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": 1.01676714295748e-05
+  },
+  {
+    "name": "Citalopram",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 8.13890058115309e-05
+  },
+  {
+    "name": "Citalopram",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.000973420020306465
+  },
+  {
+    "name": "Citalopram",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.00123609596978128
+  },
+  {
+    "name": "Citalopram",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000493798386834051
+  },
+  {
+    "name": "Denatonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000529986863504309
+  },
+  {
+    "name": "Denatonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000807362187060431
+  },
+  {
+    "name": "Denatonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 0.000119923191415635
+  },
+  {
+    "name": "Denatonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": 0.00053168307780469
+  },
+  {
+    "name": "Denatonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 0.000130219282755924
+  },
+  {
+    "name": "Denatonium",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.00160428058807961
+  },
+  {
+    "name": "Denatonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.000751579661079453
+  },
+  {
+    "name": "Denatonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.00186290942542638
+  },
+  {
+    "name": "Dimethyldioctylammonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -0.000337354858282827
+  },
+  {
+    "name": "Dimethyldioctylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.00139960466809907
+  },
+  {
+    "name": "Dimethyldioctylammonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 0.00146369941253451
+  },
+  {
+    "name": "Dimethyldioctylammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000186164690244076
+  },
+  {
+    "name": "Dimethyldioctylammonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 0.0010043964888302
+  },
+  {
+    "name": "Dimethyldioctylammonium",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.0138149361063057
+  },
+  {
+    "name": "Dimethyldioctylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -7.38707120403107e-06
+  },
+  {
+    "name": "Dimethyldioctylammonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.00273422977496977
+  },
+  {
+    "name": "Dodecyltrimethylammonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -4.97877133661641e-05
+  },
+  {
+    "name": "Dodecyltrimethylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 2.0517881978788e-05
+  },
+  {
+    "name": "Dodecyltrimethylammonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 5.42761151730755e-05
+  },
+  {
+    "name": "Dodecyltrimethylammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000167009208569545
+  },
+  {
+    "name": "Dodecyltrimethylammonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -4.40497565481796e-05
+  },
+  {
+    "name": "Dodecyltrimethylammonium",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.000114188825957178
+  },
+  {
+    "name": "Dodecyltrimethylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.000100406604413328
+  },
+  {
+    "name": "Dodecyltrimethylammonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000971327491708817
+  },
+  {
+    "name": "Ethyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.00169731619464475
+  },
+  {
+    "name": "Ethyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.00120458663169094
+  },
+  {
+    "name": "Ethyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 0.00490580487509632
+  },
+  {
+    "name": "Ethyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.00557397986936709
+  },
+  {
+    "name": "Ethyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.00513286938511177
+  },
+  {
+    "name": "Ethyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -5.61408289352703e-05
+  },
+  {
+    "name": "Ethyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.00512557869575039
+  },
+  {
+    "name": "Ethyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000245963496823203
+  },
+  {
+    "name": "Lumichrome",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 7.48280170239446e-05
+  },
+  {
+    "name": "Lumichrome",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 7.82895095582389e-05
+  },
+  {
+    "name": "Lumichrome",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 2.16784316229398e-05
+  },
+  {
+    "name": "Lumichrome",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000143074424522591
+  },
+  {
+    "name": "Lumichrome",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000104618874711961
+  },
+  {
+    "name": "Lumichrome",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -9.71926039138179e-06
+  },
+  {
+    "name": "Lumichrome",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000222298911790595
+  },
+  {
+    "name": "Lumichrome",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000109152331218824
+  },
+  {
+    "name": "N-desmethyl-citalopram",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000143523924952409
+  },
+  {
+    "name": "N-desmethyl-citalopram",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000211538359730255
+  },
+  {
+    "name": "N-desmethyl-citalopram",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 5.14579135502361e-05
+  },
+  {
+    "name": "N-desmethyl-citalopram",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": 2.59265912427934e-05
+  },
+  {
+    "name": "N-desmethyl-citalopram",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 4.91499875871313e-05
+  },
+  {
+    "name": "N-desmethyl-citalopram",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.000299359824932227
+  },
+  {
+    "name": "N-desmethyl-citalopram",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.000336573177897642
+  },
+  {
+    "name": "N-desmethyl-citalopram",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000287533331841714
+  },
+  {
+    "name": "Venlafaxine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000108494308355563
+  },
+  {
+    "name": "Venlafaxine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000118186706541385
+  },
+  {
+    "name": "Venlafaxine",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -7.66858311716187e-05
+  },
+  {
+    "name": "Venlafaxine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": 0.000182328028468798
+  },
+  {
+    "name": "Venlafaxine",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000152338386309886
+  },
+  {
+    "name": "Venlafaxine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.000351505643634919
+  },
+  {
+    "name": "Venlafaxine",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.000328208439395097
+  },
+  {
+    "name": "Venlafaxine",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000341304652930411
+  },
+  {
+    "name": "Basic yellow 28",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -0.00334710718255758
+  },
+  {
+    "name": "Basic yellow 28",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.0163200137146238
+  },
+  {
+    "name": "Basic yellow 28",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -0.00469180206050462
+  },
+  {
+    "name": "Basic yellow 28",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000280391623923309
+  },
+  {
+    "name": "Basic yellow 28",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.00721170245966372
+  },
+  {
+    "name": "Basic yellow 28",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.000225713194932767
+  },
+  {
+    "name": "Basic yellow 28",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 5.6585798058869e-05
+  },
+  {
+    "name": "Basic yellow 28",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000574230611761416
+  },
+  {
+    "name": "Climbazole",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -0.000942985592724477
+  },
+  {
+    "name": "Climbazole",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.00153855069431461
+  },
+  {
+    "name": "Climbazole",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -0.000250018522102745
+  },
+  {
+    "name": "Climbazole",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.00283015833697489
+  },
+  {
+    "name": "Climbazole",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000465449218108116
+  },
+  {
+    "name": "Climbazole",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.00140145817607251
+  },
+  {
+    "name": "Climbazole",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.00261071824884106
+  },
+  {
+    "name": "Climbazole",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000390829194946691
+  },
+  {
+    "name": "Diphenhydramine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 3.92976721813503e-05
+  },
+  {
+    "name": "Diphenhydramine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 1.10534282080671e-05
+  },
+  {
+    "name": "Diphenhydramine",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 2.07246373964419e-05
+  },
+  {
+    "name": "Diphenhydramine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -9.43957446683832e-05
+  },
+  {
+    "name": "Diphenhydramine",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 7.40234324404576e-08
+  },
+  {
+    "name": "Diphenhydramine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 4.91839012855402e-05
+  },
+  {
+    "name": "Diphenhydramine",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -3.2565575228632e-06
+  },
+  {
+    "name": "Diphenhydramine",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -9.55508159668628e-05
+  },
+  {
+    "name": "Dodecylamine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 7.5684179118027e-05
+  },
+  {
+    "name": "Dodecylamine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000481814679104599
+  },
+  {
+    "name": "Dodecylamine",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 0.000148732788203997
+  },
+  {
+    "name": "Dodecylamine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -9.09120546313688e-05
+  },
+  {
+    "name": "Dodecylamine",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 4.2721906165091e-05
+  },
+  {
+    "name": "Dodecylamine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.000570183933296577
+  },
+  {
+    "name": "Dodecylamine",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 2.74981138680121e-05
+  },
+  {
+    "name": "Dodecylamine",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000410671029586469
+  },
+  {
+    "name": "Flecainide",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000131273777942344
+  },
+  {
+    "name": "Flecainide",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000294432930157866
+  },
+  {
+    "name": "Flecainide",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 3.03261493024061e-05
+  },
+  {
+    "name": "Flecainide",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": 0.000297242882223765
+  },
+  {
+    "name": "Flecainide",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 5.21607606293046e-05
+  },
+  {
+    "name": "Flecainide",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.00100444436413531
+  },
+  {
+    "name": "Flecainide",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.000244279725582433
+  },
+  {
+    "name": "Flecainide",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000302641697372008
+  },
+  {
+    "name": "Syringic acid",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -1.54059389703584e-06
+  },
+  {
+    "name": "Syringic acid",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 4.25663379456502e-06
+  },
+  {
+    "name": "Syringic acid",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -5.53183352904518e-05
+  },
+  {
+    "name": "Syringic acid",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -8.44221232868412e-05
+  },
+  {
+    "name": "Syringic acid",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 6.96038691051092e-05
+  },
+  {
+    "name": "Syringic acid",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.000347869002777026
+  },
+  {
+    "name": "Syringic acid",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 1.24221353611363e-05
+  },
+  {
+    "name": "Syringic acid",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 9.85014250968012e-05
+  },
+  {
+    "name": "Terbutryn",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -4.46836366853739e-05
+  },
+  {
+    "name": "Terbutryn",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -1.95493143113065e-05
+  },
+  {
+    "name": "Terbutryn",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 7.15166841559525e-06
+  },
+  {
+    "name": "Terbutryn",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -9.97380531231533e-05
+  },
+  {
+    "name": "Terbutryn",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -1.00303320425813e-05
+  },
+  {
+    "name": "Terbutryn",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.000172620826987108
+  },
+  {
+    "name": "Terbutryn",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.000152743930874806
+  },
+  {
+    "name": "Terbutryn",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.00013134306695396
+  },
+  {
+    "name": "2-Isopropylphenyl diphenyl phosphate",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000382719557864465
+  },
+  {
+    "name": "2-Isopropylphenyl diphenyl phosphate",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -1.30935130175231e-05
+  },
+  {
+    "name": "2-Isopropylphenyl diphenyl phosphate",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 3.05301957087702e-05
+  },
+  {
+    "name": "2-Isopropylphenyl diphenyl phosphate",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000488310856472463
+  },
+  {
+    "name": "2-Isopropylphenyl diphenyl phosphate",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000342270916148106
+  },
+  {
+    "name": "2-Isopropylphenyl diphenyl phosphate",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.00115670752246311
+  },
+  {
+    "name": "2-Isopropylphenyl diphenyl phosphate",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.00201901190624134
+  },
+  {
+    "name": "2-Isopropylphenyl diphenyl phosphate",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 4.08836573874781e-05
+  },
+  {
+    "name": "Triphenyl phosphate",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000332085912667621
+  },
+  {
+    "name": "Triphenyl phosphate",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 1.26325303631072e-05
+  },
+  {
+    "name": "Triphenyl phosphate",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 9.7722466224329e-05
+  },
+  {
+    "name": "Triphenyl phosphate",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -2.78705348900622e-05
+  },
+  {
+    "name": "Triphenyl phosphate",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -9.43884796251067e-05
+  },
+  {
+    "name": "Triphenyl phosphate",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.00246300511454583
+  },
+  {
+    "name": "Triphenyl phosphate",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000456946934856696
+  },
+  {
+    "name": "Triphenyl phosphate",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 9.62771610078461e-05
+  },
+  {
+    "name": "Tris(4-methylphenyl) phosphate",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.00038013419968077
+  },
+  {
+    "name": "Tris(4-methylphenyl) phosphate",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -1.33342358661858e-05
+  },
+  {
+    "name": "Tris(4-methylphenyl) phosphate",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 2.86829642923814e-05
+  },
+  {
+    "name": "Tris(4-methylphenyl) phosphate",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000490191814419711
+  },
+  {
+    "name": "Tris(4-methylphenyl) phosphate",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000338785533528388
+  },
+  {
+    "name": "Tris(4-methylphenyl) phosphate",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.00107478926156581
+  },
+  {
+    "name": "Tris(4-methylphenyl) phosphate",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.00202232810845355
+  },
+  {
+    "name": "Tris(4-methylphenyl) phosphate",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 4.08836573874781e-05
+  },
+  {
+    "name": "4-Toluenesulfonic acid",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": -1.90575037619292e-05
+  },
+  {
+    "name": "4-Toluenesulfonic acid",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": -1.98031903892537e-05
+  },
+  {
+    "name": "4-Toluenesulfonic acid",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": -4.21199611536602e-05
+  },
+  {
+    "name": "4-Toluenesulfonic acid",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": -2.75565701645813e-05
+  },
+  {
+    "name": "4-Toluenesulfonic acid",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": -2.09096142034417e-05
+  },
+  {
+    "name": "4-Toluenesulfonic acid",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": -0.000128063720278649
+  },
+  {
+    "name": "4-Toluenesulfonic acid",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -3.62055233672094e-05
+  },
+  {
+    "name": "4-Toluenesulfonic acid",
+    "pol": "neg",
+    "station": "saar_gu_m",
+    "lm": 9.71140760178978e-05
+  },
+  {
+    "name": "Tris(4-isopropylphenyl) phosphate",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -0.000130590923341856
+  },
+  {
+    "name": "Tris(4-isopropylphenyl) phosphate",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.000218262640061801
+  },
+  {
+    "name": "Tris(4-isopropylphenyl) phosphate",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -7.09960023444695e-05
+  },
+  {
+    "name": "Tris(4-isopropylphenyl) phosphate",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -4.45511611599032e-05
+  },
+  {
+    "name": "Tris(4-isopropylphenyl) phosphate",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000321736175463998
+  },
+  {
+    "name": "Tris(4-isopropylphenyl) phosphate",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.000856021416878947
+  },
+  {
+    "name": "Tris(4-isopropylphenyl) phosphate",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 1.55883868005165e-05
+  },
+  {
+    "name": "Tris(4-isopropylphenyl) phosphate",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000118970700979069
+  },
+  {
+    "name": "3,4,5-Trimethoxybenzoic acid",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -1.34735287455662e-05
+  },
+  {
+    "name": "3,4,5-Trimethoxybenzoic acid",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 1.19809052123275e-05
+  },
+  {
+    "name": "3,4,5-Trimethoxybenzoic acid",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -2.26619936952046e-05
+  },
+  {
+    "name": "3,4,5-Trimethoxybenzoic acid",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -2.34959771639267e-05
+  },
+  {
+    "name": "3,4,5-Trimethoxybenzoic acid",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 1.96149328783936e-05
+  },
+  {
+    "name": "3,4,5-Trimethoxybenzoic acid",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -5.32947851454776e-06
+  },
+  {
+    "name": "3,4,5-Trimethoxybenzoic acid",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 1.30957913347479e-05
+  },
+  {
+    "name": "3,4,5-Trimethoxybenzoic acid",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 3.01731115959578e-05
+  },
+  {
+    "name": "Propranolol",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -1.77644266723317e-05
+  },
+  {
+    "name": "Propranolol",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -2.50887711757774e-06
+  },
+  {
+    "name": "Propranolol",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -2.5514091126367e-05
+  },
+  {
+    "name": "Propranolol",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000119847720556163
+  },
+  {
+    "name": "Propranolol",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -1.70042078342981e-05
+  },
+  {
+    "name": "Propranolol",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 7.39283090209736e-05
+  },
+  {
+    "name": "Propranolol",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000333770607341636
+  },
+  {
+    "name": "Propranolol",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -3.74278221110695e-08
+  },
+  {
+    "name": "Benzoyleneurea",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": 8.28753655502937e-07
+  },
+  {
+    "name": "Benzoyleneurea",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": -1.29042563630086e-05
+  },
+  {
+    "name": "Benzoyleneurea",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 3.56259571054363e-06
+  },
+  {
+    "name": "Benzoyleneurea",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": 1.68267331570021e-07
+  },
+  {
+    "name": "Benzoyleneurea",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": -8.26846519495028e-06
+  },
+  {
+    "name": "Benzoyleneurea",
+    "pol": "neg",
+    "station": "saar_gu_m",
+    "lm": -5.18975322396372e-06
+  },
+  {
+    "name": "Benzoyleneurea",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -2.27370264304586e-06
+  },
+  {
+    "name": "Benzoyleneurea",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -2.6010973669056e-05
+  },
+  {
+    "name": "Benzoyleneurea",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -7.49625114011165e-05
+  },
+  {
+    "name": "Benzoyleneurea",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -1.92369815650153e-06
+  },
+  {
+    "name": "Benzoyleneurea",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 7.14136256556106e-06
+  },
+  {
+    "name": "Benzyl-tributylammonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 2.36005042888405e-05
+  },
+  {
+    "name": "Benzyl-tributylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -7.25890888774137e-06
+  },
+  {
+    "name": "Benzyl-tributylammonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 1.75189716410668e-05
+  },
+  {
+    "name": "Benzyl-tributylammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -2.17688496400764e-05
+  },
+  {
+    "name": "Benzyl-tributylammonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -3.90772911973009e-05
+  },
+  {
+    "name": "Benzyl-tributylammonium",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 1.24264548682476e-05
+  },
+  {
+    "name": "Benzyl-tributylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -4.47957779184995e-06
+  },
+  {
+    "name": "Methyl 3-hydroxybenzoate",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -5.09682146097856e-06
+  },
+  {
+    "name": "Methyl 3-hydroxybenzoate",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 2.43156446785875e-05
+  },
+  {
+    "name": "Methyl 3-hydroxybenzoate",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -1.6270911614955e-05
+  },
+  {
+    "name": "Methyl 3-hydroxybenzoate",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -2.13277245129419e-05
+  },
+  {
+    "name": "Methyl 3-hydroxybenzoate",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 3.93534591116649e-05
+  },
+  {
+    "name": "Methyl 3-hydroxybenzoate",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -2.20209086094483e-05
+  },
+  {
+    "name": "Methyl 3-hydroxybenzoate",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 1.82546517555611e-05
+  },
+  {
+    "name": "Methyl 3-hydroxybenzoate",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -4.50868346935277e-05
+  },
+  {
+    "name": "Progesterone",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 4.41910080172751e-05
+  },
+  {
+    "name": "Progesterone",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -6.17053551574697e-05
+  },
+  {
+    "name": "Progesterone",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -1.12115692262422e-05
+  },
+  {
+    "name": "Progesterone",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.00043784748142861
+  },
+  {
+    "name": "Progesterone",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 3.53329724455111e-05
+  },
+  {
+    "name": "Progesterone",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 6.25193029333956e-05
+  },
+  {
+    "name": "Progesterone",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.000541626778936357
+  },
+  {
+    "name": "Progesterone",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000363876091655534
+  },
+  {
+    "name": "1-Methyl-2-pyrrolidinone",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 5.18762330573855e-05
+  },
+  {
+    "name": "1-Methyl-2-pyrrolidinone",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 5.42869181682037e-05
+  },
+  {
+    "name": "1-Methyl-2-pyrrolidinone",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 7.77001377550051e-06
+  },
+  {
+    "name": "1-Methyl-2-pyrrolidinone",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -2.42401898184074e-05
+  },
+  {
+    "name": "1-Methyl-2-pyrrolidinone",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -8.06628322547011e-05
+  },
+  {
+    "name": "1-Methyl-2-pyrrolidinone",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 7.53818475809654e-07
+  },
+  {
+    "name": "1-Methyl-2-pyrrolidinone",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000118681185707303
+  },
+  {
+    "name": "1-Methyl-2-pyrrolidinone",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000686547975183628
+  },
+  {
+    "name": "2-Hydroxybenzothiazole",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": -4.59014195305389e-06
+  },
+  {
+    "name": "2-Hydroxybenzothiazole",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": -0.000170845645231517
+  },
+  {
+    "name": "2-Hydroxybenzothiazole",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 2.3699257347338e-06
+  },
+  {
+    "name": "2-Hydroxybenzothiazole",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": -2.72256994439536e-05
+  },
+  {
+    "name": "2-Hydroxybenzothiazole",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -0.00020260224548323
+  },
+  {
+    "name": "2-Hydroxybenzothiazole",
+    "pol": "neg",
+    "station": "saar_gu_m",
+    "lm": 6.84056847717293e-06
+  },
+  {
+    "name": "2-Hydroxybenzothiazole",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -9.45207075223623e-06
+  },
+  {
+    "name": "2-Hydroxybenzothiazole",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -0.000458904600728221
+  },
+  {
+    "name": "2-Hydroxybenzothiazole",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 6.87094587063283e-06
+  },
+  {
+    "name": "2-Hydroxybenzothiazole",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -7.81725513275828e-05
+  },
+  {
+    "name": "Didecyl-dimethylammonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.01418774584623
+  },
+  {
+    "name": "Didecyl-dimethylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.046472452283215
+  },
+  {
+    "name": "Didecyl-dimethylammonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 0.00815702387580168
+  },
+  {
+    "name": "Didecyl-dimethylammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000837964080246522
+  },
+  {
+    "name": "Didecyl-dimethylammonium",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.000339854712591632
+  },
+  {
+    "name": "Didecyl-dimethylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.0316459103311587
+  },
+  {
+    "name": "Didecyl-dimethylammonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.0189821618829713
+  },
+  {
+    "name": "Hexadecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.00414628823955735
+  },
+  {
+    "name": "Hexadecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.00347490688353839
+  },
+  {
+    "name": "Hexadecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 0.0022238338463353
+  },
+  {
+    "name": "Hexadecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000754795456480141
+  },
+  {
+    "name": "Hexadecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 0.00289241494573462
+  },
+  {
+    "name": "Hexadecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.00092154110230605
+  },
+  {
+    "name": "Hexadecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.0109528883039794
+  },
+  {
+    "name": "Octyl-decyl-dimethylammonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000297413333109921
+  },
+  {
+    "name": "Octyl-decyl-dimethylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.00121051776748587
+  },
+  {
+    "name": "Octyl-decyl-dimethylammonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -0.000123932451318797
+  },
+  {
+    "name": "Octyl-decyl-dimethylammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000121061824974077
+  },
+  {
+    "name": "Octyl-decyl-dimethylammonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.00122409999197352
+  },
+  {
+    "name": "Octyl-decyl-dimethylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000322547408520615
+  },
+  {
+    "name": "Octyl-decyl-dimethylammonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.00820144172489
+  },
+  {
+    "name": "Tetrabutylammonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -3.94865404400488e-05
+  },
+  {
+    "name": "Tetrabutylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.000242761105482499
+  },
+  {
+    "name": "Tetrabutylammonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -0.000208433490519454
+  },
+  {
+    "name": "Tetrabutylammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": 0.00296893241462815
+  },
+  {
+    "name": "Tetrabutylammonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000656986201130104
+  },
+  {
+    "name": "Tetrabutylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.00185582781948634
+  },
+  {
+    "name": "Tetrabutylammonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000205078469418715
+  },
+  {
+    "name": "Tetradecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -8.70858780789401e-05
+  },
+  {
+    "name": "Tetradecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 4.88538627240115e-05
+  },
+  {
+    "name": "Tetradecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -4.66687442620018e-05
+  },
+  {
+    "name": "Tetradecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000114434748533812
+  },
+  {
+    "name": "Tetradecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000281974603206383
+  },
+  {
+    "name": "Tetradecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000140184337508836
+  },
+  {
+    "name": "Tetradecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000164395470945694
+  },
+  {
+    "name": "Tris(1-chloro-2-propyl) phosphate",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.00020649030963378
+  },
+  {
+    "name": "Tris(1-chloro-2-propyl) phosphate",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000241300309747401
+  },
+  {
+    "name": "Tris(1-chloro-2-propyl) phosphate",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -0.000159721322265258
+  },
+  {
+    "name": "Tris(1-chloro-2-propyl) phosphate",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 7.44146749138118e-06
+  },
+  {
+    "name": "Tris(1-chloro-2-propyl) phosphate",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.0011852501203951
+  },
+  {
+    "name": "Tris(1-chloro-2-propyl) phosphate",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.000119606301303228
+  },
+  {
+    "name": "Tris(1-chloro-2-propyl) phosphate",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000466924884553922
+  },
+  {
+    "name": "4-Aminosalicylic acid",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 3.3972985407367e-05
+  },
+  {
+    "name": "4-Aminosalicylic acid",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": 1.36356111046699e-05
+  },
+  {
+    "name": "4-Aminosalicylic acid",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": -3.33741621834163e-06
+  },
+  {
+    "name": "4-Aminosalicylic acid",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": -0.000397845433623261
+  },
+  {
+    "name": "4-Aminosalicylic acid",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 3.81308675251165e-05
+  },
+  {
+    "name": "4-Aminosalicylic acid",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -2.75001604655562e-05
+  },
+  {
+    "name": "4-Aminosalicylic acid",
+    "pol": "neg",
+    "station": "saar_gu_m",
+    "lm": -5.32049128825376e-05
+  },
+  {
+    "name": "Aliskiren",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 4.57964156751494e-05
+  },
+  {
+    "name": "Aliskiren",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 9.42621370956856e-06
+  },
+  {
+    "name": "Aliskiren",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 9.77829862235483e-05
+  },
+  {
+    "name": "Aliskiren",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 0.000290459584245493
+  },
+  {
+    "name": "Aliskiren",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000379033271084927
+  },
+  {
+    "name": "Aliskiren",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 1.53960695961027e-05
+  },
+  {
+    "name": "Aliskiren",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.000197328358359313
+  },
+  {
+    "name": "Aliskiren",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000768396383870609
+  },
+  {
+    "name": "Octadecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -0.000295867665212272
+  },
+  {
+    "name": "Octadecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.00217830015084463
+  },
+  {
+    "name": "Octadecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 0.000762858658281645
+  },
+  {
+    "name": "Octadecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000446615010864019
+  },
+  {
+    "name": "Octadecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -5.27875997320157e-05
+  },
+  {
+    "name": "Octadecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000972609266788317
+  },
+  {
+    "name": "Octadecyl-trimethylammonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.00903271235647882
+  },
+  {
+    "name": "2-Ethylidene-1,5-dimethyl-3,3-diphenylpyrrolidine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 6.45024584325128e-05
+  },
+  {
+    "name": "2-Ethylidene-1,5-dimethyl-3,3-diphenylpyrrolidine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.00011144209835448
+  },
+  {
+    "name": "2-Ethylidene-1,5-dimethyl-3,3-diphenylpyrrolidine",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -0.000168265642403789
+  },
+  {
+    "name": "2-Ethylidene-1,5-dimethyl-3,3-diphenylpyrrolidine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -4.5505447813545e-05
+  },
+  {
+    "name": "2-Ethylidene-1,5-dimethyl-3,3-diphenylpyrrolidine",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -3.8762361780242e-05
+  },
+  {
+    "name": "2-Ethylidene-1,5-dimethyl-3,3-diphenylpyrrolidine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.000168689137131461
+  },
+  {
+    "name": "2-Ethylidene-1,5-dimethyl-3,3-diphenylpyrrolidine",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000275565145907297
+  },
+  {
+    "name": "Benzethonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000466447920948548
+  },
+  {
+    "name": "Benzethonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000225951739387773
+  },
+  {
+    "name": "Benzethonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 0.000165718455887669
+  },
+  {
+    "name": "Benzethonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -2.86741750067054e-05
+  },
+  {
+    "name": "Benzethonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000389507684384623
+  },
+  {
+    "name": "Benzethonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000210754733062154
+  },
+  {
+    "name": "Benzethonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000697305929802656
+  },
+  {
+    "name": "Lamotrigine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 2.81551307020285e-05
+  },
+  {
+    "name": "Lamotrigine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 4.90951204823086e-05
+  },
+  {
+    "name": "Lamotrigine",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 1.25481308498317e-05
+  },
+  {
+    "name": "Lamotrigine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": 2.74215394006136e-05
+  },
+  {
+    "name": "Lamotrigine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.000121075383982837
+  },
+  {
+    "name": "Lamotrigine",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 6.28250037405007e-05
+  },
+  {
+    "name": "Lamotrigine",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 6.7252863236973e-05
+  },
+  {
+    "name": "Trospium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000252546263445812
+  },
+  {
+    "name": "Trospium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000538619656317532
+  },
+  {
+    "name": "Trospium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -6.71829561283975e-05
+  },
+  {
+    "name": "Trospium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 0.000109685045202693
+  },
+  {
+    "name": "Trospium",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.000985544559509196
+  },
+  {
+    "name": "Trospium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.000844431108003257
+  },
+  {
+    "name": "Trospium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000821928102678365
+  },
+  {
+    "name": "Verapamil",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -0.000699352356902168
+  },
+  {
+    "name": "Verapamil",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.00141706572272021
+  },
+  {
+    "name": "Verapamil",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000540608288077735
+  },
+  {
+    "name": "Verapamil",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000664551656406411
+  },
+  {
+    "name": "Verapamil",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.00120964727498644
+  },
+  {
+    "name": "Verapamil",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000343701877699298
+  },
+  {
+    "name": "Verapamil",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000287483427930174
+  },
+  {
+    "name": "4-Formylaminoantipyrine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 4.27139088427943e-05
+  },
+  {
+    "name": "4-Formylaminoantipyrine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 7.2195273825873e-05
+  },
+  {
+    "name": "4-Formylaminoantipyrine",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 2.15212803122713e-05
+  },
+  {
+    "name": "4-Formylaminoantipyrine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -2.21795323394622e-05
+  },
+  {
+    "name": "4-Formylaminoantipyrine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 3.34506756786687e-05
+  },
+  {
+    "name": "4-Formylaminoantipyrine",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 6.73314273607361e-05
+  },
+  {
+    "name": "4-Formylaminoantipyrine",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000307875312147648
+  },
+  {
+    "name": "5-Methyl-1H-benzotriazole",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -5.11820410625782e-06
+  },
+  {
+    "name": "5-Methyl-1H-benzotriazole",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000127841359050115
+  },
+  {
+    "name": "5-Methyl-1H-benzotriazole",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -2.91860438918439e-05
+  },
+  {
+    "name": "5-Methyl-1H-benzotriazole",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 5.97709157151163e-07
+  },
+  {
+    "name": "5-Methyl-1H-benzotriazole",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.000392478057277498
+  },
+  {
+    "name": "5-Methyl-1H-benzotriazole",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 3.46592958362361e-05
+  },
+  {
+    "name": "5-Methyl-1H-benzotriazole",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000332446750721505
+  },
+  {
+    "name": "Bis(2-isopropylphenyl) phenyl phosphate",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -0.000412197967158573
+  },
+  {
+    "name": "Bis(2-isopropylphenyl) phenyl phosphate",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -6.28557100377578e-05
+  },
+  {
+    "name": "Bis(2-isopropylphenyl) phenyl phosphate",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000148324575954466
+  },
+  {
+    "name": "Bis(2-isopropylphenyl) phenyl phosphate",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.00070096100045488
+  },
+  {
+    "name": "Bis(2-isopropylphenyl) phenyl phosphate",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.00260762423777329
+  },
+  {
+    "name": "Bis(2-isopropylphenyl) phenyl phosphate",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.00022160936810358
+  },
+  {
+    "name": "Bis(2-isopropylphenyl) phenyl phosphate",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000478752074704746
+  },
+  {
+    "name": "Triamterene",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -0.000109632481018029
+  },
+  {
+    "name": "Triamterene",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -7.89567985901741e-05
+  },
+  {
+    "name": "Triamterene",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000361887056740418
+  },
+  {
+    "name": "Triamterene",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -2.43187377180136e-05
+  },
+  {
+    "name": "Triamterene",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.00046350343574715
+  },
+  {
+    "name": "Triamterene",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000289080890014746
+  },
+  {
+    "name": "Triamterene",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000232227323106259
+  },
+  {
+    "name": "Chrysin",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": -5.80362961604415e-06
+  },
+  {
+    "name": "Chrysin",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": 0.000188811920056882
+  },
+  {
+    "name": "Chrysin",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": -5.65629792748312e-05
+  },
+  {
+    "name": "Chrysin",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": -1.44487352713593e-05
+  },
+  {
+    "name": "Chrysin",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": 0.000609149730683288
+  },
+  {
+    "name": "Chrysin",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": 0.00308406942218259
+  },
+  {
+    "name": "Propiconazole",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -1.0717742599242e-05
+  },
+  {
+    "name": "Propiconazole",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -1.18837710442001e-05
+  },
+  {
+    "name": "Propiconazole",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -1.08643722939396e-05
+  },
+  {
+    "name": "Propiconazole",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -1.45853891998598e-05
+  },
+  {
+    "name": "Propiconazole",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -1.16164598866182e-05
+  },
+  {
+    "name": "Propiconazole",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -8.94440175399374e-05
+  },
+  {
+    "name": "Dextrorphan",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 3.23218424702837e-06
+  },
+  {
+    "name": "Dextrorphan",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 9.68898423611183e-06
+  },
+  {
+    "name": "Dextrorphan",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -2.63194069329549e-06
+  },
+  {
+    "name": "Dextrorphan",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 2.26006120650369e-06
+  },
+  {
+    "name": "Dextrorphan",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 1.56790130691117e-05
+  },
+  {
+    "name": "Dextrorphan",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 2.10505653816619e-05
+  },
+  {
+    "name": "Dextrorphan",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 1.37310203976136e-05
+  },
+  {
+    "name": "Benzyl-dimethyl-hexadecylammonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -0.00252428511724352
+  },
+  {
+    "name": "Benzyl-dimethyl-hexadecylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.00171552806110318
+  },
+  {
+    "name": "Benzyl-dimethyl-hexadecylammonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -0.000922426272347596
+  },
+  {
+    "name": "Benzyl-dimethyl-hexadecylammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.00071464476231445
+  },
+  {
+    "name": "Benzyl-dimethyl-hexadecylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.00191451350209025
+  },
+  {
+    "name": "Benzyl-dimethyl-hexadecylammonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.00533272326635821
+  },
+  {
+    "name": "Benzyl-dimethyl-octylammonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -1.95259725352242e-05
+  },
+  {
+    "name": "Benzyl-dimethyl-octylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -8.89894650733516e-05
+  },
+  {
+    "name": "Benzyl-dimethyl-octylammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -6.17647399236513e-05
+  },
+  {
+    "name": "Benzyl-dimethyl-octylammonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -2.98669910075472e-05
+  },
+  {
+    "name": "Benzyl-dimethyl-octylammonium",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -3.86223162724971e-05
+  },
+  {
+    "name": "Benzyl-dimethyl-octylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -6.06282766001077e-05
+  },
+  {
+    "name": "Benzyl-dimethyl-tetradecylammonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -0.00211988499504434
+  },
+  {
+    "name": "Benzyl-dimethyl-tetradecylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.00087407988219157
+  },
+  {
+    "name": "Benzyl-dimethyl-tetradecylammonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 0.0011193462298173
+  },
+  {
+    "name": "Benzyl-dimethyl-tetradecylammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.00296091391722075
+  },
+  {
+    "name": "Benzyl-dimethyl-tetradecylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.00284193783084202
+  },
+  {
+    "name": "Benzyl-dimethyl-tetradecylammonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.0123125176222832
+  },
+  {
+    "name": "Carbamazepine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -7.05011577070128e-06
+  },
+  {
+    "name": "Carbamazepine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -3.80738111563984e-06
+  },
+  {
+    "name": "Carbamazepine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -5.52880131228052e-05
+  },
+  {
+    "name": "Carbamazepine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -4.63183863386827e-05
+  },
+  {
+    "name": "Carbamazepine",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000122485517975149
+  },
+  {
+    "name": "Carbamazepine",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -2.67144146249905e-05
+  },
+  {
+    "name": "Carbamazepine",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -9.2813426003289e-06
+  },
+  {
+    "name": "Carbamazepine",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000284662548390422
+  },
+  {
+    "name": "N-Benzyldimethylstearyl ammonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -0.00535787523152921
+  },
+  {
+    "name": "N-Benzyldimethylstearyl ammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.00467842750060627
+  },
+  {
+    "name": "N-Benzyldimethylstearyl ammonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -0.00253604276015008
+  },
+  {
+    "name": "N-Benzyldimethylstearyl ammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000390633939356882
+  },
+  {
+    "name": "N-Benzyldimethylstearyl ammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.00256757794523563
+  },
+  {
+    "name": "N-Benzyldimethylstearyl ammonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.00888113162166037
+  },
+  {
+    "name": "Sitagliptin",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000736996338600335
+  },
+  {
+    "name": "Sitagliptin",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.00111594932815169
+  },
+  {
+    "name": "Sitagliptin",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 0.000306800864560765
+  },
+  {
+    "name": "Sitagliptin",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.00134984005176249
+  },
+  {
+    "name": "Sitagliptin",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": 0.00248262638734047
+  },
+  {
+    "name": "Sitagliptin",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.00209397418644883
+  },
+  {
+    "name": "Sitagliptin",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 0.000319793943475994
+  },
+  {
+    "name": "Sitagliptin",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000781817954804289
+  },
+  {
+    "name": "Amisulpride",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 7.70452789132916e-05
+  },
+  {
+    "name": "Amisulpride",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000354540535419146
+  },
+  {
+    "name": "Amisulpride",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -2.82052744841035e-05
+  },
+  {
+    "name": "Amisulpride",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -8.86459937460852e-05
+  },
+  {
+    "name": "Amisulpride",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 4.79077171497679e-05
+  },
+  {
+    "name": "Amisulpride",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.000497917224336844
+  },
+  {
+    "name": "Amisulpride",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -3.44845029848137e-05
+  },
+  {
+    "name": "Amisulpride",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000395275553822559
+  },
+  {
+    "name": "Octocrylene",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 2.29862850097885e-05
+  },
+  {
+    "name": "Octocrylene",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 4.99769898368661e-05
+  },
+  {
+    "name": "Octocrylene",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 6.8274231251136e-05
+  },
+  {
+    "name": "Octocrylene",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 8.5099003757086e-05
+  },
+  {
+    "name": "Octocrylene",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.000134885293939306
+  },
+  {
+    "name": "Octocrylene",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000214653762051238
+  },
+  {
+    "name": "Caffeine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -1.63678247669248e-05
+  },
+  {
+    "name": "Caffeine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -1.46411097993826e-05
+  },
+  {
+    "name": "Caffeine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000101681178661443
+  },
+  {
+    "name": "Caffeine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -4.65983007330288e-05
+  },
+  {
+    "name": "Caffeine",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -4.95377263253146e-05
+  },
+  {
+    "name": "Caffeine",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 1.12167131563585e-05
+  },
+  {
+    "name": "Caffeine",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 7.39050346415379e-05
+  },
+  {
+    "name": "Fluoxetine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 8.13041975281139e-05
+  },
+  {
+    "name": "Fluoxetine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000112394308883412
+  },
+  {
+    "name": "Fluoxetine",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 0.000173229779540548
+  },
+  {
+    "name": "Fluoxetine",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 0.000136305067634844
+  },
+  {
+    "name": "Fluoxetine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 6.13975392361047e-05
+  },
+  {
+    "name": "Fluoxetine",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -3.69038814938805e-05
+  },
+  {
+    "name": "Isocaffeine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -1.36886296604203e-05
+  },
+  {
+    "name": "Isocaffeine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -1.46411097993826e-05
+  },
+  {
+    "name": "Isocaffeine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000101681178661443
+  },
+  {
+    "name": "Isocaffeine",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -8.24961355419153e-06
+  },
+  {
+    "name": "Isocaffeine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -4.31054826434656e-05
+  },
+  {
+    "name": "Isocaffeine",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -4.97367018974022e-05
+  },
+  {
+    "name": "Isocaffeine",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 7.39050346415379e-05
+  },
+  {
+    "name": "Methyl-5-oxopyrrolidine-2-carboxylate",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -4.08526455120876e-06
+  },
+  {
+    "name": "Methyl-5-oxopyrrolidine-2-carboxylate",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -5.12424428100388e-05
+  },
+  {
+    "name": "Methyl-5-oxopyrrolidine-2-carboxylate",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 6.98666445810035e-06
+  },
+  {
+    "name": "Methyl-5-oxopyrrolidine-2-carboxylate",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -3.38869856585426e-06
+  },
+  {
+    "name": "Methyl-5-oxopyrrolidine-2-carboxylate",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 2.26698155509865e-05
+  },
+  {
+    "name": "Methyl-5-oxopyrrolidine-2-carboxylate",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -1.37827947412663e-05
+  },
+  {
+    "name": "Methyl-5-oxopyrrolidine-2-carboxylate",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 4.8531003768253e-06
+  },
+  {
+    "name": "Methyl-5-oxopyrrolidine-2-carboxylate",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000147715292824875
+  },
+  {
+    "name": "Dibutyl phosphate",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 5.37832907980459e-06
+  },
+  {
+    "name": "Dibutyl phosphate",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": -0.000136659351381917
+  },
+  {
+    "name": "Dibutyl phosphate",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": -3.82786521320527e-05
+  },
+  {
+    "name": "Dibutyl phosphate",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 0.000345161257490255
+  },
+  {
+    "name": "Dibutyl phosphate",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": -0.000155567537658092
+  },
+  {
+    "name": "Doxepin",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -1.49140617549021e-05
+  },
+  {
+    "name": "Doxepin",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -3.0578900582443e-05
+  },
+  {
+    "name": "Doxepin",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000104030492483862
+  },
+  {
+    "name": "Doxepin",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 2.83672321894118e-05
+  },
+  {
+    "name": "Doxepin",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -2.44332437694594e-05
+  },
+  {
+    "name": "Doxepin",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000410596173942248
+  },
+  {
+    "name": "Tris(2-chloroethyl) phosphate",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -1.31632075724794e-05
+  },
+  {
+    "name": "Tris(2-chloroethyl) phosphate",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -3.64093727767311e-05
+  },
+  {
+    "name": "Tris(2-chloroethyl) phosphate",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -1.21131289777958e-05
+  },
+  {
+    "name": "Tris(2-chloroethyl) phosphate",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -4.55361277879262e-06
+  },
+  {
+    "name": "Tris(2-chloroethyl) phosphate",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -3.3592189476867e-06
+  },
+  {
+    "name": "Guanosine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 1.67969261875789e-05
+  },
+  {
+    "name": "Guanosine",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -5.25962990790521e-06
+  },
+  {
+    "name": "Guanosine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 3.31204360772441e-05
+  },
+  {
+    "name": "Guanosine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 4.15811076770491e-05
+  },
+  {
+    "name": "Guanosine",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 2.91777503760538e-05
+  },
+  {
+    "name": "Fexofenadine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 1.10010315406973e-05
+  },
+  {
+    "name": "Fexofenadine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -5.3866913765472e-05
+  },
+  {
+    "name": "Fexofenadine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -3.06387623607827e-05
+  },
+  {
+    "name": "Fexofenadine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 2.68740803723108e-05
+  },
+  {
+    "name": "Fexofenadine",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 5.58900254403089e-05
+  },
+  {
+    "name": "Fexofenadine",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000188898373198228
+  },
+  {
+    "name": "Methyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000863389257201824
+  },
+  {
+    "name": "Methyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.000204094558040701
+  },
+  {
+    "name": "Methyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000189399801178194
+  },
+  {
+    "name": "Methyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000141988543990035
+  },
+  {
+    "name": "Methyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.000396198733002725
+  },
+  {
+    "name": "Esculetin",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -1.19577175698398e-05
+  },
+  {
+    "name": "Esculetin",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 2.67850526466394e-05
+  },
+  {
+    "name": "Esculetin",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 2.14644403360574e-05
+  },
+  {
+    "name": "Octhilinone",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 7.29329527498658e-06
+  },
+  {
+    "name": "Octhilinone",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 3.24768280981685e-06
+  },
+  {
+    "name": "Octhilinone",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -1.47915177842117e-06
+  },
+  {
+    "name": "Octhilinone",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 7.27616179602085e-05
+  },
+  {
+    "name": "Octhilinone",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -6.97272966888821e-06
+  },
+  {
+    "name": "Octhilinone",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000383258770357923
+  },
+  {
+    "name": "Daidzein",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": -6.74624096046007e-06
+  },
+  {
+    "name": "Daidzein",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": -5.96328794827815e-06
+  },
+  {
+    "name": "Daidzein",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 1.02131816324672e-06
+  },
+  {
+    "name": "Daidzein",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": -6.12662048013035e-06
+  },
+  {
+    "name": "Daidzein",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -1.63572139068662e-05
+  },
+  {
+    "name": "Daidzein",
+    "pol": "neg",
+    "station": "saar_gu_m",
+    "lm": 2.86896976732492e-05
+  },
+  {
+    "name": "Benzyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000139065001095385
+  },
+  {
+    "name": "Benzyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 4.03772738651648e-06
+  },
+  {
+    "name": "Benzyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000198926947772444
+  },
+  {
+    "name": "Benzyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -4.63697777598984e-06
+  },
+  {
+    "name": "Benzyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -1.68267463416403e-05
+  },
+  {
+    "name": "Benzyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000257422520901343
+  },
+  {
+    "name": "Clarithromycin",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -5.41906093815656e-05
+  },
+  {
+    "name": "Clarithromycin",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000120008147456679
+  },
+  {
+    "name": "Clarithromycin",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -5.75900824730488e-05
+  },
+  {
+    "name": "Clarithromycin",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.000148499279596767
+  },
+  {
+    "name": "Clarithromycin",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -4.23232491623224e-05
+  },
+  {
+    "name": "1-Hexadecanoyl-sn-glycero-3-phosphocholine",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": -2.66024157333689e-05
+  },
+  {
+    "name": "1-Hexadecanoyl-sn-glycero-3-phosphocholine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.00103977950208314
+  },
+  {
+    "name": "1-Myristoyl-sn-glycero-3-phosphocholine",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 0.000140909334087647
+  },
+  {
+    "name": "1-Myristoyl-sn-glycero-3-phosphocholine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000451341389442617
+  },
+  {
+    "name": "Didodecyl-dimethylammonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -0.000418461628444155
+  },
+  {
+    "name": "Didodecyl-dimethylammonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -0.000154602920189638
+  },
+  {
+    "name": "Didodecyl-dimethylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -5.19091439273969e-05
+  },
+  {
+    "name": "Didodecyl-dimethylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000186981696311903
+  },
+  {
+    "name": "Didodecyl-dimethylammonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.00580134325060711
+  },
+  {
+    "name": "Cetylpyridinium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -3.01016685829433e-05
+  },
+  {
+    "name": "Cetylpyridinium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -4.1493044142571e-05
+  },
+  {
+    "name": "Cetylpyridinium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 1.15479689387568e-05
+  },
+  {
+    "name": "Cetylpyridinium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000189085472510496
+  },
+  {
+    "name": "Cetylpyridinium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000957005437488985
+  },
+  {
+    "name": "Aspartame",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 8.59885387742026e-05
+  },
+  {
+    "name": "Aspartame",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -8.18068728097445e-06
+  },
+  {
+    "name": "Aspartame",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000189664047917204
+  },
+  {
+    "name": "Aspartame",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 1.21248235943802e-06
+  },
+  {
+    "name": "Aspartame",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 9.51485519802912e-05
+  },
+  {
+    "name": "Aspartame",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -3.53487779421375e-05
+  },
+  {
+    "name": "Aspartame",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000111030362455488
+  },
+  {
+    "name": "Aspartame",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -2.73473435230477e-06
+  },
+  {
+    "name": "N,N-Dimethyltetradecylamine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000222265308750546
+  },
+  {
+    "name": "N,N-Dimethyltetradecylamine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.00111736289962566
+  },
+  {
+    "name": "N,N-Dimethyltetradecylamine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000804988031940738
+  },
+  {
+    "name": "N,N-Dimethyltetradecylamine",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.00135093242608742
+  },
+  {
+    "name": "Triphenylphosphine sulfide",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000275848662878135
+  },
+  {
+    "name": "Triphenylphosphine sulfide",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.000175298372186707
+  },
+  {
+    "name": "Triphenylphosphine sulfide",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -0.000102035521175571
+  },
+  {
+    "name": "Triphenylphosphine sulfide",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -3.69388926979994e-05
+  },
+  {
+    "name": "1-(Ethoxycarbonyl)ethyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -1.91199517788859e-06
+  },
+  {
+    "name": "1-(Ethoxycarbonyl)ethyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -8.57986833447162e-05
+  },
+  {
+    "name": "1-(Ethoxycarbonyl)ethyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 0.000564073107322273
+  },
+  {
+    "name": "1-(Ethoxycarbonyl)ethyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000478991186424091
+  },
+  {
+    "name": "Amitriptyline",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -6.95003028599757e-05
+  },
+  {
+    "name": "Amitriptyline",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -0.000166850794552813
+  },
+  {
+    "name": "Amitriptyline",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -8.88466864660029e-05
+  },
+  {
+    "name": "Amitriptyline",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000248876753632891
+  },
+  {
+    "name": "Amitriptyline",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 6.33421893735869e-05
+  },
+  {
+    "name": "Amitriptyline",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 4.75259336572345e-05
+  },
+  {
+    "name": "Amitriptyline",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000465440246420428
+  },
+  {
+    "name": "Fexofenadinone",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -6.1682257874157e-05
+  },
+  {
+    "name": "Fexofenadinone",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.000135417271484314
+  },
+  {
+    "name": "Fexofenadinone",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -2.24633301131229e-05
+  },
+  {
+    "name": "Fexofenadinone",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 5.0713468617854e-05
+  },
+  {
+    "name": "Fexofenadinone",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 8.65406839613003e-05
+  },
+  {
+    "name": "N,N,N-trimethyl-1-Eicosanaminium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.00177606412316881
+  },
+  {
+    "name": "N,N,N-trimethyl-1-Eicosanaminium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.0029671957413597
+  },
+  {
+    "name": "N,N,N-trimethyl-1-Eicosanaminium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 0.00193930424831231
+  },
+  {
+    "name": "N,N,N-trimethyl-1-Eicosanaminium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.00492525448248459
+  },
+  {
+    "name": "(Methoxymethyl)triphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.0087666789104582
+  },
+  {
+    "name": "(Methoxymethyl)triphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.00956460799129671
+  },
+  {
+    "name": "(Methoxymethyl)triphenylphosphonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -4.18839403398413e-06
+  },
+  {
+    "name": "(Methoxymethyl)triphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 3.32151321459893e-06
+  },
+  {
+    "name": "1-Palmitoyl-2-glutaryl-sn-glycero-3-phosphocholine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000228724279809804
+  },
+  {
+    "name": "1-Palmitoyl-2-glutaryl-sn-glycero-3-phosphocholine",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 6.59840742408845e-05
+  },
+  {
+    "name": "4-Methoxyphenol",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -9.42217622805699e-06
+  },
+  {
+    "name": "4-Methoxyphenol",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 2.00009516087031e-05
+  },
+  {
+    "name": "4-Methoxyphenol",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -4.02557017949222e-05
+  },
+  {
+    "name": "4-Methoxyphenol",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -7.51601386151342e-05
+  },
+  {
+    "name": "Adenosine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000206072532263697
+  },
+  {
+    "name": "Adenosine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -1.08024674048497e-05
+  },
+  {
+    "name": "Adenosine",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 0.000167011861086553
+  },
+  {
+    "name": "Adenosine",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 1.88918483196678e-05
+  },
+  {
+    "name": "11alpha-Hydroxyprogesterone",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -4.87686013932526e-06
+  },
+  {
+    "name": "11alpha-Hydroxyprogesterone",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 4.45084479138979e-08
+  },
+  {
+    "name": "11alpha-Hydroxyprogesterone",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -9.89823561448799e-05
+  },
+  {
+    "name": "11alpha-Hydroxyprogesterone",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -5.7109027853432e-05
+  },
+  {
+    "name": "11alpha-Hydroxyprogesterone",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.0001669914669708
+  },
+  {
+    "name": "11alpha-Hydroxyprogesterone",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 9.2800291621991e-05
+  },
+  {
+    "name": "Ethylene Terephthalate Cyclic Trimer",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.00170471439967282
+  },
+  {
+    "name": "Ethylene Terephthalate Cyclic Trimer",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 0.00197667667927119
+  },
+  {
+    "name": "Ethylene Terephthalate Cyclic Trimer",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.00183470543683357
+  },
+  {
+    "name": "Ethylene Terephthalate Cyclic Trimer",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 0.0016626521345078
+  },
+  {
+    "name": "Ethylene Terephthalate Cyclic Trimer",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.000186403864751301
+  },
+  {
+    "name": "Ethylene Terephthalate Cyclic Trimer",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.000869585254962071
+  },
+  {
+    "name": "Dibenzylamine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000111718488980143
+  },
+  {
+    "name": "Dibenzylamine",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 0.000181741167259059
+  },
+  {
+    "name": "Dibenzylamine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.000410299093319141
+  },
+  {
+    "name": "Dibenzylamine",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000390029422541487
+  },
+  {
+    "name": "Triethyl phosphate",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 1.83972598337944e-05
+  },
+  {
+    "name": "Triethyl phosphate",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 5.91844687146364e-05
+  },
+  {
+    "name": "Triethyl phosphate",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 1.7264405580587e-05
+  },
+  {
+    "name": "Triethyl phosphate",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 7.39413604378171e-05
+  },
+  {
+    "name": "Triethyl phosphate",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 3.01826336375647e-05
+  },
+  {
+    "name": "2,4-Dihydroxybenzophenone",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": -1.98067054286478e-06
+  },
+  {
+    "name": "2,4-Dihydroxybenzophenone",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": 5.89772572276135e-06
+  },
+  {
+    "name": "2,4-Dihydroxybenzophenone",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": -2.42326261759438e-06
+  },
+  {
+    "name": "2,4-Dihydroxybenzophenone",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": -1.93422716379119e-05
+  },
+  {
+    "name": "2,4-Dihydroxybenzophenone",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 4.38542135474089e-06
+  },
+  {
+    "name": "2,4-Dihydroxybenzophenone",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -5.00831450104899e-06
+  },
+  {
+    "name": "Mefloquine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -3.50032490952511e-05
+  },
+  {
+    "name": "Mefloquine",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -0.000159967027290685
+  },
+  {
+    "name": "Mefloquine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -2.63758104410028e-05
+  },
+  {
+    "name": "Mefloquine",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000100590224527957
+  },
+  {
+    "name": "Carbendazim",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -9.07950304388876e-06
+  },
+  {
+    "name": "Carbendazim",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -6.98556319752023e-06
+  },
+  {
+    "name": "Carbendazim",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -1.8940833662042e-05
+  },
+  {
+    "name": "Carbendazim",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -6.75622417170569e-05
+  },
+  {
+    "name": "Sulfasalazine",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": -5.3566569425918e-06
+  },
+  {
+    "name": "Sulfasalazine",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": 1.35870165953939e-05
+  },
+  {
+    "name": "Sulfasalazine",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": -1.53195710749682e-05
+  },
+  {
+    "name": "Sulfasalazine",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": -1.91665274304397e-05
+  },
+  {
+    "name": "Sulfasalazine",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -3.52518060857541e-06
+  },
+  {
+    "name": "Sulfasalazine",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 1.29037589369324e-05
+  },
+  {
+    "name": "Dibenzyldimethyl ammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.000452519036041341
+  },
+  {
+    "name": "Dibenzyldimethyl ammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.00546276522382605
+  },
+  {
+    "name": "Dibenzyldimethyl ammonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.00020354487560148
+  },
+  {
+    "name": "Dibenzyldimethyl ammonium",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -6.81908530952892e-05
+  },
+  {
+    "name": "Dibenzyldimethyl ammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.00316466689045602
+  },
+  {
+    "name": "Dibenzyldimethyl ammonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 2.33437408708379e-05
+  },
+  {
+    "name": "Butyl-triphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000765879046970388
+  },
+  {
+    "name": "Butyl-triphenylphosphonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000707491194666018
+  },
+  {
+    "name": "Butyl-triphenylphosphonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -1.95212193337459e-05
+  },
+  {
+    "name": "Sulpiride",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 1.14283325897619e-05
+  },
+  {
+    "name": "Sulpiride",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000209145479837339
+  },
+  {
+    "name": "Sulpiride",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 1.01299040794686e-05
+  },
+  {
+    "name": "Sulpiride",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.000268173233066904
+  },
+  {
+    "name": "Sulpiride",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.00012094728981842
+  },
+  {
+    "name": "Sulpiride",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000205729754876399
+  },
+  {
+    "name": "N-Desmethyltramadol",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 4.40499888137495e-06
+  },
+  {
+    "name": "N-Desmethyltramadol",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -3.2943013782836e-05
+  },
+  {
+    "name": "N-Desmethyltramadol",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -1.67549681732236e-05
+  },
+  {
+    "name": "N-Desmethyltramadol",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 2.00732486616863e-05
+  },
+  {
+    "name": "N-Desmethyltramadol",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -1.58411056481286e-05
+  },
+  {
+    "name": "N-Desmethyltramadol",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 7.98461004409554e-08
+  },
+  {
+    "name": "Sertraline",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 8.86008050228361e-06
+  },
+  {
+    "name": "Sertraline",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 2.72161525615865e-05
+  },
+  {
+    "name": "Sertraline",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 3.12933010762952e-06
+  },
+  {
+    "name": "Sertraline",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 1.5538795330008e-05
+  },
+  {
+    "name": "Sertraline",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 3.9668537743428e-05
+  },
+  {
+    "name": "Trimethoprim",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -1.32272578982112e-05
+  },
+  {
+    "name": "Trimethoprim",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -7.17951838075667e-05
+  },
+  {
+    "name": "Trimethoprim",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -8.3510101513711e-05
+  },
+  {
+    "name": "Trimethoprim",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -4.20498510671788e-05
+  },
+  {
+    "name": "Trimethoprim",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 9.0334609148544e-05
+  },
+  {
+    "name": "Celiprolol",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -6.32640397991134e-05
+  },
+  {
+    "name": "Celiprolol",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000379867747773407
+  },
+  {
+    "name": "Celiprolol",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -4.86118869518375e-05
+  },
+  {
+    "name": "Celiprolol",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.000114143351921618
+  },
+  {
+    "name": "Celiprolol",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000541394598274316
+  },
+  {
+    "name": "Celiprolol",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -1.73515704845748e-05
+  },
+  {
+    "name": "DEET",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 7.69245871399173e-06
+  },
+  {
+    "name": "DEET",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 4.80016554569461e-07
+  },
+  {
+    "name": "DEET",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -4.7122289183117e-07
+  },
+  {
+    "name": "2-Phenyl-2-imidazoline",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 8.58170756919837e-05
+  },
+  {
+    "name": "2-Phenyl-2-imidazoline",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": 3.05737117696174e-06
+  },
+  {
+    "name": "2-Phenyl-2-imidazoline",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -8.77707768689398e-08
+  },
+  {
+    "name": "2-Phenyl-2-imidazoline",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 9.05210169026271e-05
+  },
+  {
+    "name": "2-Phenyl-2-imidazoline",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000103409826470762
+  },
+  {
+    "name": "2-Phenyl-2-imidazoline",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 2.19115191523188e-05
+  },
+  {
+    "name": "Dihexadecyldimethylammonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -0.000133947367962655
+  },
+  {
+    "name": "Dihexadecyldimethylammonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -0.000212660273966306
+  },
+  {
+    "name": "Dihexadecyldimethylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.00113669017608718
+  },
+  {
+    "name": "Tetraphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -0.0013807672337603
+  },
+  {
+    "name": "Tetraphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.0030462585615993
+  },
+  {
+    "name": "Tetraphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 4.28571684719776e-06
+  },
+  {
+    "name": "Tiapride",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 1.28651177399541e-05
+  },
+  {
+    "name": "Tiapride",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000182165810472329
+  },
+  {
+    "name": "Tiapride",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 3.7059222262566e-05
+  },
+  {
+    "name": "Tiapride",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -3.0849332427447e-05
+  },
+  {
+    "name": "Tiapride",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -1.20240786415419e-05
+  },
+  {
+    "name": "Tiapride",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -9.53886285889946e-05
+  },
+  {
+    "name": "Methylbenzethonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -2.78044402421805e-05
+  },
+  {
+    "name": "Methylbenzethonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 2.45590291746423e-07
+  },
+  {
+    "name": "Methylbenzethonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -6.36004083286298e-05
+  },
+  {
+    "name": "Epoxiconazole",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 1.45759887289874e-06
+  },
+  {
+    "name": "Epoxiconazole",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 2.43898616857616e-06
+  },
+  {
+    "name": "Epoxiconazole",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000103875277056569
+  },
+  {
+    "name": "1-Cyclohexyl-3-ethylurea",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -6.54742975362731e-05
+  },
+  {
+    "name": "1-Cyclohexyl-3-ethylurea",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 8.89767502929384e-06
+  },
+  {
+    "name": "Isopentyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000216780109191711
+  },
+  {
+    "name": "Isopentyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000213913513967596
+  },
+  {
+    "name": "[4(Acetyloxy)butyl](triphenyl)phosphonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.00060914168115807
+  },
+  {
+    "name": "[4(Acetyloxy)butyl](triphenyl)phosphonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -3.65028209733782e-05
+  },
+  {
+    "name": "(3-Methyl-2-butenyl)(triphenyl)phosphorane",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.00161238704013073
+  },
+  {
+    "name": "(3-Methyl-2-butenyl)(triphenyl)phosphorane",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000852303971043737
+  },
+  {
+    "name": "2-Hydroxy-N-phenylpropanamide",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": 2.62296674168652e-07
+  },
+  {
+    "name": "2-Hydroxy-N-phenylpropanamide",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": -1.34985839315221e-05
+  },
+  {
+    "name": "2-Hydroxy-N-phenylpropanamide",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -9.32719654865625e-06
+  },
+  {
+    "name": "2-Hydroxy-N-phenylpropanamide",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": 4.2522409968752e-06
+  },
+  {
+    "name": "2-Hydroxy-N-phenylpropanamide",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 9.20248441778517e-07
+  },
+  {
+    "name": "2-Hydroxy-N-phenylpropanamide",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": -2.6670376420416e-06
+  },
+  {
+    "name": "Tyrosine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 8.06837782333222e-05
+  },
+  {
+    "name": "Tyrosine",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 1.87677589036079e-06
+  },
+  {
+    "name": "Tyrosine",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": 4.98236091965974e-06
+  },
+  {
+    "name": "Tyrosine",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 9.18656876080233e-05
+  },
+  {
+    "name": "Fenbendazole",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -1.32427121819045e-05
+  },
+  {
+    "name": "Fenbendazole",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -5.80289751772944e-05
+  },
+  {
+    "name": "Fenbendazole",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -1.55372496535742e-05
+  },
+  {
+    "name": "Fenbendazole",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -3.160656762014e-05
+  },
+  {
+    "name": "Fenbendazole",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -1.81313009161146e-05
+  },
+  {
+    "name": "Oleyltrimethylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000685267116251621
+  },
+  {
+    "name": "Oleyltrimethylammonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 3.47826322861452e-05
+  },
+  {
+    "name": "Oleyltrimethylammonium",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.00115873892786755
+  },
+  {
+    "name": "Oleyltrimethylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.000148705139402776
+  },
+  {
+    "name": "Oleyltrimethylammonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000589401194141418
+  },
+  {
+    "name": "Pantoprazole sulfide",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.000229023123043328
+  },
+  {
+    "name": "Pantoprazole sulfide",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.00128980196809921
+  },
+  {
+    "name": "Pantoprazole sulfide",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 9.93456185193617e-05
+  },
+  {
+    "name": "Pantoprazole sulfide",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": -5.38649483976074e-05
+  },
+  {
+    "name": "Pantoprazole sulfide",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": -0.000277210949979858
+  },
+  {
+    "name": "Malachite green",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 4.27929791071555e-05
+  },
+  {
+    "name": "Malachite green",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 2.50212657687406e-05
+  },
+  {
+    "name": "Malachite green",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.000268824132319784
+  },
+  {
+    "name": "Malachite green",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000107068312632857
+  },
+  {
+    "name": "Malachite green",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -0.000257761440001004
+  },
+  {
+    "name": "Malachite green",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -2.6309280386423e-05
+  },
+  {
+    "name": "Bisoprolol",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 7.55472746310904e-05
+  },
+  {
+    "name": "Bisoprolol",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": 1.04638105578177e-05
+  },
+  {
+    "name": "Bisoprolol",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.000326394746567788
+  },
+  {
+    "name": "Bisoprolol",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.000167418327792962
+  },
+  {
+    "name": "Bisoprolol",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.00018373335862128
+  },
+  {
+    "name": "Diflufenican",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -2.46729381238278e-06
+  },
+  {
+    "name": "Diflufenican",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -5.88640287635031e-05
+  },
+  {
+    "name": "Diflufenican",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 5.59457138836575e-05
+  },
+  {
+    "name": "Diflufenican",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000834663705311386
+  },
+  {
+    "name": "Diflufenican",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": 6.4120846483069e-07
+  },
+  {
+    "name": "Tebuconazole",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 4.92235315904947e-06
+  },
+  {
+    "name": "Tebuconazole",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -8.40614218265772e-06
+  },
+  {
+    "name": "Tebuconazole",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 4.64297488865878e-05
+  },
+  {
+    "name": "Tebuconazole",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -1.76755867933173e-06
+  },
+  {
+    "name": "Tebuconazole",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -3.29190335405429e-05
+  },
+  {
+    "name": "Benzothiazole-2-sulfonic acid",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": 8.35003945998906e-06
+  },
+  {
+    "name": "Benzothiazole-2-sulfonic acid",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": -0.000297410150686938
+  },
+  {
+    "name": "Benzothiazole-2-sulfonic acid",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": -0.000224372693537872
+  },
+  {
+    "name": "Benzothiazole-2-sulfonic acid",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 3.63629961794738e-06
+  },
+  {
+    "name": "Dacarbazine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000194215972155506
+  },
+  {
+    "name": "Dacarbazine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000145309979170201
+  },
+  {
+    "name": "Dacarbazine",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 5.19550953891896e-05
+  },
+  {
+    "name": "Dacarbazine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -5.14468275494604e-05
+  },
+  {
+    "name": "Dacarbazine",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000160297295569869
+  },
+  {
+    "name": "O-desmethyl-tramadol",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -1.96613343345152e-05
+  },
+  {
+    "name": "O-desmethyl-tramadol",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -7.38141604017568e-05
+  },
+  {
+    "name": "O-desmethyl-tramadol",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -7.54673007349307e-05
+  },
+  {
+    "name": "O-desmethyl-tramadol",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -1.49458069229662e-05
+  },
+  {
+    "name": "O-desmethyl-tramadol",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -4.92663075114615e-05
+  },
+  {
+    "name": "Terbutylazine-2-hydroxy",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -1.61256114939362e-05
+  },
+  {
+    "name": "Terbutylazine-2-hydroxy",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -5.26936064298567e-05
+  },
+  {
+    "name": "Terbutylazine-2-hydroxy",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -7.29568057839594e-06
+  },
+  {
+    "name": "Terbutylazine-2-hydroxy",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -3.18864928435261e-05
+  },
+  {
+    "name": "Terbutylazine-2-hydroxy",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000213282028292122
+  },
+  {
+    "name": "2`-Deoxyguanosine",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 9.86684046569667e-07
+  },
+  {
+    "name": "2`-Deoxyguanosine",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": 2.07911542206041e-05
+  },
+  {
+    "name": "2`-Deoxyguanosine",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": -2.21020170860225e-05
+  },
+  {
+    "name": "2`-Deoxyguanosine",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": -5.30411314339564e-06
+  },
+  {
+    "name": "2`-Deoxyguanosine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -5.5460475097332e-05
+  },
+  {
+    "name": "Benzohydroxamic acid",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 1.0017805849281e-05
+  },
+  {
+    "name": "Benzohydroxamic acid",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -1.70240322420797e-05
+  },
+  {
+    "name": "Benzohydroxamic acid",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 8.25977694115123e-05
+  },
+  {
+    "name": "Benzohydroxamic acid",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.00058347745816408
+  },
+  {
+    "name": "Benzyl-triethylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -6.53485420464502e-05
+  },
+  {
+    "name": "Benzyl-triethylammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000256725850183172
+  },
+  {
+    "name": "Benzyl-triethylammonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -8.61916158359265e-06
+  },
+  {
+    "name": "Benzyl-triethylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000197400274147762
+  },
+  {
+    "name": "N-Ethyl-4-menthane-3-carboxamide",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 3.82017782977178e-06
+  },
+  {
+    "name": "N-Ethyl-4-menthane-3-carboxamide",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -8.11625566779653e-05
+  },
+  {
+    "name": "N-Ethyl-4-menthane-3-carboxamide",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 1.30195487800724e-05
+  },
+  {
+    "name": "N-Ethyl-4-menthane-3-carboxamide",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -2.45424426104123e-05
+  },
+  {
+    "name": "Tetrapropylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -1.14698178610989e-05
+  },
+  {
+    "name": "Tetrapropylammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000135822788904961
+  },
+  {
+    "name": "Tetrapropylammonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 1.03249734385441e-05
+  },
+  {
+    "name": "Tetrapropylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000450096423880118
+  },
+  {
+    "name": "2-Aminobenzimidazole",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -1.45825309673486e-06
+  },
+  {
+    "name": "Fluorescent brightener 363",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 3.12948251228483e-05
+  },
+  {
+    "name": "Methadone",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 1.14691133099187e-05
+  },
+  {
+    "name": "O-desmethyl-venlafaxine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 5.77981111948712e-05
+  },
+  {
+    "name": "Tramadol",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -2.0534625593758e-05
+  },
+  {
+    "name": "Triphenylphosphine oxide",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000983446982372078
+  },
+  {
+    "name": "Isopropyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -2.70050372218669e-05
+  },
+  {
+    "name": "Isopropyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.000102991472385512
+  },
+  {
+    "name": "1-Oxo-ibuprofen",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.000153448651838477
+  },
+  {
+    "name": "1-Oxo-ibuprofen",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 1.99840151789421e-06
+  },
+  {
+    "name": "1-Oxo-ibuprofen",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -3.22005998252133e-05
+  },
+  {
+    "name": "1-Oxo-ibuprofen",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 1.31746539574133e-06
+  },
+  {
+    "name": "2-Hydroxy-N-phenylacetamide",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 1.34756012447453e-05
+  },
+  {
+    "name": "2-Hydroxy-N-phenylacetamide",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -9.04831792053457e-06
+  },
+  {
+    "name": "2-Hydroxy-N-phenylacetamide",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 1.81259923029346e-05
+  },
+  {
+    "name": "2-Hydroxy-N-phenylacetamide",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 3.29578085169847e-05
+  },
+  {
+    "name": "Diphenylphosphinic acid",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 1.29592102871496e-05
+  },
+  {
+    "name": "Diphenylphosphinic acid",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": 8.50863311174081e-06
+  },
+  {
+    "name": "3-Methylbenzoic acid",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 2.57210617997624e-06
+  },
+  {
+    "name": "3-Methylbenzoic acid",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -4.84449738427488e-06
+  },
+  {
+    "name": "3-Methylbenzoic acid",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -3.11580498582635e-05
+  },
+  {
+    "name": "Acebutolol",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000249445197487028
+  },
+  {
+    "name": "Acebutolol",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.000126408167820969
+  },
+  {
+    "name": "Acebutolol",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -1.90997095268706e-06
+  },
+  {
+    "name": "Acebutolol",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000170773334359876
+  },
+  {
+    "name": "Carebastine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.000135417271484314
+  },
+  {
+    "name": "Carebastine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -2.13000284967628e-05
+  },
+  {
+    "name": "Carebastine",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 5.01881202810232e-05
+  },
+  {
+    "name": "Carebastine",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 8.65406839613003e-05
+  },
+  {
+    "name": "Tetrabutylphosphonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -4.51688837836837e-05
+  },
+  {
+    "name": "Tetrabutylphosphonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.00435333170649783
+  },
+  {
+    "name": "Tetrabutylphosphonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.0113487622676937
+  },
+  {
+    "name": "Tributylmethylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.000454914928487718
+  },
+  {
+    "name": "Tributylmethylammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": 0.000377542733997083
+  },
+  {
+    "name": "Tributylmethylammonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 6.72771752196466e-06
+  },
+  {
+    "name": "2-Mercaptobenzoxazole",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -0.000458904600728221
+  },
+  {
+    "name": "2-Mercaptobenzoxazole",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -7.78813789379909e-05
+  },
+  {
+    "name": "2-Mercaptobenzoxazole",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000316774329819625
+  },
+  {
+    "name": "2-Naphthalenesulfonic acid",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": -3.11085093205632e-05
+  },
+  {
+    "name": "2-Naphthalenesulfonic acid",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": -0.000126516608257901
+  },
+  {
+    "name": "2-Naphthalenesulfonic acid",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -0.00111980168574385
+  },
+  {
+    "name": "Adipic acid",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 4.49038222274113e-05
+  },
+  {
+    "name": "Metoprolol",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000222087088149801
+  },
+  {
+    "name": "Metoprolol",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 0.00131558349935485
+  },
+  {
+    "name": "Metoprolol",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -1.03535328043344e-05
+  },
+  {
+    "name": "Metoprolol",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000590461975998624
+  },
+  {
+    "name": "N,N-Dimethyldecanamide",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -3.55587580694868e-05
+  },
+  {
+    "name": "N,N-Dimethyldecanamide",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.00184286293195655
+  },
+  {
+    "name": "N,N-Dimethyldecanamide",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.00011584444971652
+  },
+  {
+    "name": "N,N-dimethylbenzylamine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -6.86889682138554e-07
+  },
+  {
+    "name": "N,N-dimethylbenzylamine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -9.13021196671665e-05
+  },
+  {
+    "name": "N,N-dimethylbenzylamine",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000169557727546557
+  },
+  {
+    "name": "Octyl hydrogen sulfate",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": -2.38343650116231e-05
+  },
+  {
+    "name": "Octyl hydrogen sulfate",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 2.82767230987806e-05
+  },
+  {
+    "name": "Octyl hydrogen sulfate",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -0.000105147590683508
+  },
+  {
+    "name": "Octyl hydrogen sulfate",
+    "pol": "neg",
+    "station": "saar_gu_m",
+    "lm": -0.00161614117090066
+  },
+  {
+    "name": "Tetraglyme",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -3.60262906501238e-05
+  },
+  {
+    "name": "Tetraglyme",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.000301033352745692
+  },
+  {
+    "name": "Tetraglyme",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 7.49410890363337e-05
+  },
+  {
+    "name": "Thiabendazole",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 1.63642912173595e-05
+  },
+  {
+    "name": "Thiabendazole",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": 3.9174433166398e-05
+  },
+  {
+    "name": "Thiabendazole",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 3.73505320074634e-06
+  },
+  {
+    "name": "Tris(2-butoxyethyl) phosphate",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.000800359310453013
+  },
+  {
+    "name": "Tris(2-butoxyethyl) phosphate",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.00141666993715631
+  },
+  {
+    "name": "Tris(2-butoxyethyl) phosphate",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.0011113000359428
+  },
+  {
+    "name": "2-Phenylbenzimidazole",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 4.35603892062627e-05
+  },
+  {
+    "name": "2-Phenylbenzimidazole",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -3.63849746407486e-06
+  },
+  {
+    "name": "2-Phenylbenzimidazole",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 4.57933420307589e-06
+  },
+  {
+    "name": "Cybutryne",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -2.82174780904511e-05
+  },
+  {
+    "name": "Cybutryne",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000218304099417909
+  },
+  {
+    "name": "Cybutryne",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000149217284221862
+  },
+  {
+    "name": "Fenpropimorph",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -2.46754308814332e-05
+  },
+  {
+    "name": "Fenpropimorph",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -1.7980904576191e-05
+  },
+  {
+    "name": "Fenpropimorph",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -9.16890920360238e-06
+  },
+  {
+    "name": "Metoclopramide",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 4.28176796711553e-06
+  },
+  {
+    "name": "Metoclopramide",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -3.36928076817484e-05
+  },
+  {
+    "name": "Metoclopramide",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -2.36281178400202e-05
+  },
+  {
+    "name": "Metoclopramide",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -7.66260454553511e-05
+  },
+  {
+    "name": "N-Octyl-2-pyrrolidone",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -4.4102819897592e-05
+  },
+  {
+    "name": "N-Octyl-2-pyrrolidone",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 2.69550004581609e-05
+  },
+  {
+    "name": "N-Octyl-2-pyrrolidone",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 4.3454901935089e-05
+  },
+  {
+    "name": "Benzamide",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 5.98693655028975e-06
+  },
+  {
+    "name": "Benzamide",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 3.54979550298733e-06
+  },
+  {
+    "name": "Benzamide",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -1.78456676095827e-05
+  },
+  {
+    "name": "Isorhamnetin",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": -5.85930760430595e-05
+  },
+  {
+    "name": "Isorhamnetin",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 1.2124515120292e-06
+  },
+  {
+    "name": "Isorhamnetin",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": -2.98319634524466e-06
+  },
+  {
+    "name": "Isorhamnetin",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -5.56569383309703e-05
+  },
+  {
+    "name": "Isorhamnetin",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -7.15981743651436e-05
+  },
+  {
+    "name": "Methyl 1,2,2,6,6-pentamethyl-4-piperidyl sebacate",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -2.69905056603578e-05
+  },
+  {
+    "name": "Methyl 1,2,2,6,6-pentamethyl-4-piperidyl sebacate",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -4.42574135481173e-05
+  },
+  {
+    "name": "Methyl 1,2,2,6,6-pentamethyl-4-piperidyl sebacate",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -8.47940275001278e-05
+  },
+  {
+    "name": "Rhein",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 1.32551451076821e-06
+  },
+  {
+    "name": "3-Hydroxyacetaminophen",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -2.35039205912748e-05
+  },
+  {
+    "name": "3-Hydroxyacetaminophen",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 6.08094172865769e-06
+  },
+  {
+    "name": "Acetylcholine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -1.79667230322027e-06
+  },
+  {
+    "name": "Acetylcholine",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 1.7371045324233e-05
+  },
+  {
+    "name": "Acetylcholine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -6.24243174689124e-06
+  },
+  {
+    "name": "Acetylcholine",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 3.35270522523325e-06
+  },
+  {
+    "name": "Azithromycin",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.00032729031420582
+  },
+  {
+    "name": "Azithromycin",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 3.58398264335127e-06
+  },
+  {
+    "name": "Azithromycin",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000127091284569905
+  },
+  {
+    "name": "Cyclopropyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -1.93568582160184e-05
+  },
+  {
+    "name": "Cyclopropyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 2.35303982389881e-05
+  },
+  {
+    "name": "Cyclopropyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 1.08400043552149e-05
+  },
+  {
+    "name": "Ethyl-hexadecyl-dimethylammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -0.000255881612134411
+  },
+  {
+    "name": "Ethyl-hexadecyl-dimethylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -1.54845372203115e-05
+  },
+  {
+    "name": "Ethyl-hexadecyl-dimethylammonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000206389651248108
+  },
+  {
+    "name": "Tryptamine",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.000159648778432691
+  },
+  {
+    "name": "Tryptamine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 1.6140809268655e-06
+  },
+  {
+    "name": "Tryptamine",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -8.25052542853577e-05
+  },
+  {
+    "name": "4-Ethoxybenzyltriphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 1.86014407280369e-05
+  },
+  {
+    "name": "Ethylparaben",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000352909862057399
+  },
+  {
+    "name": "Ethylparaben",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 7.05498882265101e-05
+  },
+  {
+    "name": "O-desmethyl-naproxen",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -4.80775650067496e-06
+  },
+  {
+    "name": "O-desmethyl-naproxen",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 3.97350222208503e-06
+  },
+  {
+    "name": "1-Benzyl-3-methylimidazolium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -2.73161892127184e-05
+  },
+  {
+    "name": "1-Benzyl-3-methylimidazolium",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 2.07592792277865e-05
+  },
+  {
+    "name": "1-Benzyl-3-methylimidazolium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000108131591563747
+  },
+  {
+    "name": "Bephenium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -5.7202905490215e-06
+  },
+  {
+    "name": "Bephenium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 2.33447058748045e-05
+  },
+  {
+    "name": "Desamino-metamitron",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": -7.88696519759778e-07
+  },
+  {
+    "name": "Desamino-metamitron",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -8.27061107062528e-06
+  },
+  {
+    "name": "Desamino-metamitron",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": 9.93431374915026e-07
+  },
+  {
+    "name": "Econazole",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -7.27724344634253e-05
+  },
+  {
+    "name": "Econazole",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -8.5567850165992e-05
+  },
+  {
+    "name": "Fenofibrate",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000121271305015801
+  },
+  {
+    "name": "Fenofibrate",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 0.000956499949404033
+  },
+  {
+    "name": "Fenofibrate",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 0.0045529197167306
+  },
+  {
+    "name": "N-[4-(1H-benzimidazol-2-yl)phenyl]-N,N-dimethylamine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 0.000507721473225142
+  },
+  {
+    "name": "N-[4-(1H-benzimidazol-2-yl)phenyl]-N,N-dimethylamine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000137506341264129
+  },
+  {
+    "name": "2-Phenylbenzimidazole-5-sulfonic acid",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 6.84049137372309e-06
+  },
+  {
+    "name": "2-Phenylbenzimidazole-5-sulfonic acid",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -2.12248958032745e-06
+  },
+  {
+    "name": "2-Phenylbenzimidazole-5-sulfonic acid",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -4.55167697848399e-05
+  },
+  {
+    "name": "L-Isoleucine",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 1.24555703969861e-05
+  },
+  {
+    "name": "L-Isoleucine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 1.83727374923195e-05
+  },
+  {
+    "name": "N-Cyclohexyl-1,3-benzothiazol-2-amine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -4.97762978796883e-05
+  },
+  {
+    "name": "N-Cyclohexyl-1,3-benzothiazol-2-amine",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.002248964561871
+  },
+  {
+    "name": "N-Cyclohexyl-1,3-benzothiazol-2-amine",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 9.16807875562009e-05
+  },
+  {
+    "name": "1-Hexyl-3-methylimidazolium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -1.44593014576805e-06
+  },
+  {
+    "name": "1-Hexyl-3-methylimidazolium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -5.409200487552e-06
+  },
+  {
+    "name": "1-Hexyl-3-methylimidazolium",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -0.00061273972618662
+  },
+  {
+    "name": "Azacyclonol",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -3.53515459860444e-07
+  },
+  {
+    "name": "Bicalutamide",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": 4.5687844197644e-05
+  },
+  {
+    "name": "Bicalutamide",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": 0.000180691296803595
+  },
+  {
+    "name": "Metamitron",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": -8.86775421697318e-05
+  },
+  {
+    "name": "Metamitron",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": 1.08827357760434e-05
+  },
+  {
+    "name": "Metamitron",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -6.1157257208186e-05
+  },
+  {
+    "name": "1-Amino-3-phenoxy-2-propanol",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 6.61086553610507e-06
+  },
+  {
+    "name": "1-Amino-3-phenoxy-2-propanol",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -2.23406634628161e-05
+  },
+  {
+    "name": "Benzyldimethyl(tetradecyl-carbamoylmethyl)ammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -0.000451493831060279
+  },
+  {
+    "name": "Benzyldimethyl(tetradecyl-carbamoylmethyl)ammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000650323537597779
+  },
+  {
+    "name": "Tributylphosphine oxide",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -6.2455279215593e-05
+  },
+  {
+    "name": "Tributylphosphine oxide",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 1.13152364993067e-05
+  },
+  {
+    "name": "1,3-Dicyclohexylurea",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -1.80313298924295e-05
+  },
+  {
+    "name": "1,3-Dicyclohexylurea",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000489879764175282
+  },
+  {
+    "name": "3-Dimethylaminophenol",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 9.02066807539899e-08
+  },
+  {
+    "name": "3-Dimethylaminophenol",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 7.90310664705486e-06
+  },
+  {
+    "name": "3-Dimethylaminophenol",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -3.18711095201881e-06
+  },
+  {
+    "name": "Benzyldimethyl(hexadecylcarbamoylmethyl)ammonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -7.70417476573041e-05
+  },
+  {
+    "name": "Benzyldimethyl(hexadecylcarbamoylmethyl)ammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -9.55650070552043e-05
+  },
+  {
+    "name": "Dibenzyl phosphate",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": -7.89971967945887e-05
+  },
+  {
+    "name": "Dibenzyl phosphate",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -0.000246367165462922
+  },
+  {
+    "name": "Prometryn",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -9.96132933379908e-05
+  },
+  {
+    "name": "Prometryn",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.000153125469824951
+  },
+  {
+    "name": "Bisphenol A bis(2,3-dihydroxypropyl) ether",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000105489377141566
+  },
+  {
+    "name": "Bisphenol A bis(2,3-dihydroxypropyl) ether",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -5.07883120646086e-05
+  },
+  {
+    "name": "Bisphenol A bis(2,3-dihydroxypropyl) ether",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 4.6690698013806e-05
+  },
+  {
+    "name": "threo-Dihydrobupropion",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 2.79407070799513e-05
+  },
+  {
+    "name": "threo-Dihydrobupropion",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": 6.95754136829205e-06
+  },
+  {
+    "name": "Cetirizine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -1.63632345590984e-05
+  },
+  {
+    "name": "Cetirizine",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 4.81988638420811e-05
+  },
+  {
+    "name": "Cetirizine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 8.47326093098578e-06
+  },
+  {
+    "name": "Levocetirizine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -1.63632345590984e-05
+  },
+  {
+    "name": "Levocetirizine",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 4.81988638420811e-05
+  },
+  {
+    "name": "Levocetirizine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 8.47326093098578e-06
+  },
+  {
+    "name": "Valsartan",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": 6.36381680543002e-05
+  },
+  {
+    "name": "Valsartan",
+    "pol": "neg",
+    "station": "saar_gu_m",
+    "lm": 0.000124556196036326
+  },
+  {
+    "name": "Valsartan",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 1.09493275122969e-05
+  },
+  {
+    "name": "Ethyl-N-(4-aminophenyl)carbamate",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 7.14282577590139e-06
+  },
+  {
+    "name": "Ethyl-N-(4-aminophenyl)carbamate",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -6.01797284700196e-05
+  },
+  {
+    "name": "Atenolol acid",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -3.19070340863357e-06
+  },
+  {
+    "name": "Atenolol acid",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -2.12586931311239e-05
+  },
+  {
+    "name": "Hydroxychloroquine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 1.00859220437116e-05
+  },
+  {
+    "name": "Hydroxychloroquine",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -5.81762060521448e-05
+  },
+  {
+    "name": "Cyclamate",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -6.66866068329035e-05
+  },
+  {
+    "name": "Cyclamate",
+    "pol": "neg",
+    "station": "saar_gu_m",
+    "lm": -3.25584377540783e-06
+  },
+  {
+    "name": "Cyclamate",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": -6.29644282963482e-06
+  },
+  {
+    "name": "Valsartanic acid",
+    "pol": "neg",
+    "station": "rhein_bi_l",
+    "lm": -2.11719644960082e-05
+  },
+  {
+    "name": "(1,2-Diphenylpropyl)-trimethyl-ammonium",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -6.52088074511089e-06
+  },
+  {
+    "name": "1,5,5-Trimethylhydantoin",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -2.77965394334143e-07
+  },
+  {
+    "name": "2`-Deoxyadenosine",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -5.27773751312212e-06
+  },
+  {
+    "name": "4-Methyl-5-thiazoleethanol",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 5.07540295026492e-06
+  },
+  {
+    "name": "Acetanilide",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -1.35256608935779e-06
+  },
+  {
+    "name": "Benzyldimethyl(2-dodecyloxyethyl)-ammonium",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.000129688057486476
+  },
+  {
+    "name": "Benzyldimethyl(2-dodecyloxyethyl)-ammonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -8.33543201391058e-05
+  },
+  {
+    "name": "Boscalid",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 1.1329607103891e-05
+  },
+  {
+    "name": "Cyprodinil",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -1.94355142223337e-05
+  },
+  {
+    "name": "Erlotinib",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 3.1125884244542e-05
+  },
+  {
+    "name": "Erlotinib",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 3.5154267030263e-05
+  },
+  {
+    "name": "Norfloxacin",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -1.70117427704925e-06
+  },
+  {
+    "name": "Pregabalin",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 5.48622374612183e-06
+  },
+  {
+    "name": "Sotalol",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 1.84317203524044e-05
+  },
+  {
+    "name": "Sotalol",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -2.42048060856116e-05
+  },
+  {
+    "name": "(2-Carboxyethyl)triphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 2.00099991960279e-05
+  },
+  {
+    "name": "(2-Carboxyethyl)triphenylphosphonium",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -8.97474906565679e-06
+  },
+  {
+    "name": "Ethyldiphenlyphosphine oxide",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 1.12107807203194e-05
+  },
+  {
+    "name": "Prallethrin",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": -4.32129508748128e-05
+  },
+  {
+    "name": "Prallethrin",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -1.38603696506534e-05
+  },
+  {
+    "name": "1,2,3-trimethoxybenzene",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 1.03401256037014e-05
+  },
+  {
+    "name": "2,4-Dinitrophenol",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": -6.04227532111938e-06
+  },
+  {
+    "name": "2,6-Dimethylquinoline",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.000223606982093724
+  },
+  {
+    "name": "2-(2-Methoxyphenyl)-1H-Benzimidazole",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -7.97005552336034e-05
+  },
+  {
+    "name": "2-Methoxyethyl-N-(3-aminophenyl)carbamate",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 9.04093796044273e-06
+  },
+  {
+    "name": "2-Piperidin-3-yl-benzothiazole",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 0.000155728686044068
+  },
+  {
+    "name": "3-Acetamidophenol",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -1.1000562976379e-05
+  },
+  {
+    "name": "4-Acetamidoantipyrine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -2.91162169927747e-05
+  },
+  {
+    "name": "6alpha-Methylprednisolone",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -0.000180860776944967
+  },
+  {
+    "name": "Benzylphosphonic acid",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -1.26656413453263e-05
+  },
+  {
+    "name": "Clindamycin",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -9.15690641747897e-06
+  },
+  {
+    "name": "Clindamycin",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -1.7744563044314e-05
+  },
+  {
+    "name": "Dinoterb",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 1.33912574059429e-06
+  },
+  {
+    "name": "Diuron",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -3.95258222280228e-05
+  },
+  {
+    "name": "Gabapentin related compound E",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 7.75156301364145e-06
+  },
+  {
+    "name": "Godecke",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": -7.69348489717192e-06
+  },
+  {
+    "name": "Lidocaine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 3.19063866689802e-05
+  },
+  {
+    "name": "Oxazepam",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 2.27004549651775e-05
+  },
+  {
+    "name": "Saccharin",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": 8.90195774792254e-06
+  },
+  {
+    "name": "Salicylic acid",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": -0.000128307744833763
+  },
+  {
+    "name": "Sertaconazole",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 6.70000321808668e-07
+  },
+  {
+    "name": "1,7-Dimethylxanthine",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -3.84080662922693e-05
+  },
+  {
+    "name": "1-(o-Tolyl)-biguanide",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -1.0299821207218e-06
+  },
+  {
+    "name": "1-Butylpyridinium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000166572194298577
+  },
+  {
+    "name": "2-Benzyl-4-chlorophenol",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -0.000112024660737474
+  },
+  {
+    "name": "2-Mercaptobenzothiazol",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -2.00180179732415e-05
+  },
+  {
+    "name": "Acridine",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -0.000379604647324422
+  },
+  {
+    "name": "Eicosyltrimethylammonium",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.00201706939808753
+  },
+  {
+    "name": "Theophylline",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": -3.84080662922693e-05
+  },
+  {
+    "name": "Thymidine",
+    "pol": "neg",
+    "station": "elbe_bl_m",
+    "lm": -0.000307117384019664
+  },
+  {
+    "name": "Xanthine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 2.05048517428437e-05
+  },
+  {
+    "name": "1-Methylguanine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 2.50619846513684e-05
+  },
+  {
+    "name": "9-Methylguanine",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": 2.50619846513684e-05
+  },
+  {
+    "name": "Chlorothiazide",
+    "pol": "neg",
+    "station": "elbe_ba_m",
+    "lm": -3.77333564702886e-05
+  },
+  {
+    "name": "Terbuthylazine",
+    "pol": "pos",
+    "station": "rhein_bi_l",
+    "lm": 2.25013110199603e-05
+  },
+  {
+    "name": "Terbuthylazine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 9.64086889340932e-05
+  },
+  {
+    "name": "Allopurinol riboside",
+    "pol": "neg",
+    "station": "rhein_we_r",
+    "lm": 4.37240046104363e-07
+  },
+  {
+    "name": "Clindamycin sulfoxide",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -2.60037041525822e-05
+  },
+  {
+    "name": "Clindamycin sulfoxide",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -3.68876627598116e-05
+  },
+  {
+    "name": "Methacetin",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -6.10674386730528e-07
+  },
+  {
+    "name": "Mirtazapine",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 9.50432917102952e-05
+  },
+  {
+    "name": "Resorcinol bis(diphenyl phosphate)",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -3.42646688666086e-05
+  },
+  {
+    "name": "Oxipurinol",
+    "pol": "neg",
+    "station": "rhein_ko_l",
+    "lm": 7.23917249850622e-05
+  },
+  {
+    "name": "Thioridazine",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -6.50773180829223e-05
+  },
+  {
+    "name": "Urapidil",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": -7.73409452728426e-05
+  },
+  {
+    "name": "Flecainide meta-O-dealkylated",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 1.85961365679997e-05
+  },
+  {
+    "name": "Phloretin",
+    "pol": "neg",
+    "station": "saar_re_m",
+    "lm": -2.55126234626918e-05
+  },
+  {
+    "name": "(2-Hydroxyethyl)triphenylphosphonium",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 9.14390125880681e-05
+  },
+  {
+    "name": "2-Benzylimidazole",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": -8.98962158795013e-05
+  },
+  {
+    "name": "N-desmethyl-venlafaxine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -8.69044013634894e-06
+  },
+  {
+    "name": "Resveratrol",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": -6.02516145541495e-06
+  },
+  {
+    "name": "Testosterone",
+    "pol": "pos",
+    "station": "rhein_if_m",
+    "lm": 1.14594573736943e-05
+  },
+  {
+    "name": "Fludarabine",
+    "pol": "neg",
+    "station": "rhein_if_m",
+    "lm": 9.17754078753749e-05
+  },
+  {
+    "name": "Xanthosine",
+    "pol": "pos",
+    "station": "elbe_bl_m",
+    "lm": -1.05331974664766e-05
+  },
+  {
+    "name": "Benzyl-(1-methoxycarbonyl-undecyl)-dimethyl-ammonium",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -0.000186092566708522
+  },
+  {
+    "name": "Dihexyl phthalate",
+    "pol": "pos",
+    "station": "rhein_ko_l",
+    "lm": -0.000468044639777651
+  },
+  {
+    "name": "Flubendazole",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -6.55511405413673e-05
+  },
+  {
+    "name": "Haloperidol",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": -7.52037840880503e-05
+  },
+  {
+    "name": "Meptazinol",
+    "pol": "pos",
+    "station": "saar_gu_m",
+    "lm": 0.000290223111922999
+  },
+  {
+    "name": "1,3-Bis(2-methylphenyl)urea",
+    "pol": "pos",
+    "station": "elbe_ba_m",
+    "lm": 0.00100273721219197
+  },
+  {
+    "name": "4-Acetamidobenzoic acid",
+    "pol": "pos",
+    "station": "rhein_we_r",
+    "lm": 1.99452508787276e-06
+  },
+  {
+    "name": "4-Phenoxyphenol",
+    "pol": "pos",
+    "station": "saar_re_m",
+    "lm": 1.68231617606861e-06
+  }
+]

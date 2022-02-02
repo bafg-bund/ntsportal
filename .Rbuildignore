@@ -1,0 +1,8 @@
+^Meta$
+^doc$
+^README\.Rmd$
+^\.gitignore$
+^tests$
+^.*\.Rproj$
+^\.Rproj\.user$
+^elastic$

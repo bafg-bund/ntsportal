@@ -1,0 +1,22 @@
+default:
+  elastic_connect:
+    user: 'kevin.jewell'
+    pwd: 'g23456'
+  mztol_rough_mda: 10
+  mztol_mda: 7
+  mztol_clustering_mda: 5
+  rttol_rough_min: 1.5
+  rttol_min: 0.5
+  rttol_clustering_min: 0.3
+  ms2_ndp_min_score: 50
+  ms2_ndp_min_score_clustering: 200
+  ms2_ndp_m: 1
+  ms2_ndp_n: 1
+  mztol_ms2_ndp_mda: 30
+  mztol_ms2_ndp_clustering_mda: 30
+  mztol_gap_fill_mda: 5
+  rttol_gap_fill_min: 0.3
+  min_number_gap_fill: 2
+  cores: 6
+  index_pattern: g2_nts*
+

@@ -1,0 +1,23 @@
+Package: ntsportal
+Type: Package
+Title: Functions to access the NTS-Portal database. Federal Institute of Hydrology, Koblenz, Germany
+Version: 0.1.0
+Date: 2021-03-25
+Authors@R: c(
+             person(c("Kevin", "S."), "Jewell", email = "Jewell@bafg.de", role = c("aut", "cre"),
+             comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany"),
+             person("Arne", "Wick", email = "Wick@bafg.de", role = "aut",
+             comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany"),
+             person(c("Thomas", "A."), "Ternes", email = "Ternes@bafg.de", role = "aut",
+             comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany")
+             )
+Description: This is a collection of functions to be used for accessing the NTS-Portal database in R
+License: GNU GPL-3.0 (comes with ABSOLUTELY NO WARRANTY)
+LazyData: TRUE
+Imports:
+    elastic
+RoxygenNote: 7.1.2
+Suggests:
+Encoding: UTF-8
+LinkingTo: 
+VignetteBuilder: knitr

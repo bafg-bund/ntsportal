@@ -1,0 +1,76 @@
+# Beispiel Settings Datei für dbas Auswertung
+# Stand: 2021-03-26
+
+
+polaritaet: "pos"
+#probenahmestelle: "rhein_ko_l"                         # nicht zwingend 
+
+matrix: "Wasser"
+probenahmedauer: 0                                     # in Tage
+# verbindungen:                                        # Um alle Substanzen zu suchen
+#   - "Valsartanic acid"                               # alles löschen (auch "verbindungen:")
+#   - "Diclofenac"
+#   - "Carbamazepine"
+spektrendatenbank: "~/sqlite_local/MS2_db_v7.db"
+is_table: "~/projects/rhein_koblenz/IS_table_pos.csv"
+is_auswahl: "Bezafibrat-d4"
+
+# Ermittlung Probenahmezeit
+# Datum in Dateiname ####
+# datum_format: "ymd"                                  # "ymd", "ym", "yy" (nur "y" nicht erlaubt)
+# datum_regex:
+#   ymd: "([20]*\\d{6})"
+#   ym: "(20\\d{4})"
+#   yy: "_([20]*\\d{2})"
+# Datum in einer Tabelle ####
+zeiten_tabelle: "saale_pos_table.csv"         # Zeiten als Tabelle csv, (Spaltenüberschriften: filename, time) 
+                                                    # Format "time": "2020-10-05 12:56" oder "2020-10-05" NICHT "2020-10"
+                                                    # Format "filename": Dateiname mit Endung (bsp. "beste_messung_ever.mzXML")
+# Ermittlung Probenahmeort ####
+# Alle Proben gleichen Ort ####
+# koordinaten:
+#   breitengrad: 50.349601
+#   laengengrad: 7.599691
+# Probenahmeort in Tabelle
+koord_tabelle: "saale_pos_table.csv"              # Koordinaten in einer csv (filename, lon, lat)
+                                                        # Format "lat", "lon": floats
+                                                        # Format "filename": Dateiname mit Endung (bsp. "beste_messung_ever.mzXML")
+
+
+#fluss_name: "Rhein"                                   # optional
+fluss_name_tabelle: "saale_pos_table.csv"           # optional Fluss in einer Tabelle (filename, river) 
+#fluss_gkz: 2                                          # optional, Gewässerkennzahl
+fluss_gkz_tabelle: "saale_pos_table.csv"           # optional, gkz in einer Tabelle (filename, gkz)
+#fluss_km: 230                                         # optional, 
+fluss_km_tabelle: "saale_pos_table.csv"            # fluss km in einer Tabelle (filename, km)
+
+
+blank_int_factor: 5
+# height_threshold: 1
+area_threshold: 1
+use_int_threshold: "area"
+threshold: 400
+rtTolReinteg: 0.3
+ndp_m: 2                                              # Settings für Spektren vergleich
+ndp_n: 1                                              # 
+cores: 1                                              # Wie viele Kerne für Bearbeitung der Proben
+cores_report: 1                                       # Anzahl Kerne für jeden Report Datei
+instr:                                                # Welche Daten der Spektrendatenbank sollen angewendet werden?
+  - "LC-ESI-QTOF TripleTOF 5600 SCIEX"
+  - "LC-ESI-QTOF TripleTOF 6600 SCIEX"
+hplc_methode: "10.1016/j.chroma.2015.11.014"
+blank_regex: "MQ"
+minimum_detections: 3                                 # Verbindung muss mehrmals
+fp:                                                   # Falsch positiven
+  - "Iopromide-d3"
+  - "Bezafibrate-d4"
+  - "Olmesartan-d6"
+  - "L-Isoleucine"
+  - "Lomefloxacin"
+  - "4-Oxo-4-[3-(trifluoromethyl)-5,6-dihydro-[1,2,4]triazolo[4,3-a]pyrazin-7(8H9-yl]-1-(2,4,5-trifluorophenyl)butan-2-one"
+  - "Memantine"
+replicate_regex: "(pos)[123]\\."                     # part in ( shows context, part in [ indicates replicates
+datenquelle: "BfG"
+
+es_index_name: "g2_dbas_v4_bfg"
+es_config: "~/projects/dbas_automated/config.yml"
