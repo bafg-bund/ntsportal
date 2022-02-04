@@ -262,7 +262,7 @@ es_add_ufid_to_ids <- function(escon, index, ufid_to_add, ids_for_update) {
 es_add_ufid2_to_ids <- function(escon, index, ufid2_to_add, ids_for_update) {
   if (length(ids_for_update) > 65536)
     stop("exceeded maximum allowed ids")
-  
+
   id_search_string <- paste(shQuote(ids_for_update, type = "cmd"), collapse = ", ")
   res_update <- elastic::docs_update_by_query(escon, index, refresh = "true", body = sprintf('
       {
@@ -278,7 +278,7 @@ es_add_ufid2_to_ids <- function(escon, index, ufid2_to_add, ids_for_update) {
           }
         }
       }
-      ', id_search_string, ufid_to_add))
+      ', id_search_string, ufid2_to_add))
   total_updated <- res_update$updated
   if (length(ids_for_update) == total_updated)
     message("successful esdb update") else stop("update esdb not complete")

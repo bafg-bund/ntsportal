@@ -166,9 +166,10 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
   # write all ufids to Ids
 
 }
+  u <- 1
 
 for (u in unique(alles$ufid2)) {
   if (u == 0)
     next
-
+  es_add_ufid2_to_ids(escon, index, ufid2_to_add = u , alles[alles$ufid2 == u, "id" , drop = T])
 }
