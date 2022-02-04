@@ -1,6 +1,20 @@
 
 
 
+#' Alignment by m/z and RT
+#'
+#'
+#' blah blah blah
+#'
+#' @param escon 
+#' @param index 
+#' @param rtTol 
+#' @param mzTolmDa 
+#' @param minPoints 
+#'
+#' @return nothing yet
+#' @export
+#'
 ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5, minPoints = 5) {
 
 
@@ -165,11 +179,12 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
 
   # write all ufids to Ids
 
-}
+
   u <- 1
 
-for (u in unique(alles$ufid2)) {
-  if (u == 0)
-    next
-  es_add_ufid2_to_ids(escon, index, ufid2_to_add = u , alles[alles$ufid2 == u, "id" , drop = T])
+  for (u in unique(alles$ufid2)) {
+    if (u == 0)
+      next
+    es_add_ufid2_to_ids(escon, index, ufid2_to_add = u , alles[alles$ufid2 == u, "id" , drop = T])
+  }
 }
