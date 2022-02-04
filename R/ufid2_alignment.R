@@ -2,11 +2,7 @@
 
 
 ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5, minPoints = 5) {
-  
-  # index <- "g2_nts*"
-  # rtTol <- 0.3
-  # mzTolmDa <- 5
-  # minPoints <- 5
+
 
 
   message("compiling cpp function")
@@ -72,6 +68,8 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
   alles <- data.frame(id= character(), ufid2 = numeric())
 
   repeat {
+    message("We are at mz ", mzPosition, " RT ", rtPosition)
+
     res <- elastic::Search(escon, index, body = sprintf('{
       "search_after": [%.4f, %.2f],
       "sort": [
@@ -152,6 +150,11 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
 
     numUfids <- max(newcluster)
 
+
+
+    # write the new ufids to a vector outside of the loop
+
+
     # set new mz and rt position
     # get last hit
     mzPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[1]] - 2* mzTolmDa / 1000
@@ -159,12 +162,13 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
 
   }
 
-  
 
   # write all ufids to Ids
 
 }
 
-# get last hit
-# mzPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[1]]
-# rtPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[2]]
+for (u in unique(alles$ufid2)) {
+  if (u == 0)
+    next
+
+}
