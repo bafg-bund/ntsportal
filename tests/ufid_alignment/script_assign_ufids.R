@@ -2,7 +2,7 @@
 
 
 library(ntsportal)
-index <- "g2_nts_bfg"
+index <- "g2_nts_expn"
 path_ufid_db <- "~/projects/ufid/tests/ufid1.sqlite"
 config_path <- "~/projects/config.yml"
 ec <- config::get("elastic_connect", file = config_path)
