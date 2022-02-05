@@ -4,7 +4,7 @@
 #' Alignment by m/z and RT
 #'
 #'
-#' blah blah blah
+#' Function will assign ufid2 to features
 #'
 #' @param escon 
 #' @param index 
@@ -119,8 +119,10 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
       }', mzPosition)
     )
     numReturned <- length(res$hits$hits)
-    sameSort <- sapply(res$hits$hits, function(x) x[["_source"]]$mz == x[["sort"]][[1]])
-    if (numReturned <= minPoints || all(sameSort)) {
+    sameSort <- max(sapply(res$hits$hits, function(x) x[["sort"]][[1]]))
+    # last hit gives new mz position
+    newMzPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[1]] - 2 * mzTolmDa / 1000
+    if (numReturned <= minPoints || mzPosition == newMzPosition) {
       message("All features were analyzed, no further clusters found")
       message("completed clustering and found ", numUfids, " ufid2s")
       break
@@ -161,12 +163,9 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
     alles <- rbind(alles, ergebnis)
 
     numUfids <- max(newcluster)
-
-    # write the new ufids to a vector outside of the loop
-    # set new mz and rt position
-    # get last hit
-    mzPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[1]] - 2 * mzTolmDa / 1000
-
+    
+    # set new mz position
+    mzPosition <- newMzPosition
   }
   
   # remove all 0 ufids
@@ -226,7 +225,7 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
 
   # write all ufids to Ids
   #u <- 1
-  message("Writing", numUfids, "ufid2 to esdb at ", date())
+  message("Writing ", numUfids, " ufid2 to esdb at ", date())
 
   for (u in unique(alles$ufid2)) {
     message("Updating ", u, " at ", date())

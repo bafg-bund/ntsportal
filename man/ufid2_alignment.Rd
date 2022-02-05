@@ -27,5 +27,5 @@ ufid2_alignment(
 TRUE
 }
 \description{
-blah blah blah
+Function will assign ufid2 to features
 }
