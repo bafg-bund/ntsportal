@@ -13,7 +13,7 @@
 es_test_fpfn <- function(escon, udb, index) {
   #index <- "g2_nts*"
   # get total number of features
-
+  message("Starting tests at ", date())
   totFeat <- elastic::count(escon, index = index)
   totFeatMs2 <- elastic::Search(escon, index = index,size = 0, body =
   '
@@ -50,6 +50,21 @@ es_test_fpfn <- function(escon, udb, index) {
   )
   totWithUfid <- totWithUfid$hits$total$value
   percentWithUfid <- 100 * totWithUfid / totFeat
+  
+  totWithUfid2 <- elastic::Search(
+    escon, index, size = 0, body =
+      '
+      {
+        "query": {
+          "exists": {
+            "field": "ufid2"
+          }
+        }
+      }
+    '
+  )
+  totWithUfid2 <- totWithUfid2$hits$total$value
+  percentWithUfid2 <- 100 * totWithUfid2 / totFeat
 
   totMs2withUfid <- elastic::Search(
     escon, index, size = 0, body =
@@ -318,17 +333,45 @@ es_test_fpfn <- function(escon, udb, index) {
   problemNames <- c(type2FpPos$problemNames, type2FpNeg$problemNames)
   totFPFeatures2 <- sum(type2FpPos$totFPFeatures2, type2FpNeg$totFPFeatures2)
 
+  # multiple ufids in one sample ####
+  
   allUfids <- tbl(udb, "feature") %>% select(ufid) %>% collect() %>% .$ufid
-
+  
+  # get all ufid2s
+  ufid2res <- elastic::Search(
+    escon, index, body = 
+      '
+    {
+  "query": {
+    "exists": {
+      "field": "ufid2"
+    }
+  },
+  "size": 0,
+  "aggs": {
+    "ufid2s": {
+      "terms": {
+        "field": "ufid2",
+        "size": 100000
+      }
+    }
+  }
+}
+    '
+  )
+  if (ufid2res$aggregations$ufid2s$sum_other_doc_count != 0)
+    warning("not all ufid2s were counted when getting multiple assignments")
+  allUfid2s <- vapply(ufid2res$aggregations$ufid2s$buckets, "[[", numeric(1), i = "key")
+  
   # for each ufid, get number of docs which are result of multiple assignment in one sample
-  get_docs_multi_assignment <- function(ufid) {
+  get_docs_multi_assignment <- function(ufid, ufidType) {
     res <- elastic::Search(
     escon, index, body = sprintf(
     '
     {
       "query": {
         "term": {
-          "ufid": {
+          "%s": {
             "value": %i
           }
         }
@@ -343,20 +386,37 @@ es_test_fpfn <- function(escon, udb, index) {
         }
       }
     }
-    ', ufid))
+    ', ufidType, ufid))
     stopifnot(res$aggregations$files$sum_other_doc_count == 0)
 
     b <- res$aggregations$files$buckets
     # there should be one feature for each file, all others are fp
     sum(vapply(b, function(x) x$doc_count, numeric(1)) - 1)
   }
-  numberMultiAssign <- sum(vapply(allUfids, get_docs_multi_assignment, numeric(1)))
-
-
+  message("Computing duplicated ufid assignments to one sample at ", date())
+  numberMultiAssignUfid <- sum(
+    vapply(
+      allUfids, 
+      get_docs_multi_assignment, 
+      numeric(1), 
+      ufidType = "ufid"
+    )
+  )
+  message("Computing duplicated ufid2 assignments to one sample at ", date())
+  numberMultiAssignUfid2 <- sum(
+    vapply(
+      allUfid2s, 
+      get_docs_multi_assignment, 
+      numeric(1), 
+      ufidType = "ufid2"
+    )
+  )
+  
+  
   # ucid accuracy ####
 
   # compute max sd in rt across all ucids
-
+  message("Computing ucid accuracy at ", date())
   ucid_rts <- elastic::Search(
     escon, index, body =
     '
@@ -388,18 +448,23 @@ es_test_fpfn <- function(escon, udb, index) {
   numUcids <- length(ucid_rts)
   mxRtDevUcid <- max(vapply(ucid_rts, function(x) x$rt$std_deviation, numeric(1)))
 
-
+  message("Completed tests at ", date())
   list(
     total_features = totFeat,
     total_features_with_ufid = totWithUfid,
+    total_features_with_ufid2 = totWithUfid2,
     percent_features_with_ufid = round(percentWithUfid),
-    percent_fn = 100 - round(percentWithUfid),
+    percent_features_with_ufid2 = round(percentWithUfid2),
+    percent_fn_ufid = 100 - round(percentWithUfid),
+    percent_fn_ufid2 = 100 - round(percentWithUfid2),
     total_features_with_ms2 = totFeatMs2,
     percent_with_ms2 = round(ms2percent),
     percent_ms2_features_with_ufid = round(percentMs2withUfid),
-    percent_ms2_fn = 100 - round(percentMs2withUfid),
-    total_features_multiple_assignment = numberMultiAssign,
-    percent_ufids_multiple_assignment = round(100 * numberMultiAssign / totWithUfid),
+    percent_ms2_fn_ufid = 100 - round(percentMs2withUfid),
+    total_features_multiple_assignment_ufid = numberMultiAssignUfid,
+    total_features_multiple_assignment_ufid2 = numberMultiAssignUfid2,
+    percent_ufids_multiple_assignment = round(100 * numberMultiAssignUfid / totWithUfid),
+    percent_ufid2s_multiple_assignment = round(100 * numberMultiAssignUfid2 / totWithUfid2),
     total_features_ufid_annotated = totUfidAnnotated,
     percent_fp_multiple_names_by_ufid = round(100 * totFPFeatures1 / totUfidAnnotated),
     percent_fp_multiple_ufids_by_name = round(100 * totFPFeatures2 / totUfidAnnotated),
@@ -409,7 +474,7 @@ es_test_fpfn <- function(escon, udb, index) {
     max_rt_stddev_ucid = round(mxRtDevUcid, 2),
     names_multiple_ufids = problemNames,
     ufids_multiple_names = problemUfidsNames
-    )
+  )
 }
 
 
