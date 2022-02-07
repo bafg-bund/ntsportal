@@ -11,7 +11,12 @@
 #' @return list of metrics used to assess quality of ufid and ucid assignments
 #' @export
 es_test_fpfn <- function(escon, udb, index) {
-  #index <- "g2_nts*"
+  
+  # index <- "g2_nts*"
+  # config_path <- "~/config.yml"
+  # ec <- config::get("elastic_connect", file = config_path)
+  # escon <- elastic::connect(host = '10.140.73.204', user=ec$user, pwd=ec$pwd)
+   
   # get total number of features
   message("Starting tests at ", date())
   totFeat <- elastic::count(escon, index = index)
@@ -35,37 +40,30 @@ es_test_fpfn <- function(escon, udb, index) {
   ms2percent <- 100 * totFeatMs2 / totFeat
 
   # number of features with ufid
-
-  totWithUfid <- elastic::Search(
-    escon, index, size = 0, body =
-    '
-      {
-        "query": {
-          "exists": {
-            "field": "ufid"
-          }
-        }
-      }
-    '
-  )
-  totWithUfid <- totWithUfid$hits$total$value
-  percentWithUfid <- 100 * totWithUfid / totFeat
   
-  totWithUfid2 <- elastic::Search(
-    escon, index, size = 0, body =
-      '
+  tot_with_ufid <- function(ufidType, perc) {
+    totWithUfid <- elastic::Search(
+      escon, index, size = 0, body = sprintf(
+        '
       {
         "query": {
           "exists": {
-            "field": "ufid2"
+            "field": "%s"
           }
         }
       }
-    '
-  )
-  totWithUfid2 <- totWithUfid2$hits$total$value
-  percentWithUfid2 <- 100 * totWithUfid2 / totFeat
+    ', ufidType)
+    )
+    totl <- totWithUfid$hits$total$value
+    if (perc)
+      100 * totl / totFeat else totl
+  }
 
+  percentWithUfid <- tot_with_ufid("ufid", TRUE)
+  percentWithUfid2 <- tot_with_ufid("ufid2", TRUE)
+  totWithUfid <- tot_with_ufid("ufid", FALSE)
+  totWithUfid2 <- tot_with_ufid("ufid2", FALSE)
+  
   totMs2withUfid <- elastic::Search(
     escon, index, size = 0, body =
       '
@@ -100,9 +98,10 @@ es_test_fpfn <- function(escon, udb, index) {
   # Calculation of fP ####
   # FP Flavor 1 ####
   # can only be done on annotated features with ufid
-  totUfidAnnotated <- elastic::Search(
-    escon, index, size = 0, body =
-      '
+  get_tot_ufid_annotated <- function(ufidType) {
+    elastic::Search(
+      escon, index, size = 0, body = sprintf(
+        '
       {
         "query": {
           "bool": {
@@ -114,75 +113,83 @@ es_test_fpfn <- function(escon, udb, index) {
               },
               {
                 "exists": {
-                  "field": "ufid"
+                  "field": "%s"
                 }
               }
             ]
           }
         }
       }
-    '
-  )$hits$total$value
-
+    ', ufidType)
+    )$hits$total$value
+  }
+  totUfidAnnotated <- get_tot_ufid_annotated("ufid")
+  totUfid2Annotated <- get_tot_ufid_annotated("ufid2")
 
   # which of these ufids have more than one name, assume name with highest frequency is
   # correct and all other features are fp
-  nameCardinality <- elastic::Search(escon, index, body = '
-                                     {
-  "query": {
-    "bool": {
-      "filter": [
-        {
-          "exists": {
-            "field": "name"
+  problem_ufids <- function(ufidType) {
+    nameCardinality <- elastic::Search(escon, index, body = sprintf('
+  {
+    "query": {
+      "bool": {
+        "filter": [
+          {
+            "exists": {
+              "field": "name"
+            }
+          },
+          {
+            "exists": {
+              "field": "%s"
+            }
           }
+        ]
+      }
+    },
+    "size": 0,
+    "aggs": {
+      "ufids": {
+        "terms": {
+          "field": "%s",
+          "size": 10000
         },
-        {
-          "exists": {
-            "field": "ufid"
-          }
-        }
-      ]
-    }
-  },
-  "size": 0,
-  "aggs": {
-    "ufids": {
-      "terms": {
-        "field": "ufid",
-        "size": 10000
-      },
-      "aggs": {
-        "names": {
-          "cardinality": {
-            "field": "name"
-          }
-        },
-        "select_buckets": {
-          "bucket_selector": {
-            "buckets_path": {
-              "nameCardinality": "names"
-            },
-            "script": "params.nameCardinality > 1"
+        "aggs": {
+          "names": {
+            "cardinality": {
+              "field": "name"
+            }
+          },
+          "select_buckets": {
+            "bucket_selector": {
+              "buckets_path": {
+                "nameCardinality": "names"
+              },
+              "script": "params.nameCardinality > 1"
+            }
           }
         }
       }
     }
   }
-}
-                                     ')$aggregations$ufids$buckets
-
-  # which ufids?
-  problemUfids <- sapply(nameCardinality, function(x) x$key)
+  ', ufidType, ufidType))$aggregations$ufids$buckets
+    
+    # which ufids?
+    sapply(nameCardinality, function(x) x$key)
+  }
+  
+  problemUfids <- problem_ufids("ufid")
+  problemUfid2s <- problem_ufids("ufid2")
 
   # for each of these ufids, determine the number of features not belonging to
   # the name with the highest frequency,  everything else is fp
-  totFPFeatures1 <- sum(vapply(problemUfids, function(uf) {
-    featuresPerName <- elastic::Search(escon, index, body = sprintf('
+  tot_fp_features_1 <- function(probUfids, ufidType) {
+    sum(vapply(probUfids, function(uf) {
+      featuresPerName <- elastic::Search(escon, index, body = sprintf('
                     {
       "query": {
         "term": {
-          "ufid": {
+          "%s": {
             "value": %i
           }
         }
@@ -197,19 +204,23 @@ es_test_fpfn <- function(escon, udb, index) {
         }
       }
     }
-  ', uf))$aggregations$namesCount$buckets
-
-    featuresPerName <- sapply(featuresPerName, function(x) x$doc_count)
-    # results are already sorted by size (first group is the largest)
-    sum(featuresPerName[-1])
-  }, numeric(1)))
-
-  problemUfidsNames <- lapply(problemUfids, function(uf) {
-    featuresPerName <- elastic::Search(escon, index, body = sprintf('
+  ', ufidType, uf))$aggregations$namesCount$buckets
+      
+      featuresPerName <- sapply(featuresPerName, function(x) x$doc_count)
+      # results are already sorted by size (first group is the largest)
+      sum(featuresPerName[-1])
+    }, numeric(1)))
+  }
+  totFPFeatures1ufid <- tot_fp_features_1(problemUfids, "ufid")
+  totFPFeatures1ufid2 <- tot_fp_features_1(problemUfid2s, "ufid2")
+  
+  problem_ufids_names <- function(probUfids, ufidType) {
+    probUfidsNames <- lapply(probUfids, function(uf) {
+      featuresPerName <- elastic::Search(escon, index, body = sprintf('
                     {
       "query": {
         "term": {
-          "ufid": {
+          "%s": {
             "value": %i
           }
         }
@@ -224,65 +235,69 @@ es_test_fpfn <- function(escon, udb, index) {
         }
       }
     }
-  ', uf))$aggregations$namesCount$buckets
-
-    sapply(featuresPerName, function(x) x$key)
-  })
-  names(problemUfidsNames) <- paste("ufid", problemUfids, sep = "_")
+    ', ufidType, uf))$aggregations$namesCount$buckets
+      
+      sapply(featuresPerName, function(x) x$key)
+    })
+    names(probUfidsNames) <- paste(ufidType, probUfids, sep = "_")
+    probUfidsNames
+  }
+  problemUfidsNames <- problem_ufids_names(problemUfids, "ufid")
+  problemUfid2sNames <- problem_ufids_names(problemUfid2s, "ufid2")
 
   # FP flavor 2 ####
   # second type of FPs are features belonging to one name but with multiple ufids
   # must be done for each polarity separately, since each polarity has a different ufid
-  get_ufid_cardinality <- function(polarity) {
+  get_ufid_cardinality <- function(polarity, ufidType) {
     ufidCardinality <- elastic::Search(escon, index, body = sprintf('
-                                     {
-  "query": {
-    "bool": {
-      "filter": [
-        {
-          "exists": {
-            "field": "name"
-          }
-        },
-        {
-          "exists": {
-            "field": "ufid"
-          }
-        },
-        {
-          "term": {
-            "pol": "%s"
-          }
-        }
-      ]
-    }
-  },
-  "size": 0,
-  "aggs": {
-    "names": {
-      "terms": {
-        "field": "name",
-        "size": 10000
-      },
-      "aggs": {
-        "ufids": {
-          "cardinality": {
-            "field": "ufid"
-          }
-        },
-        "select_buckets": {
-          "bucket_selector": {
-            "buckets_path": {
-              "ufidCardinality": "ufids"
+    {
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "exists": {
+                "field": "name"
+              }
             },
-            "script": "params.ufidCardinality > 1"
+            {
+              "exists": {
+                "field": "%s"
+              }
+            },
+            {
+              "term": {
+                "pol": "%s"
+              }
+            }
+          ]
+        }
+      },
+      "size": 0,
+      "aggs": {
+        "names": {
+          "terms": {
+            "field": "name",
+            "size": 10000
+          },
+          "aggs": {
+            "ufids": {
+              "cardinality": {
+                "field": "%s"
+              }
+            },
+            "select_buckets": {
+              "bucket_selector": {
+                "buckets_path": {
+                  "ufidCardinality": "ufids"
+                },
+                "script": "params.ufidCardinality > 1"
+              }
+            }
           }
         }
       }
     }
-  }
-}
-                                     ', polarity))$aggregations$names$buckets
+    ', ufidType, polarity, ufidType))$aggregations$names$buckets
     # which names?
     problemNames <- sapply(ufidCardinality, function(x) x$key)
     # for each of these names, determine the number of features not belonging to
@@ -312,13 +327,13 @@ es_test_fpfn <- function(escon, udb, index) {
       "aggs": {
         "ufidsCount": {
           "terms": {
-            "field": "ufid",
+            "field": "%s",
             "size": 100
           }
         }
       }
     }
-  ', nm, polarity))$aggregations$ufidsCount$buckets
+  ', nm, polarity, ufidType))$aggregations$ufidsCount$buckets
 
       featuresPerUfid <- sapply(featuresPerUfid, function(x) x$doc_count)
       # results are already sorted by size (first group is the largest)
@@ -327,11 +342,15 @@ es_test_fpfn <- function(escon, udb, index) {
 
     list(problemNames = problemNames, totFPFeatures2 = totFPFeatures2)
   }
-  type2FpPos <- get_ufid_cardinality("pos")
-  type2FpNeg <- get_ufid_cardinality("neg")
+  type2FpPos <- get_ufid_cardinality("pos", "ufid")
+  type2FpNeg <- get_ufid_cardinality("neg", "ufid")
+  type2FpPosUfid2 <- get_ufid_cardinality("pos", "ufid2")
+  type2FpNegUfid2 <- get_ufid_cardinality("neg", "ufid2")
 
   problemNames <- c(type2FpPos$problemNames, type2FpNeg$problemNames)
   totFPFeatures2 <- sum(type2FpPos$totFPFeatures2, type2FpNeg$totFPFeatures2)
+  problemNamesUfid2 <- c(type2FpPosUfid2$problemNames, type2FpNegUfid2$problemNames)
+  totFPFeatures2Ufid2 <- sum(type2FpPosUfid2$totFPFeatures2, type2FpNegUfid2$totFPFeatures2)
 
   # multiple ufids in one sample ####
   
@@ -393,7 +412,7 @@ es_test_fpfn <- function(escon, udb, index) {
     # there should be one feature for each file, all others are fp
     sum(vapply(b, function(x) x$doc_count, numeric(1)) - 1)
   }
-  message("Computing duplicated ufid assignments to one sample at ", date())
+  message("Computing duplicated ufid assignments to one sample on ", date())
   numberMultiAssignUfid <- sum(
     vapply(
       allUfids, 
@@ -402,7 +421,7 @@ es_test_fpfn <- function(escon, udb, index) {
       ufidType = "ufid"
     )
   )
-  message("Computing duplicated ufid2 assignments to one sample at ", date())
+  message("Computing duplicated ufid2 assignments to one sample on ", date())
   numberMultiAssignUfid2 <- sum(
     vapply(
       allUfid2s, 
@@ -416,7 +435,7 @@ es_test_fpfn <- function(escon, udb, index) {
   # ucid accuracy ####
 
   # compute max sd in rt across all ucids
-  message("Computing ucid accuracy at ", date())
+  message("Computing ucid accuracy on ", date())
   ucid_rts <- elastic::Search(
     escon, index, body =
     '
@@ -449,31 +468,28 @@ es_test_fpfn <- function(escon, udb, index) {
   mxRtDevUcid <- max(vapply(ucid_rts, function(x) x$rt$std_deviation, numeric(1)))
 
   message("Completed tests at ", date())
+  # Output List ####
   list(
     total_features = totFeat,
-    total_features_with_ufid = totWithUfid,
-    total_features_with_ufid2 = totWithUfid2,
-    percent_features_with_ufid = round(percentWithUfid),
-    percent_features_with_ufid2 = round(percentWithUfid2),
     percent_fn_ufid = 100 - round(percentWithUfid),
     percent_fn_ufid2 = 100 - round(percentWithUfid2),
     total_features_with_ms2 = totFeatMs2,
     percent_with_ms2 = round(ms2percent),
-    percent_ms2_features_with_ufid = round(percentMs2withUfid),
     percent_ms2_fn_ufid = 100 - round(percentMs2withUfid),
-    total_features_multiple_assignment_ufid = numberMultiAssignUfid,
-    total_features_multiple_assignment_ufid2 = numberMultiAssignUfid2,
     percent_ufids_multiple_assignment = round(100 * numberMultiAssignUfid / totWithUfid),
     percent_ufid2s_multiple_assignment = round(100 * numberMultiAssignUfid2 / totWithUfid2),
     total_features_ufid_annotated = totUfidAnnotated,
-    percent_fp_multiple_names_by_ufid = round(100 * totFPFeatures1 / totUfidAnnotated),
+    total_features_ufid2_annotated = totUfid2Annotated,
+    percent_fp_multiple_names_by_ufid = round(100 * totFPFeatures1ufid / totUfidAnnotated),
+    percent_fp_multiple_names_by_ufid2 = round(100 * totFPFeatures1ufid2 / totUfid2Annotated),
     percent_fp_multiple_ufids_by_name = round(100 * totFPFeatures2 / totUfidAnnotated),
-    percent_fp_sum = round(100 * (totFPFeatures1 + totFPFeatures2) / totUfidAnnotated),
-    percent_fp_avg = round(100 * mean(c(totFPFeatures1 / totUfidAnnotated,  totFPFeatures2 / totUfidAnnotated))),
+    percent_fp_multiple_ufid2s_by_name = round(100 * totFPFeatures2Ufid2 / totUfidAnnotated),
     num_ucids = numUcids,
     max_rt_stddev_ucid = round(mxRtDevUcid, 2),
     names_multiple_ufids = problemNames,
-    ufids_multiple_names = problemUfidsNames
+    names_multiple_ufid2s = problemNamesUfid2,
+    ufids_multiple_names = problemUfidsNames,
+    ufid2s_multiple_names = problemUfid2sNames
   )
 }
 

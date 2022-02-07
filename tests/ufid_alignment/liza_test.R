@@ -1,4 +1,4 @@
-index <- "g2_nts_expn"
+index <- "g2_nts*"
 path_ufid_db <- "~/HRMS_Z/sw_entwicklung/ntsportal/ufid1.sqlite"
 config_path <- "~/config.yml"
 ec <- config::get("elastic_connect", file = config_path)
