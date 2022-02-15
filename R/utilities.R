@@ -1,4 +1,36 @@
 
+#' @export
+dist_make_parallel <- function(x, distance_fcn, numCores, ...) 
+{ 
+  browser()
+  distance_from_idxs <- function(idxs) {
+    i1 <- idxs[1]
+    i2 <- idxs[2]
+    distance_fcn(x[i1, ], x[i2, ], ...)
+  }
+  size <- nrow(x)
+  clf <- parallel::makeForkCluster(numCores)
+  d <- parallel::parApply(clf, utils::combn(size, 2), 2, distance_from_idxs)
+  parallel::stopCluster(clf)
+  attr(d, "Size") <- size
+  xnames <- rownames(x)
+  if (!is.null(xnames)) {
+    attr(d, "Labels") <- xnames
+  }
+  attr(d, "Diag") <- FALSE
+  attr(d, "Upper") <- FALSE
+  class(d) <- "dist"
+  d
+}
+
+distdex <- function(i, j, n) #given row, column, and n, return index
+  n*(i-1) - i*(i-1)/2 + j-i
+
+rowcol <- function(ix, n) { #given index, return row and column
+  nr <- ceiling(n-(1+sqrt(1+4*(n^2-n-2*ix)))/2)
+  nc <- n-(2*n-nr+1)*nr/2+ix+nr
+  c(nr,nc)
+}
 
 
 tconvert <- function(unixtime) {

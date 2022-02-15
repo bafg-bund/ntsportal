@@ -4,12 +4,14 @@
 \alias{es_assign_ucids}
 \title{Assign ucids to all documents}
 \usage{
-es_assign_ucids(escon, index = "g2_nts*", rtlim = 0.2)
+es_assign_ucids(escon, index = "g2_nts*", rtlim = 0.2, ufidLevel = 1)
 }
 \arguments{
 \item{index}{should be all indices together otherwise ucids won't match across indices}
 
 \item{rtlim}{pre-eliminate ufids from consideration which have rt difference higher than this}
+
+\item{ufidLevel}{numeric length 1, 1 or 2}
 }
 \value{
 TRUE if ran to completion

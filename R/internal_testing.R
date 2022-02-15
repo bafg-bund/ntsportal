@@ -5,12 +5,11 @@
 #' Used for testing purposes
 #'
 #' @param escon
-#' @param udb
 #' @param index
 #'
 #' @return list of metrics used to assess quality of ufid and ucid assignments
 #' @export
-es_test_fpfn <- function(escon, udb, index) {
+es_test_fpfn <- function(escon, index) {
   
   # index <- "g2_nts*"
   # config_path <- "~/config.yml"
@@ -354,33 +353,35 @@ es_test_fpfn <- function(escon, udb, index) {
 
   # multiple ufids in one sample ####
   
-  allUfids <- tbl(udb, "feature") %>% select(ufid) %>% collect() %>% .$ufid
-  
-  # get all ufid2s
-  ufid2res <- elastic::Search(
-    escon, index, body = 
+  # get all ufids
+  get_all_ufids <- function(ufidType) {
+    ufidres <- elastic::Search(
+    escon, index, body = sprintf(
       '
     {
-  "query": {
-    "exists": {
-      "field": "ufid2"
-    }
-  },
-  "size": 0,
-  "aggs": {
-    "ufid2s": {
-      "terms": {
-        "field": "ufid2",
-        "size": 100000
+      "query": {
+        "exists": {
+          "field": "%s"
+        }
+      },
+      "size": 0,
+      "aggs": {
+        "ufids": {
+          "terms": {
+            "field": "%s",
+            "size": 1000000
+          }
+        }
       }
     }
+      ', ufidType, ufidType)
+    )
+    if (ufidres$aggregations$ufids$sum_other_doc_count != 0)
+      stop("not all ", ufidType, "s were counted when getting multiple assignments")
+    vapply(ufidres$aggregations$ufids$buckets, "[[", numeric(1), i = "key")
   }
-}
-    '
-  )
-  if (ufid2res$aggregations$ufid2s$sum_other_doc_count != 0)
-    warning("not all ufid2s were counted when getting multiple assignments")
-  allUfid2s <- vapply(ufid2res$aggregations$ufid2s$buckets, "[[", numeric(1), i = "key")
+  allUfids <- get_all_ufids("ufid")
+  allUfid2s <- get_all_ufids("ufid2") 
   
   # for each ufid, get number of docs which are result of multiple assignment in one sample
   get_docs_multi_assignment <- function(ufid, ufidType) {
@@ -436,20 +437,22 @@ es_test_fpfn <- function(escon, udb, index) {
 
   # compute max sd in rt across all ucids
   message("Computing ucid accuracy on ", date())
-  ucid_rts <- elastic::Search(
-    escon, index, body =
+  
+  test_ucid <- function(ucidType) {
+   ucid_rts <- elastic::Search(
+    escon, index, body = sprintf(
     '
     {
       "query": {
         "exists": {
-          "field": "ucid"
+          "field": "%s"
         }
       },
       "size": 0,
       "aggs": {
         "ucids": {
           "terms": {
-            "field": "ucid",
+            "field": "%s",
             "size": 10000
           },
           "aggs": {
@@ -462,10 +465,18 @@ es_test_fpfn <- function(escon, udb, index) {
         }
       }
     }
-    '
+    ', ucidType, ucidType)
   )$aggregations$ucids$buckets
   numUcids <- length(ucid_rts)
-  mxRtDevUcid <- max(vapply(ucid_rts, function(x) x$rt$std_deviation, numeric(1)))
+  mxRtDevUcid <- max(vapply(ucid_rts, function(x) x$rt$std_deviation, numeric(1))) 
+  list(numUcids = numUcids, mxRtDevUcid = mxRtDevUcid)
+  }
+  ucidList <- test_ucid("ucid")
+  mxRtDevUcid <- ucidList$mxRtDevUcid
+  numUcids <- ucidList$numUcids
+  ucid2List <- test_ucid("ucid2")
+  mxRtDevUcid2 <- ucid2List$mxRtDevUcid
+  numUcid2s <- ucid2List$numUcids
 
   message("Completed tests at ", date())
   # Output List ####
@@ -486,6 +497,8 @@ es_test_fpfn <- function(escon, udb, index) {
     percent_fp_multiple_ufid2s_by_name = round(100 * totFPFeatures2Ufid2 / totUfidAnnotated),
     num_ucids = numUcids,
     max_rt_stddev_ucid = round(mxRtDevUcid, 2),
+    num_ucid2s = numUcid2s,
+    max_rt_stddev_ucid2 = round(mxRtDevUcid2, 2),
     names_multiple_ufids = problemNames,
     names_multiple_ufid2s = problemNamesUfid2,
     ufids_multiple_names = problemUfidsNames,
