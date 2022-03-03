@@ -8,6 +8,7 @@
 #' @param station can be one of "KOMO", "FAN", "WIN", "rhein_ko_l"
 #' @param startRange 2 element character vector with date range e.g. c("2021-01-01", "2022-01-01")
 #' @param responseField can be one of "intensity", "intensity_normalized", "area", "area_normalized"
+#' @param ufidLevel can be 1 or 2. Level 1: mz+rt+ms2, level 2: mz+rt
 #' @param form format of output table, can be one of "long", "wide"
 #'
 #' @return data.frame
@@ -34,6 +35,7 @@ get_time_series <- function(
   station = "KOMO",
   startRange = c("2021-01-01", "2022-01-01"),
   responseField = "intensity",
+  ufidLevel = 1,
   form = "long") {
   
   stopifnot(length(startRange) == 2)
@@ -44,6 +46,9 @@ get_time_series <- function(
   stopifnot(length(form) == 1, is.element(form, c("long", "wide")))
   stopifnot(length(index) == 1, is.element(index, c("g2_nts_expn", "g2_nts_bfg")))
   stopifnot(inherits(escon, "Elasticsearch"))
+  stopifnot(is.numeric(ufidLevel), length(ufidLevel) == 1, is.element(ufidLevel, c(1,2)))
+  ufidType <- ifelse(ufidLevel == 1, "ufid", "ufid2")
+  ucidType <- ifelse(ufidLevel == 1, "ucid", "ucid2")
   
   # need to partition results since bucket overload may occur
   # get number of ufids
@@ -51,35 +56,35 @@ get_time_series <- function(
   numUfids <- elastic::Search(escon, index, body = sprintf(
     '
     {
-  "query": {
-    "bool": {
-      "filter": [
-        {
-          "range": {
-            "start": {
-              "gte": "%s",
-              "lte": "%s"
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "range": {
+                "start": {
+                  "gte": "%s",
+                  "lte": "%s"
+                }
+              }
+            },
+            {
+              "term": {
+                "station": "%s"
+              }
             }
-          }
-        },
-        {
-          "term": {
-            "station": "%s"
+          ]
+        }
+      },
+      "size": 0, 
+      "aggs": {
+        "ufid_num": {
+          "cardinality": {
+            "field": "%s"
           }
         }
-      ]
-    }
-  },
-  "size": 0, 
-  "aggs": {
-    "ufid_num": {
-      "cardinality": {
-        "field": "ufid"
       }
     }
-  }
-}
-    ', startRange[1], startRange[2], station
+    ', startRange[1], startRange[2], station, ufidType
   ))$aggregations$ufid_num$value
   
   # get number of days
@@ -118,7 +123,7 @@ get_time_series <- function(
       "aggs": {
         "ufids": {
           "terms": {
-            "field": "ufid",
+            "field": "%s",
             "include": {
                "partition": %i,
                "num_partitions": %i
@@ -150,7 +155,7 @@ get_time_series <- function(
             },
             "ucid": {
               "terms": {
-                "field": "ucid",
+                "field": "%s",
                 "size": 10
               }
             },
@@ -171,7 +176,7 @@ get_time_series <- function(
         }
       }
     }
-    ', station, startRange[1], startRange[2], part - 1, numPartitions, responseField
+    ', station, startRange[1], startRange[2], ufidType, part - 1, numPartitions, ucidType, responseField
     ))
     
     message(ans$hits$total$value, " features returned")
@@ -226,6 +231,7 @@ get_time_series <- function(
         }, numeric(1))
       )
     })
+    
     resp <- do.call("rbind", resp)
     resp$start <- substr(resp$start, 1, 10)
     
@@ -236,6 +242,11 @@ get_time_series <- function(
   
   # long form
   aligTable <- do.call("rbind", aligTables) 
+  
+  if (ufidLevel == 2) {
+    colnames(aligTable) <- sub("^ufid$", "ufid2", colnames(aligTable))
+    colnames(aligTable) <- sub("^ucid$", "ucid2", colnames(aligTable))
+  }
   
   # wide form
   if (form == "wide")

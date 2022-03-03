@@ -10,6 +10,7 @@ get_time_series(
   station = "KOMO",
   startRange = c("2021-01-01", "2022-01-01"),
   responseField = "intensity",
+  ufidLevel = 1,
   form = "long"
 )
 }
@@ -23,6 +24,8 @@ get_time_series(
 \item{startRange}{2 element character vector with date range e.g. c("2021-01-01", "2022-01-01")}
 
 \item{responseField}{can be one of "intensity", "intensity_normalized", "area", "area_normalized"}
+
+\item{ufidLevel}{can be 1 or 2. Level 1: mz+rt+ms2, level 2: mz+rt}
 
 \item{form}{format of output table, can be one of "long", "wide"}
 }

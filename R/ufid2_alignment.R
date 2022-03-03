@@ -4,7 +4,7 @@
 #' Alignment by m/z and RT
 #'
 #'
-#' blah blah blah
+#' Function will assign ufid2 to features
 #'
 #' @param escon 
 #' @param index 
@@ -12,16 +12,20 @@
 #' @param mzTolmDa 
 #' @param minPoints 
 #'
-#' @return nothing yet
+#' @return TRUE
 #' @export
 #'
 ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5, minPoints = 5) {
 
-
-
+  # index <- "g2_nts*"
+  # rtTol <- 0.3
+  # mzTolmDa <- 5
+  # minPoints <- 5
+  # config_path <- "~/config.yml"
+  # ec <- config::get("elastic_connect", file = config_path)
+  # escon <- elastic::connect(host = '10.140.73.204', user=ec$user, pwd=ec$pwd)
+  message("Starting ufid2 assignment at ", date())
   message("compiling cpp function")
-
-
   mzrtpol_dist_FuncPtr <- RcppXPtrUtils::cppXPtr(
     sprintf("
       double customDist(const arma::mat &A, const arma::mat &B) {
@@ -76,24 +80,20 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
   message("done.")
 
   mzPosition <- 0
-  rtPosition <- 0
   numUfids <- 0
 
   alles <- data.frame(id= character(), ufid2 = numeric())
 
   repeat {
-    message("We are at mz ", mzPosition, " RT ", rtPosition)
+    # if (numUfids > 500)
+    #   break
+    message("We are at mz ", mzPosition, " at ", date())
 
     res <- elastic::Search(escon, index, body = sprintf('{
-      "search_after": [%.4f, %.2f],
+      "search_after": [%.4f],
       "sort": [
         {
           "mz": {
-            "order": "asc"
-          }
-        },
-        {
-          "rt": {
             "order": "asc"
           }
         }
@@ -116,12 +116,15 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
       },
       "size": 10000,
       "_source": ["mz", "rt", "filename", "pol"]
-      }', mzPosition, rtPosition)
+      }', mzPosition)
     )
-
-    if (length(res$hits$hits) == 0) {
+    numReturned <- length(res$hits$hits)
+    sameSort <- max(sapply(res$hits$hits, function(x) x[["sort"]][[1]]))
+    # last hit gives new mz position
+    newMzPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[1]] - 2 * mzTolmDa / 1000
+    if (numReturned <= minPoints || mzPosition == newMzPosition) {
       message("All features were analyzed, no further clusters found")
-      message("completed clustering and assigned ", numUfids, " new ufids")
+      message("completed clustering and found ", numUfids, " ufid2s")
       break
     }
 
@@ -134,10 +137,7 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
 
     # convert pols to numeric hash
     pols <- sapply(res$hits$hits, function(x) x[["_source"]]$pol)
-    pols <- sapply(pols, digest::digest, algo = "xxhash32")
-    pols <- sapply(pols, stringr::str_sub, end = -2)
-    pols <- sapply(pols, strtoi, base = 16)
-    pols <- sapply(pols, as.double)
+    pols <- ifelse(pols == "pos", 1.0, 2.0)
 
     ids <- sapply(res$hits$hits, function(x) x[["_id"]])
 
@@ -148,7 +148,7 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
       unname(pols)
     )
 
-    message("begin computations")
+    message("Clustering...")
 
     # cluster these by mz-rt using parallel distance function
     dist1 <- parallelDist::parDist(m, method="custom", func = mzrtpol_dist_FuncPtr, threads = 6)
@@ -158,33 +158,85 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
     newcluster <- dbscanRes$cluster
     newcluster[newcluster != 0] <- newcluster[newcluster != 0] + numUfids
 
-    ergebnis <- data.frame(id = ids, ufid2 = dbscanRes$cluster)
+    ergebnis <- data.frame(id = ids, ufid2 = newcluster)
 
     alles <- rbind(alles, ergebnis)
 
     numUfids <- max(newcluster)
-
-
-
-    # write the new ufids to a vector outside of the loop
-
-
-    # set new mz and rt position
-    # get last hit
-    mzPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[1]] - 2* mzTolmDa / 1000
-    rtPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[2]] - 2* rtTol
-
+    
+    # set new mz position
+    mzPosition <- newMzPosition
   }
+  
+  # remove all 0 ufids
+  alles <- alles[alles$ufid2 != 0, ]
+  
+  # check for duplicate features
+  
+  compare_ufids <- function(u1, u2) {
+    set1 <- alles[alles$ufid2 == u1, "id"]
+    set2 <- alles[alles$ufid2 == u2, "id"]
+    if (setequal(set1, set2)) {
+      return(1)
+    } else if (all(is.element(set1, set2)) || all(is.element(set2, set1))) {
+      return(2)
+    } else if (length(intersect(set1, set2)) > 0.9 * mean(c(length(set1), length(set2)))) {
+      return(3)
+    } else {
+      return(0)
+    }
+  }
+  
+  if (any(duplicated(alles$id))) {
+    message("Combining duplicates at ", date())
+    dupIds <- alles[duplicated(alles$id), "id"]
+    dupUfids <- lapply(dupIds, function(x) alles[alles$id == x, "ufid2"])
+    dupUfids <- unique(do.call("c", dupUfids))
+    compMat <- as.matrix(usedist::dist_make(as.matrix(dupUfids), compare_ufids))
+    
+    compMat[lower.tri(compMat)] <- 0
+    # in the case where they are exactly the same, delete one of them
+    if (any(compMat == 1)) {
+      pairs <- which(compMat == 1, arr.ind = T)
+      for (i in seq_len(nrow(pairs))) {  # i <- 1
+        toCombine <- dupUfids[pairs[i, , drop = T]]
+        alles <- alles[alles$ufid2 != toCombine[1], ]
+      }
+    }
+    # In the case where one is the set of another, delete the smaller of the two
+    if (any(compMat == 2)) {
+      pairs <- which(compMat == 2, arr.ind = T)
+      for (i in seq_len(nrow(pairs))) {  # i <- 1
+        toCombine <- dupUfids[pairs[i, , drop = T]]
+        subAlles <- subset(alles, ufid2 %in% toCombine)
+        smaller <- which.min(by(subAlles, subAlles$ufid2, nrow))
+        alles <- alles[alles$ufid2 != toCombine[smaller], ]
+      }
+    }
+    # In the case where they are almost the same, does this ever happen?
+    if (any(compMat == 3)) {
+      stop("I came accross a case of almost similar ufid groups...")
+    }
+  }
+  
+  if (any(duplicated(alles$id)))
+    stop("Duplicate filter did not work")
 
 
   # write all ufids to Ids
-
-
-  u <- 1
+  #u <- 1
+  message("Writing ", numUfids, " ufid2 to esdb at ", date())
 
   for (u in unique(alles$ufid2)) {
-    if (u == 0)
-      next
-    es_add_ufid2_to_ids(escon, index, ufid2_to_add = u , alles[alles$ufid2 == u, "id" , drop = T])
+    message("Updating ", u, " at ", date())
+    es_add_ufid2_to_ids(
+      escon, 
+      index, 
+      ufid2_to_add = u, 
+      ids_for_update = alles[alles$ufid2 == u, "id" , drop = T]
+    )
   }
+  
+  message("Completed ufid2 assignment at ", date())
+  TRUE
 }

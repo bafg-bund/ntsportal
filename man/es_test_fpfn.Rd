@@ -4,7 +4,7 @@
 \alias{es_test_fpfn}
 \title{Compute false positives and false negatives in ufid and ucid assignment}
 \usage{
-es_test_fpfn(escon, udb, index)
+es_test_fpfn(escon, index)
 }
 \arguments{
 \item{index}{}

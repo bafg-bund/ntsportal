@@ -24,8 +24,8 @@ ufid2_alignment(
 \item{minPoints}{}
 }
 \value{
-nothing yet
+TRUE
 }
 \description{
-blah blah blah
+Function will assign ufid2 to features
 }

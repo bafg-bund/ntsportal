@@ -3,6 +3,7 @@
 S3method(print,feature)
 S3method(print,ufid_assignment)
 export(clean_spectrum)
+export(dist_make_parallel)
 export(es_add_ufid)
 export(es_add_ufid2_to_ids)
 export(es_add_ufid_to_ids)
