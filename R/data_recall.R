@@ -35,7 +35,7 @@ get_time_series <- function(
   station = "KOMO",
   startRange = c("2021-01-01", "2022-01-01"),
   responseField = "intensity",
-  ufidLevel = 1,
+  ufidLevel = 2,
   form = "long") {
   
   stopifnot(length(startRange) == 2)
@@ -165,9 +165,16 @@ get_time_series <- function(
                 "calendar_interval": "day"
               },
               "aggs": {
-                "response": {
-                  "avg": {
-                    "field": "%s"
+                "durations": {
+                  "terms": {
+                    "field": "duration"
+                  },
+                  "aggs": {
+                    "response": {
+                      "avg": {
+                        "field": "%s"
+                      }
+                    }
                   }
                 }
               }
@@ -218,23 +225,29 @@ get_time_series <- function(
       }, character(1))
     ) 
     
-    resp <- lapply(ufids, function(x) {
-      u <- x$key
-      tb <- x$over_time$buckets
-      data.frame(
-        ufid = u,
-        start = vapply(tb, "[[", character(1), i = "key_as_string"),
-        response = vapply(tb, function(y) {
-          rVal <- y$response$value
-          if (is.null(rVal))
-            0 else rVal
-        }, numeric(1))
-      )
+    resp <- lapply(ufids, function(ufidBuck) {  # ufidBuck <- ufids[[1]]
+      dayBucks <- ufidBuck$over_time$buckets
+      dayRows <- lapply(dayBucks, function(dayBuck) {  # dayBuck <- dayBucks[[1]]
+        durBucks <- dayBuck$durations$buckets
+        responseRows <- lapply(durBucks, function(durBuck) { # durBuck <- durBucks[[1]]
+          c(
+            ufid = ufidBuck$key,
+            start = dayBuck$key_as_string,
+            duration = durBuck$key,
+            response = durBuck$response$value
+          )
+        })
+        do.call("rbind", responseRows)
+      })
+      do.call("rbind", dayRows)
     })
-    
     resp <- do.call("rbind", resp)
+    resp <- as.data.frame(resp)
+    resp$ufid <- as.numeric(resp$ufid)
+    resp$duration <- as.numeric(resp$duration)
+    resp$response <- as.numeric(resp$response)
     resp$start <- substr(resp$start, 1, 10)
-    
+    resp$start <- ymd(resp$start)
     merge(df, resp, by = "ufid")
   }
   
