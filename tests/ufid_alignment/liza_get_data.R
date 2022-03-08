@@ -20,8 +20,9 @@ alig <- get_time_series(escon, index = "g2_nts_expn",
 
 # example benzotriazole
 ggplot() + 
-  geom_line(aes(start, response), subset(alig, ufid2 == 77 & duration == 1)) + 
-  geom_step(aes(start, response), subset(alig, ufid2 == 77 & duration != 1), color = "blue")
+  geom_point(aes(start, response), subset(alig, ufid2 == 77 & duration == 1)) + 
+  geom_segment(aes(start, response, xend = start + duration, yend = response), subset(alig, ufid2 == 77 & duration == 14), color = "blue") +
+  geom_segment(aes(start, response, xend = start + duration, yend = response), subset(alig, ufid2 == 77 & !is.element(duration, c(1,14))), color = "red")
 
 ggplot() + 
   geom_step(aes(start, response), subset(alig, ufid2 == 77)) 
