@@ -3,7 +3,7 @@ library(ggplot2)
 library(lubridate)
 index <- "g2_nts_expn"
 path_ufid_db <- "~/projects/ufid/tests/ufid1.sqlite"
-config_path <- "config.yml"
+config_path <- "tests/ufid_alignment/config.yml"
 path_ufid_db <- "~/HRMS_Z/sw_entwicklung/ntsportal/ufid1.sqlite"
 #config_path <- "~/config.yml"
 ec <- config::get("elastic_connect", file = config_path)
@@ -19,11 +19,16 @@ alig <- get_time_series(escon, index = "g2_nts_expn",
                 form = "long")
 
 # linegraph all data
-ggplot(subset(test, name=="Benzotriazole"), aes(start,response, group =1))+
+ggplot(subset(alig, name=="Benzotriazole"), aes(start,response, group =1))+
   geom_line()+
   theme(axis.text.x = element_text(angle = 90))
 
 # example benzotriazole
+ggplot() +
+  geom_point(aes(start, response), subset(alig, ufid2 == 77 & duration == 1)) +
+  geom_segment(aes(start, response, xend = start + duration, yend = response), subset(alig, ufid2 == 77 & duration == 14), color = "blue") +
+  geom_segment(aes(start, response, xend = start + duration, yend = response), subset(alig, ufid2 == 77 & !is.element(duration, c(1,14))), color = "red")
+
 ggplot() +
   geom_line(aes(start, response), subset(alig, ufid2 == 77 & duration == 1)) +
   geom_step(aes(start, response), subset(alig, ufid2 == 77 & duration != 1), color = "blue")
