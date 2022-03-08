@@ -15,3 +15,7 @@ test <- get_time_series(escon, index = "g2_nts_expn",
                 responseField = "intensity",
                 ufidLevel = 2,
                 form = "long")
+
+ggplot(subset(test, name=="Benzotriazole"), aes(start,response, group =1))+
+  geom_line()+
+  theme(axis.text.x = element_text(angle = 90))
