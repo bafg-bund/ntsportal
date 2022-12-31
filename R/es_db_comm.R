@@ -125,7 +125,7 @@ es_ids_to_assign_name <- function(escon, index, comp_name, polarity) {
   sapply(res$hits$hits, function(x) x[["_id"]])
 }
 
-#' Get feature from id
+#' Get feature (doc) from ntsp with doc-id
 #'
 #' @param escon
 #' @param index
@@ -749,7 +749,7 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
 #' @param polarity
 #' @param ufids if ufids is NULL (default), then all ufids will be processed
 #'
-#' @return
+#' @return TRUE if ran until the end
 #' @export
 #'
 #' @import dplyr
@@ -762,7 +762,10 @@ es_assign_ufids <- function(
   # library(dplyr)
   # polarity <- "pos"
   # ufids <- 778
-
+  
+  
+  # At the moment the Ufid-db is small enough to fit in memory, so load it in, everything is much
+  # faster that way.
   ftt <- tbl(udb, "feature") %>% collect()
   rtt <- tbl(udb, "retention_time") %>% collect()
   ms2t <- tbl(udb, "ms2") %>% collect()
@@ -773,16 +776,16 @@ es_assign_ufids <- function(
   if (!is.null(ufids) && is.numeric(ufids)) {
     all_ufids <- as.integer(ufids)
   } else {
-    all_ufids <- ftt %>% select(ufid) %>% unlist()
+    all_ufids <- ftt %>% select(ufid) %>% unname() %>% unlist()
   }
 
-  for (uf in all_ufids) {  # uf <- 778L
+  for (uf in all_ufids) {  # uf <- 861L
     pol_ <- ftt %>% filter(ufid == !!unname(uf)) %>% select(polarity) %>% unlist()
 
     if (pol_ != polarity)
       next
 
-    message("starting ufid ", uf)
+    logger::log_info("Starting ufid {uf}")
     # collect candidate ids by rough filtering by mz-rt
 
     # MS2 matching ####
@@ -790,7 +793,7 @@ es_assign_ufids <- function(
     mz_ <- ftt %>% filter(ufid == !!unname(uf)) %>% select(mz) %>% unlist()
     rt_ <- rtt %>% filter(ufid == !!unname(uf) & method == "bfg_nts_rp1") %>%
       select(rt) %>% unlist()
-
+    #browser()
 
     res <- elastic::Search(escon, index, body = sprintf('
         {
@@ -853,7 +856,7 @@ es_assign_ufids <- function(
       next
 
     # collect features and then do udb_feature_match on these
-    message("Collecting ", length(ids), " features from esdb.")
+    logger::log_info("Collecting {length(ids)} features from ntsp")
     fts <- tryCatch(
       suppressMessages(lapply(ids, es_feat_from_id, escon = escon, index = index)),
       error = function(e) {
@@ -862,8 +865,8 @@ es_assign_ufids <- function(
     )
     if (inherits(fts, "error") || is.null(fts))
       next
-    message("matching features")
-
+    logger::log_info("Matching features")
+    
     matched_ufids <- tryCatch(
       vapply(
         fts,
@@ -897,7 +900,8 @@ es_assign_ufids <- function(
     # check that this ufid hasnt already been added to the file
     not_already_added <- function(f, ufid_to_assign) {
       # get filename and import date of ft
-      rs <- elastic::docs_get(escon, index, f$es_id, source = c("filename", "date_import"))
+      rs <- elastic::docs_get(escon, index, f$es_id, source = c("filename", "date_import"), 
+                              verbose = FALSE)
       fn <- rs$`_source`$filename
       dateImport <- rs$`_source`$date_import
 
@@ -1000,9 +1004,9 @@ es_assign_ufids <- function(
     if (!is.numeric(gapFilled))
       warning("gap-filling failed for ufid ", uf)
 
-    message("completed ufid ", uf)
+    logger::log_info("Completed ufid {uf}")
   }
-  message("went through all requested ufids")
+  logger::log_info("Went through all requested ufids")
   TRUE
 }
 

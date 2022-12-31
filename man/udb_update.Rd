@@ -9,9 +9,6 @@ udb_update(udb, escon, index, ufid_to_update)
 \arguments{
 \item{ufid}{}
 }
-\value{
-
-}
 \description{
 The ufid database is updated at the end of a session to
 improve it based on statistical averaging of previous data.

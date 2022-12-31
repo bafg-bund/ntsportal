@@ -2,9 +2,10 @@
 
 index <- "g2_ufid1"
 
-config_path <- "~/projects/config.yml"
+config_path <- "~/config.yml"
 ec <- config::get("elastic_connect", file = config_path)
-escon <- elastic::connect(host = '10.140.73.204', user=ec$user, pwd=ec$pwd)
+escon <- elastic::connect(host = 'elastic-mn-01.hpc.bafg.de', port = 9200, user=ec$user, pwd=ec$pwd,
+                          transport_schema = "https")
 
 elastic::docs_delete_by_query(escon, index, body = '
                               {

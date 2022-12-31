@@ -9,9 +9,6 @@ es_feat_from_id(escon, index, id)
 \arguments{
 \item{id}{}
 }
-\value{
-
-}
 \description{
 Get feature from id
 }

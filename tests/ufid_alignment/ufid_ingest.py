@@ -6,12 +6,16 @@ import time
 import sys
 import yaml
 
-def get_data_path():
-  return(sys.argv[2])
-  
+def get_user():
+  with open(sys.argv[1], 'r') as f:
+    uc = yaml.safe_load(f)
+    return uc['default']['elastic_connect']
 
+def get_data_path():
+  return(sys.argv[3])
+  
 def get_index_name():
-  esIndex = sys.argv[1]
+  esIndex = sys.argv[2]
   return(esIndex)
 
 def get_length():
@@ -31,9 +35,9 @@ def generate_actions():
       yield doc
 
 def main():
-  client = Elasticsearch([
-    'http://kevin.jewell:g23456@10.140.73.204:9200/'
-  ])
+  cred = get_user()
+  client = Elasticsearch([{'host': 'kibana.bafg.de', 'port': 9200,'scheme':"https"}],
+    http_auth=(cred['user'], cred['pwd']), verify_certs=False)
   
   print("Indexing documents...")
   progress = tqdm.tqdm(unit="docs", total=get_length())

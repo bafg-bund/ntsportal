@@ -1,18 +1,30 @@
 # script to create a new analysis index, which can be used to prioritize 
-# compounds by there trend. E.g. Regression trend
+# compounds by their trend. E.g. Regression trend
 
 # We do this first for the _upb database
 
 # collect data by compound and station
 
-index <- "g2_dbas_v5_upb"
-config_path <- "~/projects/config.yml"
-ec <- config::get("elastic_connect", file = config_path)
-escon <- elastic::connect(host = '10.140.73.204', user=ec$user, pwd=ec$pwd)
+INDEX <- "g2_dbas_upb"
+ANALYSIS_INDEX <- "g2_dbas_upb_analysis"
+dateId <- format(Sys.Date(), "%y%m%d")
+SAVE_LOC <- "~/projects/ntsportal/tests/analysis_index"
+INGEST_SCRIPT <- "~/projects/ntsautoeval/ingest.sh"
+CONFIG_PATH <- "~/config.yml"
+logFile <- file.path(SAVE_LOC, paste0(dateId, ".log")) 
+cat("----- compute-analysis-index.R v2022-10-28 -----\n", file = logFile)
+cat(date(), "\n", file = logFile, append = T)
 
+ec <- config::get("elastic_connect", file = CONFIG_PATH)
+escon <- elastic::connect(host = 'elastic.dmz.bafg.de', port = 443, user=ec$user, pwd=ec$pwd,
+                          transport_schema = "https", ssl_verifypeer = FALSE)
 
+if (escon$ping()$cluster_name == "bfg-elastic-cluster")
+  cat("Connection to elasticsearch successful\n", file = logFile, append = TRUE)
+
+#escon$ping()
 res <- elastic::Search(
-  escon, index, 
+  escon, INDEX, 
   body = '
   {
     "query": {
@@ -83,6 +95,10 @@ for (comp in res$aggregations$comps$buckets) {
           time = vapply(time_buckets, function(x) x$key, numeric(1))
         )
         #df$time <- df$time / 1000  # time in secs since epoch 
+        # need to normalize the regression to the max area otherwise you are just going to see the
+        # highest intensity peaks
+        
+        df$norma <- df$norma / max(df$norma, na.rm = T)
         model <- lm(norma ~ time, df)
         slope <- model$coefficients["time"]
         newRow <- data.frame(name = comp_name, pol = pol_name, station = station_name, change_per_ms = slope, datapoints = length(time_buckets))
@@ -92,12 +108,42 @@ for (comp in res$aggregations$comps$buckets) {
     }
   }
 }
+
 reg <- do.call("rbind", regList)
 rownames(reg) <- NULL
-reg$lm <- reg$change_per_ms * 1000 * 60 * 60 * 24
+reg$lm <- reg$change_per_ms * 1000 * 60 * 60 * 24 * 365
 
 # make data ready for elastic
 reg$change_per_ms <- NULL
 reg$datapoints <- NULL
 
-jsonlite::write_json(reg, "reg.json", pretty = T, digits = NA, auto_unbox = T)
+if (file.exists(file.path(SAVE_LOC, "reg.json"))) {
+  cat("Deleting old json\n", file = logFile, append = TRUE)
+  file.remove(file.path(SAVE_LOC, "reg.json"))
+}
+
+cat("Writing new json\n", file = logFile, append = TRUE)
+jsonlite::write_json(reg, file.path(SAVE_LOC, "reg.json"), pretty = T, digits = NA, auto_unbox = T)
+
+# clear contents of current analysis index
+cat("Clearing old data\n", file = logFile, append = TRUE)
+mes <- elastic::docs_delete_by_query(escon, ANALYSIS_INDEX, '{
+  "query": {
+    "match_all": {}
+  }
+}')
+cat(mes$deleted, "docs cleared\n", file = logFile, append = TRUE)
+
+# upload newly formed index
+cat("Uploading new docs\n", file = logFile, append = TRUE)
+
+if (file.exists(file.path(SAVE_LOC, "reg.json")))
+  ingestMes <- system(paste(INGEST_SCRIPT, CONFIG_PATH, ANALYSIS_INDEX, file.path(SAVE_LOC, "reg.json")), intern = T)
+
+cat(ingestMes, "\n", file = logFile, append = TRUE, fill = TRUE)
+
+
+
+
+
+

@@ -9,9 +9,6 @@ validate_feature(x)
 \arguments{
 \item{x}{}
 }
-\value{
-
-}
 \description{
 Check
 }

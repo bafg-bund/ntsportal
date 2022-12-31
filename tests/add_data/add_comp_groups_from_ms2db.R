@@ -1,11 +1,31 @@
 
-library(dplyr)
-index <- "g2_dbas_v5_upb"
-config_path <- "~/projects/config.yml"
-ec <- config::get("elastic_connect", file = config_path)
-escon <- elastic::connect(host = '10.140.73.204', user=ec$user, pwd=ec$pwd)
+# Script to add comp_group information to index.
 
-db <- DBI::dbConnect(RSQLite::SQLite(), "~/sqlite_local/MS2_db_v7.db")
+# if you are updating an index which has already been processed by this script, you must first
+# remove the previous comp_group information. e.g.:
+
+# POST g2_dbas_v4_bfg/_update_by_query?wait_for_completion=false
+# {
+#   "query": {
+#    "exists": {
+#      "field": "comp_group"
+#    }
+#  },
+#   "script": {
+#     "source": "ctx._source.remove('comp_group')",
+#     "lang": "painless"
+#   }
+# }
+
+
+library(dplyr)
+index <- "g2_dbas_v5_bfg"
+config_path <- "~/config.yml"
+ec <- config::get("elastic_connect", file = config_path)
+escon <- elastic::connect(host = 'elastic-mn-01.hpc.bafg.de', port = 9200, user=ec$user, pwd=ec$pwd,
+                          transport_schema = "https")
+
+db <- DBI::dbConnect(RSQLite::SQLite(), "~/sqlite_local/MS2_db_v9.db")
 
 
 

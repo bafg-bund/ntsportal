@@ -9,9 +9,6 @@ udb_add_feature(feat, udb)
 \arguments{
 \item{udb}{}
 }
-\value{
-
-}
 \description{
 if this is not found in the database
 for now only for the case where ms1 and ms2 are present

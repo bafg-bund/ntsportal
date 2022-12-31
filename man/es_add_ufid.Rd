@@ -9,9 +9,6 @@ es_add_ufid(feat, escon, index)
 \arguments{
 \item{index}{}
 }
-\value{
-
-}
 \description{
 All the information needed is
 contained within the feature object

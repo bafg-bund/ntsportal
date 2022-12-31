@@ -95,7 +95,7 @@ es_assign_ucids <- function(escon, index = "g2_nts*", rtlim = 0.2, ufidLevel = 1
   df2 <- merge(nums, df, all.x = T, by = "ufid")
   df2[is.na(df2$rt), "rt"] <- 0
 
-  rtd <- parallelDist::parDist(as.matrix(df2$rt), method = "euclidean", threads = 6)
+  rtd <- parallelDist::parDist(as.matrix(df2$rt), method = "euclidean", threads = 10)
   message("size of rt dist object: ", format(object.size(rtd), units = "MB", standard = "SI"))
   nn <- length(df2$rt)
   
@@ -108,7 +108,9 @@ es_assign_ucids <- function(escon, index = "g2_nts*", rtlim = 0.2, ufidLevel = 1
   pairs <- lapply(which(rtd <= rtlim), rowcol, n = nn)
   rm(rtd)
   
-  pairs <- split(pairs, ceiling(seq_along(pairs)/1000))
+  pairs <- split(pairs, ceiling(seq_along(pairs)/500))
+  
+  # need to save it as you go and add tryCatch
   process_chunk <- function(chunk) {  # chunk <- pairs[[1]]
     pairsMat <- do.call("rbind", chunk)
     pairsFilt <- if (ufidType == "ufid") {
@@ -118,35 +120,43 @@ es_assign_ucids <- function(escon, index = "g2_nts*", rtlim = 0.2, ufidLevel = 1
     } else {
       stop("ufidType not found")
     }
-    chunkRes <- elastic::Search(
-      escon, index, size = 0, 
-      body = list(
-        query = list(
-          exists = list(
-            field = "ufid2"
-          )
-        ),
-        aggs = list(
-          pairs = list(
-            filters = list(
-              filters = pairsFilt
+    
+    # if server stops responding, add a pause and try again
+    keepTrying <- TRUE
+    while (keepTrying) {
+      keepTrying <- FALSE
+      chunkRes <- try(
+        elastic::Search(
+          escon, index, size = 0, 
+          body = list(
+            query = list(
+              exists = list(
+                field = "ufid2"
+              )
             ),
             aggs = list(
-              batches = list(
-                terms = list(
-                  field = "date_import",
-                  size = 1000
+              pairs = list(
+                filters = list(
+                  filters = pairsFilt
                 ),
                 aggs = list(
-                  components = list(
+                  batches = list(
                     terms = list(
-                      field = "tag",
+                      field = "date_import",
                       size = 1000
                     ),
                     aggs = list(
-                      ufids = list(
-                        cardinality = list(
-                          field = "ufid2"
+                      components = list(
+                        terms = list(
+                          field = "tag",
+                          size = 1000
+                        ),
+                        aggs = list(
+                          ufids = list(
+                            cardinality = list(
+                              field = "ufid2"
+                            )
+                          )
                         )
                       )
                     )
@@ -157,7 +167,14 @@ es_assign_ucids <- function(escon, index = "g2_nts*", rtlim = 0.2, ufidLevel = 1
           )
         )
       )
-    )
+      if (inherits(chunkRes, "try-error")) {
+        keepTrying <- TRUE
+        Sys.sleep(60)
+        warning("error occured during process_chunk, retrying on ", date())
+        saveRDS(chunk, "~/temp/ucid_temp/chunk_that_went_wrong.RDS")
+      }
+    }
+    
     cr <- chunkRes$aggregations$pairs$buckets
     
     compare_pair <- function(pairsbucket) {
@@ -172,16 +189,25 @@ es_assign_ucids <- function(escon, index = "g2_nts*", rtlim = 0.2, ufidLevel = 1
       round(totalFoundTogether / totalDocs, 2)
     }
     pairsMat <- cbind(pairsMat, vapply(cr, compare_pair, numeric(1)))
+    saveRDS(pairsMat, file = sprintf("~/temp/ucid_temp/pairsMat_%i", round(as.numeric(Sys.time())))) 
     pairsMat
   } 
   # takes a long time
   message("Starting ucid distance matrix computation on ", date())
-  pairs <- lapply(pairs, process_chunk)
+  message("processing ", length(pairs), " chunks")
+  # create folder to store temporary files
+  # first delete any previously temp folders which were not deleted
+  unlink("~/temp/ucid_temp", recursive = T)
+  dir.create("~/temp/ucid_temp")
+  pairs <- parallel::mclapply(pairs, process_chunk, mc.cores = 10)
   pairs <- do.call("rbind", pairs)
   pairs <- pairs[pairs[, 3] != 0, ]
   pairs <- pairs[!is.na(pairs[, 3]), ]
   # save in case of crash
   saveRDS(pairs, "~/temp/ucid_obj_pairs.RDS")
+  
+  # delete temp folder, since it has worked
+  unlink("~/temp/ucid_temp", recursive = T)
   # pairs <- readRDS("~/temp/ucid_obj_pairs.RDS")
   pairsVec <- unique(c(pairs[,1], pairs[,2]))
   get_ufid_comparison <- function(u1, u2, pairs, pairsVec) {
@@ -204,9 +230,19 @@ es_assign_ucids <- function(escon, index = "g2_nts*", rtlim = 0.2, ufidLevel = 1
     }
   }
   message("Starting dist_make on ", date())
-  #m <- dist_make_parallel(as.matrix(allUfids), get_ufid_comparison, 20, pairs = pairs, pairsVec = pairsVec)
-  m <- usedist::dist_make(as.matrix(allUfids), get_ufid_comparison)
+  #combObj <- readRDS("~/temp/comboGeneralMatrix.RDS")
+  cols <- seq_len(ncol(combObj))
+  
+  chunks <- split(cols, ceiling(cols/500))
+  
+  # at 6 cores already using 86% of available memory...
+  # there must be a better way... build matrix in chunks...
+  
+  
+  m <- ntsportal::dist_make_parallel(as.matrix(allUfids), get_ufid_comparison, numCores = 20, pairs = pairs, pairsVec = pairsVec)
+  #m <- usedist::dist_make(as.matrix(allUfids), get_ufid_comparison, pairs = pairs, pairsVec = pairsVec)
   saveRDS(m, "~/temp/ucid_obj_m.RDS")
+  #m <- readRDS("~/temp/ucid_obj_m.RDS")
   message("Completed on ", date())
   message("size of dist object: ", format(object.size(m), units = "MB", standard = "SI"))
   m2 <- 1-m

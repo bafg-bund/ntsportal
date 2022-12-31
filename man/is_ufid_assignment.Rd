@@ -9,9 +9,6 @@ is_ufid_assignment(feat)
 \arguments{
 \item{feat}{}
 }
-\value{
-
-}
 \description{
 Check ufid
 }

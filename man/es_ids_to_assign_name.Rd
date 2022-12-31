@@ -9,9 +9,6 @@ es_ids_to_assign_name(escon, index, comp_name, polarity)
 \arguments{
 \item{polarity}{}
 }
-\value{
-
-}
 \description{
 Get features
 }

@@ -2,7 +2,7 @@
 #' @export
 dist_make_parallel <- function(x, distance_fcn, numCores, ...) 
 { 
-  browser()
+  #browser()
   distance_from_idxs <- function(idxs) {
     i1 <- idxs[1]
     i2 <- idxs[2]
@@ -10,7 +10,32 @@ dist_make_parallel <- function(x, distance_fcn, numCores, ...)
   }
   size <- nrow(x)
   clf <- parallel::makeForkCluster(numCores)
-  d <- parallel::parApply(clf, utils::combn(size, 2), 2, distance_from_idxs)
+  comb <- RcppAlgos::comboGeneral(size, m = 2)
+  d <- parallel::parApply(clf, comb, 2, distance_from_idxs)
+  parallel::stopCluster(clf)
+  attr(d, "Size") <- size
+  xnames <- rownames(x)
+  if (!is.null(xnames)) {
+    attr(d, "Labels") <- xnames
+  }
+  attr(d, "Diag") <- FALSE
+  attr(d, "Upper") <- FALSE
+  class(d) <- "dist"
+  d
+}
+
+dist_make_parallel_temp <- function(x, distance_fcn, numCores, comb, ...) 
+{ 
+  #browser()
+  distance_from_idxs <- function(idxs) {
+    i1 <- idxs[1]
+    i2 <- idxs[2]
+    distance_fcn(x[i1, ], x[i2, ], ...)
+  }
+  size <- nrow(x)
+  clf <- parallel::makeForkCluster(numCores)
+  # passed comb externally because not able to compile RcppAlgos on Centos
+  d <- parallel::parApply(clf, comb, 2, distance_from_idxs)
   parallel::stopCluster(clf)
   attr(d, "Size") <- size
   xnames <- rownames(x)
@@ -48,8 +73,8 @@ test_config <- function() {
 #' A cardinality estimation is made. If the number of different docs
 #' (based on mz, rt, intensity, pol, start and station) and the
 #' number of docs is the same, it is assumed no duplicates. The estimation
-#' is done within 1% accuracy since the cardinality computation is fuzzy
-#' (HyperLogLog++ algorithm).
+#' is done within 5% accuracy since the cardinality computation is fuzzy
+#' (HyperLogLog++ algorithm). The question here is, is it worth it.
 #'
 #' @param escon
 #' @param index
@@ -70,9 +95,7 @@ es_no_duplicates <- function(escon, index) {
   "runtime_mappings": {
     "combi": {
       "type": "keyword",
-      "script": "emit(doc[\'intensity\'].value +
-      \' \' + doc[\'station\'].value + \' \' + doc[\'mz\'].value + \' \'
-      + doc[\'rt\'].value + \' \' + doc[\'pol\'].value + \' \' + doc[\'start\'].value)"
+      "script": "emit(doc[\'intensity\'].value + \' \' + doc[\'station\'].value + \' \' + doc[\'mz\'].value + \' \' + doc[\'rt\'].value + \' \' + doc[\'pol\'].value + \' \' + doc[\'start\'].value)"
     }
   },
   "size": 0,
@@ -87,6 +110,88 @@ es_no_duplicates <- function(escon, index) {
 }
     ')
   numDiff <- resp$aggregations$num_different$value
-  # cardinality calculation is fuzzy, assume at least 1% accuracy
-  return(abs(totDocs - numDiff) / totDocs < 0.01)
+  # cardinality calculation is fuzzy, assume at least 5% accuracy
+  return(abs(totDocs - numDiff) / totDocs < 0.05)
+}
+
+
+#' Check for consistency of documents in an ntsp index.
+#'
+#' @param escon Connection to ntsp
+#' @param index Index name
+#'
+#' @return
+#' @export
+#'
+#' @examples
+es_check_docs_fields <- function(escon, index) {
+  # check that start is present
+  res <- elastic::Search(escon, index, size = 0, body = '
+{
+  "query": {
+    "bool": {
+      "must_not": [
+        {
+          "exists": {
+            "field": "start"
+          }
+        }
+      ]
+    }
+  }
+}
+')
+  checkStart <- res$hits$total$value
+  if (checkStart > 0) {
+    logger::log_fatal("Found {checkStart} docs without start")
+    return(FALSE)
+  }
+    
+  
+  # check that mz is present
+  res2 <- elastic::Search(escon, index, size = 0, body = '
+{
+  "query": {
+    "bool": {
+      "must_not": [
+        {
+          "exists": {
+            "field": "mz"
+          }
+        }
+      ]
+    }
+  }
+}
+')
+  checkMz <- res2$hits$total$value
+  if (checkMz > 0) {
+    logger::log_fatal("Found {checkMz} docs without mz")
+    return(FALSE)
+  }
+    
+  
+  # check that station is present
+  res3 <- elastic::Search(escon, index, size = 0, body = '
+{
+  "query": {
+    "bool": {
+      "must_not": [
+        {
+          "exists": {
+            "field": "station"
+          }
+        }
+      ]
+    }
+  }
+}
+')
+  checkSta <- res2$hits$total$value
+  if (checkSta > 0) {
+    logger::log_fatal("Found {checkSta} docs without station")
+    return(FALSE)
+  }
+  logger::log_info("Consistency checks complete.")
+  return(TRUE)
 }

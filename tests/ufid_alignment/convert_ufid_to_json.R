@@ -6,7 +6,7 @@
 library(dplyr)
 
 message("Converting ufid db to json format on ", date())
-udb <- DBI::dbConnect(RSQLite::SQLite(), "~/projects/ufid/tests/ufid1.sqlite")
+udb <- DBI::dbConnect(RSQLite::SQLite(), "~/sqlite_local/ufid1.sqlite")
 
 fts <- tbl(udb, "feature") %>% left_join(tbl(udb, "retention_time"), by = "ufid") %>% collect()
 fts <- split(fts, seq_len(nrow(fts)))

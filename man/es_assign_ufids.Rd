@@ -9,9 +9,6 @@ es_assign_ufids(escon, udb, index, polarity, ufids = NULL)
 \arguments{
 \item{ufids}{if ufids is NULL (default), then all ufids will be processed}
 }
-\value{
-
-}
 \description{
 updates ufid-db as well when it is done. This can either be done for all
 ufids, or for a selection by giving a vector of integers.

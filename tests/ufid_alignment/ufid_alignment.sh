@@ -5,7 +5,7 @@ printf -v thisDate '%(%Y-%m-%d)T' -1
 
 echo "Alignment process started on $(date)"
 
-Rscript script_assign_ufids.R &> "log_ufid_$thisDate.txt"
+Rscript script_assign_ufids.R &> ~/temp/ufid_$thisDate.log
 
 # clear ufid db
 
@@ -19,7 +19,7 @@ Rscript convert_ufid_to_json.R
 
 source ~/venv/bin/activate
 
-python3 ufid_ingest.py g2_ufid1 ufid_db.json
+python3 ufid_ingest.py ~/config.yml g2_ufid1 ufid_db.json
 
 deactivate
 
@@ -28,7 +28,7 @@ echo "updated new ufid-db on $(date)"
 # assign ucids
 echo "Assigning ucids"
 
-Rscript script_assign_ucids.R &> "log_ucid_$thisDate.txt"
+Rscript script_assign_ucids.R &> "~/temp/ucid_$thisDate.log"
 
 echo "Ucid alignment complete on $(date)"
 

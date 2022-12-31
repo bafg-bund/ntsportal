@@ -1,0 +1,15 @@
+----- compute-analysis-index.R v2022-10-28 -----
+Fri Oct 28 23:20:41 2022 
+Connection to elasticsearch successful
+Deleting old json
+Writing new json
+Clearing old data
+1488 docs cleared
+Uploading new docs
+----------- ingest.sh v2022-10-25 ---------------- Submitted command: 
+/home/Jewell/projects/ntsautoeval/ingest.sh /home/Jewell/config.yml g2_dbas_upb_analysis /home/Jewell/projects/ntsportal/tests/analysis_index/reg.json 
+Ingesting /home/Jewell/projects/ntsportal/tests/analysis_index/reg.json 
+Indexing documents... Indexed 1488/1488 documents 
+Ingest successful for /home/Jewell/projects/ntsportal/tests/analysis_index/reg.json 
+-- End of script. Thank you for choosing ingest.sh, take care and goodbye. -- 
+

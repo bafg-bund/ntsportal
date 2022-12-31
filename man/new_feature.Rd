@@ -16,9 +16,6 @@ new_feature(
 \arguments{
 \item{...}{}
 }
-\value{
-
-}
 \description{
 Create feature
 }

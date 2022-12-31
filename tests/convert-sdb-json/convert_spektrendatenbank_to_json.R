@@ -6,11 +6,14 @@
 library(dplyr)
 library(lubridate)
 library(DBI)
+library(parallel)
+library(elastic)
+library(logger)
 
 # only needs to be done for newly added spectra
-afterDate <- ymd("20100101", tz = "Europe/Berlin")
+# afterDate <- ymd("20100101", tz = "Europe/Berlin")
 
-sdb <- DBI::dbConnect(RSQLite::SQLite(), "~/sqlite_local/MS2_db_v7.db")
+sdb <- DBI::dbConnect(RSQLite::SQLite(), "~/sqlite_local/MS2_db_v9.db")
 # dbListTables(sdb)
 # dbListFields(sdb, "retention_time")
 # dbListFields(sdb, "fragment")
@@ -21,8 +24,6 @@ exps <- tbl(sdb, "experiment") %>%
   left_join(tbl(sdb, "compound"), by = "compound_id") %>%
   left_join(tbl(sdb, "parameter"), by = "parameter_id") %>%
   collect()
-exps$time_added <- ymd_hms(exps$time_added, tz = "Europe/Berlin")
-exps <- subset(exps, time_added > afterDate)
 
 exps <- split(exps, seq_len(nrow(exps)))
 exps <- lapply(exps, unclass)
@@ -36,11 +37,15 @@ exps <- lapply(exps, function(doc) {
   names(doc) <- sub("^CES$", "ces", names(doc))
   doc
 })
+#expsAll <- exps
+#exps <- expsAll[600]
 
 # add ms2
-exps <- lapply(exps, function(doc) { #doc <- fts[[1]]
-  ms2 <- tbl(sdb, "fragment") %>% filter(experiment_id == !!doc$experiment_id) %>%
-    select(mz, int) %>% collect()
+# first load ms2 table into memory for speed
+ms2tbl <- tbl(sdb, "fragment") %>% collect()
+exps <- mclapply(exps, function(doc) { #doc <- fts[[1]]
+  ms2 <- ms2tbl %>% filter(experiment_id == !!doc$experiment_id) %>%
+    select(mz, int)
   # make spectrum relative to max int
   ms2$int <- ms2$int / max(ms2$int)
   ms2 <- split(ms2, seq_len(nrow(ms2)))
@@ -49,15 +54,17 @@ exps <- lapply(exps, function(doc) { #doc <- fts[[1]]
   ms2 <- lapply(ms2, as.list)
   doc$ms2 <- ms2
   doc
-})
+}, mc.cores = 16)
 
 # add rtt
-exps <- lapply(exps, function(doc) { #doc <- exps[[1]]
-  rtt <- tbl(sdb, "retention_time") %>% filter(compound_id == !!doc$compound_id) %>%
-    select(rt, chrom_method) %>% collect()
+rttbl <- tbl(sdb, "retention_time") %>% collect()
+exps <- mclapply(exps, function(doc) { #doc <- exps[[1]]
+  rtt <- rttbl %>% filter(compound_id == !!doc$compound_id) %>%
+    select(rt, chrom_method, predicted) 
   colnames(rtt) <- sub("chrom_method", "method", colnames(rtt))
-  rtt$predicted <- FALSE
   rtt$doi <- rtt$method
+  rtt$predicted <- as.logical(rtt$predicted)
+  rtt[!grepl("^dx.doi", rtt$doi), "doi"] <- NA
   rtt <- subset(rtt, !is.na(method))
   if (nrow(rtt) == 0)
     return(doc)
@@ -68,28 +75,29 @@ exps <- lapply(exps, function(doc) { #doc <- exps[[1]]
   rtt <- lapply(rtt, as.list)
   doc$rtt <- rtt
   doc
-})
+}, mc.cores = 16)
 
 
 # add experiment groups (data_source)
-
-exps <- lapply(exps, function(doc) { #doc <- exps[[1]]
-  expGroup <-  tbl(sdb, "expGroupExp") %>%
+egetbl <- tbl(sdb, "expGroupExp") %>% collect()
+egtbl <- tbl(sdb, "experimentGroup") %>% collect()
+exps <- mclapply(exps, function(doc) { #doc <- exps[[1]]
+  expGroup <- egetbl %>%
     filter(experiment_id == !!doc$experiment_id) %>%
-    left_join(tbl(sdb, "experimentGroup"), by = "experimentGroup_id") %>%
-    collect()
+    left_join(egtbl, by = "experimentGroup_id") 
   doc$data_source <- expGroup$name
   doc
-})
+}, mc.cores = 16)
 
 # add compound groups
-exps <- lapply(exps, function(doc) { #doc <- exps[[1]]
-  compGroup <-  tbl(sdb, "compGroupComp") %>%
+cgctbl <- tbl(sdb, "compGroupComp") %>% collect()
+cgtbl <- tbl(sdb, "compoundGroup") %>% collect()
+exps <- mclapply(exps, function(doc) { #doc <- exps[[1]]
+  compGroup <- cgctbl %>%
     filter(compound_id == !!doc$compound_id) %>%
-    left_join(tbl(sdb, "compoundGroup"), by = "compoundGroup_id") %>%
-    collect()
-
-  compGroup <- subset(compGroup, Negate(is.element)(name, c("BfG", "LfU")))
+    left_join(cgtbl, by = "compoundGroup_id") 
+  
+  compGroup <- subset(compGroup, Negate(is.element)(name, c("BfG", "LfU", "UBA")))
 
   if (nrow(compGroup) == 0) {
     return(doc)
@@ -97,9 +105,11 @@ exps <- lapply(exps, function(doc) { #doc <- exps[[1]]
     doc$comp_group <- compGroup$name
     return(doc)
   }
-})
+}, mc.cores = 16)
 
+#which(sapply(exps, function(doc) doc$data_source == "LfU"))
 
+#View(exps[[20007]])
 # remove fields (clean up)
 exps <- unname(exps)
 
@@ -109,14 +119,19 @@ exps <- lapply(exps, function(doc) { #doc <- exps[[1]]
   doc$parameter_id <- NULL
   doc$compound_id <- NULL
 
-  names(doc) <- sub("time_added", "date_import", names(doc))
-  doc$date_import <- round(as.numeric(doc$date_import))
-
   names(doc) <- sub("col_type", "frag_type", names(doc))
   names(doc) <- sub("isotope", "isotopologue", names(doc))
 
   doc
 })
+
+# put time_added into comment field
+exps <- lapply(exps, function(doc) { #doc <- exps[[1]]
+  doc$comment <- paste("Original time added to sqlite", doc$time_added)
+  doc$time_added <- NULL
+  doc
+})
+
 
 # remove NA values
 exps <- lapply(exps, function(doc) Filter(Negate(is.na), doc))
@@ -133,7 +148,7 @@ exps <- lapply(exps, function(doc) { #doc <- exps[[1]]
 
 # parse rt as float and predicted as boolean
 exps <- lapply(exps, function(doc) { #doc <- exps[[1]]
-  if (rtt %in% names(doc)) {
+  if ("rtt" %in% names(doc)) {
     doc$rtt <- lapply(doc$rtt, function(entry) {
     entry$rt <- as.numeric(entry$rt)
     entry$predicted <- as.logical(entry$predicted)
@@ -144,9 +159,29 @@ exps <- lapply(exps, function(doc) { #doc <- exps[[1]]
 })
 
 # remove NA values (again, just in case)
+exps <- lapply(exps, function(doc) { # doc <- exps[[1]]
+  doc$rtt <- lapply(doc$rtt, function(doc2) Filter(function(x) x != "NA", doc2))
+  doc
+})
 exps <- lapply(exps, function(doc) Filter(Negate(is.na), doc))
 exps <- lapply(exps, function(doc) Filter(function(x) length(x) != 0, doc))
 
 jsonlite::write_json(exps, "spektrendatenbank.json", pretty = T, digits = NA, auto_unbox = T)
 
 DBI::dbDisconnect(sdb)
+
+
+# delete current contents of index g2_spectral_library index
+
+
+ec <- config::get("elastic_connect", file = config_path)
+
+escon <- elastic::connect(
+  host = 'elastic.dmz.bafg.de', 
+  port = 443, user=ec$user, 
+  pwd  = ec$pwd,
+  transport_schema = "https"
+)
+
+
+

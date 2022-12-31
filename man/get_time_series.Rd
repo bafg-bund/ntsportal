@@ -10,7 +10,7 @@ get_time_series(
   station = "KOMO",
   startRange = c("2021-01-01", "2022-01-01"),
   responseField = "intensity",
-  ufidLevel = 1,
+  ufidLevel = 2,
   form = "long"
 )
 }

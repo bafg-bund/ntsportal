@@ -17,7 +17,6 @@ es_test_fpfn <- function(escon, index) {
   # escon <- elastic::connect(host = '10.140.73.204', user=ec$user, pwd=ec$pwd)
    
   # get total number of features
-  message("Starting tests at ", date())
   totFeat <- elastic::count(escon, index = index)
   totFeatMs2 <- elastic::Search(escon, index = index,size = 0, body =
   '
@@ -214,6 +213,8 @@ es_test_fpfn <- function(escon, index) {
   totFPFeatures1ufid2 <- tot_fp_features_1(problemUfid2s, "ufid2")
   
   problem_ufids_names <- function(probUfids, ufidType) {
+    if (length(probUfids) == 0)
+      return(NULL)
     probUfidsNames <- lapply(probUfids, function(uf) {
       featuresPerName <- elastic::Search(escon, index, body = sprintf('
                     {
@@ -413,7 +414,7 @@ es_test_fpfn <- function(escon, index) {
     # there should be one feature for each file, all others are fp
     sum(vapply(b, function(x) x$doc_count, numeric(1)) - 1)
   }
-  message("Computing duplicated ufid assignments to one sample on ", date())
+  logger::log_info("Computing duplicated ufid assignments to one sample")
   numberMultiAssignUfid <- sum(
     vapply(
       allUfids, 
@@ -422,7 +423,7 @@ es_test_fpfn <- function(escon, index) {
       ufidType = "ufid"
     )
   )
-  message("Computing duplicated ufid2 assignments to one sample on ", date())
+  logger::log_info("Computing duplicated ufid2 assignments to one sample")
   numberMultiAssignUfid2 <- sum(
     vapply(
       allUfid2s, 
@@ -436,7 +437,7 @@ es_test_fpfn <- function(escon, index) {
   # ucid accuracy ####
 
   # compute max sd in rt across all ucids
-  message("Computing ucid accuracy on ", date())
+  logger::log_info("Computing ucid accuracy")
   
   test_ucid <- function(ucidType) {
    ucid_rts <- elastic::Search(
@@ -478,7 +479,7 @@ es_test_fpfn <- function(escon, index) {
   mxRtDevUcid2 <- ucid2List$mxRtDevUcid
   numUcid2s <- ucid2List$numUcids
 
-  message("Completed tests at ", date())
+  logger::log_info("Completed tests")
   # Output List ####
   list(
     total_features = totFeat,

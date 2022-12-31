@@ -1,7 +1,4 @@
 default:
-  elastic_connect:
-    user: 'kevin.jewell'
-    pwd: 'g23456'
   mztol_rough_mda: 10
   mztol_mda: 7
   mztol_clustering_mda: 5

@@ -3,7 +3,7 @@ library(ggplot2)
 library(lubridate)
 index <- "g2_nts_expn"
 path_ufid_db <- "~/projects/ufid/tests/ufid1.sqlite"
-config_path <- "tests/ufid_alignment/config.yml"
+config_path <- "~/config.yml"
 path_ufid_db <- "~/HRMS_Z/sw_entwicklung/ntsportal/ufid1.sqlite"
 #config_path <- "~/config.yml"
 ec <- config::get("elastic_connect", file = config_path)
@@ -18,6 +18,8 @@ alig <- get_time_series(escon, index = "g2_nts_expn",
                 ufidLevel = 2,
                 form = "long")
 
+#alig <- read.csv("~/temp/220303_Metaalignment_pos.csv")
+
 # linegraph all data
 ggplot(subset(alig, name=="Benzotriazole"), aes(start,response, group =1))+
   geom_line()+
@@ -26,17 +28,17 @@ ggplot(subset(alig, name=="Benzotriazole"), aes(start,response, group =1))+
 # example benzotriazole
 
 ggplot() + 
-  geom_point(aes(start, response), subset(alig, ufid2 == 77 & duration == 1)) + 
-  geom_segment(aes(start, response, xend = start + duration, yend = response), subset(alig, ufid2 == 77 & duration == 14), color = "blue") +
-  geom_segment(aes(start, response, xend = start + duration, yend = response), subset(alig, ufid2 == 77 & !is.element(duration, c(1,14))), color = "red")
+  geom_point(aes(start, response), subset(alig, ufid2 == 149 & duration == 1)) + 
+  geom_segment(aes(start, response, xend = start + duration, yend = response), subset(alig, ufid2 == 149 & duration == 14), color = "blue") +
+  geom_segment(aes(start, response, xend = start + duration, yend = response), subset(alig, ufid2 == 149 & !is.element(duration, c(1,14))), color = "red")
 
 ggplot() +
-  geom_line(aes(start, response), subset(alig, ufid2 == 77 & duration == 1)) +
-  geom_step(aes(start, response), subset(alig, ufid2 == 77 & duration != 1), color = "blue")
+  geom_line(aes(start, response), subset(alig, ufid2 == 149 & duration == 1)) +
+  geom_step(aes(start, response), subset(alig, ufid2 == 149 & duration != 1), color = "blue")
 
 
 ggplot() +
-  geom_step(aes(start, response), subset(alig, ufid2 == 77))
+  geom_step(aes(start, response), subset(alig, ufid2 == 149))
 
 # go through alig table and for every composite sample, replicate the row for the number of days
 expandedRows <- lapply(seq_len(nrow(alig)), function(i) { # i <- 5
@@ -74,10 +76,10 @@ alig2 <- by(alig, list(alig$start, alig$ufid2), function(x) {
  }
 }, simplify = F)
 alig2 <- do.call("rbind", alig2)
-View(subset(alig2, ufid2 == 77))
+View(subset(alig2, ufid2 == 149))
 interv <- ymd(20210401) %--% ymd(20210601)
-alig3 <- alig2[alig2$ufid2 == 77 & sapply(alig2$start, function(x) x %within% interv) , ]
-alig3 <- alig2[alig2$ufid2 == 77, ]
+alig3 <- alig2[alig2$ufid2 == 149 & sapply(alig2$start, function(x) x %within% interv) , ]
+alig3 <- alig2[alig2$ufid2 == 149, ]
 ggplot() + geom_line(aes(start, response), alig3)
 
 

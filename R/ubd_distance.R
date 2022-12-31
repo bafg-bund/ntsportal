@@ -21,11 +21,11 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
   # library(RcppArmadillo)
   # library(dplyr)
   # set up c++ function ####
-
+  logger::log_info("Starting udb_new_ufid")
   if (!file.exists("config.yml"))
     stop("config.yml file not found")
 
-  message("compiling cpp function")
+  logger::log_info("compiling cpp function")
 
 
   mzrt_dist_FuncPtr <- RcppXPtrUtils::cppXPtr(
@@ -69,7 +69,7 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
     depends = c("RcppArmadillo")
   )
 
-  message("done.")
+  logger::log_info("done.")
 
   # other private functions ####
 
@@ -140,14 +140,14 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
   # accessing more pages until a cluster is found or no more results are returned
 
   # polarity <- "pos"
-  message("begin loop through all features")
+  logger::log_info("begin loop through all features")
   # mzPosition <- 255
   # rtPosition <- 5
   mzPosition <- 0
   rtPosition <- 0
   numUfids <- 0
   repeat {
-    message("access database from position ", mzPosition, "_", rtPosition)
+    logger::log_info("access database from position m/z {mzPosition}, rt {rtPosition}")
     res <- elastic::Search(escon, index, body = sprintf('{
   "search_after": [%.4f, %.2f],
   "sort": [
@@ -206,13 +206,14 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
   }', mzPosition, rtPosition, polarity))
 
     # if nothing is returned by the database, you have reached the end.
+    # this is where the function ends
     if (length(res$hits$hits) == 0) {
       message("All features were analyzed, no further clusters found")
       message("completed clustering and assigned ", numUfids, " new ufids")
       return(TRUE)
     }
 
-    # convert filenames to numeric hash
+    # convert filenames to numeric hash so that it can be used by armadillo
     filenames <- sapply(res$hits$hits, function(x) x[["_source"]]$filename)
     filenames <- sapply(filenames, digest::digest, algo = "xxhash32")
     filenames <- sapply(filenames, stringr::str_sub, end = -2)

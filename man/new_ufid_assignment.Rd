@@ -9,9 +9,6 @@ new_ufid_assignment(x = integer(), level = integer())
 \arguments{
 \item{level}{}
 }
-\value{
-
-}
 \description{
 New ufid
 }

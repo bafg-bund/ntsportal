@@ -9,9 +9,6 @@ es_check_feat(escon, index, id)
 \arguments{
 \item{id}{}
 }
-\value{
-
-}
 \description{
 Check es feature
 }

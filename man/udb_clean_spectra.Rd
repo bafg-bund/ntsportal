@@ -9,9 +9,6 @@ udb_clean_spectra(udb, ufid, msLevel)
 \arguments{
 \item{msLevel}{}
 }
-\value{
-
-}
 \description{
 Clean spectra within ufid db
 }
