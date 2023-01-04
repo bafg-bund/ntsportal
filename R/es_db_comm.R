@@ -153,6 +153,9 @@ es_feat_from_id <- function(escon, index, id) { # id <- "2vLQwXsB5nUKfQcuMOAv"
   if ("ms2" %in% names(doc))
     newFeat$ms2 <- data.frame(mz = sapply(doc$ms2, function(x) x$mz),
                               int = sapply(doc$ms2, function(x) x$int))
+  
+  if ("rt_clustering" %in% names(doc))
+    newFeat$rt_clustering <- doc$rt_clustering
 
   newFeat
 }
@@ -400,8 +403,7 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
                              rttol_gap_fill_min = 0.3) {
   # ufid_to_fill <- 82
 
-  message("Gap-filling on ufid ", ufid_to_fill, " started on ", date())
-
+  logger::log_info("Gap-filling on ufid {ufid_to_fill}")
 
   # get info of current features in index
   fieldsVec <- c("mz", "rt","filename", "chrom_method", "data_source",
@@ -738,18 +740,21 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
 
 # Main function - ufid assignment ####
 
+#' Assign existing ufids to features if match is found
+#' 
 #' Go sequentially through ufid-db and assign ufids in es-db
 #'
 #' updates ufid-db as well when it is done. This can either be done for all
-#' ufids, or for a selection by giving a vector of integers.
+#' ufids, or for a selection by giving a vector of integers. 
 #'
 #' @param escon
 #' @param udb
 #' @param index
 #' @param polarity
 #' @param ufids if ufids is NULL (default), then all ufids will be processed
+#' @param chromMethod name of chromatographic method to use, at the moment only "bfg_nts_rp1" possible
 #'
-#' @return TRUE if ran until the end
+#' @return TRUE if the function runs until the end (which does not mean that everything worked)
 #' @export
 #'
 #' @import dplyr
@@ -758,20 +763,21 @@ es_assign_ufids <- function(
   udb,
   index,
   polarity,
-  ufids = NULL) {
+  ufids = NULL,
+  chromMethod = "bfg_nts_rp1") {
   # library(dplyr)
   # polarity <- "pos"
-  # ufids <- 778
-  
+  # ufids <- 585
   
   # At the moment the Ufid-db is small enough to fit in memory, so load it in, everything is much
   # faster that way.
   ftt <- tbl(udb, "feature") %>% collect()
-  rtt <- tbl(udb, "retention_time") %>% collect()
+  rtt <- tbl(udb, "retention_time") %>% filter(method == chromMethod) %>% collect()
   ms2t <- tbl(udb, "ms2") %>% collect()
 
   mztol_rough <- config::get("mztol_rough_mda") / 1000
   rttol_rough <- config::get("rttol_rough_min")
+  stopifnot(is.numeric(mztol_rough), mztol_rough > 0)
 
   if (!is.null(ufids) && is.numeric(ufids)) {
     all_ufids <- as.integer(ufids)
@@ -779,7 +785,7 @@ es_assign_ufids <- function(
     all_ufids <- ftt %>% select(ufid) %>% unname() %>% unlist()
   }
 
-  for (uf in all_ufids) {  # uf <- 861L
+  for (uf in all_ufids) {  # uf <- 861L, uf <- all_ufids
     pol_ <- ftt %>% filter(ufid == !!unname(uf)) %>% select(polarity) %>% unlist()
 
     if (pol_ != polarity)
@@ -793,7 +799,6 @@ es_assign_ufids <- function(
     mz_ <- ftt %>% filter(ufid == !!unname(uf)) %>% select(mz) %>% unlist()
     rt_ <- rtt %>% filter(ufid == !!unname(uf) & method == "bfg_nts_rp1") %>%
       select(rt) %>% unlist()
-    #browser()
 
     res <- elastic::Search(escon, index, body = sprintf('
         {
@@ -824,10 +829,28 @@ es_assign_ufids <- function(
                   }
                 },
                 {
-                  "range": {
-                    "rt": {
-                      "gte": %.2f,
-                      "lte": %.2f
+                  "nested": {
+                    "path": "rtt",
+                    "query": {
+                      "bool": {
+                        "must": [
+                          {
+                            "range": {
+                              "rtt.rt": {
+                                "gte": %.2f,
+                                "lte": %.2f
+                              }
+                            }
+                          },
+                          {
+                            "term": {
+                              "rtt.method": {
+                                "value": "%s"
+                              }
+                            }
+                          }
+                        ]
+                      }
                     }
                   }
                 }
@@ -848,23 +871,26 @@ es_assign_ufids <- function(
            mz_ - mztol_rough,
            mz_ + mztol_rough,
            rt_ - rttol_rough,
-           rt_ + rttol_rough))
+           rt_ + rttol_rough,
+           chromMethod))
 
     ids <- vapply(res$hits$hits, function(x) x[["_id"]], character(1))
-
+    
+    # nothing found, next ufid
     if (length(ids) == 0)
       next
 
     # collect features and then do udb_feature_match on these
     logger::log_info("Collecting {length(ids)} features from ntsp")
     fts <- tryCatch(
-      suppressMessages(lapply(ids, es_feat_from_id, escon = escon, index = index)),
+      suppressMessages(lapply(ids, ntsportal::es_feat_from_id, escon = escon, index = index)),
       error = function(e) {
         message("Error in ufid ", uf, ". error text: ", e, "\nskipping to next ufid")
       }
     )
     if (inherits(fts, "error") || is.null(fts))
       next
+    
     logger::log_info("Matching features")
     
     matched_ufids <- tryCatch(
@@ -876,9 +902,13 @@ es_assign_ufids <- function(
         rtt = rtt,
         ms2t = ms2t,
         ufid_to_match = uf,
-        mztol = config::get("mztol_mda"),
+        mztol = config::get("mztol_mda") / 1000,
         rttol = config::get("rttol_min"),
-        ms2dpThresh = config::get("ms2_ndp_min_score")
+        ms2dpThresh = config::get("ms2_ndp_min_score"),
+        ndp_m = config::get("ms2_ndp_m"),
+        ndp_n = config::get("ms2_ndp_n"),
+        mztolms2 = config::get("mztol_ms2_ndp_mda") / 1000,
+        chromMethod = chromMethod
       ),
       error = function(e) {
         message("Error in ufid ", uf, ". error text: ", e, "\nskipping to next ufid")
@@ -897,8 +927,8 @@ es_assign_ufids <- function(
 
 
     # for each feature you want to assign a new ufid,
-    # check that this ufid hasnt already been added to the file
-    not_already_added <- function(f, ufid_to_assign) {
+    # check that this ufid hasn't already been added to the file
+    not_already_added <- function(f) {
       # get filename and import date of ft
       rs <- elastic::docs_get(escon, index, f$es_id, source = c("filename", "date_import"), 
                               verbose = FALSE)
@@ -935,12 +965,12 @@ es_assign_ufids <- function(
           }
         }
       }
-      ', fn, dateImport - 86400, dateImport + 86400, ufid_to_assign))
+      ', fn, dateImport - 86400, dateImport + 86400, f$ufid))
       rs2 <- rs2$hits$total$value
       return(rs2 == 0)
     }
     # only keep fts which have not already been added to the same file
-    safe <- vapply(fts, not_already_added, logical(1), ufid_to_assign = uf)
+    safe <- vapply(fts, not_already_added, logical(1))
     fts <- fts[safe]
 
     # make sure that for remaining fts, they all are from different files
@@ -948,7 +978,7 @@ es_assign_ufids <- function(
     if (length(fts) > 1) {
       finfo <- elastic::docs_mget(
         escon, index, ids = vapply(fts, "[[", character(1), "es_id"),
-        source = c("filename", "date_import")
+        source = c("filename", "date_import"), verbose = FALSE
       )
       finfo <- finfo$docs
       fls <- vapply(finfo, function(x) x$`_source`$filename, character(1))
@@ -966,7 +996,8 @@ es_assign_ufids <- function(
             escon,
             index,
             ids = vapply(ftgroup, "[[", character(1), "es_id"),
-            source = "intensity"
+            source = "intensity",
+            verbose = F
           )
           intens <- intens$docs
           intens <- vapply(intens, function(x) x$`_source`$intensity, numeric(1))
@@ -981,15 +1012,16 @@ es_assign_ufids <- function(
       next
     }
 
-    message("adding ufids to esdb")
-    message("total to add: ", length(fts))
+    logger::log_info("adding ufids to esdb")
+    logger::log_info("total to add: ", length(fts))
     ids_for_update <- vapply(fts, function(f) f$es_id, character(1))
 
     ntsportal::es_add_ufid_to_ids(escon, index, uf, ids_for_update)
 
-    message("updating ufid-db with new docs, using all available indexes")
+    logger::log_info("updating ufid-db with new docs, using all available indexes")
     # Use all indexes for update, otherwise averaged spectra are only from
     # last updated index.
+    
     ntsportal::udb_update(udb, escon, index = config::get("index_pattern"), uf)
 
     # run gap-filling for this ufid

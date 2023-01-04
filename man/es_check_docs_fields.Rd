@@ -2,15 +2,21 @@
 % Please edit documentation in R/utilities.R
 \name{es_check_docs_fields}
 \alias{es_check_docs_fields}
-\title{Check for consistency of documents in an es index.}
+\title{Check for consistency of documents in an ntsp index.}
 \usage{
-es_check_docs_fields(escon, index)
+es_check_docs_fields(escon, index, methodName = "bfg_nts_rp1")
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Connection to ntsp}
 
-\item{index}{}
+\item{index}{Index name}
+
+\item{methodName}{Name of method which must be provided}
+}
+\value{
+FALSE if not all consistency checks successful. TRUE otherwise.
 }
 \description{
-Check for consistency of documents in an es index.
+In order for alignment to work, all features must have at least mz and the retention time of the
+bfg method (bfg_nts_rp1) in the rtt table, either experimental or predicted.
 }

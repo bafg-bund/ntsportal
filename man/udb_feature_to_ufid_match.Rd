@@ -5,18 +5,22 @@
 \title{Find if feature and specified ufid entry are a match}
 \usage{
 udb_feature_to_ufid_match(
+  ft,
   ftt,
   rtt,
   ms2t,
-  ft,
   ufid_to_match,
   mztol = 0.007,
   rttol = 1,
-  ms2dpThresh = 50
+  ms2dpThresh = 50,
+  ndp_m = 1,
+  ndp_n = 1,
+  mztolms2 = 0.03,
+  chromMethod = "bfg_nts_rp1"
 )
 }
 \arguments{
-\item{ms2dpThresh}{}
+\item{chromMethod}{Chromatographic method to extract retention time}
 }
 \value{
 true if matching

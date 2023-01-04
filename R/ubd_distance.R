@@ -15,15 +15,17 @@
 #' @import RcppXPtrUtils
 #' @import RcppArmadillo
 #' @import dplyr
+#' @import logger
 ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2 = 2) {
   # polarity <- "pos"
   # library(RcppXPtrUtils)
   # library(RcppArmadillo)
   # library(dplyr)
   # set up c++ function ####
-  logger::log_info("Starting udb_new_ufid")
-  if (!file.exists("config.yml"))
-    stop("config.yml file not found")
+  log_info("Starting udb_new_ufid")
+  log_info("Current memory usage {round(pryr::mem_used()/1e6)} MB")
+  if (!file.exists("config.yml") || !is.numeric(config::get("ms2_ndp_min_score"))) 
+    stop("config.yml file not found or settings missing")
 
   logger::log_info("compiling cpp function")
 
@@ -69,7 +71,7 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
     depends = c("RcppArmadillo")
   )
 
-  logger::log_info("done.")
+  log_info("Compilation complete")
 
   # other private functions ####
 
@@ -114,21 +116,23 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
   }
 
   feature_compare <- function(ftx, fty, mztol = 0.005, rttol = 0.5,
-                              ms2mztol = 0.03, ms2dpthresh = 400) {
+                              ms2mztol = 0.03, ms2dpthresh = 400, ndp_m = 2, ndp_n = 1) {
     inMz <- ifelse(abs(ftx$mz - fty$mz) <= mztol, TRUE, FALSE)
-    inRt <- ifelse(abs(ftx$rt - fty$rt) <= rttol, TRUE, FALSE)
-    inMS2 <- ifelse(calc_ndp_purity(ftx$ms2, fty$ms2, 2, 1, ms2mztol) >= ms2dpthresh, TRUE, FALSE)
+    inRt <- ifelse(abs(ftx$rt_clustering - fty$rt_clustering) <= rttol, TRUE, FALSE)
+    inMS2 <- ifelse(
+      calc_ndp_purity(ftx$ms2, fty$ms2, ndp_m, ndp_n, ms2mztol) >= ms2dpthresh, TRUE, FALSE
+    )
     all(inMz, inRt, inMS2)
   }
 
   custom_distance <- function(id1, id2, mztol = 0.005, rttol = 0.5,
-                              ms2mztol = 0.03, ms2dpthresh = 400) {
+                              ms2mztol = 0.03, ms2dpthresh = 400, ndp_m = 2, ndp_n = 1) {
 
     ft1 <- listoFeatures[[id1]]
     ft2 <- listoFeatures[[id2]]
 
     ifelse(feature_compare(ft1, ft2, mztol = mztol, rttol = rttol,
-            ms2mztol = ms2mztol, ms2dpthresh = ms2dpthresh), 0, 1)
+            ms2mztol = ms2mztol, ms2dpthresh = ms2dpthresh, ndp_m = ndp_m, ndp_n = ndp_n), 0, 1)
   }
 
   # begin computations ####
@@ -140,79 +144,85 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
   # accessing more pages until a cluster is found or no more results are returned
 
   # polarity <- "pos"
-  logger::log_info("begin loop through all features")
+  log_info("begin loop through all unassigned features")
   # mzPosition <- 255
   # rtPosition <- 5
+  # use rt_clustering field instead of rt
+  # rt_clustering is at the moment the rt of the bfg_nts_rp1 method (predicted or experimental)
+  # copied from the rtt table to the top level using add-rt_clustering-field.R
   mzPosition <- 0
   rtPosition <- 0
   numUfids <- 0
   repeat {
-    logger::log_info("access database from position m/z {mzPosition}, rt {rtPosition}")
+    log_info("Access database from position m/z {mzPosition}, rt {rtPosition}")
     res <- elastic::Search(escon, index, body = sprintf('{
-  "search_after": [%.4f, %.2f],
-  "sort": [
-    {
-      "mz": {
-        "order": "asc"
-      }
-    },
-    {
-      "rt": {
-        "order": "asc"
-      }
-    }
-  ],
-  "query": {
-    "bool": {
-      "filter": [
+      "search_after": [%.4f, %.2f],
+      "sort": [
         {
-          "exists": {
-            "field": "mz"
-          }
-        },
-
-        {
-          "term": {
-            "pol": "%s"
+          "mz": {
+            "order": "asc"
           }
         },
         {
-          "exists": {
-            "field": "rt"
-          }
-        },
-        {
-          "nested": {
-            "path": "ms2",
-            "query": {
-              "exists": {
-                "field": "ms2.mz"
-              }
-            }
+          "rt_clustering": {
+            "order": "asc"
           }
         }
       ],
-      "must_not": [
-       {
-          "exists": {
-            "field": "ufid"
-          }
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "exists": {
+                "field": "mz"
+              }
+            },
+    
+            {
+              "term": {
+                "pol": "%s"
+              }
+            },
+            {
+              "exists": {
+                "field": "rt_clustering"
+              }
+            },
+            {
+              "nested": {
+                "path": "ms2",
+                "query": {
+                  "exists": {
+                    "field": "ms2.mz"
+                  }
+                }
+              }
+            }
+          ],
+          "must_not": [
+           {
+              "exists": {
+                "field": "ufid"
+              }
+            }
+          ]
         }
-      ]
-    }
-  },
-  "size": 10000,
-  "_source": ["mz", "rt", "filename"]
-  }', mzPosition, rtPosition, polarity))
-
+      },
+      "size": 10000,
+      "_source": ["mz", "rt_clustering", "filename"]
+      }', mzPosition, rtPosition, polarity))
+    
+    log_info("In total {res$hits$total$value} features left to process")
     # if nothing is returned by the database, you have reached the end.
     # this is where the function ends
     if (length(res$hits$hits) == 0) {
-      message("All features were analyzed, no further clusters found")
-      message("completed clustering and assigned ", numUfids, " new ufids")
+      log_info("All features were analyzed, no further clusters found")
+      log_info("completed clustering and assigned {numUfids} new ufids")
       return(TRUE)
     }
-
+    
+    log_info("Begining computations on the next {length(res$hits$hits)} features")
+    
     # convert filenames to numeric hash so that it can be used by armadillo
     filenames <- sapply(res$hits$hits, function(x) x[["_source"]]$filename)
     filenames <- sapply(filenames, digest::digest, algo = "xxhash32")
@@ -223,11 +233,10 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
 
     m <- cbind(
       sapply(res$hits$hits, function(x) x[["_source"]]$mz),
-      sapply(res$hits$hits, function(x) x[["_source"]]$rt),
+      sapply(res$hits$hits, function(x) x[["_source"]]$rt_clustering),
       unname(filenames)
     )
 
-    message("begin computations")
 
     # cluster these by mz-rt using parallel distance function
     dist1 <- parallelDist::parDist(m, method="custom", func = mzrt_dist_FuncPtr)
@@ -236,17 +245,20 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
     dbscanRes <- dbscan::dbscan(dist1, 0.1, minPoints1)
 
     if (length(names(table(dbscanRes$cluster))) > 1) {
-      message("Cluster with ", minPoints1," or more features found")
+      tblc <- table(dbscanRes$cluster)
+      log_info("{length(tblc) - 1} cluster(s) with {minPoints1} or more features found")
+      distrib <- hist(tblc[-1], plot = F)
+      log_info("Breaks: {paste(distrib$breaks[-1], collapse = ' ')}")
+      log_info("Counts: {paste(distrib$counts, collapse = ' ')}")
+      log_info("Current memory usage {round(pryr::mem_used()/1e6)} MB")
       # go through all viable clusters and perform second stage clustering
       # with ms1 and ms2
-      tblc <- table(dbscanRes$cluster)
       clusters <- data.frame(id = ids, cluster = dbscanRes$cluster)
       clusters <- clusters[clusters$cluster != 0, ]
       for (cl in unique(clusters$cluster)) {  # cl <- 1
         # select the cluster
         ids_of_compound <- clusters[clusters$cluster == cl, "id"]
-        message("selected cluster with ", length(ids_of_compound),
-                " features for second stage clustering")
+        log_info("Second stage clustering with {length(ids_of_compound)} features")
         # cluster these candidates again by mz-rt-ms2 with non-parallel distance function
         listoFeatures <- lapply(ids_of_compound, function(i) {
           if (ntsportal::es_check_feat(escon, index, i))
@@ -261,7 +273,9 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
           mztol = config::get("mztol_clustering_mda") / 1000,
           rttol = config::get("rttol_clustering_min"),
           ms2mztol = config::get("mztol_ms2_ndp_clustering_mda") / 1000,
-          ms2dpthresh = config::get("ms2_ndp_min_score_clustering")
+          ms2dpthresh = config::get("ms2_ndp_min_score_clustering"),
+          ndp_m = config::get("ms2_ndp_m"),
+          ndp_n = config::get("ms2_ndp_n")
         )
 
         dbscanRes2 <- dbscan::dbscan(dist2, 0.1, minPoints2)
@@ -271,13 +285,16 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
           message("no 2nd cluster with ", minPoints2 ,"or more features found, moving to next
                   viable 1st stage cluster")
         } else {
-          message("found candidate cluster with ", minPoints2," or more features after 2nd stage clustering")
-          # take the cluster with the highest number
           tblc2 <- table(dbscanRes2$cluster)
+          log_info("Found {length(tblc2) - 1} cluster(s) with {minPoints2} or more features after 2nd stage clustering")
+          distrib2 <- hist(tblc2[-1], plot = F)
+          log_info("Breaks: {paste(distrib2$breaks[-1], collapse = ' ')}")
+          log_info("Counts: {paste(distrib2$counts, collapse = ' ')}")
+          # take the cluster with the highest number
           clusters2 <- data.frame(id = names(listoFeatures), cluster = dbscanRes2$cluster)
           ids_of_compound2 <- clusters2[clusters2$cluster == which.max(tblc2[names(tblc2) != "0"]), "id"]
 
-          res2 <- elastic::docs_mget(escon, index, ids = ids_of_compound2)
+          res2 <- elastic::docs_mget(escon, index, ids = ids_of_compound2, verbose = F)
           # if docs have a name, add this to ufid db as well
           named <- vapply(res2$docs, function(x) is.element("name", names(x[["_source"]])), logical(1))
           # if more than half have a name, add these to ufid DB
@@ -285,10 +302,9 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
             comps <- vapply(res2$docs, function(x) paste(x[["_source"]][["name"]], collapse = ", "), character(1))
             comps <- comps[comps != ""]
             comp_name <- paste(unique(comps), collapse = ", ")
-            message("adding following compound(s)")
-            message(comp_name)
+            log_info("Cluster is known compound(s) {comp_name}")
           } else {
-            message("adding unknown compound(s)")
+            log_info("Cluster is not annotated")
             if (exists("comp_name"))
               rm(comp_name)
             mzs <- vapply(res2$docs, function(x) x[["_source"]][["mz"]], numeric(1))
@@ -305,14 +321,14 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
           new_ufid <- if (length(all_ufid) == 0)
             1L else min(which(!(1:(max(all_ufid)+1) %in% all_ufid)))
           new_ufid <- as.integer(new_ufid)
-
+          log_info("Adding ufid to docs in ntsp")
           ntsportal::es_add_ufid_to_ids(escon, index, new_ufid, ids_of_compound2)
 
-          message("completed updating esdb")
+          log_info("Completed updating ntsp")
 
-          message("now updating udb")
-          # here we create a new ufid, so we are only interessted in the current
-          # index.
+          log_info("Updating ufid-db")
+          # here we create a new ufid, so we are only interested in the current
+          # index (no need to use generic g2_nts* index).
           success <- tryCatch(ntsportal::udb_update(udb, escon, index, new_ufid),
                               error = function(e) {
                                 message(e, "\n")
@@ -335,7 +351,7 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
                                 stop("error but roll-back successful, ", rese$updated, " updated.")
           })
           if (success)
-            message("new ufid ", new_ufid, " successfully added")
+            log_info("new ufid ", new_ufid, " successfully added")
 
           # add name to ufid-db
           if (sum(named) > length(named) * 0.5 && exists("comp_name")) {
@@ -349,19 +365,21 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
 
           # do a ufid assignment to catch any stragglers
           ntsportal::es_assign_ufids(escon, udb, index, polarity, new_ufid)
+          
+          # success in defining new ufid, increment the counter
           numUfids <- numUfids + 1
         }
       }
-      # no clusters found after second stage clustering, move to next set of
+      # no (more) clusters found after second stage clustering, move to next set of
       # results and continue searching
-      message("Processed all available candidate clusters, moving to next page
+      log_info("Processed all available candidate clusters, moving to next page
                of features")
       # get last hit
       mzPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[1]]
       rtPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[2]]
     } else if (length(names(table(dbscanRes$cluster))) == 1 &&
                names(table(dbscanRes$cluster)) == "0") {
-      message("no 1st stage cluster with 10 or more features found, moving to next page
+      log_info("no 1st stage cluster with 10 or more features found, moving to next page
             of results")
       # get last hit
       mzPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[1]]
@@ -370,7 +388,6 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
       stop("error in initial clustering.")
     }
   }
-
 }
 
 

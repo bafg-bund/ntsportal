@@ -116,15 +116,19 @@ es_no_duplicates <- function(escon, index) {
 
 
 #' Check for consistency of documents in an ntsp index.
+#' 
+#' In order for alignment to work, all features must have at least mz and the retention time of the
+#' bfg method (bfg_nts_rp1) in the rtt table, either experimental or predicted.
 #'
 #' @param escon Connection to ntsp
 #' @param index Index name
+#' @param methodName Name of method which must be provided
 #'
-#' @return
+#' @return FALSE if not all consistency checks successful. TRUE otherwise.
 #' @export
 #'
 #' @examples
-es_check_docs_fields <- function(escon, index) {
+es_check_docs_fields <- function(escon, index, methodName = "bfg_nts_rp1") {
   # check that start is present
   res <- elastic::Search(escon, index, size = 0, body = '
 {
@@ -192,6 +196,75 @@ es_check_docs_fields <- function(escon, index) {
     logger::log_fatal("Found {checkSta} docs without station")
     return(FALSE)
   }
-  logger::log_info("Consistency checks complete.")
+  
+  
+  
+  # check that rtt is present with the right method
+  totDocs <- elastic::Search(escon, index, size = 0, body = '
+                            {
+  "query": {
+    "match_all": {}
+  }
+}
+                            ')$hits$total$value
+  
+  stopifnot(is.numeric(totDocs), length(totDocs) == 1)
+  
+  docsWithMethod <- elastic::Search(escon, index, size = 0, body = sprintf('
+                                    {
+  "query": {
+    "nested": {
+      "path": "rtt",
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "term": {
+                "rtt.method": {
+                  "value": "%s"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+                            ', methodName))$hits$total$value
+  if (docsWithMethod != totDocs) {
+    logger::log_fatal("Found {totDocs - docsWithMethod} docs without an rtt entry for {methodName}")
+    return(FALSE)
+  }
+  
+  
+  logger::log_info("Index {index} doc consistency checks complete.")
   return(TRUE)
 }
+
+
+#' Plot an ms2 spectrum for viewing
+#'
+#' @param ms2Spec data.frame with columns mz and int
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' @import ggplot2
+plot_ms2 <- function(ms2Spec) {
+  # change name of int field
+  if (!is.element("int", colnames(ms2Spec))) {
+    colnames(ms2Spec)[grep("int", colnames(ms2Spec))] <- "int"
+  }
+  ggplot(ms2Spec, aes(mz, int, label = round(mz,4))) +
+    geom_segment(aes(x = mz, xend = mz, y = 0, yend = int),
+                 stat = "identity", linewidth = .5, alpha = .5) +
+    theme_bw(base_size = 14) +
+    geom_text(data = ms2Spec[ms2Spec$int > 0.01, ], check_overlap = TRUE, vjust = -0.5) +
+    scale_y_continuous(expand = c(0, 0)) +
+    coord_cartesian(ylim = c(0, max(ms2Spec$int)*1.1), xlim = c(0, max(ms2Spec$mz) + 5)) +
+    ylab("Intensity") +
+    xlab("m/z (u)")
+}
+

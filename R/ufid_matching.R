@@ -24,6 +24,16 @@ norm_ms2 <- function(x, precursorMz, noiselevel = 0.01) {
   data.frame(mz = x$mz, int = x$int / max(x$int))
 }
 
+#' Aggregate MS2 Spectra 
+#' 
+#' Goes through the a data.frame of fragments starting with the most intense fragments and combines
+#' fragments which are within the mztolerance into one centroid with the average m/z. Potential
+#' problem with this is that instruments with radically different response factors and noise levels
+#' can not be aggregated together in this way. A more generalized approach is needed in the future
+#' based on the density distribution of spectra.
+#' 
+#' @param x data.frame containing the m/z and intensity of all fragments to be combined
+#' 
 #' @export
 clean_spectrum <- function(x, mztol = 0.005, msLevel = "ms1", precursorMz = NULL) {
   stopifnot(is.data.frame(x), ncol(x) == 2, colnames(x)[1] == "mz")
@@ -53,6 +63,7 @@ clean_spectrum <- function(x, mztol = 0.005, msLevel = "ms1", precursorMz = NULL
   newSpec
 }
 
+#' @export
 calc_ndp_fit <- function(d_spec, db_spec, ndp_m = 2, ndp_n = 1, mztolu_ = 0.015) {
   ar <- which(abs(outer(d_spec[, 1], db_spec[, 1], "-")) <= mztolu_,
               arr.ind = TRUE)  # find matching masses
@@ -218,20 +229,24 @@ udb_feature_match <- function(ftt, rtt, ms2t, ft, mztol = 0.007, rttol = 1, ms2d
 
 #' Find if feature and specified ufid entry are a match
 #'
-#'
+#' @param ft
 #' @param ftt
 #' @param rtt
 #' @param ms2t
-#' @param ft
 #' @param ufid_to_match
 #' @param mztol
 #' @param rttol
 #' @param ms2dpThresh
+#' @param ndp_m
+#' @param ndp_n
+#' @param mztolms2
+#' @param chromMethod Chromatographic method to extract retention time
 #'
 #' @return true if matching
 #' @export
-udb_feature_to_ufid_match <- function(ftt, rtt, ms2t, ft, ufid_to_match,
-                                      mztol = 0.007, rttol = 1, ms2dpThresh = 50) {
+udb_feature_to_ufid_match <- function(
+    ft, ftt, rtt, ms2t, ufid_to_match, mztol = 0.007, rttol = 1, ms2dpThresh = 50, 
+    ndp_m = 1, ndp_n = 1, mztolms2 = 0.03, chromMethod = "bfg_nts_rp1") {
   ft <- validate_feature(ft)
   # get mz
   dbmz <- ftt %>%
@@ -244,16 +259,21 @@ udb_feature_to_ufid_match <- function(ftt, rtt, ms2t, ft, ufid_to_match,
   dbrt <- rtt %>% filter(ufid == !!ufid_to_match) %>%
     select(rt) %>% .$rt
   stopifnot(length(dbrt) == 1)
-
+  
+  dataRt <- subset(ft$rtt, method == chromMethod, "rt", drop = T)
+  stopifnot(length(dataRt) == 1)
   # get ms2
 
   dbms2 <- ms2t %>% filter(ufid == !!ufid_to_match) %>% select(mz, rel_int)
-  ms2similarity <- calc_ndp_fit(
-    ft$ms2,
+  # ms2 in ntsp is not relative to max, whereas data in ufid-db is. 
+  # The noiselevel should be irrelevant, since this was cleared before ingest.
+  dataMs2 <- ntsportal::norm_ms2(ft$ms2, ft$mz, noiselevel = 0.0001)
+  ms2similarity <- ntsportal::calc_ndp_fit(
+    dataMs2,
     as.data.frame(dbms2),
-    ndp_m = config::get("ms2_ndp_m"),
-    ndp_n = config::get("ms2_ndp_n"),
-    mztolu_ = config::get("mztol_ms2_ndp_mda") / 1000
+    ndp_m = ndp_m,
+    ndp_n = ndp_n,
+    mztolu_ = mztolms2
   )
-  all(abs(dbmz - ft$mz) <= mztol, abs(dbrt - ft$rt) <= rttol, ms2similarity >= ms2dpThresh)
+  all(abs(dbmz - ft$mz) <= mztol, abs(dbrt - dataRt) <= rttol, ms2similarity >= ms2dpThresh)
 }

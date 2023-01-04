@@ -2,14 +2,29 @@
 % Please edit documentation in R/es_db_comm.R
 \name{es_assign_ufids}
 \alias{es_assign_ufids}
-\title{Go sequentially through ufid-db and assign ufids in es-db}
+\title{Assign existing ufids to features if match is found}
 \usage{
-es_assign_ufids(escon, udb, index, polarity, ufids = NULL)
+es_assign_ufids(
+  escon,
+  udb,
+  index,
+  polarity,
+  ufids = NULL,
+  chromMethod = "bfg_nts_rp1"
+)
 }
 \arguments{
 \item{ufids}{if ufids is NULL (default), then all ufids will be processed}
+
+\item{chromMethod}{name of chromatographic method to use, at the moment only "bfg_nts_rp1" possible}
+}
+\value{
+TRUE if the function runs until the end (which does not mean that everything worked)
 }
 \description{
+Go sequentially through ufid-db and assign ufids in es-db
+}
+\details{
 updates ufid-db as well when it is done. This can either be done for all
 ufids, or for a selection by giving a vector of integers.
 }

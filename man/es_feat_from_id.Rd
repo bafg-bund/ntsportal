@@ -2,7 +2,7 @@
 % Please edit documentation in R/es_db_comm.R
 \name{es_feat_from_id}
 \alias{es_feat_from_id}
-\title{Get feature from id}
+\title{Get feature (doc) from ntsp with doc-id}
 \usage{
 es_feat_from_id(escon, index, id)
 }
@@ -10,5 +10,5 @@ es_feat_from_id(escon, index, id)
 \item{id}{}
 }
 \description{
-Get feature from id
+Get feature (doc) from ntsp with doc-id
 }

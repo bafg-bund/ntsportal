@@ -16,7 +16,7 @@ License: GNU GPL-3.0 (comes with ABSOLUTELY NO WARRANTY)
 LazyData: TRUE
 Imports:
     elastic
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Suggests:
 Encoding: UTF-8
 LinkingTo: 

@@ -249,14 +249,25 @@ udb_update <- function(udb, escon, index, ufid_to_update) {  # ufid_to_update <-
     stopifnot(is.character(msLevel), length(msLevel) == 1,
               msLevel %in% c("ms1", "ms2"))
     # get all available spectra as a list
+    # at the moment we will only use BfG data. The complexities of combining data from other instr
+    # is to be tackled later
     esSpecTemp <- elastic::Search(escon, index, body = sprintf(
       '
       {
         "query": {
-          "term": {
-            "ufid": {
-              "value": %i
-            }
+          "bool": {
+            "filter": [
+              {
+                "term": {
+                  "ufid": %i
+                }
+              },
+              {
+                "term": {
+                  "data_source": "BfG"
+                }
+              }
+            ]
           }
         },
         "_source": "%s",

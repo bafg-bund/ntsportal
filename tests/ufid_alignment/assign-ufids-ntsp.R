@@ -4,36 +4,25 @@
 # usage:
 # Rscript assign-ufids-ntsp.R index_name
 # e.g.
-# Rscript assign-ufids-ntsp.R g2_nts_upb &> logdat.log
+# nohup Rscript assign-ufids-ntsp.R g2_nts_upb &> logs/ufid-alignment.log &
 
 library(ntsportal)
 library(logger)
 
-VERSION <- "2022-11-15"
+VERSION <- "2023-01-03"
 index <- commandArgs(TRUE)
+#index <- "g2_nts_bfg"
+#index <- "g2_nts_lanuv"
 path_ufid_db <- "~/sqlite_local/ufid1.sqlite"
-config_path <- "~/config.yml"
 
 # Check args
 if (!is.character(index) || length(index) != 1 || !grepl("^g2_nts", index))
   stop("Incorrect index specification")
 
-ec <- config::get("elastic_connect", file = config_path)
-
-escon <- elastic::connect(
-  host = 'elastic.dmz.bafg.de', 
-  port = 443, user=ec$user, 
-  pwd  = ec$pwd,
-  transport_schema = "https"
-)
+source("~/connect-ntsp.R")
 
 log_info("----- assign-ufids-ntsp.R v{VERSION} -----")
 log_info("Processing {index} with {path_ufid_db}")
-
-# do some checks
-if (escon$ping()$cluster_name != "bfg-elastic-cluster") {
-  stop("Connection to es-db not established")
-}
 
 # Will hang if index is not present
 log_info("{elastic::count(escon, index)} docs in index")

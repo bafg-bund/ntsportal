@@ -16,6 +16,6 @@ TRUE if no duplicates found.
 A cardinality estimation is made. If the number of different docs
 (based on mz, rt, intensity, pol, start and station) and the
 number of docs is the same, it is assumed no duplicates. The estimation
-is done within 1% accuracy since the cardinality computation is fuzzy
-(HyperLogLog++ algorithm).
+is done within 5% accuracy since the cardinality computation is fuzzy
+(HyperLogLog++ algorithm). The question here is, is it worth it.
 }
