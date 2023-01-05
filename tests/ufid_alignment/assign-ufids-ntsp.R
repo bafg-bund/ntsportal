@@ -4,7 +4,7 @@
 # usage:
 # Rscript assign-ufids-ntsp.R index_name
 # e.g.
-# nohup Rscript assign-ufids-ntsp.R g2_nts_lanuv &> logs/ufid-alignment.log &
+# nohup Rscript assign-ufids-ntsp.R g2_nts_lanuv &> ~/log-files/ufid-alignment-$(date +%y%m%d).log &
 
 library(ntsportal)
 library(logger)
@@ -26,6 +26,11 @@ stopifnot(is.numeric(config::get("ms2_ndp_min_score")))
 log_info("----- assign-ufids-ntsp.R v{VERSION} -----")
 log_info("Processing {index} with {path_ufid_db}")
 
+# test that config.yml is present (this is not the same config.yml used for ntsp password!)
+# it must be located in the current working dir and have all the settings needed for alignment.
+if (is.null(config::get("mztol_rough_mda")))
+  stop("no config.yml with settings found")
+
 # print settings
 message("**Settings**")
 setin <- yaml::read_yaml("config.yml")$default
@@ -41,6 +46,7 @@ udb <- DBI::dbConnect(RSQLite::SQLite(), path_ufid_db)
 log_info("{elastic::count(escon, index)} docs in index")
 
 stopifnot(es_check_docs_fields(escon, index))
+
 # check for duplicates
 if (!es_no_duplicates(escon, index))
   stop("Duplicate features found")
@@ -51,10 +57,6 @@ stopifnot("feature" %in% DBI::dbListTables(udb))
 # processing pos ####
 log_info("Starting pos processing.")
 
-# test that config.yml is present (this is not the same config.yml used for ntsp password!)
-# it must be located in the current working dir and have all the settings needed for alignment.
-if (is.null(config::get("mztol_rough_mda")))
-  stop("no config.yml with settings found")
 
 log_info("initial pass through ufid-db")
 tryCatch(

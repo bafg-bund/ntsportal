@@ -191,10 +191,12 @@ udb_update <- function(udb, escon, index, ufid_to_update) {
   stopifnot(resu == 1)
 
   # get average rt from db
-  # at the moment this is only for bfg_nts_rp1
-  # in the future this should be done for multiple method rt
-  
-  # rt_clustering field is used since this has been set to bfg_nts_rp1 anyway
+  # rt_clustering field is used since this has been set to bfg_nts_rp1 anyway and this
+  # is the method currently used for clustering
+  # Both experimental and predicted retention times are therefore used to build the 
+  # average. Originally the idea was to only use experimental RTs, but what about
+  # ufids only found in external data? Maybe there needs to be a query and use 
+  # predicted RTs only when experimental RTs are not available... (not done yet)
 
   res2 <- elastic::Search(escon, index, body = sprintf(
     '
@@ -243,8 +245,9 @@ udb_update <- function(udb, escon, index, ufid_to_update) {
     stopifnot(is.character(msLevel), length(msLevel) == 1,
               msLevel %in% c("ms1", "ms2"))
     # get all available spectra as a list
-    # at the moment we will only use BfG data. The complexities of combining data from other instr
-    # is to be tackled later
+    # This will get all data regardless of the source
+    # This is considered the simpler way of doing this rather than choosing the source depending
+    # on what is available
     esSpecTemp <- elastic::Search(escon, index, body = sprintf(
       '
       {
@@ -257,8 +260,13 @@ udb_update <- function(udb, escon, index, ufid_to_update) {
                 }
               },
               {
-                "term": {
-                  "data_source": "BfG"
+                "nested": {
+                  "path": "%s",
+                  "query": {
+                    "exists": {
+                      "field": "%s.mz"
+                    }
+                  }
                 }
               }
             ]
@@ -267,7 +275,7 @@ udb_update <- function(udb, escon, index, ufid_to_update) {
         "_source": "%s",
         "size": 200
       }
-    ', ufid_, msLevel)
+    ', ufid_, msLevel, msLevel, msLevel)
     )
     hits <- esSpecTemp$hits$hits
     esSpecs <- lapply(hits, function(x) {
