@@ -4,12 +4,12 @@
 # usage:
 # Rscript assign-ufids-ntsp.R index_name
 # e.g.
-# nohup Rscript assign-ufids-ntsp.R g2_nts_upb &> logs/ufid-alignment.log &
+# nohup Rscript assign-ufids-ntsp.R g2_nts_lanuv &> logs/ufid-alignment.log &
 
 library(ntsportal)
 library(logger)
 
-VERSION <- "2023-01-03"
+VERSION <- "2023-01-04"
 index <- commandArgs(TRUE)
 #index <- "g2_nts_bfg"
 #index <- "g2_nts_lanuv"
@@ -19,10 +19,23 @@ path_ufid_db <- "~/sqlite_local/ufid1.sqlite"
 if (!is.character(index) || length(index) != 1 || !grepl("^g2_nts", index))
   stop("Incorrect index specification")
 
-source("~/connect-ntsp.R")
+# check for settings
+stopifnot(file.exists("config.yml"))
+stopifnot(is.numeric(config::get("ms2_ndp_min_score")))
 
 log_info("----- assign-ufids-ntsp.R v{VERSION} -----")
 log_info("Processing {index} with {path_ufid_db}")
+
+# print settings
+message("**Settings**")
+setin <- yaml::read_yaml("config.yml")$default
+message(paste(paste(names(setin), setin, sep = ": "), collapse = "\n"))
+
+stopifnot(file.exists(path_ufid_db))
+
+# connect to databases
+source("~/connect-ntsp.R")
+udb <- DBI::dbConnect(RSQLite::SQLite(), path_ufid_db)
 
 # Will hang if index is not present
 log_info("{elastic::count(escon, index)} docs in index")
@@ -31,8 +44,7 @@ stopifnot(es_check_docs_fields(escon, index))
 # check for duplicates
 if (!es_no_duplicates(escon, index))
   stop("Duplicate features found")
-stopifnot(file.exists(path_ufid_db))
-udb <- DBI::dbConnect(RSQLite::SQLite(), path_ufid_db)
+
 stopifnot(DBI::dbIsValid(udb))
 stopifnot("feature" %in% DBI::dbListTables(udb))
 

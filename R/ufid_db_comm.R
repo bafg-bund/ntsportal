@@ -110,8 +110,10 @@ udb_add_feature <- function(feat, udb) {
 #' @export
 #'
 #' @examples
-udb_update <- function(udb, escon, index, ufid_to_update) {  # ufid_to_update <- 608L
-
+#' @import dplyr
+udb_update <- function(udb, escon, index, ufid_to_update) {  
+  # index <- "g2_nts*"
+  # ufid_to_update <- 8429L
   stopifnot(is.integer(ufid_to_update), !is.na(ufid_to_update))
 
   # get ufid polarity
@@ -191,6 +193,8 @@ udb_update <- function(udb, escon, index, ufid_to_update) {  # ufid_to_update <-
   # get average rt from db
   # at the moment this is only for bfg_nts_rp1
   # in the future this should be done for multiple method rt
+  
+  # rt_clustering field is used since this has been set to bfg_nts_rp1 anyway
 
   res2 <- elastic::Search(escon, index, body = sprintf(
     '
@@ -203,17 +207,9 @@ udb_update <- function(udb, escon, index, ufid_to_update) {  # ufid_to_update <-
         }
       },
       "aggs": {
-        "methods" : {
-          "terms": {
-            "field": "chrom_method",
-            "size": 10
-          },
-          "aggs": {
-            "art": {
-              "avg": {
-                "field": "rt"
-              }
-            }
+        "art": {
+          "avg": {
+            "field": "rt_clustering"
           }
         }
       },
@@ -222,10 +218,8 @@ udb_update <- function(udb, escon, index, ufid_to_update) {  # ufid_to_update <-
     ', ufid_to_update)
   )
 
-  rt_es <- sapply(res2$aggregations$methods$buckets,
-                  function(x) if (x$key == "bfg_nts_rp1") x$art$value else NA)
-  rt_es <- rt_es[!is.na(rt_es)]
-  stopifnot(is.double(rt_es), length(rt_es) == 1)
+  rt_es <- res2$aggregations$art$value
+  stopifnot(is.double(rt_es), length(rt_es) == 1, !is.na(rt_es))
 
   # if ufid does not exist, add it first
   all_ufids2 <- tbl(udb, "retention_time") %>% select(ufid) %>% collect() %>% unlist()

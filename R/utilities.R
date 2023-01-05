@@ -191,7 +191,7 @@ es_check_docs_fields <- function(escon, index, methodName = "bfg_nts_rp1") {
   }
 }
 ')
-  checkSta <- res2$hits$total$value
+  checkSta <- res3$hits$total$value
   if (checkSta > 0) {
     logger::log_fatal("Found {checkSta} docs without station")
     return(FALSE)
@@ -234,6 +234,28 @@ es_check_docs_fields <- function(escon, index, methodName = "bfg_nts_rp1") {
                             ', methodName))$hits$total$value
   if (docsWithMethod != totDocs) {
     logger::log_fatal("Found {totDocs - docsWithMethod} docs without an rtt entry for {methodName}")
+    return(FALSE)
+  }
+  
+  # check for rt_clustering
+  res4 <- elastic::Search(escon, index, size = 0, body = '
+{
+  "query": {
+    "bool": {
+      "must_not": [
+        {
+          "exists": {
+            "field": "rt_clustering"
+          }
+        }
+      ]
+    }
+  }
+}
+')
+  checkRtC <- res4$hits$total$value
+  if (checkRtC > 0) {
+    logger::log_fatal("Found {checkRtC} docs without rt_clustering")
     return(FALSE)
   }
   

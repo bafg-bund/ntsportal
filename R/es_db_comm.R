@@ -767,7 +767,7 @@ es_assign_ufids <- function(
   chromMethod = "bfg_nts_rp1") {
   # library(dplyr)
   # polarity <- "pos"
-  # ufids <- 585
+  # ufids <- 8429L
   
   # At the moment the Ufid-db is small enough to fit in memory, so load it in, everything is much
   # faster that way.
@@ -799,7 +799,7 @@ es_assign_ufids <- function(
     mz_ <- ftt %>% filter(ufid == !!unname(uf)) %>% select(mz) %>% unlist()
     rt_ <- rtt %>% filter(ufid == !!unname(uf) & method == "bfg_nts_rp1") %>%
       select(rt) %>% unlist()
-
+    
     res <- elastic::Search(escon, index, body = sprintf('
         {
           "query": {
