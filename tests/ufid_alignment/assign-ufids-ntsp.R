@@ -10,10 +10,12 @@ library(ntsportal)
 library(logger)
 
 VERSION <- "2023-01-04"
+path_ufid_db <- "~/sqlite_local/ufid1.sqlite"
+
 index <- commandArgs(TRUE)
 #index <- "g2_nts_bfg"
 #index <- "g2_nts_lanuv"
-path_ufid_db <- "~/sqlite_local/ufid1.sqlite"
+
 
 # Check args
 if (!is.character(index) || length(index) != 1 || !grepl("^g2_nts", index))
@@ -68,7 +70,7 @@ tryCatch(
   }
 )
 
-log_info("looking for new clusters")
+# Clustering to look for new ufids
 success <- tryCatch(ubd_new_ufid(udb, escon, index, "pos"),
                    error = function(e) {
                      log_error(e)
