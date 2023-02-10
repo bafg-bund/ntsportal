@@ -4,13 +4,18 @@
 # usage:
 # Rscript assign-ufids-ntsp.R index_name
 # e.g.
-# nohup Rscript assign-ufids-ntsp.R g2_nts_lanuv &> ~/log-files/ufid-alignment-$(date +%y%m%d).log &
+# nohup Rscript assign-ufids-ntsp.R g2_nts_bfg &> ~/log-files/ufid-alignment-$(date +%y%m%d).log &
+
+# before you start you must add rtt field and rt_clustering field to all documents
 
 library(ntsportal)
 library(logger)
+library(glue)
 
 VERSION <- "2023-01-04"
 path_ufid_db <- "~/sqlite_local/ufid1.sqlite"
+PATH_ADD_RTT <- "~/projects/ntsportal/tests/add_data/add-rtt.R"
+PATH_ADD_RT_CLUSTERING <- "~/projects/ntsportal/tests/add_data/add-rt_clustering-field.R"
 
 index <- commandArgs(TRUE)
 #index <- "g2_nts_bfg"
@@ -46,6 +51,14 @@ udb <- DBI::dbConnect(RSQLite::SQLite(), path_ufid_db)
 
 # Will hang if index is not present
 log_info("{elastic::count(escon, index)} docs in index")
+
+# add rtt field (looks at all g2_nts* indices)
+
+system(glue("Rscript {PATH_ADD_RTT}"))
+
+# add rt_cluster field to where ever this is missing
+
+system(glue("Rscript {PATH_ADD_RT_CLUSTERING}"))
 
 stopifnot(es_check_docs_fields(escon, index))
 

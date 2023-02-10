@@ -26,6 +26,9 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
   # library(glue)
   # minPoints1 = 5
   # minPoints2 = 2
+  # setwd("tests/ufid_alignment")
+  
+  
   # set up c++ function ####
   log_info("----- Starting clustering with udb_new_ufid -----")
   log_info("Current memory usage {round(pryr::mem_used()/1e6)} MB")
@@ -159,7 +162,7 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
   rtPosition <- 0
   numUfids <- 0
   repeat {
-    log_info("Access database from position m/z {mzPosition}, rt {rtPosition}")
+    log_info("Access database from position m/z {mzPosition}, rt {rtPosition}, pol {polarity}")
     res <- elastic::Search(escon, index, body = sprintf('{
       "search_after": [%.4f, %.2f],
       "sort": [
@@ -222,7 +225,8 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
     # this is where the function ends
     if (length(res$hits$hits) == 0) {
       log_info("All features were analyzed, no further clusters found")
-      log_info("completed clustering and assigned {numUfids} new ufids")
+      log_info("Current memory usage {round(pryr::mem_used()/1e6)} MB")
+      log_info("Completed clustering and assigned {numUfids} new ufids")
       return(TRUE)
     }
     
@@ -263,12 +267,16 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
       clusters <- data.frame(id = ids, cluster = dbscanRes$cluster)
       clusters <- clusters[clusters$cluster != 0, ]
       # go through all these clusters with the largest first
-      tblcdf <- as.data.frame(tblc)
+      tblcdf <- as.data.frame(tblc, stringsAsFactors = F)
       tblcdf <- tblcdf[tblcdf$Var1 != "0",]
       tblcdf <- tblcdf[order(tblcdf$Freq, decreasing = T),]
       for (cl in as.numeric(tblcdf$Var1)) {  # cl <- 259
         # select the cluster
         ids_of_compound <- clusters[clusters$cluster == cl, "id"]
+        if (length(ids_of_compound) == 0) {
+          log_warn("No docs found for cluster {cl}, moving to next")
+          next
+        }
         log_info("Second stage clustering with {length(ids_of_compound)} features")
         # cluster these candidates again by mz-rt-ms2 with non-parallel distance function
         listoFeatures <- lapply(ids_of_compound, function(i) {
@@ -307,6 +315,7 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
           # second stage clusters?
           # Are these just forgotten??? 
           # Well, when/if you redo the clustering they should be captured...
+          # TODO additional for loop needed to add each group of second stage clustering
           clusters2 <- data.frame(id = names(listoFeatures), cluster = dbscanRes2$cluster)
           ids_of_compound2 <- clusters2[clusters2$cluster == which.max(tblc2[names(tblc2) != "0"]), "id"]
           

@@ -118,7 +118,8 @@ es_no_duplicates <- function(escon, index) {
 #' Check for consistency of documents in an ntsp index.
 #' 
 #' In order for alignment to work, all features must have at least mz and the retention time of the
-#' bfg method (bfg_nts_rp1) in the rtt table, either experimental or predicted.
+#' bfg method (bfg_nts_rp1) in the rtt table, either experimental or predicted. They must also have
+#' the rt_clustering field which copies this rt to the top level 
 #'
 #' @param escon Connection to ntsp
 #' @param index Index name

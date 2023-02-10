@@ -2,6 +2,8 @@
 
 # script adding experimental rt to rtt field of all documents in ntsp
 
+# nohup Rscript ~/projects/ntsportal/tests/add_data/add-rtt.R &> ~/log-files/add-rtt-$(date +%y%m%d).log & 
+
 library(logger)
 source("~/connect-ntsp.R")
 

@@ -6,7 +6,7 @@ library(shiny)
 library(shinyBS)
 library(DT)
 library(ggplot2)
-
+library(shinymanager)
 #library(ntsworkflow)
 
 
@@ -17,7 +17,8 @@ ui <- fluidPage(
     #### Index and Filters ####
     sidebarPanel(
       width = 2,
-      textInput("index", "Index regex", "g2_nts1_bfg")
+      actionButton("credInput", "Login"),
+      textInput("index", "Index regex", "g2_nts_bfg")
       ),
     mainPanel(width = 10,
       tabsetPanel(
@@ -43,18 +44,67 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  # connect to server ####
-  config_path <- "~/projects/config.yml"
-  ec <- config::get("elastic_connect", file = config_path)
-  escon <- elastic::connect(host = '10.140.73.204', user=ec$user, pwd=ec$pwd)
+  # load settings
+  appSet <- yaml::read_yaml("ntsp-app-settings.yml")
   
-  output$pingTest <- renderText({unlist(escon$ping())})
+  # connect to server ####
+  # hold login credentials
+  creds <- reactiveValues(username = NULL, password = NULL)
+  escon <- reactiveVal()
+  loginModal <- function(failed = FALSE) {
+    modalDialog(
+      textInput("uname", "User:", placeholder = 'firstname.lastname'),
+      passwordInput("pwd", "Password:"),
+      span('Please enter username and password for elasicsearch'),
+      if (failed)
+        div(tags$b("Connection not possible, invalid credentials or bad connection", style = "color: red;")),
+      
+      footer = tagList(
+        modalButton("Cancel"),
+        actionButton("okLogin", "OK")
+      )
+    )
+  }
+  
+  observeEvent(input$credInput, {
+    showModal(loginModal())
+  })
+  
+  observeEvent(input$okLogin, {
+    # Check that login worked
+    #browser()
+    validText <- !is.null(input$uname) && nzchar(input$uname) && 
+      !is.null(input$pwd) && nzchar(input$pwd)
+    if (validText) {
+      escon(
+        elastic::connect(
+          host = appSet$host, 
+          user=input$uname, 
+          pwd=input$pwd,
+          port = 443,
+          transport_schema = "https"
+        )
+      )
+      if (escon()$ping()$cluster_name == "bfg-elastic-cluster") {
+        removeModal()
+      } else {
+        showModal(loginModal(failed = TRUE))
+      }
+      
+    } else {
+      showModal(loginModal(failed = TRUE))
+    }
+  })
+  
+  output$pingTest <- renderText({
+    unlist(escon()$ping())
+  })
   
   #### Feature tab ####
   output$featureTable <- DT::renderDataTable({
     # get features
     #browser()
-    res <- elastic::Search(escon, input$index, body = '
+    res <- elastic::Search(escon(), input$index, body = '
     {
       "query": {
         "match_all": {}
@@ -80,7 +130,7 @@ server <- function(input, output, session) {
   output$alignmentTable <- DT::renderDataTable({
     # get features grouped by ufid
     #browser()
-    res <- elastic::Search(escon, input$index, body = '
+    res <- elastic::Search(escon(), input$index, body = '
        {
         "query": {
           "match_all": {}

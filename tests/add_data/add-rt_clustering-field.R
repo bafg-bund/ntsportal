@@ -1,9 +1,15 @@
 
+# script to add rt_clustering field to all docs
 
-# script to add rt_clustering to all documents
+# nohup Rscript ~/projects/ntsportal/tests/add_data/add-rt_clustering-field.R &> ~/log-files/add-rt_clustering-$(date +%y%m%d).log &
+
+
 library(logger)
 source("~/connect-ntsp.R")
 index <- "g2_nts*"
+
+VERSION <- "2023-02-01"
+log_info("-------- add-rt_clustering.R v{VERSION} -------")
 
 # get all features without rt_clustering
 repeat {

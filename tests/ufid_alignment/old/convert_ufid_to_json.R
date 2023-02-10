@@ -1,9 +1,11 @@
 
 
-# add ufid db to elastic for data viewing
+# Add ufid db to elastic for data viewing
 
 # create json of all entries
 library(dplyr)
+library(log_info)
+
 
 message("Converting ufid db to json format on ", date())
 udb <- DBI::dbConnect(RSQLite::SQLite(), "~/sqlite_local/ufid1.sqlite")

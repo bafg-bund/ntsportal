@@ -249,7 +249,7 @@ es_add_ufid_to_ids <- function(escon, index, ufid_to_add, ids_for_update) {
       ', id_search_string, ufid_to_add))
   total_updated <- res_update$updated
   if (length(ids_for_update) == total_updated)
-    message("successful esdb update") else stop("update esdb not complete")
+    logger::log_info("successful ntsp update") else stop("update esdb not complete")
   TRUE
 }
 
@@ -284,7 +284,7 @@ es_add_ufid2_to_ids <- function(escon, index, ufid2_to_add, ids_for_update) {
       ', id_search_string, ufid2_to_add))
   total_updated <- res_update$updated
   if (length(ids_for_update) == total_updated)
-    message("successful esdb update") else stop("update esdb not complete")
+    logger::log_info("successful ntsp update") else stop("update esdb not complete")
   TRUE
 }
 
@@ -401,7 +401,10 @@ es_res_feat_list <- function(res, fields = c("mz", "pol", "rt", "chrom_method"))
 es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
                              mztol_gap_fill_mda = 5,
                              rttol_gap_fill_min = 0.3) {
-  # ufid_to_fill <- 82
+  # ufid_to_fill <- 908
+  # min_number = 2
+  # mztol_gap_fill_mda = 5
+  # rttol_gap_fill_min = 0.3
 
   logger::log_info("Gap-filling on ufid {ufid_to_fill}")
 
@@ -497,7 +500,7 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
   message("Prototype features in ", length(batches), " batches.")
   # per batch, add ids of features to update with this ufid:
   ids_to_update <- character(0)
-  for (ftsb in batches) {  # ftsb <- batches[[2]]
+  for (ftsb in batches) {  # ftsb <- batches[[1]]
 
     # find other features of the same batch without MS2 and without ufid
     mthd <- ftsb[[1]]$chrom_method
@@ -505,7 +508,6 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
     dimp <- as.integer(median(vapply(ftsb, "[[", integer(1), i = "date_import")))
     ave_mz <- mean(vapply(ftsb, "[[", numeric(1), i = "mz"))
     ave_rt <- mean(vapply(ftsb, "[[", numeric(1), i = "rt"))
-
 
     res3 <- elastic::Search(
       escon,
@@ -573,7 +575,7 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
                   },
                   {
                     "term": {
-                      "data_import": %i
+                      "date_import": %i
                     }
                   },
                   {
@@ -602,7 +604,7 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
     numCand <- res3$hits$total$value
     if (numCand == 0)
       next
-    ftCand <- es_res_feat_list(res3, fieldsVec)
+    ftCand <- ntsportal::es_res_feat_list(res3, fieldsVec)
 
     # each candidate must be from a file which does not already contain the
     # ufid to fill
@@ -675,12 +677,14 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
     #rowMax <- apply(eicmt, 1, max, na.rm = TRUE)
     #eicmtn <- sweep(eicmt, 1, rowMax, "/")
     # plot(eicmtn[15, ])
+    
 
     # dbscan clustering of dtw correlation
     distM <- parallelDist::parDist(eicmtn, method = "dtw", threads = config::get("cores"))
     # used elbow method on CBZ data to determine dbscan epsilon of 12
+    # based on the soltalol data from lanuv increase epsilon to 24
     #dbscan::kNNdistplot(distM, 3)
-    clust <- dbscan::dbscan(distM, 12, minPts = min_number)
+    clust <- dbscan::dbscan(distM, 24, minPts = min_number)
 
     # those unassigned features within group of assigned feature are ear-marked for assignment
     cdf <- data.frame(
@@ -722,7 +726,7 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
 
   }
 
-  message("found ", length(ids_to_update), " features to update (gap-fill).")
+  log_info("found {length(ids_to_update)} features to update for ufid {ufid_to_fill} (gap-fill).")
 
   # nothing found in any batches
   if (length(ids_to_update) == 0)
