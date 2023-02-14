@@ -5,6 +5,8 @@
 # Creates json of all entries, deletes current index of entries and replaces it with the current
 # json. The json is saved under ~/sqlite_local/json
 
+# nohup Rscript update-spectral-library-ntsp.R &> ~/logs/sdb-update-$(date +%y%m%d).log &
+
 library(dplyr)
 library(lubridate)
 library(DBI)
