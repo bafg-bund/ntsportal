@@ -1016,19 +1016,20 @@ es_assign_ufids <- function(
       next
     }
 
-    logger::log_info("adding ufids to esdb")
-    logger::log_info("total to add: ", length(fts))
+    logger::log_info("adding ufid {uf} to esdb")
+    logger::log_info("total to add: {length(fts)}")
     ids_for_update <- vapply(fts, function(f) f$es_id, character(1))
 
     ntsportal::es_add_ufid_to_ids(escon, index, uf, ids_for_update)
 
-    logger::log_info("updating ufid-db with new docs, using all available indexes")
+    logger::log_info("updating ufid-db with new docs of ufid {uf}, using all available indexes")
     # Use all indexes for update, otherwise averaged spectra are only from
     # last updated index.
     
     ntsportal::udb_update(udb, escon, index = config::get("index_pattern"), uf)
 
     # run gap-filling for this ufid
+    logger::log_info("Gap-filling for ufid {uf}")
 
     gapFilled <- try(
       ntsportal::es_ufid_gap_fill(

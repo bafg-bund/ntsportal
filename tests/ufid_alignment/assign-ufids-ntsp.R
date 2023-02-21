@@ -12,6 +12,12 @@ library(ntsportal)
 library(logger)
 library(glue)
 
+# for debugging purposes, isolate steps so that you can start from a predefined point.
+# 1: Pos initial pass
+# 2: Pos clustering and final pass
+# 3: Neg initial pass
+# 4: Neg clustering and final pass
+STEPS <- 1:4
 VERSION <- "2023-01-04"
 path_ufid_db <- "~/sqlite_local/ufid1.sqlite"
 PATH_ADD_RTT <- "~/projects/ntsportal/tests/add_data/add-rtt.R"
@@ -72,71 +78,56 @@ stopifnot("feature" %in% DBI::dbListTables(udb))
 # processing pos ####
 log_info("Starting pos processing.")
 
-
-log_info("initial pass through ufid-db")
-tryCatch(
-  es_assign_ufids(escon, udb, index, "pos"),
-  error = function(e) {
-    log_error(e)
-    DBI::dbDisconnect(udb)
-    log_info("Disconnected DB")
-  }
-)
+if (1 %in% STEPS) {
+  log_info("initial pass through ufid-db")
+  tryCatch(
+    es_assign_ufids(escon, udb, index, "pos"),
+    error = function(e) {
+      log_error(e)
+      DBI::dbDisconnect(udb)
+      log_info("Disconnected DB")
+    }
+  )
+} else {
+  log_info("Skipping step 1 (pos initial pass)")
+}
 
 # Clustering to look for new ufids
-success <- tryCatch(ubd_new_ufid(udb, escon, index, "pos"),
+if (2 %in% STEPS) {
+  log_info("Looking for new clusters")
+  success <- tryCatch(ubd_new_ufid(udb, escon, index, "pos"),
                    error = function(e) {
                      log_error(e)
                      DBI::dbDisconnect(udb)
                      log_info("Disconnected DB")
                    })
- 
-if (success) {
-  # sometimes we see a disconnection of DB, so just connect again
-  udb <- DBI::dbConnect(RSQLite::SQLite(), path_ufid_db)
-  log_info("no more features found to assign")
-  log_info("final pass through ufid-db")
-  # pass through all ufids one more time for good measure
-  tryCatch(es_assign_ufids(escon, udb, index, "pos"),
-           error = function(e) {
-             log_error(e)
-             DBI::dbDisconnect(udb)
-             log_info("Disconnected DB")
-           })
+  
+  if (success) {
+    # sometimes we see a disconnection of DB, so just connect again
+    udb <- DBI::dbConnect(RSQLite::SQLite(), path_ufid_db)
+    log_info("no more features found to assign")
+    log_info("final pass through ufid-db")
+    # pass through all ufids one more time for good measure
+    tryCatch(es_assign_ufids(escon, udb, index, "pos"),
+             error = function(e) {
+               log_error(e)
+               DBI::dbDisconnect(udb)
+               log_info("Disconnected DB")
+             })
+  }
+} else {
+  log_info("Skipping step 2 (pos clustering and final pass)")
 }
 
 log_info("Ended pos processing")
 
 # processing neg ####
 log_info("Starting neg processing")
-log_info("initial pass through ufid-db")
-udb <- DBI::dbConnect(RSQLite::SQLite(), path_ufid_db)
 
-tryCatch(
-  es_assign_ufids(escon, udb, index, "neg"),
-  error = function(e) {
-    log_error(e)
-    DBI::dbDisconnect(udb)
-    log_info("Disconnected DB")
-  }
-)
-
-log_info("looking for new clusters")
-success <- tryCatch(
-  ubd_new_ufid(udb, escon, index, "neg"),
-  error = function(e) {
-    log_error(e)
-    DBI::dbDisconnect(udb)
-    log_info("Disconnected DB")
-  }
-)
-
-if (success) {
+if (3 %in% STEPS) {
+  log_info("initial pass through ufid-db")
   udb <- DBI::dbConnect(RSQLite::SQLite(), path_ufid_db)
-  log_info("no more features found to assign")
   
-  # pass through all ufids one more time for good measure
-  log_info("final pass through ufid-db")
   tryCatch(
     es_assign_ufids(escon, udb, index, "neg"),
     error = function(e) {
@@ -145,6 +136,38 @@ if (success) {
       log_info("Disconnected DB")
     }
   )
+} else {
+  log_info("Skipping step 3: Neg initial pass")
+}
+
+if (4 %in% STEPS) {
+  log_info("looking for new clusters")
+  success <- tryCatch(
+    ubd_new_ufid(udb, escon, index, "neg"),
+    error = function(e) {
+      log_error(e)
+      DBI::dbDisconnect(udb)
+      log_info("Disconnected DB")
+    }
+  )
+  
+  if (success) {
+    udb <- DBI::dbConnect(RSQLite::SQLite(), path_ufid_db)
+    log_info("no more features found to assign")
+    
+    # pass through all ufids one more time for good measure
+    log_info("final pass through ufid-db")
+    tryCatch(
+      es_assign_ufids(escon, udb, index, "neg"),
+      error = function(e) {
+        log_error(e)
+        DBI::dbDisconnect(udb)
+        log_info("Disconnected DB")
+      }
+    )
+  }
+} else {
+  log_info("Skipping step 4: Neg clustering and final pass")
 }
 
 log_info("Ended neg processing")

@@ -112,8 +112,9 @@ udb_add_feature <- function(feat, udb) {
 #' @examples
 #' @import dplyr
 udb_update <- function(udb, escon, index, ufid_to_update) {  
+  # library(dplyr)
   # index <- "g2_nts*"
-  # ufid_to_update <- 8429L
+  # ufid_to_update <- 14952
   stopifnot(is.integer(ufid_to_update), !is.na(ufid_to_update))
 
   # get ufid polarity
@@ -328,7 +329,7 @@ udb_update <- function(udb, escon, index, ufid_to_update) {
   # update ufid with new MS1 spectrum
   if (!is.null(ms1spec))
     success1 <- udb_update_spectrum("ms1", "bfg_nts_rp1", ms1spec, mz_es, ufid_to_update)
-
+  
   # get new averaged MS2 spectrum
   ms2spec <- get_combined_spectrum("ms2", ufid_to_update, mztol_combine = 0.03, mz_precursor = mz_es)
   # update ufid with new MS2 spectrum
