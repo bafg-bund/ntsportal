@@ -113,7 +113,8 @@ udb_add_feature <- function(feat, udb) {
 #' @import dplyr
 udb_update <- function(udb, escon, index, ufid_to_update) {  
   # library(dplyr)
-  # index <- "g2_nts*"
+  # index <- "g2_nts_v2_bfg"
+  # ufid_to_update <- 544L
   # ufid_to_update <- 14952
   stopifnot(is.integer(ufid_to_update), !is.na(ufid_to_update))
 
@@ -339,3 +340,6 @@ udb_update <- function(udb, escon, index, ufid_to_update) {
   TRUE
 }
 
+udb_connect <- function(pth) {
+  DBI::dbConnect(RSQLite::SQLite(), pth)
+}

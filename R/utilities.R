@@ -291,3 +291,183 @@ plot_ms2 <- function(ms2Spec) {
     xlab("m/z (u)")
 }
 
+
+#' Create ufid-library 
+#'
+#' Produce an empty ufid-library (SQLite database file) at a specified location.
+#'
+#' @param pth Path to the where the SQLite file should be saved
+#'
+#' @return Prints the list of tables and returns full path to library
+#' @export
+#' @import DBI
+create_ufid_lib <- function(pth) {
+  
+  fdb <- dbConnect(RSQLite::SQLite(), pth)
+  
+  dbExecute(fdb, "PRAGMA foreign_keys = ON;")
+  
+  dbExecute(fdb, "CREATE TABLE feature (
+  ufid INTEGER PRIMARY KEY,
+  mz REAL NOT NULL,
+  isotopologue TEXT,
+  adduct TEXT,
+  compound_name TEXT,
+  cas TEXT,
+  smiles TEXT,
+  inchi TEXT,
+  formula TEXT,
+  comment TEXT,
+  polarity TEXT NOT NULL,
+  date_added INTEGER NOT NULL
+  );")
+  
+  dbExecute(fdb, "CREATE TABLE tag (
+          tag_id INTEGER PRIMARY KEY,
+          tag_text TEXT NOT NULL UNIQUE
+          );")
+  
+  dbExecute(fdb, "CREATE TABLE feature_tag (
+  tag_id INTEGER,
+  ufid INTEGER,
+  PRIMARY KEY (tag_id, ufid),
+  FOREIGN KEY (ufid)
+    REFERENCES feature (ufid)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE,
+  FOREIGN KEY (tag_id)
+    REFERENCES tag (tag_id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE
+  );")
+  
+  dbExecute(fdb, "CREATE TABLE retention_time (
+          method TEXT NOT NULL,
+          rt REAL NOT NULL,
+          ufid INTEGER NOT NULL,
+          FOREIGN KEY (ufid)
+            REFERENCES feature (ufid)
+              ON DELETE CASCADE
+              ON UPDATE CASCADE
+  );")
+  
+  dbExecute(fdb, "CREATE TABLE ms1 (
+          method TEXT NOT NULL,
+          mz REAL NOT NULL,
+          rel_int REAL NOT NULL,
+          ufid INTEGER NOT NULL,
+          FOREIGN KEY (ufid)
+            REFERENCES feature (ufid)
+              ON DELETE CASCADE
+              ON UPDATE CASCADE
+  );")
+  
+  dbExecute(fdb, "CREATE TABLE ms2 (
+          method TEXT NOT NULL,
+          mz REAL NOT NULL,
+          rel_int REAL NOT NULL,
+          ufid INTEGER NOT NULL,
+          FOREIGN KEY (ufid)
+            REFERENCES feature (ufid)
+              ON DELETE CASCADE
+              ON UPDATE CASCADE
+  );")
+  
+  dbListTables(fdb)
+  
+  dbDisconnect(fdb)
+  
+  if (file.exists(pth))
+    normalizePath(pth) else NULL 
+} 
+
+
+
+
+
+#' Remove all ufid from NTSPortal-DB and a ufid library
+#'
+#' @param escon elastic::connect connection object
+#' @param es_index index name or pattern
+#' @param ufidLibPath path to ufid-lib
+#'
+#' @return TRUE if completed
+#' @export
+#' @import dplyr
+reset_alignment <- function(escon, es_index, ufidLibPath) {
+  udb <- DBI::dbConnect(RSQLite::SQLite(), ufidLibPath)
+  elastic::docs_update_by_query(escon, es_index, body =
+                                  '
+  {
+    "query": {
+      "exists": {
+        "field": "ufid"
+      }
+    },
+    "script": {
+      "source": "ctx._source.remove(\'ufid\')",
+      "lang": "painless"
+    }
+  }
+  '
+  )
+  
+  elastic::docs_update_by_query(escon, es_index, body =
+                                  '
+  {
+    "query": {
+      "exists": {
+        "field": "ucid"
+      }
+    },
+    "script": {
+      "source": "ctx._source.remove(\'ucid\')",
+      "lang": "painless"
+    }
+  }
+  '
+  )
+  
+  
+  DBI::dbExecute(udb, "PRAGMA foreign_keys = ON;")
+  
+  DBI::dbExecute(udb, "DELETE FROM feature;")
+  nr <- c(
+    tbl(udb, "feature") %>% collect() %>% nrow(),
+    tbl(udb, "retention_time") %>% collect() %>% nrow(),
+    tbl(udb, "ms1") %>% collect() %>% nrow(),
+    tbl(udb, "ms2") %>% collect() %>% nrow()
+  )
+  if (any(nr != 0))
+    warning("Some tables still have rows left over")
+  DBI::dbDisconnect(udb)
+  invisible(TRUE)
+}
+
+
+#' Handle 429 error from elastic
+#'
+#' @param thisCnd 
+#'
+#' @return
+#' @export
+es_break <- function(thisCnd) {
+  if (is.character(thisCnd$message) && grepl("429", thisCnd$message)) {
+    logger::log_warn("429 error from ElasticSearch (overload), taking a 2 minute break")
+    Sys.sleep(120)
+  }
+}
+
+
+#' Connect to a sqlite db (ufid-library)
+#'
+#' @param pth 
+#'
+#' @return connection object
+#' @export
+conn_udb <- function(pth) {
+  DBI::dbConnect(RSQLite::SQLite(), pth)
+}
+  
+  
+  

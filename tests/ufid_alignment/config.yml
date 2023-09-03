@@ -16,4 +16,6 @@ default:
   min_number_gap_fill: 2
   cores: 6
   index_pattern: g2_nts*
+  index_name: g2_nts_bfg
+  path_ufid_lib: ~/sqlite_local/ufid1.sqlite
 

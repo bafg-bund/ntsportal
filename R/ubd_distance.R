@@ -27,12 +27,12 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
   # minPoints1 = 5
   # minPoints2 = 2
   # setwd("tests/ufid_alignment")
-  
+  #browser()
   
   # set up c++ function ####
   log_info("----- Starting clustering with udb_new_ufid -----")
   log_info("Current memory usage {round(pryr::mem_used()/1e6)} MB")
-  if (!file.exists("config.yml") || !is.numeric(config::get("ms2_ndp_min_score"))) 
+  if (!is.numeric(config::get("ms2_ndp_min_score"))) 
     stop("config.yml file not found or settings missing")
   
   logger::log_info("compiling cpp function")
@@ -155,6 +155,8 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
   log_info("begin loop through all unassigned features")
   # mzPosition <- 255
   # rtPosition <- 5
+  # mzPosition <- 171
+  # rtPosition <- 2.3
   # use rt_clustering field instead of rt
   # rt_clustering is at the moment the rt of the bfg_nts_rp1 method (predicted or experimental)
   # copied from the rtt table to the top level using add-rt_clustering-field.R
@@ -246,7 +248,7 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
       unname(filenames)
     )
     
-    
+    # 1st stage clustering ####
     # cluster these by mz-rt using parallel distance function
     dist1 <- parallelDist::parDist(m, method="custom", func = mzrt_dist_FuncPtr)
     #table(r1)
@@ -270,7 +272,8 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
       tblcdf <- as.data.frame(tblc, stringsAsFactors = F)
       tblcdf <- tblcdf[tblcdf$Var1 != "0",]
       tblcdf <- tblcdf[order(tblcdf$Freq, decreasing = T),]
-      for (cl in as.numeric(tblcdf$Var1)) {  # cl <- 259
+      
+      for (cl in as.numeric(tblcdf$Var1)) {  # cl <- 17
         # select the cluster
         ids_of_compound <- clusters[clusters$cluster == cl, "id"]
         if (length(ids_of_compound) == 0) {
@@ -286,6 +289,7 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
         names(listoFeatures) <- ids_of_compound
         listoFeatures <- Filter(Negate(is.null), listoFeatures)
         
+        # 2nd stage clustering ####
         dist2 <- usedist::dist_make(
           as.matrix(names(listoFeatures)),
           custom_distance,
@@ -346,38 +350,61 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
           new_ufid <- if (length(all_ufid) == 0)
             1L else min(which(!(1:(max(all_ufid)+1) %in% all_ufid)))
           new_ufid <- as.integer(new_ufid)
-          log_info("Adding ufid to docs in ntsp")
-          ntsportal::es_add_ufid_to_ids(escon, index, new_ufid, ids_of_compound2)
+          #browser(expr = new_ufid == 544)
+          log_info("Adding ufid {new_ufid} to docs in ntsp")
+          success <- FALSE
+          tryCatch(
+            success <- ntsportal::es_add_ufid_to_ids(escon, index, new_ufid, ids_of_compound2),
+            error = function(cnd) {
+              log_error("Error in es_add_ufid_to_ids for ufid {new_ufid}") 
+              message("Error text: ", cnd)
+            }
+          )
+          if (success) {
+            log_info("Completed updating ntsp with ufid {new_ufid}")  
+          } else {
+            log_warn("Skipping to next 1st stage cluster")
+            next
+          }
           
-          log_info("Completed updating ntsp")
+          # Wait a few seconds (it was theorized that errors in the next step
+          # are occurring because ntsp is not ready yet)
+          Sys.sleep(5)
           
-          log_info("Updating ufid-db")
+          log_info("Updating ufid-db with averaged data from NTSP")
           # here we create a new ufid, so we are only interested in the current
           # index (no need to use generic g2_nts* index).
-          success <- tryCatch(ntsportal::udb_update(udb, escon, index, new_ufid),
-                              error = function(e) {
-                                message(e, "\n")
-                                message("rolling back changes to esdb")
-                                rese <- elastic::docs_update_by_query(escon, index, body = sprintf('
-                                   {
-                                    "query": {
-                                      "term": {
-                                        "ufid": {
-                                          "value": %i
-                                        }
-                                      }
-                                    },
-                                    "script": {
-                                      "source": "ctx._source.remove(\'ufid\')",
-                                      "lang": "painless"
-                                    }
-                                  }
-                                                      ', new_ufid))
-                                stop("error but roll-back successful, ", rese$updated, " updated.")
-                              })
-          if (success)
-            log_info("new ufid ", new_ufid, " successfully added")
-          
+          success <- FALSE
+          tryCatch(
+            success <- ntsportal::udb_update(udb, escon, index, new_ufid),
+            error = function(cnd) {
+              log_error("Error in udb_update for ufid {new_ufid}")
+              message("Error text: ", cnd)
+            }
+          )
+          if (success) {
+            log_info("new ufid {new_ufid} successfully added to ufid DB")
+          } else {
+            log_warn("Rolling back changes to ntsp")
+            rese <- elastic::docs_update_by_query(escon, index, body = sprintf('
+                 {
+                  "query": {
+                    "term": {
+                      "ufid": {
+                        "value": %i
+                      }
+                    }
+                  },
+                  "script": {
+                    "source": "ctx._source.remove(\'ufid\')",
+                    "lang": "painless"
+                  }
+                }
+              ', new_ufid))
+            log_warn("Rollback of ntsp successful, ", rese$updated, " updated.")
+            log_warn("Skipping to next 1st stage cluster")
+            next
+          }
           # add name to ufid-db
           if (sum(named) > length(named) * 0.5 && exists("comp_name")) {
             DBI::dbExecute(udb, sprintf('

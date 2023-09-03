@@ -18,5 +18,6 @@ FALSE if not all consistency checks successful. TRUE otherwise.
 }
 \description{
 In order for alignment to work, all features must have at least mz and the retention time of the
-bfg method (bfg_nts_rp1) in the rtt table, either experimental or predicted.
+bfg method (bfg_nts_rp1) in the rtt table, either experimental or predicted. They must also have
+the rt_clustering field which copies this rt to the top level
 }

@@ -229,10 +229,54 @@ es_add_ufid <- function(feat, escon, index) {
 #' @export
 es_add_ufid_to_ids <- function(escon, index, ufid_to_add, ids_for_update) {
   if (length(ids_for_update) > 65536)
-    stop("exceeded maximum allowed ids")
+    stop("exceeded maximum allowed ids for ufid ", ufid_to_add)
 
   id_search_string <- paste(shQuote(ids_for_update, type = "cmd"), collapse = ", ")
-  res_update <- elastic::docs_update_by_query(escon, index, refresh = "true", body = sprintf('
+  
+  # This process produces many errors
+  # According to this post
+  # https://stackoverflow.com/questions/29810531/elasticsearch-kibana-errors-data-too-large-data-for-timestamp-would-be-la
+  # this could be helped by clearing the cache.
+  # 2023-08-26 did not help
+  # temporary, no way of getting the credentials from the escon object directly
+  #uandp <- yaml::read_yaml("~/config.yml")$default$elastic_connect
+  #logger::log_info("Clearing cache")
+  # system(sprintf('
+  #      curl -u %s:%s -H "Content-Type: application/json" -XPOST "https://%s:%i/%s/_cache/clear"
+  #      ', uandp$user, uandp$pwd, escon$host, escon$port, index))
+  
+  # updDocs <- 0
+  # for (idi in ids_for_update) { # idi <- ids_for_update[1]
+  #   Sys.sleep(1)  # 2023-08-26 added pause to maybe give 
+  #   tryCatch(
+  #     {
+  #       elastic::docs_update(
+  #         escon, index, id = idi, 
+  #         body = sprintf('
+  #           {
+  #             "script": {
+  #               "source" : "ctx._source.ufid = params.thisUfid",
+  #               "params" : {
+  #                 "thisUfid" : %i
+  #               }
+  #             }
+  #           }', ufid_to_add
+  #         )
+  #       )
+  #       updDocs <- updDocs + 1
+  #     },
+  #     error = function(cnd) {
+  #       logger::log_error("There was an error updating doc {idi} with ufid {ufid_to_add}")
+  #       message(cnd)
+  #     }
+  #   )
+  # }
+  # if (updDocs == 0)
+  #   return(FALSE)
+  # logger::log_info("{updDocs} out of {length(ids_for_update)} docs were updated with ufid {ufid_to_add}")
+  # 
+  tryCatch(
+    res_update <- elastic::docs_update_by_query(escon, index, body = sprintf('
       {
         "query": {
           "terms": {
@@ -246,10 +290,17 @@ es_add_ufid_to_ids <- function(escon, index, ufid_to_add, ids_for_update) {
           }
         }
       }
-      ', id_search_string, ufid_to_add))
+      ', id_search_string, ufid_to_add)),
+    error = function(cnd) {
+      logger::log_error("There was an error updating docs for ufid {ufid_to_add} in es_add_ufid_to_ids")
+      message(cnd)
+    }
+  )
+  if (is.null(res_update))
+    return(FALSE)
   total_updated <- res_update$updated
   if (length(ids_for_update) == total_updated)
-    logger::log_info("successful ntsp update") else stop("update esdb not complete")
+    logger::log_info("successful ntsp update of ufid {ufid_to_add}")
   TRUE
 }
 
@@ -406,7 +457,7 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
   # mztol_gap_fill_mda = 5
   # rttol_gap_fill_min = 0.3
 
-  logger::log_info("Gap-filling on ufid {ufid_to_fill}")
+  #logger::log_info("Gap-filling on ufid {ufid_to_fill}")
 
   # get info of current features in index
   fieldsVec <- c("mz", "rt","filename", "chrom_method", "data_source",
@@ -736,7 +787,7 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
   worked <- try(ntsportal::es_add_ufid_to_ids(escon, index, ufid_to_fill, ids_to_update))
 
   if (worked)
-    message("gap-filling complete") else return(0L)
+    message("gap-filling complete") else return(NULL)
 
   return(length(ids_to_update))
 }
@@ -1028,18 +1079,23 @@ es_assign_ufids <- function(
     
     ntsportal::udb_update(udb, escon, index = config::get("index_pattern"), uf)
 
-    # run gap-filling for this ufid
+    # run gap-filling for this ufid ####
     logger::log_info("Gap-filling for ufid {uf}")
 
-    gapFilled <- try(
-      ntsportal::es_ufid_gap_fill(
+    tryCatch(
+      gapFilled <- ntsportal::es_ufid_gap_fill(
         escon, index, uf, min_number = config::get("min_number_gap_fill"),
         mztol_gap_fill_mda = config::get("mztol_gap_fill_mda"),
         rttol_gap_fill_min = config::get("rttol_gap_fill_min")
-      )
+      ),
+      error = function(cnd) {
+        logger::log_warn("Gap-filling failed for ufid {uf}")
+        ntsportal::es_break(cnd)
+        message(cnd)
+      }
     )
     if (!is.numeric(gapFilled))
-      warning("gap-filling failed for ufid ", uf)
+      logger::log_warn("Gap-filling failed for ufid {uf}")
 
     logger::log_info("Completed ufid {uf}")
   }
