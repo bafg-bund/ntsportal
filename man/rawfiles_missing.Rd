@@ -2,15 +2,15 @@
 % Please edit documentation in R/add_rawfiles.R
 \name{rawfiles_missing}
 \alias{rawfiles_missing}
-\title{Check if file is m}
+\title{Check if any files are missing}
 \usage{
 rawfiles_missing(escon, rfindex)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{elastic connection object created by elastic::connect}
 
-\item{rfindex}{}
+\item{rfindex}{index name for rawfiles index}
 }
 \description{
-Check if file is m
+Check if any files are missing
 }

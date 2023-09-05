@@ -7,11 +7,11 @@
 create_dbas_index(escon, aliasName, rfIndex)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{elastic connection object created by elastic::connect}
 
 \item{aliasName}{}
 
-\item{rfIndex}{}
+\item{rfIndex}{index name for rawfiles index}
 }
 \description{
 Create a new, empty dbas index

@@ -7,7 +7,7 @@
 move_dbas_alias(escon, indexName, aliasName)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{elastic connection object created by elastic::connect}
 
 \item{indexName}{}
 

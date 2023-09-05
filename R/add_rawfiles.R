@@ -135,7 +135,7 @@ station_from_code <- function(escon, rfindex, filename, stationRegex) {
 #' 
 #' @param escon elastic connection object created by elastic::connect
 #' @param rfindex index name for rawfiles index 
-#' @param templateId 
+#' @param templateId Document ID for a document to use as a template
 #' @param newPaths 
 #' @param newStart Either "filename" (default), meaning extract the start time 
 #' from the filename or provide a start date as an 8 digit number "YYYYMMDD"

@@ -2,14 +2,14 @@
 % Please edit documentation in R/add_rawfiles.R
 \name{station_from_code}
 \alias{station_from_code}
-\title{Get station and location based on othe docs in msrawfiles index}
+\title{Get station, river, and geopoint location based on other docs in msrawfiles index}
 \usage{
 station_from_code(escon, rfindex, filename, stationRegex)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{elastic connection object created by elastic::connect}
 
-\item{rfindex}{}
+\item{rfindex}{index name for rawfiles index}
 
 \item{filename}{}
 
@@ -19,5 +19,5 @@ station_from_code(escon, rfindex, filename, stationRegex)
 list with geolocation and station name
 }
 \description{
-Get station and location based on othe docs in msrawfiles index
+Get station, river, and geopoint location based on other docs in msrawfiles index
 }

@@ -7,12 +7,12 @@
 norm_rf_paths(escon, rfindex)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{elastic connection object created by elastic::connect}
 
-\item{rfindex}{}
+\item{rfindex}{index name for rawfiles index}
 }
 \value{
-no return value
+Returns TRUE when completed (invisibly)
 }
 \description{
 Normalize all paths in the msrawfiles index
