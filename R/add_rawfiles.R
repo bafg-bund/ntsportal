@@ -173,6 +173,7 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
     )
   }
   
+  #Check if any duplicates in filenames
   check_files <- function(pths, isBlank = FALSE) {
     vapply(pths, function(pth) {
       if (!file.exists(pth))
@@ -225,6 +226,9 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
     doc <- templDoc
     doc$path <- normalizePath(pth)
     doc$filename <- basename(pth)
+    poli <- stringr::str_extract(doc$filename, "[posneg]{3}")
+    #browser()
+    stopifnot(doc$pol == poli) 
     
     # All blanks must also have a start from now on. 
     # TODO at the moment only dates can be read. This function must also
@@ -290,3 +294,67 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
   }
   
 }
+
+#' Get ID based on search parameters
+#'
+#' @param escon 
+#' @param rfindex 
+#' @param isBlank default is FALSE
+#' @param polarity 
+#' @param station 
+#' @param matrix default is spm
+#'
+#' @return string templateID
+#' @export
+#'
+find_templateid <- function(escon, rfindex, isBlank = FALSE, polarity, station, matrix = "spm") {
+    tempID <- elastic::Search(escon, rfindex, body = sprintf('
+                                                   {
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+             "station": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "term": {
+            "pol": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "term": {
+            "matrix": {
+              "value": "%s"
+            }
+          }
+        },
+        {
+          "term": {
+            "blank": {
+              "value": %s
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_source": false,
+  "size": 1
+}
+
+', station, polarity, matrix, ifelse(isBlank, "true", "false") ))
+    if (tempID$hits$total$value == 0) {
+      warning("search have no hits")
+      return(NULL)
+    }
+      tempID$hits$hits[[1]]$`_id`
+}
+
+
+
