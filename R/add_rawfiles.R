@@ -4,8 +4,8 @@
 #' The maximum allowed number of return ids is 10000. This function will
 #' hang if there are more than 10000 docs in the index
 #'  
-#' @param escon 
-#' @param rfindex 
+#' @param escon elastic connection object created by elastic::connect
+#' @param rfindex index name for rawfiles index
 #'
 #' @return character vector of IDs
 #'
@@ -21,10 +21,10 @@ get_all_ids <- function(escon, rfindex) {
   vapply(res$hits$hits, "[[", i = "_id", character(1))
 }
 
-#' Check if file is m
+#' Check if any files are missing
 #'
-#' @param escon 
-#' @param rfindex 
+#' @param escon elastic connection object created by elastic::connect
+#' @param rfindex index name for rawfiles index 
 #'
 #' @return
 rawfiles_missing <- function(escon, rfindex) {
@@ -36,10 +36,10 @@ rawfiles_missing <- function(escon, rfindex) {
 
 #' Normalize all paths in the msrawfiles index
 #'
-#' @param escon 
-#' @param rfindex 
+#' @param escon elastic connection object created by elastic::connect
+#' @param rfindex index name for rawfiles index
 #'
-#' @return no return value
+#' @return Returns TRUE when completed (invisibly)
 #' @export
 #'
 norm_rf_paths <- function(escon, rfindex) {
@@ -72,13 +72,14 @@ norm_rf_paths <- function(escon, rfindex) {
     if (resi2$result != "updated")
       warning("In id ", idi, " doc not updated")
   }
+  invisible(TRUE)
 }
 
 
 #' Get station, river, and geopoint location based on other docs in msrawfiles index
 #' 
-#' @param escon 
-#' @param rfindex 
+#' @param escon elastic connection object created by elastic::connect
+#' @param rfindex index name for rawfiles index
 #' @param filename 
 #' @param stationRegex Must have brackets for stringr::str_match 
 #'
@@ -102,7 +103,7 @@ station_from_code <- function(escon, rfindex, filename, stationRegex) {
   regex2 <- sub("\\(.*\\)", stationCode, regex2)
   
   # Find which other docs have this identifier
-  
+  # TODO need to also add km if it is present
   res <- elastic::Search(escon, rfindex, body = sprintf('
                                                         {
   "query": {
@@ -132,8 +133,8 @@ station_from_code <- function(escon, rfindex, filename, stationRegex) {
 
 #' Add new MS measurement files to msrawfiles index
 #' 
-#' @param escon 
-#' @param rfindex 
+#' @param escon elastic connection object created by elastic::connect
+#' @param rfindex index name for rawfiles index 
 #' @param templateId 
 #' @param newPaths 
 #' @param newStart Either "filename" (default), meaning extract the start time 
@@ -309,8 +310,8 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
 
 #' Get ID based on search parameters
 #'
-#' @param escon 
-#' @param rfindex 
+#' @param escon elastic connection object created by elastic::connect
+#' @param rfindex index name for rawfiles index 
 #' @param isBlank boolean default is FALSE
 #' @param polarity 
 #' @param station
@@ -320,52 +321,56 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
 #' @export
 #'
 find_templateid <- function(escon, rfindex, isBlank = FALSE, polarity, station, matrix = "spm") {
-    tempID <- elastic::Search(escon, rfindex, body = sprintf('
-                                                   {
-  "query": {
-    "bool": {
-      "must": [
+    tempID <- elastic::Search(
+      escon, rfindex, body = 
+      sprintf('
         {
-          "term": {
-             "station": {
-              "value": "%s"
+          "query": {
+            "bool": {
+              "must": [
+                {
+                  "term": {
+                     "station": {
+                      "value": "%s"
+                    }
+                  }
+                },
+                {
+                  "term": {
+                    "pol": {
+                      "value": "%s"
+                    }
+                  }
+                },
+                {
+                  "term": {
+                    "matrix": {
+                      "value": "%s"
+                    }
+                  }
+                },
+                {
+                  "term": {
+                    "blank": {
+                      "value": %s
+                    }
+                  }
+                }
+              ]
             }
-          }
-        },
-        {
-          "term": {
-            "pol": {
-              "value": "%s"
-            }
-          }
-        },
-        {
-          "term": {
-            "matrix": {
-              "value": "%s"
-            }
-          }
-        },
-        {
-          "term": {
-            "blank": {
-              "value": %s
-            }
-          }
+          },
+          "_source": false,
+          "size": 1
         }
-      ]
-    }
-  },
-  "_source": false,
-  "size": 1
-}
-
-', station, polarity, matrix, ifelse(isBlank, "true", "false") ))
-    if (tempID$hits$total$value == 0) {
-      warning("search have no hits")
-      return(NULL)
-    }
-      tempID$hits$hits[[1]]$`_id`
+        ', 
+        station, polarity, matrix, ifelse(isBlank, "true", "false")
+      )
+  )
+  if (tempID$hits$total$value == 0) {
+    warning("search have no hits")
+    return(NULL)
+  }
+  tempID$hits$hits[[1]]$`_id`
 }
 
 

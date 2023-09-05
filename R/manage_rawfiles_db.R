@@ -21,9 +21,9 @@ dbas_index_from_alias <- function(aliasName, dateNum = NULL) {
 
 #' Create a new, empty dbas index 
 #'
-#' @param escon 
+#' @param escon elastic connection object created by elastic::connect
 #' @param aliasName 
-#' @param rfIndex 
+#' @param rfIndex index name for rawfiles index
 #'
 #' @return
 #' @export
@@ -167,7 +167,7 @@ create_dbas_index <- function(escon, aliasName, rfIndex) {
 
 #' Remove the old alias and create a new one
 #'
-#' @param escon 
+#' @param escon elastic connection object created by elastic::connect
 #' @param indexName 
 #' @param aliasName 
 #'
@@ -203,12 +203,16 @@ move_dbas_alias <- function(escon, indexName, aliasName) {
 
 #' Change the path of a document in a rawfiles db
 #'
-#' @param escon 
-#' @param rfindex 
-#' @param oldPath 
-#' @param newPath 
+#' @param escon elastic connection object created by elastic::connect
+#' @param rfindex index name for rawfiles index
+#' @param oldPath Current path in rawfiles index, file must exist
+#' @param newPath New path, file must exist
 #'
-#' @return
+#' @details
+#' Both files must exist when making the change. The function takes some time 
+#' because it compares md5-checksums of the two files.
+#' 
+#' @return TRUE if change was successful (invisibly)
 #' @export
 #'
 change_msrawfile_path <- function(escon, rfindex, oldPath, newPath) {
@@ -231,11 +235,14 @@ change_msrawfile_path <- function(escon, rfindex, oldPath, newPath) {
     }
     ', normalizePath(oldPath))
   )
-  if (res1$hits$total$value != 1)
-    stop(oldPath, " not found in ", rfindex, " index")
-  docId <- as.character(res1$hits$hits[[1]]["_id"])
-  res2 <- elastic::docs_update(escon, rfindex, id = docId, body = 
-    sprinf('
+  if (res1$hits$total$value == 0) {
+    warning(oldPath, " not found in ", rfindex, " index. No change made.")
+  } else if (res1$hits$total$value > 1) {
+    stop(oldPath, " found more than once in ", rfindex, " index. Please correct.")
+  } else {
+    docId <- as.character(res1$hits$hits[[1]]["_id"])
+    res2 <- elastic::docs_update(escon, rfindex, id = docId, body = 
+                                   sprintf('
      {
         "script": {
           "source": "ctx._source.path = \'%s\'",
@@ -243,6 +250,7 @@ change_msrawfile_path <- function(escon, rfindex, oldPath, newPath) {
         }
       }
      ', normalizePath(newPath))                               
-  )
-  
+    )
+    invisible(res2$result == "updated")
+  }
 }
