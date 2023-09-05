@@ -141,14 +141,20 @@ station_from_code <- function(escon, rfindex, filename, stationRegex) {
 #' @param newStation Either be "same_as_template" (default), which will
 #' copy the value from the template document, or "filename", meaning extract
 #' the station and loc values from the code in the filename (will compare to 
-#' other docs in msrawfiles index) or provide a list of length 2 with station 
+#' other docs in msrawfiles index) or provide a list of length 3 with station, river  
 #' and loc values. See details.
 #'
 #' @details newStation can be either "same_as_template" or "filename" or
 #' a new fixed station name and location (list with fields "station", "river" and "loc")
 #' "loc" being a geopoint with fields "lat" and "lon"
 #' if it is in the filename it will use the dbas_station_regex field in
-#' the index to get the station information from another doc in the index
+#' the index to get the station information from another doc in the index. Station and
+#' river names all lowercase and no spaces and no special characters. 
+#' For the station name use the convention <river_town_position> where position is l, r or m for 
+#' left, right, middle. If there is no obvious town but km
+#' is known, then use the convention <river_km> for the station name. If neither 
+#' town or km is known, use the convention <river_description> where description
+#' is some indication of the location. 
 #' 
 #' @return
 #' @export
