@@ -75,7 +75,7 @@ norm_rf_paths <- function(escon, rfindex) {
 }
 
 
-#' Get station and location based on othe docs in msrawfiles index
+#' Get station, river, and geopoint location based on other docs in msrawfiles index
 #' 
 #' @param escon 
 #' @param rfindex 
@@ -111,7 +111,7 @@ station_from_code <- function(escon, rfindex, filename, stationRegex) {
     }
   },
   "size": 10000,
-  "_source": ["station", "loc"]
+  "_source": ["station", "loc", "river"]
 }
 ', regex2))
   
@@ -124,8 +124,10 @@ station_from_code <- function(escon, rfindex, filename, stationRegex) {
   stopifnot(length(unique(st)) == 1)
   locs <- lapply(hits, function(doc) doc[["_source"]][["loc"]])
   stopifnot(all(outer(locs, locs, Vectorize(all.equal))))
+  rivs <- vapply(hits, function(doc) doc[["_source"]][["river"]], character(1))
+  stopifnot(length(unique(st)) == 1)
   
-  list(station = st[1], loc = locs[[1]])
+  list(station = st[1], loc = locs[[1]], river = rivs[1])
 }
 
 #' Add new MS measurement files to msrawfiles index
@@ -143,7 +145,7 @@ station_from_code <- function(escon, rfindex, filename, stationRegex) {
 #' and loc values. See details.
 #'
 #' @details newStation can be either "same_as_template" or "filename" or
-#' a new fixed station name and location (list with fields "station" and "loc")
+#' a new fixed station name and location (list with fields "station", "river" and "loc")
 #' "loc" being a geopoint with fields "lat" and "lon"
 #' if it is in the filename it will use the dbas_station_regex field in
 #' the index to get the station information from another doc in the index
@@ -160,14 +162,15 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
     stop("Files not found")
   # for now newStart must be filename or a new start date
   stopifnot(newStart == "filename" || grepl("^\\d{8}$", newStart))
-  stopifnot(newStation %in% c("same_as_template", "filename") || is.list(newStation))
-  
+  stopifnot(any(newStation %in% c("same_as_template", "filename")) || is.list(newStation))
   if (is.list(newStation)) {
     stopifnot(
-      length(newStation) == 2, 
-      all(c("station", "loc") %in% names(newStation)),
+      length(newStation) == 3, 
+      all(c("station", "loc", "river") %in% names(newStation)),
       is.character(newStation$station),
       length(newStation$station) == 1,
+      is.character(newStation$river),
+      length(newStation$river) == 1,
       all(c("lat", "lon") %in% names(newStation$loc)),
       all(vapply(newStation$loc, is.numeric, logical(1)))
     )
@@ -226,8 +229,7 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
     doc <- templDoc
     doc$path <- normalizePath(pth)
     doc$filename <- basename(pth)
-    poli <- stringr::str_extract(doc$filename, "[posneg]{3}")
-    #browser()
+    poli <- stringr::str_extract(doc$filename, "pos|neg")
     stopifnot(doc$pol == poli) 
     
     # All blanks must also have a start from now on. 
@@ -245,7 +247,7 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
     if (is.na(doc$start))
       stop("File ", pth, " produced an NA start date")
     
-    if (newStation == "filename") {
+    if (!is.list(newStation) && newStation == "filename") {
       stopifnot("dbas_station_regex" %in% names(doc))
       staList <- station_from_code(
         escon = escon, 
@@ -253,19 +255,23 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
         filename = doc$filename,
         stationRegex = doc$dbas_station_regex
       )
-      if (is.list(staList) && length(staList) == 2 && 
+      if (is.list(staList) && length(staList) == 3 && 
           all(c("station", "loc") %in% names(staList))) {
         doc$station <- staList$station
-        doc$loc <- staList$loc  
+        doc$loc <- staList$loc
+        doc$river <- staList$river
       } else {
         stop("Station parsing in file ", pth, " failed")
       }
     } else if (is.list(newStation)) {
       doc$station <- newStation$station
       doc$loc <- newStation$loc
+      doc$river <- newStation$river
     }
     
     doc$date_import <- as.integer(Sys.time())
+    # Alphabetically sort names for easy reading
+    doc <- doc[order(names(doc))]
     doc
   })
   
@@ -299,10 +305,10 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
 #'
 #' @param escon 
 #' @param rfindex 
-#' @param isBlank default is FALSE
+#' @param isBlank boolean default is FALSE
 #' @param polarity 
-#' @param station 
-#' @param matrix default is spm
+#' @param station
+#' @param matrix character default is "spm"
 #'
 #' @return string templateID
 #' @export
