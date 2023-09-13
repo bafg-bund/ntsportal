@@ -10,3 +10,5 @@ add-rawfiles-check.json
 tests/iris_add_rawfiles
 tests/new-detections
 tests/stats-report
+tests/Iris_add_rawfiles
+
