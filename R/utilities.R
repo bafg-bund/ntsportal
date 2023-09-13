@@ -395,39 +395,72 @@ create_ufid_lib <- function(pth) {
 #' @export
 #' @import dplyr
 reset_alignment <- function(escon, es_index, ufidLibPath) {
+  
+  elastic::docs_update_by_query(escon, es_index, body =
+    '
+    {
+      "query": {
+        "exists": {
+          "field": "ufid"
+        }
+      },
+      "script": {
+        "source": "ctx._source.remove(\'ufid\')",
+        "lang": "painless"
+      }
+    }
+    '
+  )
+  
+  elastic::docs_update_by_query(escon, es_index, body =
+    '
+    {
+      "query": {
+        "exists": {
+          "field": "ucid"
+        }
+      },
+      "script": {
+        "source": "ctx._source.remove(\'ucid\')",
+        "lang": "painless"
+      }
+    }
+    '
+  )
+  
+  elastic::docs_update_by_query(escon, es_index, body =
+                                  '
+    {
+      "query": {
+        "exists": {
+          "field": "ufid"
+        }
+      },
+      "script": {
+        "source": "ctx._source.remove(\'ufid2\')",
+        "lang": "painless"
+      }
+    }
+    '
+  )
+  
+  elastic::docs_update_by_query(escon, es_index, body =
+                                  '
+    {
+      "query": {
+        "exists": {
+          "field": "ucid"
+        }
+      },
+      "script": {
+        "source": "ctx._source.remove(\'ucid2\')",
+        "lang": "painless"
+      }
+    }
+    '
+  )
+  
   udb <- DBI::dbConnect(RSQLite::SQLite(), ufidLibPath)
-  elastic::docs_update_by_query(escon, es_index, body =
-                                  '
-  {
-    "query": {
-      "exists": {
-        "field": "ufid"
-      }
-    },
-    "script": {
-      "source": "ctx._source.remove(\'ufid\')",
-      "lang": "painless"
-    }
-  }
-  '
-  )
-  
-  elastic::docs_update_by_query(escon, es_index, body =
-                                  '
-  {
-    "query": {
-      "exists": {
-        "field": "ucid"
-      }
-    },
-    "script": {
-      "source": "ctx._source.remove(\'ucid\')",
-      "lang": "painless"
-    }
-  }
-  '
-  )
-  
   
   DBI::dbExecute(udb, "PRAGMA foreign_keys = ON;")
   
@@ -468,6 +501,19 @@ es_break <- function(thisCnd) {
 conn_udb <- function(pth) {
   DBI::dbConnect(RSQLite::SQLite(), pth)
 }
+
+# TODO general function for adding a value to es
+# what to do with numbers and logicals?
+es_add_value <- function(escon, index, esid, fieldName, value) {
   
+  elastic::docs_update(escon, index, esid, body = sprintf('
+                                                          {
+  "script": {
+    "source": "ctx._source.%s = \'%s\'",
+    "lang": "painless"
+    }
+  }    
+  ', fieldName, value))
+}  
   
   

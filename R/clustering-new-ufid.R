@@ -3,21 +3,30 @@
 
 #' Add new ufid entry by dbscan clustering
 #'
+#' This is the main function for the clustering stage of NTSP alignment.
+#' New features, which do not yet have a ufid entry, are clustered based on 
+#' their similarity (within tolerances) in the m/z, tR and MS2 domains. New 
+#' ufids are added both to NTSP and ufid-db.
 #'
+#' @param ubd ufid database connection object (DBI::dbConnect) 
+#' @param escon NTSPortal connection object (elastic::connect)
+#' @param index Index name
+#' @param polarity polarity of features to process
+#' @param minPoints1 minimum number of features for first stage clustering
+#' @param minPoints2 minimum number of features for second stage clustering
+#' @param mzPosition minimum mz (Da) for returning new features from NTSPortal
+#' @param rtPosition minimum RT (min) for returning new features from NTSPortal
 #'
-#' @param ubd
-#' @param escon
-#' @param index
-#' @param polarity
-#'
-#' @return ufid which was added successful, otherwise 0
+#' @return TRUE if the function ended successfully
 #' @export
+#' 
 #' @import RcppXPtrUtils
 #' @import RcppArmadillo
 #' @import dplyr
 #' @import logger
 #' @import glue
-ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2 = 2) {
+ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, 
+                         minPoints2 = 2, mzPosition = 0, rtPosition = 0) {
   # polarity <- "pos"
   # library(RcppXPtrUtils)
   # library(RcppArmadillo)
@@ -27,7 +36,6 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
   # minPoints1 = 5
   # minPoints2 = 2
   # setwd("tests/ufid_alignment")
-  #browser()
   
   # set up c++ function ####
   log_info("----- Starting clustering with udb_new_ufid -----")
@@ -37,7 +45,7 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
   
   logger::log_info("compiling cpp function")
   
-  
+  # Define c++ function for 1st stage clustering
   mzrt_dist_FuncPtr <- RcppXPtrUtils::cppXPtr(
     sprintf("
       double customDist(const arma::mat &A, const arma::mat &B) {
@@ -160,8 +168,7 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
   # use rt_clustering field instead of rt
   # rt_clustering is at the moment the rt of the bfg_nts_rp1 method (predicted or experimental)
   # copied from the rtt table to the top level using add-rt_clustering-field.R
-  mzPosition <- 0
-  rtPosition <- 0
+  
   numUfids <- 0
   repeat {
     log_info("Access database from position m/z {mzPosition}, rt {rtPosition}, pol {polarity}")
@@ -276,8 +283,8 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
       for (cl in as.numeric(tblcdf$Var1)) {  # cl <- 17
         # select the cluster
         ids_of_compound <- clusters[clusters$cluster == cl, "id"]
-        if (length(ids_of_compound) == 0) {
-          log_warn("No docs found for cluster {cl}, moving to next")
+        if (length(ids_of_compound) < minPoints2) {
+          log_warn("Not enough docs found for cluster {cl}, moving to next")
           next
         }
         log_info("Second stage clustering with {length(ids_of_compound)} features")
@@ -356,7 +363,11 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
           tryCatch(
             success <- ntsportal::es_add_ufid_to_ids(escon, index, new_ufid, ids_of_compound2),
             error = function(cnd) {
-              log_error("Error in es_add_ufid_to_ids for ufid {new_ufid}") 
+              log_error("Error in es_add_ufid_to_ids for ufid {new_ufid}")
+              log_error("In total, {length(ids_of_compound2)} docs were to be updated")
+              log_error("Current mzPosition: {mzPosition}")
+              log_error("Current rtPosition: {rtPosition}")
+              log_error("Current 1st stage cluster: {cl}")
               message("Error text: ", cnd)
             }
           )
@@ -379,6 +390,9 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, minPoints2
             success <- ntsportal::udb_update(udb, escon, index, new_ufid),
             error = function(cnd) {
               log_error("Error in udb_update for ufid {new_ufid}")
+              log_error("Current mzPosition: {mzPosition}")
+              log_error("Current rtPosition: {rtPosition}")
+              log_error("Current 1st stage cluster: {cl}")
               message("Error text: ", cnd)
             }
           )

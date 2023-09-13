@@ -3,6 +3,13 @@
 # Utility functions ####
 
 
+#' Return one non-aligned feature (without a ufid)
+#' 
+#' @param escon Elasticsearch connection object created by elastic::connect
+#' @param index Elasticsearch index name
+#'
+#' @return returns a ntsportal::feature object
+#'
 #' @export
 feature_no_ufid <- function(escon, index) {
 
@@ -33,7 +40,14 @@ feature_no_ufid <- function(escon, index) {
               pol = doc$pol, es_id = res$hits$hits[[1]]$`_id`)
 }
 
+#' Return a feature, annotated with Carbamazepine, without a ufid
+#'
+#' @param escon Elasticsearch connection object created by elastic::connect
+#' @param index Elasticsearch index name
+#'
+#' @return returns a ntsportal::feature object
 #' @export
+#'
 feature_no_ufid_cbz <- function(escon, index) {
 
   res <- elastic::Search(escon, index, body = '
@@ -80,61 +94,60 @@ feature_no_ufid_cbz <- function(escon, index) {
 }
 
 
-#' Get features
+#' Get non-aligned features from a particular compound and polarity
 #'
-#' @param escon
-#' @param index
-#' @param comp_name
-#' @param polarity
+#' @param escon Elasticsearch connection object created by elastic::connect
+#' @param index Elasticsearch index name
+#' @param compName length 1 character
+#' @param polarity length 1 character ("pos", "neg")
 #'
-#' @return
+#' @return character vector NTSP IDs for features (max. 10000)
 #' @export
 #'
-#' @examples
-es_ids_to_assign_name <- function(escon, index, comp_name, polarity) {
+es_ids_to_assign_name <- function(escon, index, compName, polarity) {
   res <- elastic::Search(escon, index, body = sprintf('
-                         {
-  "query": {
-    "bool": {
-      "must_not": [
-        {
-          "exists": {
-            "field": "ufid"
+  {
+    "query": {
+      "bool": {
+        "must_not": [
+          {
+            "exists": {
+              "field": "ufid"
+            }
           }
-        }
-      ],
-      "filter": [
-        {
-          "term": {
-            "name": "%s"
+        ],
+        "filter": [
+          {
+            "term": {
+              "name": "%s"
+            }
+          },
+          {
+            "term": {
+              "pol": "%s"
+            }
           }
-        },
-        {
-          "term": {
-            "pol": "%s"
-          }
-        }
-      ]
-    }
-  },
-  "_source": false,
-  "size": 10000
-}
-                         ', comp_name, polarity))
+        ]
+      }
+    },
+    "_source": false,
+    "size": 10000
+  }
+  ', compName, polarity))
   message("Total found: ", res$hits$total$value)
   sapply(res$hits$hits, function(x) x[["_id"]])
 }
 
-#' Get feature (doc) from ntsp with doc-id
+#' Get feature (doc) from ntsp with a document-ID
 #'
-#' @param escon
-#' @param index
-#' @param id
+#' @param escon Elasticsearch connection object created by elastic::connect
+#' @param index Elasticsearch index name
+#' @param id Elasticsearch document ID
 #'
-#' @return
+#' @return ntsportal::feature object
+#' 
 #' @export
 #'
-#' @examples
 es_feat_from_id <- function(escon, index, id) { # id <- "2vLQwXsB5nUKfQcuMOAv"
   res <- elastic::docs_get(escon, index, id)
   doc <- res[["_source"]]
@@ -160,11 +173,11 @@ es_feat_from_id <- function(escon, index, id) { # id <- "2vLQwXsB5nUKfQcuMOAv"
   newFeat
 }
 
-#' Check es feature
+#' Check feature 
 #'
-#' @param escon
-#' @param index
-#' @param id
+#' @param escon Elasticsearch connection object created by elastic::connect
+#' @param index Elasticsearch index name
+#' @param id character ID length 1
 #'
 #' @return
 #' @export
@@ -195,11 +208,12 @@ es_check_feat <- function(escon, index, id) {
 #'
 #' All the information needed is
 #' contained within the feature object
-#' @param feat
-#' @param escon
-#' @param index
+#' 
+#' @param feat ntsporta::feature object
+#' @param escon Elasticsearch connection object created by elastic::connect
+#' @param index Elasticsearch index name
 #'
-#' @return
+#' @return TRUE if update successful
 #' @export
 es_add_ufid <- function(feat, escon, index) {
   feat <- validate_feature(feat)
@@ -220,12 +234,14 @@ es_add_ufid <- function(feat, escon, index) {
 
 #' Add ufid entry to a list of features in elasticsearch
 #'
-#' @param escon
-#' @param index
-#' @param ufid_to_add
-#' @param ids_for_update
+#' This function often leads to errors
+#' 
+#' @param escon Elasticsearch connection object created by elastic::connect
+#' @param index Elasticsearch index name
+#' @param ufid_to_add integer length 1 ufid to add
+#' @param ids_for_update character of document IDs, max. 65536
 #'
-#' @return TRUE if successful
+#' @return TRUE if update successful
 #' @export
 es_add_ufid_to_ids <- function(escon, index, ufid_to_add, ids_for_update) {
   if (length(ids_for_update) > 65536)
@@ -233,48 +249,7 @@ es_add_ufid_to_ids <- function(escon, index, ufid_to_add, ids_for_update) {
 
   id_search_string <- paste(shQuote(ids_for_update, type = "cmd"), collapse = ", ")
   
-  # This process produces many errors
-  # According to this post
-  # https://stackoverflow.com/questions/29810531/elasticsearch-kibana-errors-data-too-large-data-for-timestamp-would-be-la
-  # this could be helped by clearing the cache.
-  # 2023-08-26 did not help
-  # temporary, no way of getting the credentials from the escon object directly
-  #uandp <- yaml::read_yaml("~/config.yml")$default$elastic_connect
-  #logger::log_info("Clearing cache")
-  # system(sprintf('
-  #      curl -u %s:%s -H "Content-Type: application/json" -XPOST "https://%s:%i/%s/_cache/clear"
-  #      ', uandp$user, uandp$pwd, escon$host, escon$port, index))
-  
-  # updDocs <- 0
-  # for (idi in ids_for_update) { # idi <- ids_for_update[1]
-  #   Sys.sleep(1)  # 2023-08-26 added pause to maybe give 
-  #   tryCatch(
-  #     {
-  #       elastic::docs_update(
-  #         escon, index, id = idi, 
-  #         body = sprintf('
-  #           {
-  #             "script": {
-  #               "source" : "ctx._source.ufid = params.thisUfid",
-  #               "params" : {
-  #                 "thisUfid" : %i
-  #               }
-  #             }
-  #           }', ufid_to_add
-  #         )
-  #       )
-  #       updDocs <- updDocs + 1
-  #     },
-  #     error = function(cnd) {
-  #       logger::log_error("There was an error updating doc {idi} with ufid {ufid_to_add}")
-  #       message(cnd)
-  #     }
-  #   )
-  # }
-  # if (updDocs == 0)
-  #   return(FALSE)
-  # logger::log_info("{updDocs} out of {length(ids_for_update)} docs were updated with ufid {ufid_to_add}")
-  # 
+   
   tryCatch(
     res_update <- elastic::docs_update_by_query(escon, index, body = sprintf('
       {
@@ -293,6 +268,11 @@ es_add_ufid_to_ids <- function(escon, index, ufid_to_add, ids_for_update) {
       ', id_search_string, ufid_to_add)),
     error = function(cnd) {
       logger::log_error("There was an error updating docs for ufid {ufid_to_add} in es_add_ufid_to_ids")
+      logger::log_error("In total, {length(ids_for_update)} docs were to be updated")
+      if (is.character(cnd) && length(cnd) == 1 && grepl("429", cnd)) {
+        elastic::cat_pending_tasks(escon)
+        elastic::cat_thread_pool(escon)
+      }
       message(cnd)
     }
   )
@@ -306,10 +286,10 @@ es_add_ufid_to_ids <- function(escon, index, ufid_to_add, ids_for_update) {
 
 #' Add ufid2 entry to a list of features in elasticsearch
 #'
-#' @param escon
-#' @param index
-#' @param ufid2_to_add
-#' @param ids_for_update
+#' @param escon Elasticsearch connection object created by elastic::connect
+#' @param index Elasticsearch index name
+#' @param ufid2_to_add integer length 1 ufid2 to add
+#' @param ids_for_update character of document IDs, max. 65536
 #'
 #' @return TRUE if successful
 #' @export
@@ -340,58 +320,13 @@ es_add_ufid2_to_ids <- function(escon, index, ufid2_to_add, ids_for_update) {
 }
 
 
-# TODO
-# EIC matching (gap filling) ####
-# for each batch, check if there are features (with same mz,rt) without ms2
-# in neighboring measurements
-
-# if these features have correlating EICs then they should get the same ufid.
-
-
-
-# for each ft in fts get list of ids of features which
-# i) are same mz and rt ii) have no ms2 iii) are from the same batch
-# iv) have correlating EIC
-
-# this function returns a vector of es_ids of matching features, NA for no matches
-
-# This function adds ufids to features without ms2 but in the same batch
-# there must be X MS2 features from the same batch to allow gap filling
-# for each feature
-
-# es_feat_from_ufid <- function(escon, index, ufid_to_get,
-#                               fields = c("mz", "pol", "rt", "chrom_method")) {
-#   stopifnot(all(c("mz", "pol", "rt", "chrom_method") %in% fields))
-#
-#   res1 <- elastic::Search(
-#     escon,
-#     index,
-#     source = c("mz", "rt","filename", "chrom_method", "data_source", "date_import", "eic", "pol"),
-#     size = 10000,
-#     body = sprintf(
-#       '
-#       {
-#         "query": {
-#           "term": {
-#             "ufid": %i
-#           }
-#         }
-#       }
-#       ',
-#       ufid_to_fill
-#     )
-#   )
-#
-# }
-
-
 #' Reformat results from elastic into a list of features
 #'
 #' Given a result list from elastic::Search, reformat this into a list of
 #' features of the feature class.
 #'
-#' @param res
-#' @param fields which fields should be included in the features (at leaste mz,
+#' @param res response list from elastic::Search
+#' @param fields which fields should be included in the features (at least mz,
 #' rt, pol and chrom_method must be included)
 #'
 #' @return list of feature objects
@@ -439,8 +374,8 @@ es_res_feat_list <- function(res, fields = c("mz", "pol", "rt", "chrom_method"))
 #' Candidate features (based on mz and rt) are joined to already assigned features
 #' and all features are clustered based on dtw correlation of EICs followed by DBSCAN clustering.
 #'
-#' @param escon
-#' @param index
+#' @param escon Elasticsearch connection object created by elastic::connect
+#' @param index Elasticsearch index name
 #' @param ufid_to_fill
 #' @param min_number minimum number of MS2 ufids needed in the cluster to assign
 #' ufid to other features in that cluster
@@ -802,9 +737,9 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
 #' updates ufid-db as well when it is done. This can either be done for all
 #' ufids, or for a selection by giving a vector of integers. 
 #'
-#' @param escon
+#' @param escon Elasticsearch connection object created by elastic::connect
 #' @param udb
-#' @param index
+#' @param index Elasticsearch index name
 #' @param polarity
 #' @param ufids if ufids is NULL (default), then all ufids will be processed
 #' @param chromMethod name of chromatographic method to use, at the moment only "bfg_nts_rp1" possible

@@ -20,7 +20,8 @@ add_rawfiles(
 
 \item{templateId}{Document ID for a document to use as a template}
 
-\item{newPaths}{}
+\item{newPaths}{Character vector of full paths to new rawfiles which are to 
+be added, must be mzXML files.}
 
 \item{newStart}{Either "filename" (default), meaning extract the start time 
 from the filename or provide a start date as an 8 digit number "YYYYMMDD"}

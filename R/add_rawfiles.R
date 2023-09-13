@@ -136,7 +136,8 @@ station_from_code <- function(escon, rfindex, filename, stationRegex) {
 #' @param escon elastic connection object created by elastic::connect
 #' @param rfindex index name for rawfiles index 
 #' @param templateId Document ID for a document to use as a template
-#' @param newPaths 
+#' @param newPaths Character vector of full paths to new rawfiles which are to 
+#' be added, must be mzXML files.
 #' @param newStart Either "filename" (default), meaning extract the start time 
 #' from the filename or provide a start date as an 8 digit number "YYYYMMDD"
 #' @param newStation Either be "same_as_template" (default), which will
@@ -167,7 +168,10 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
   fileFound <- vapply(newPaths, file.exists, logical(1))
   if (!all(fileFound))
     stop("Files not found")
-  # for now newStart must be filename or a new start date
+  fileKind <- vapply(newPaths, grepl, pattern = "\\.mzX?ML$", logical(1))
+  if (!all(fileKind))
+    stop("Files are not all .mzXML files")
+  # For now newStart must be filename or a new start date
   stopifnot(newStart == "filename" || grepl("^\\d{8}$", newStart))
   stopifnot(any(newStation %in% c("same_as_template", "filename")) || is.list(newStation))
   if (is.list(newStation)) {
@@ -372,6 +376,5 @@ find_templateid <- function(escon, rfindex, isBlank = FALSE, polarity, station, 
   }
   tempID$hits$hits[[1]]$`_id`
 }
-
 
 
