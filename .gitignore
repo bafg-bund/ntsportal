@@ -7,3 +7,4 @@ ntsportal_github
 tests/msrawfiles/
 tests/ufid_alignment/
 add-rawfiles-check.json
+test/iris_add_rawfiles

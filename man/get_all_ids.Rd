@@ -7,9 +7,9 @@
 get_all_ids(escon, rfindex)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{elastic connection object created by elastic::connect}
 
-\item{rfindex}{}
+\item{rfindex}{index name for rawfiles index}
 }
 \value{
 character vector of IDs
