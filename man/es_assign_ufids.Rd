@@ -14,6 +14,10 @@ es_assign_ufids(
 )
 }
 \arguments{
+\item{escon}{Elasticsearch connection object created by elastic::connect}
+
+\item{index}{Elasticsearch index name}
+
 \item{ufids}{if ufids is NULL (default), then all ufids will be processed}
 
 \item{chromMethod}{name of chromatographic method to use, at the moment only "bfg_nts_rp1" possible}

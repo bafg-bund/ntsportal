@@ -7,7 +7,13 @@
 es_add_ufid2_to_ids(escon, index, ufid2_to_add, ids_for_update)
 }
 \arguments{
-\item{ids_for_update}{}
+\item{escon}{Elasticsearch connection object created by elastic::connect}
+
+\item{index}{Elasticsearch index name}
+
+\item{ufid2_to_add}{integer length 1 ufid2 to add}
+
+\item{ids_for_update}{character of document IDs, max. 65536}
 }
 \value{
 TRUE if successful

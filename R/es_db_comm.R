@@ -232,6 +232,34 @@ es_add_ufid <- function(feat, escon, index) {
     TRUE else FALSE
 }
 
+#' Delete all ufid entries for a ufid
+#'
+#' @param escon 
+#' @param index 
+#' @param ufidToDelete 
+#'
+#' @return
+#' @export
+#'
+es_remove_ufid <- function(escon, index, ufidToDelete) {
+  rese <- elastic::docs_update_by_query(escon, index, body = sprintf('
+     {
+      "query": {
+        "term": {
+          "ufid": {
+            "value": %i
+          }
+        }
+      },
+      "script": {
+        "source": "ctx._source.remove(\'ufid\')",
+        "lang": "painless"
+      }
+    }
+  ', ufidToDelete)) 
+  logger::log_info("Successful removal of ufid {ufidToDelete}")
+}
+
 #' Add ufid entry to a list of features in elasticsearch
 #'
 #' This function often leads to errors
@@ -249,9 +277,11 @@ es_add_ufid_to_ids <- function(escon, index, ufid_to_add, ids_for_update) {
 
   id_search_string <- paste(shQuote(ids_for_update, type = "cmd"), collapse = ", ")
   
-   
-  tryCatch(
-    res_update <- elastic::docs_update_by_query(escon, index, body = sprintf('
+  
+  res_update <- elastic::docs_update_by_query(
+    escon, index, 
+    refresh = "true", 
+    body = sprintf('
       {
         "query": {
           "terms": {
@@ -265,23 +295,21 @@ es_add_ufid_to_ids <- function(escon, index, ufid_to_add, ids_for_update) {
           }
         }
       }
-      ', id_search_string, ufid_to_add)),
-    error = function(cnd) {
-      logger::log_error("There was an error updating docs for ufid {ufid_to_add} in es_add_ufid_to_ids")
-      logger::log_error("In total, {length(ids_for_update)} docs were to be updated")
-      if (is.character(cnd) && length(cnd) == 1 && grepl("429", cnd)) {
-        elastic::cat_pending_tasks(escon)
-        elastic::cat_thread_pool(escon)
-      }
-      message(cnd)
-    }
+      ', 
+      id_search_string, 
+      ufid_to_add
+    )
   )
+  
   if (is.null(res_update))
-    return(FALSE)
-  total_updated <- res_update$updated
-  if (length(ids_for_update) == total_updated)
-    logger::log_info("successful ntsp update of ufid {ufid_to_add}")
-  TRUE
+    stop("Ufid update failed for ufid ", ufid_to_add)
+  if (length(ids_for_update) == res_update$updated) {
+    logger::log_info("Successful ntsp update of ufid {ufid_to_add}")
+  } else {
+    stop("Ufid update failed for ufid ", ufid_to_add)
+  }
+    
+  invisible(TRUE)
 }
 
 #' Add ufid2 entry to a list of features in elasticsearch
@@ -321,7 +349,7 @@ es_add_ufid2_to_ids <- function(escon, index, ufid2_to_add, ids_for_update) {
 
 
 #' Reformat results from elastic into a list of features
-#'
+#
 #' Given a result list from elastic::Search, reformat this into a list of
 #' features of the feature class.
 #'
@@ -905,7 +933,7 @@ es_assign_ufids <- function(
       }
     )
     if (inherits(matched_ufids, "error") || is.null(matched_ufids) || all(!matched_ufids)) {
-      message("Nothing found, moving on")
+      logger::log_info("Nothing found, moving on")
       next
     }
 
@@ -1018,23 +1046,21 @@ es_assign_ufids <- function(
     logger::log_info("Gap-filling for ufid {uf}")
 
     tryCatch(
-      gapFilled <- ntsportal::es_ufid_gap_fill(
+      ntsportal::es_ufid_gap_fill(
         escon, index, uf, min_number = config::get("min_number_gap_fill"),
         mztol_gap_fill_mda = config::get("mztol_gap_fill_mda"),
         rttol_gap_fill_min = config::get("rttol_gap_fill_min")
       ),
       error = function(cnd) {
-        logger::log_warn("Gap-filling failed for ufid {uf}")
-        ntsportal::es_break(cnd)
-        message(cnd)
+        logger::log_error("Gap-filling failed for ufid {uf}")
+        logger::log_info("{conditionMessage(cnd)}")
       }
     )
-    if (!is.numeric(gapFilled))
-      logger::log_warn("Gap-filling failed for ufid {uf}")
-
-    logger::log_info("Completed ufid {uf}")
+   
+    logger::log_info("Completed screening for ufid {uf}")
   }
-  logger::log_info("Went through all requested ufids")
+  logger::log_info("Screening and assigning ufids complete for all 
+                   requested ufids in es_assign_ufids")
   TRUE
 }
 

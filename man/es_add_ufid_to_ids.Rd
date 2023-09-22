@@ -7,11 +7,17 @@
 es_add_ufid_to_ids(escon, index, ufid_to_add, ids_for_update)
 }
 \arguments{
-\item{ids_for_update}{}
+\item{escon}{Elasticsearch connection object created by elastic::connect}
+
+\item{index}{Elasticsearch index name}
+
+\item{ufid_to_add}{integer length 1 ufid to add}
+
+\item{ids_for_update}{character of document IDs, max. 65536}
 }
 \value{
-TRUE if successful
+TRUE if update successful
 }
 \description{
-Add ufid entry to a list of features in elasticsearch
+This function often leads to errors
 }

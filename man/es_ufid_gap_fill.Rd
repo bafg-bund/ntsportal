@@ -14,6 +14,10 @@ es_ufid_gap_fill(
 )
 }
 \arguments{
+\item{escon}{Elasticsearch connection object created by elastic::connect}
+
+\item{index}{Elasticsearch index name}
+
 \item{min_number}{minimum number of MS2 ufids needed in the cluster to assign
 ufid to other features in that cluster}
 

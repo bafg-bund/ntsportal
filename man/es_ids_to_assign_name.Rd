@@ -2,13 +2,22 @@
 % Please edit documentation in R/es_db_comm.R
 \name{es_ids_to_assign_name}
 \alias{es_ids_to_assign_name}
-\title{Get features}
+\title{Get non-aligned features from a particular compound and polarity}
 \usage{
-es_ids_to_assign_name(escon, index, comp_name, polarity)
+es_ids_to_assign_name(escon, index, compName, polarity)
 }
 \arguments{
-\item{polarity}{}
+\item{escon}{Elasticsearch connection object created by elastic::connect}
+
+\item{index}{Elasticsearch index name}
+
+\item{compName}{length 1 character}
+
+\item{polarity}{length 1 character ("pos", "neg")}
+}
+\value{
+character vector NTSP IDs for features (max. 10000)
 }
 \description{
-Get features
+Get non-aligned features from a particular compound and polarity
 }

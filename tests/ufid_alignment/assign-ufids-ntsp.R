@@ -17,7 +17,7 @@ library(logger)
 # 3: Neg initial pass
 # 4: Neg clustering and final pass
 STEPS <- 1:4
-VERSION <- "2023-08-02"
+VERSION <- "2023-08-14"
 
 configFile <- commandArgs(TRUE)
 stopifnot(file.exists(configFile))
@@ -51,6 +51,7 @@ if (is.null(config::get("mztol_rough_mda")))
 message("**Settings**")
 setin <- config::get()
 message(paste(paste(names(setin), setin, sep = ": "), collapse = "\n"))
+message("**End settings**")
 
 stopifnot(file.exists(path_ufid_lib))
 
@@ -93,27 +94,34 @@ if (1 %in% STEPS) {
 # Clustering to look for new ufids
 if (2 %in% STEPS) {
   log_info("Looking for new clusters, +ESI")
-  success <- FALSE
-  tryCatch(
-    success <- ubd_new_ufid(udb, escon, index, "pos"),
-    error = function(cnd) {
-      log_error("Error in step 2")
-      message("error text: ", cnd)
-      log_info("Skipping step 2 (pos clustering and final pass)")
-     }
-  )
+  successNewUfid <- FALSE
+  while (!successNewUfid) {
+    tryCatch(
+      successNewUfid <- ubd_new_ufid(udb, escon, index, "pos"),
+      error = function(cnd) {
+        log_error("Error in step 2, udb_new_ufid")
+        log_info("Error text: {conditionMessage(cnd)}")
+        log_info("Taking a 1 h break")
+        Sys.sleep(3600)
+        log_info("Repeating")
+        successNewUfid <<- FALSE
+      }
+    )
+  }
 
-  if (success) {
+  if (successNewUfid) {
     # sometimes we see a disconnection of DB, so just connect again
     udb <- DBI::dbConnect(RSQLite::SQLite(), path_ufid_lib)
     log_info("no more features found to assign")
     log_info("final pass through ufid-db")
     # Pass through all ufids one more time for good measure
-    tryCatch(es_assign_ufids(escon, udb, index, "pos"),
-             error = function(cnd) {
-               log_error("Error in step 2, second pass through ufid-lib")
-               message("error text: ", cnd)
-             })
+    tryCatch(
+      es_assign_ufids(escon, udb, index, "pos"),
+      error = function(cnd) {
+        log_error("Error in step 2, second pass through ufid-lib")
+        log_info("Error text: {conditionMessage(cnd)}")
+      }
+    )
   }
 } 
 

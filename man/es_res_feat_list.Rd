@@ -2,18 +2,23 @@
 % Please edit documentation in R/es_db_comm.R
 \name{es_res_feat_list}
 \alias{es_res_feat_list}
-\title{Reformat results from elastic into a list of features}
+\title{Reformat results from elastic into a list of features
+Given a result list from elastic::Search, reformat this into a list of
+features of the feature class.}
 \usage{
 es_res_feat_list(res, fields = c("mz", "pol", "rt", "chrom_method"))
 }
 \arguments{
-\item{fields}{which fields should be included in the features (at leaste mz,
+\item{res}{response list from elastic::Search}
+
+\item{fields}{which fields should be included in the features (at least mz,
 rt, pol and chrom_method must be included)}
 }
 \value{
 list of feature objects
 }
 \description{
+Reformat results from elastic into a list of features
 Given a result list from elastic::Search, reformat this into a list of
 features of the feature class.
 }

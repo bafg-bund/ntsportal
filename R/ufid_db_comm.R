@@ -1,5 +1,21 @@
 
 
+
+#' Remove a ufid from the ufid library
+#'
+#' @param udb 
+#' @param ufid 
+#'
+#' @return
+#' @export
+#'
+udb_remove_ufid <- function(udb, ufid) {
+  DBI::dbExecute(udb, "PRAGMA foreign_keys = ON;")
+  x <- DBI::dbExecute(udb, sprintf("DELETE FROM feature WHERE ufid == %i;", ufid))
+  logger::log_info("Removed {x} rows from ufid lib")
+  invisible(TRUE)
+}
+
 #' Clean spectra within ufid db
 #'
 #' @param udb

@@ -396,7 +396,7 @@ create_ufid_lib <- function(pth) {
 #' @import dplyr
 reset_alignment <- function(escon, es_index, ufidLibPath) {
   
-  elastic::docs_update_by_query(escon, es_index, body =
+  elastic::docs_update_by_query(escon, es_index, refresh = "true", body =
     '
     {
       "query": {
@@ -411,8 +411,8 @@ reset_alignment <- function(escon, es_index, ufidLibPath) {
     }
     '
   )
-  
-  elastic::docs_update_by_query(escon, es_index, body =
+  Sys.sleep(1)
+  elastic::docs_update_by_query(escon, es_index, refresh = "true", body =
     '
     {
       "query": {
@@ -427,8 +427,7 @@ reset_alignment <- function(escon, es_index, ufidLibPath) {
     }
     '
   )
-  
-  elastic::docs_update_by_query(escon, es_index, body =
+  elastic::docs_update_by_query(escon, es_index, refresh = "true", body =
                                   '
     {
       "query": {
@@ -443,8 +442,7 @@ reset_alignment <- function(escon, es_index, ufidLibPath) {
     }
     '
   )
-  
-  elastic::docs_update_by_query(escon, es_index, body =
+  elastic::docs_update_by_query(escon, es_index, refresh = "true", body =
                                   '
     {
       "query": {
@@ -459,7 +457,6 @@ reset_alignment <- function(escon, es_index, ufidLibPath) {
     }
     '
   )
-  
   udb <- DBI::dbConnect(RSQLite::SQLite(), ufidLibPath)
   
   DBI::dbExecute(udb, "PRAGMA foreign_keys = ON;")
@@ -478,19 +475,68 @@ reset_alignment <- function(escon, es_index, ufidLibPath) {
 }
 
 
-#' Handle 429 error from elastic
+#' Handle errors from ElasticSearch
+#' 
+#' Errors from ElasticSearch are returned by package 'elastic' as text. This
+#' function will take the error condition and take appropriate action.
 #'
-#' @param thisCnd 
+#' @param thisCnd Error condition thrown in the `tryCatch` context
 #'
-#' @return
+#' @return No return value
 #' @export
-es_break <- function(thisCnd) {
-  if (is.character(thisCnd$message) && grepl("429", thisCnd$message)) {
-    logger::log_warn("429 error from ElasticSearch (overload), taking a 2 minute break")
-    Sys.sleep(120)
+es_error_handler <- function(thisCnd) {
+  if (is.character(conditionMessage(thisCnd)) && 
+      grepl("429", conditionMessage(thisCnd))) {
+    logger::log_warn("Error 429 from ElasticSearch, taking a 1 h break")
+    Sys.sleep(3600)
   }
 }
 
+
+#' Return a new, unique ufid number
+#'
+#' The next ufid number is returned, for creating a new cluster. Will double
+#' check that this number is not already present.
+#' 
+#' @param udb 
+#' @param escon 
+#' @param index 
+#'
+#' @return length one integer
+#' @import dplyr
+#' @export
+#'
+get_next_ufid <- function(udb, escon, index) {
+  allUfid <- tbl(udb, "feature") %>% select(ufid) %>% collect() %>% .$ufid
+  newUfid <- if (length(allUfid) == 0)
+    1L else min(which(!(1:(max(allUfid)+1) %in% allUfid)))
+  newUfid <- as.integer(newUfid)
+  # Double check that this ufid is not found in the ntsp
+  checkUf <- elastic::Search(escon, index, body = sprintf(
+    '
+            {
+              "query": {
+                "term": {
+                  "ufid": {
+                    "value": %i
+                  }
+                }
+              },
+              "size": 0
+            }
+            ', newUfid
+  ))
+  if (checkUf$hits$total$value != 0) {
+    logger::log_error("Creating new ufid number failed, already found in ntsp")
+    stop("Mismatch between ntsp and ufid lib in ufid ", newUfid)
+  }
+  checkUf2 <- tbl(udb, "feature") %>% filter(ufid == newUfid) %>% collect()
+  if (nrow(checkUf2) != 0) {
+    logger::log_error("Creating new ufid number failed, already found in udb")
+    stop("Ufid lib already contains ", newUfid)
+  }
+  newUfid
+}
 
 #' Connect to a sqlite db (ufid-library)
 #'

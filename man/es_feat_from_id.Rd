@@ -2,13 +2,20 @@
 % Please edit documentation in R/es_db_comm.R
 \name{es_feat_from_id}
 \alias{es_feat_from_id}
-\title{Get feature (doc) from ntsp with doc-id}
+\title{Get feature (doc) from ntsp with a document-ID}
 \usage{
 es_feat_from_id(escon, index, id)
 }
 \arguments{
-\item{id}{}
+\item{escon}{Elasticsearch connection object created by elastic::connect}
+
+\item{index}{Elasticsearch index name}
+
+\item{id}{Elasticsearch document ID}
+}
+\value{
+ntsportal::feature object
 }
 \description{
-Get feature (doc) from ntsp with doc-id
+Get feature (doc) from ntsp with a document-ID
 }
