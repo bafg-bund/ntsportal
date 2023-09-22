@@ -225,11 +225,11 @@ get_time_series <- function(
       }, character(1))
     ) 
     
-    resp <- lapply(ufids, function(ufidBuck) {  # ufidBuck <- ufids[[1]]
+    resp <- lapply(ufids, function(ufidBuck) {  
       dayBucks <- ufidBuck$over_time$buckets
-      dayRows <- lapply(dayBucks, function(dayBuck) {  # dayBuck <- dayBucks[[1]]
+      dayRows <- lapply(dayBucks, function(dayBuck) {  
         durBucks <- dayBuck$durations$buckets
-        responseRows <- lapply(durBucks, function(durBuck) { # durBuck <- durBucks[[1]]
+        responseRows <- lapply(durBucks, function(durBuck) { 
           c(
             ufid = ufidBuck$key,
             start = dayBuck$key_as_string,

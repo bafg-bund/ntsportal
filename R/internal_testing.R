@@ -506,6 +506,3 @@ es_test_fpfn <- function(escon, index) {
     ufid2s_multiple_names = problemUfid2sNames
   )
 }
-
-
-

@@ -486,14 +486,3 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5,
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
