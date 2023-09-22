@@ -389,6 +389,7 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5,
           # Assign new ufid to these ids, then build new ufid entry in ufid_db
           new_ufid <- ntsportal::get_next_ufid(udb, escon, index)
           
+          Sys.sleep(5)
           log_info("Adding ufid {new_ufid} to docs in ntsp")
           skipToNext <- FALSE
           tryCatch(
@@ -405,7 +406,9 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5,
           )
           if (skipToNext) {
             # Remove any partial ufid assignments
-            ntsportal::es_remove_ufid(escon, index, new_ufid)
+            Sys.sleep(120)
+            log_info("Rolling back changes to ntsp")
+            try(ntsportal::es_remove_ufid(escon, index, new_ufid))
             log_warn("Skipping to next 1st stage cluster")
             next
           }
@@ -413,7 +416,6 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5,
           # Wait a few seconds (it was theorized that errors in the next step
           # are occurring because ntsp is not ready yet)
           Sys.sleep(5)
-          
           log_info("Updating ufid-db with averaged data from NTSP")
           # here we create a new ufid, so we are only interested in the current
           # index (no need to use generic g2_nts* index).
@@ -427,14 +429,13 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5,
               log_info("Current 1st stage cluster: {cl}")
               log_info("Error text: {conditionMessage(cnd)}")
               skiptToNext <<- TRUE
-              Sys.sleep(5)
-              log_warn("Rolling back changes to ntsp")
-              try(es_remove_ufid(escon, index, new_ufid))
             }
           )
           if (skipToNext) {
-            ntsportal::es_remove_ufid(escon, index, new_ufid)
-            ntsportal::udb_remove_ufid(udb, new_ufid)
+            Sys.sleep(120)
+            log_info("Rolling back changes to ntsp")
+            try(ntsportal::es_remove_ufid(escon, index, new_ufid))
+            try(ntsportal::udb_remove_ufid(udb, new_ufid))
             log_warn("Skipping to next 1st stage cluster")
             next
           }

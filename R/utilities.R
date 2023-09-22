@@ -411,7 +411,7 @@ reset_alignment <- function(escon, es_index, ufidLibPath) {
     }
     '
   )
-  Sys.sleep(1)
+  Sys.sleep(5)
   elastic::docs_update_by_query(escon, es_index, refresh = "true", body =
     '
     {
@@ -427,6 +427,7 @@ reset_alignment <- function(escon, es_index, ufidLibPath) {
     }
     '
   )
+  Sys.sleep(5)
   elastic::docs_update_by_query(escon, es_index, refresh = "true", body =
                                   '
     {
@@ -442,8 +443,9 @@ reset_alignment <- function(escon, es_index, ufidLibPath) {
     }
     '
   )
+  Sys.sleep(5)
   elastic::docs_update_by_query(escon, es_index, refresh = "true", body =
-                                  '
+    '
     {
       "query": {
         "exists": {

@@ -1061,6 +1061,6 @@ es_assign_ufids <- function(
   }
   logger::log_info("Screening and assigning ufids complete for all 
                    requested ufids in es_assign_ufids")
-  TRUE
+  invisble(TRUE)
 }
 
