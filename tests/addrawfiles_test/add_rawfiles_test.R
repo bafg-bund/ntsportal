@@ -1,6 +1,7 @@
 source("~/connect-ntsp.R")
+library(ntsportal)
 rfindex <- "g2_msrawfiles"
-templateId <- find_templateid(escon, rfindex, polarity = "neg", station = "saale_wettin_m")
+templateId <- find_templateid(escon, rfindex, polarity = "neg", station = "saale_wettin_m", isBlank = T)
 
 newPaths <- "~/Messdaten/00_to_sort/20230831_SPM/pos/Wett_08_2_pos.mzXML"
 #newPaths <- list.files("~/Messdaten/zehren/schwebstoff/elz_neg/", 

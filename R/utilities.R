@@ -564,4 +564,13 @@ es_add_value <- function(escon, index, esid, fieldName, value) {
   ', fieldName, value))
 }  
   
-  
+#' Return the number of Gb of free memory on linux server
+#'
+#' @return numeric length 1
+#' @export
+#'
+free_gb <- function() {
+  x <- system("free -g", intern = T)
+  x <- strsplit(x[2], "\\s+")
+  as.numeric(x[[1]][length(x[[1]])])
+}  

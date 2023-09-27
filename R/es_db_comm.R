@@ -284,8 +284,8 @@ es_add_ufid_to_ids <- function(escon, index, ufid_to_add, ids_for_update) {
     body = sprintf('
       {
         "query": {
-          "terms": {
-            "_id": [%s]
+          "ids": {
+            "values": [%s]
           }
         },
         "script": {
@@ -394,6 +394,8 @@ es_res_feat_list <- function(res, fields = c("mz", "pol", "rt", "chrom_method"))
   ftsl
 }
 
+
+
 #' Assign ufids to features without MS2 (gap-filling)
 #'
 #' For a given ufid, will look for features of the same batch with similar
@@ -413,116 +415,126 @@ es_res_feat_list <- function(res, fields = c("mz", "pol", "rt", "chrom_method"))
 #' @return Integer. Number of features assigned (0 for no assignment)
 #' @export
 es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
-                             mztol_gap_fill_mda = 5,
-                             rttol_gap_fill_min = 0.3) {
+                              mztol_gap_fill_mda = 5,
+                              rttol_gap_fill_min = 0.3) {
   # ufid_to_fill <- 908
   # min_number = 2
   # mztol_gap_fill_mda = 5
   # rttol_gap_fill_min = 0.3
-
+  #browser()
   #logger::log_info("Gap-filling on ufid {ufid_to_fill}")
-
+  
   # get info of current features in index
   fieldsVec <- c("mz", "rt","filename", "chrom_method", "data_source",
                  "date_import", "eic", "pol", "intensity")
-
-  # collect already aligned features which will be used as a template
-
-  res1 <- elastic::Search(
-    escon,
-    index,
-    source = fieldsVec,
-    size = 10000,
-    body = sprintf(
-      '
-      {
-        "query": {
-          "bool": {
-            "filter": [
-              {
-                "nested": {
-                  "path": "ms2",
-                  "query": {
-                    "exists": {
-                      "field": "ms2.mz"
-                    }
-                  }
-                }
+  res1 <- elastic::Search(escon, index, body = sprintf('
+                                               {
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "nested": {
+            "path": "ms2",
+            "query": {
+              "exists": {
+                "field": "ms2.mz"
+              }
+            }
+          }
+        },
+        {
+          "nested": {
+            "path": "eic",
+            "query": {
+              "exists": {
+                "field": "eic.time"
+              }
+            }
+          }
+        },
+        {
+          "term": {
+            "ufid": %i
+          }
+        }
+      ]
+    }
+  },
+  "size": 0,
+  "aggs": {
+    "source": {
+      "terms": {
+        "field": "data_source"
+      },
+      "aggs": {
+        "method": {
+          "terms": {
+            "field": "chrom_method"
+          },
+          "aggs": {
+            "dateImport": {
+              "date_histogram": {
+                "field": "date_import",
+                "fixed_interval": "1s",
+                "min_doc_count": %i
               },
-              {
-                "nested": {
-                  "path": "eic",
-                  "query": {
-                    "exists": {
-                      "field": "eic.time"
-                    }
+              "aggs": {
+                "ids": {
+                  "top_hits": {
+                    "size": 100,
+                    "_source": false
                   }
-                }
-              },
-              {
-                "term": {
-                  "ufid": %i
                 }
               }
-            ]
+            }
           }
         }
       }
-      ',
-      ufid_to_fill
-    )
-  )
-
-  # there must be at least the min number of features available for gap filling
-  if (res1$hits$total$value < min_number)
-    return(0L)
-  fts <- ntsportal::es_res_feat_list(res1, fieldsVec)
-
-  ufidPol <- unique(vapply(fts, "[[", character(1), i = "pol"))
-  stopifnot(length(ufidPol) == 1, ufidPol %in% c("pos", "neg"))
-
-  # group fts into batches.
-  # Determine same batch:
-  # Date import within 1 day
-  # same method, same data_source
-  # date_import is not the best for this, since multiple batches can be imported
-  # on the same day, but it's the best we have at the moment, maybe it is
-  # good enough.
-  # We assume that one batch is updated at one time.
-  compare_ft <- function(id1, id2) {
-    ft1 <- fts[[id1]]
-    ft2 <- fts[[id2]]
-    score <- 0
-    if (ft1$data_source != ft2$data_source)
-      score <- score + 1
-    if (ft1$chrom_method != ft2$chrom_method)
-      score <- score + 1
-    if (ft1$date_import != ft2$date_import)
-      score <- score + 1
-    score
+    }
   }
-
-  dist1 <- usedist::dist_make(as.matrix(names(fts)), compare_ft)
-  dbscanRes1 <- dbscan::dbscan(dist1, 0.1, min_number)
-  # if nothing could be clustered into batches, no gap-filling possible
-  if (all(dbscanRes1$cluster == 0))
-    return(0L)
-  # remove "noise" features
-  fts <- fts[dbscanRes1$cluster != 0]
-  realClusters <- dbscanRes1$cluster[dbscanRes1$cluster != 0]
-  batches <- split(fts, realClusters)
-  message("Prototype features in ", length(batches), " batches.")
-  # per batch, add ids of features to update with this ufid:
+}                                             
+', ufid_to_fill, min_number))
+  
+  
+  bIds <- lapply(res1$aggregations$source$buckets, function(x) {
+    lapply(x$method$buckets, function(y) {
+      lapply(y$dateImport$buckets, function(z) {
+        vapply(z$ids$hits$hits, "[[", i = "_id", character(1)) 
+      })
+    })
+  })
+  bIds <- unlist(unlist(bIds, F), F)
+  batches <- lapply(bIds, function(x) {
+    idString <- paste(shQuote(x, type = "cmd"), collapse = ", ")
+    resx <- elastic::Search(
+      escon, index,
+      body = sprintf('
+        {
+          "query": {
+            "ids": {
+              "values": [%s]
+            }
+          }
+        }             
+                     ', idString)
+    )
+    ntsportal::es_res_feat_list(resx, fieldsVec)
+  })
+  
+  logger::log_info("{length(batches)} batches found for gap-filling.")
+  
+  # Per batch, add ids of features to update with this ufid:
   ids_to_update <- character(0)
   for (ftsb in batches) {  # ftsb <- batches[[1]]
-
-    # find other features of the same batch without MS2 and without ufid
+    
+    # Find other features of the same batch without MS2 and without ufid
     mthd <- ftsb[[1]]$chrom_method
     ds <- ftsb[[1]]$data_source
     dimp <- as.integer(median(vapply(ftsb, "[[", integer(1), i = "date_import")))
     ave_mz <- mean(vapply(ftsb, "[[", numeric(1), i = "mz"))
     ave_rt <- mean(vapply(ftsb, "[[", numeric(1), i = "rt"))
-
+    pol <- ftsb[[1]]$pol
+    
     res3 <- elastic::Search(
       escon,
       index,
@@ -550,7 +562,7 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
                     }
                   }
                 ],
-                "filter": [
+                "must": [
                   {
                     "nested": {
                       "path": "eic",
@@ -588,8 +600,12 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
                     }
                   },
                   {
-                    "term": {
-                      "date_import": %i
+                    "range": {
+                      "date_import": {
+                        "gte": %i,
+                        "lte": %i,
+                        "format": "epoch_second"
+                      }
                     }
                   },
                   {
@@ -610,17 +626,19 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
         mthd,
         ds,
         dimp,
-        ufidPol
+        dimp,
+        pol
       )
     )
-
-    # if nothing found, no features to update, move to next batch
+    
+    # If nothing found, no features to update, move to next batch
     numCand <- res3$hits$total$value
     if (numCand == 0)
       next
+    #browser()
     ftCand <- ntsportal::es_res_feat_list(res3, fieldsVec)
-
-    # each candidate must be from a file which does not already contain the
+    
+    # Each candidate must be from a file which does not already contain the
     # ufid to fill
     not_already_added2 <- function(fnToCheck, uToCheck) {
       res2 <- elastic::Search(
@@ -646,8 +664,8 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
               }
             }
           ',
-           uToCheck,
-           fnToCheck)
+          uToCheck,
+          fnToCheck)
       )
       return(res2$hits$total$value == 0)
     }
@@ -656,15 +674,16 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
     if (all(!keep))
       next
     ftCand <- ftCand[keep]
-
-    # compute eic correlation for all features with eachother
-
+    
+    # Compute eic correlation for all features with eachother
+    
     eicProt <- lapply(ftsb, "[[", i = "eic")
     names(eicProt) <- names(ftsb)
     eicCand <- lapply(ftCand, "[[", i = "eic")
     names(eicCand) <- names(ftCand)
     eics <- c(eicProt, eicCand)
-    # round time to nearest second, average duplicate times
+    
+    # Round time to nearest second, average the intensity for duplicate times
     eics <- lapply(eics, function(x) {
       x$time <- round(x$time)
       dupTimes <- unique(x$time[duplicated(x$time)])
@@ -672,14 +691,14 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
         x[which(x$time == dt)[1], "int"] <- mean(x[x$time == dt, "int"])
       x[!duplicated(x$time), ]
     })
-
+    
     eicm <- suppressWarnings(Reduce(function(a, b) merge(a, b, by = "time", all = TRUE), eics))
     # pardist does not work with NAs, need to set them to 0
     eicm[is.na(eicm)] <- 0
     eicmt <- t(eicm[, -1])
     colnames(eicmt) <- eicm[, 1]
     rownames(eicmt) <- names(eics)
-
+    
     # z-normalize
     znorm <- function(ts) {
       ts.mean <- mean(ts)
@@ -687,19 +706,19 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
       (ts - ts.mean)/ts.dev
     }
     eicmtn <- t(apply(eicmt, 1, znorm))
-
+    
     #rowMax <- apply(eicmt, 1, max, na.rm = TRUE)
     #eicmtn <- sweep(eicmt, 1, rowMax, "/")
     # plot(eicmtn[15, ])
     
-
+    
     # dbscan clustering of dtw correlation
     distM <- parallelDist::parDist(eicmtn, method = "dtw", threads = config::get("cores"))
     # used elbow method on CBZ data to determine dbscan epsilon of 12
     # based on the soltalol data from lanuv increase epsilon to 24
     #dbscan::kNNdistplot(distM, 3)
     clust <- dbscan::dbscan(distM, 24, minPts = min_number)
-
+    
     # those unassigned features within group of assigned feature are ear-marked for assignment
     cdf <- data.frame(
       es_id = names(eics),
@@ -716,10 +735,10 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
       if (sum(cdf[cdf$cl == cli, "assigned"]) >= min_number)
         new_ids <- append(new_ids, cdf[i, "es_id"])
     }
-
+    
     if (length(new_ids) == 0)
       next
-
+    
     # check that all earmarked features are from different files,
     # in case multiple assignments, take most intense feature
     flnCand2 <- vapply(ftCand[new_ids], "[[", character(1), i = "filename")
@@ -735,24 +754,23 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
         new_ids <- new_ids[!is.element(new_ids, idsToRemove)]
       }
     }
-
+    
     ids_to_update <- append(ids_to_update, new_ids)
-
+    
   }
-
-  log_info("found {length(ids_to_update)} features to update for ufid {ufid_to_fill} (gap-fill).")
-
-  # nothing found in any batches
+  
+  log_info("Found {length(ids_to_update)} features to update for ufid {ufid_to_fill} (gap-fill).")
+  
   if (length(ids_to_update) == 0)
     return(0L)
-
-  # update es-database
+  
+  # Update es-database
   worked <- try(ntsportal::es_add_ufid_to_ids(escon, index, ufid_to_fill, ids_to_update))
-
+  
   if (worked)
-    message("gap-filling complete") else return(NULL)
-
-  return(length(ids_to_update))
+    message("Gap-filling complete") else return(NULL)
+  
+  invisible(length(ids_to_update))
 }
 
 
@@ -1061,6 +1079,6 @@ es_assign_ufids <- function(
   }
   logger::log_info("Screening and assigning ufids complete for all 
                    requested ufids in es_assign_ufids")
-  invisble(TRUE)
+  invisible(TRUE)
 }
 
