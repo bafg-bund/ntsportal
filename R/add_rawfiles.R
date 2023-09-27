@@ -247,8 +247,16 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
     # TODO at the moment only dates can be read. This function must also
     # work for ymd_hms datetimes.
     if (newStart == "filename") {
-      date_string <- stringr::str_match(doc$filename, doc$dbas_date_regex)[,2]
-      temp <- lubridate::ymd(date_string, tz = "Europe/Berlin", truncated = 2)
+      dateString <- stringr::str_match(doc$filename, doc$dbas_date_regex)[,2]
+      dateFormat <- doc$dbas_date_format
+      if (!is.element(dateFormat, c("ymd", "dmy"))) {
+        stop("Unknown dbas_date_format ", dateFormat, " in ", doc$filename)
+      }
+      temp <- switch(
+        dateFormat,
+        ymd = lubridate::ymd(dateString, tz = "Europe/Berlin", truncated = 2),
+        dmy = lubridate::dmy(dateString, tz = "Europe/Berlin", truncated = 2)
+      )
       doc$start <- format(temp, "%Y-%m-%d", tz = "Europe/Berlin")
     } else {
       temp <- lubridate::ymd(newStart, tz = "Europe/Berlin", truncated = 2)
@@ -294,7 +302,8 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
   if (isOk != "y") {
     stop("processing stoped, files not added")
   } 
-  
+  # TODO use the changed documents for upload.
+  # TODO IDs to console
   for (doci in newDocs)
     elastic::docs_create(escon, rfindex, body = doci)
   

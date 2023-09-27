@@ -490,6 +490,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     if (!all(is.na(dat$int_a_IS))) {
       rstdev <- round((sd(dat$int_a_IS)/mean(dat$int_a_IS)), 2)
       log_info("Die relative SD des internen Standards beträgt ", 100*rstdev, "%")
+      # TODO The script must automatically decide what to do.
       if  (100*rstdev >= 10) 
         log_warn("Die Standardabweichung des internen Standards ist über Grenzwert von 10%")
     }

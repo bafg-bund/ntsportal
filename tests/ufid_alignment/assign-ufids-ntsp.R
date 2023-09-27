@@ -17,8 +17,9 @@ library(logger)
 # 3: Neg initial pass
 # 4: Neg clustering and final pass
 STEPS <- 1:4
-VERSION <- "2023-08-14"
+VERSION <- "2023-09-27"
 
+startTime <- lubridate::now()
 configFile <- commandArgs(TRUE)
 stopifnot(file.exists(configFile))
 #configFile <- "tests/ufid_alignment/config.yml"
@@ -174,6 +175,7 @@ log_info("Ended neg processing")
 DBI::dbDisconnect(udb)
 
 log_info("Disconnected DB")
+endTime <- lubridate::now()
+hrs <- round(as.numeric(endTime - startTime, units = "hours"))
 
-log_info("Completed assign-ufids-ntsp.R")
-
+log_info("----------- Completed assign-ufids-ntsp.R in {hrs} h -----------")

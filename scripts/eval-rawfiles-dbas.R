@@ -6,7 +6,7 @@
 # carried out. Once everything is complete the script will 
 # change aliases to the newly created indices.
 
-VERSION <- "2023-09-17"
+VERSION <- "2023-09-27"
 
 # Variables ####
 RFINDEX <- "g2_msrawfiles"
@@ -20,6 +20,7 @@ library(ntsworkflow)
 library(logger)
 library(ntsportal)
 
+startTime <- lubridate::now()
 setwd("~/projects/ntsautoeval/msrawfiles-db/")
 
 # Create escon variable
@@ -290,9 +291,7 @@ suca <- mapply(move_dbas_alias, indexName = allInd, aliasName = allAlia,
 if (all(suca))
   log_info("Move alias successful")
 
-log_info("------------ Completed eval-rawfiles-dbas.R ---------------")
+endTime <- lubridate::now()
+hrs <- round(as.numeric(endTime - startTime, units = "hours"))
 
-
-
-
-
+log_info("--------- Completed eval-rawfiles-dbas.R in {hrs} h ------------")
