@@ -10,14 +10,14 @@ templateId <- "LPOH1YoBis-yLiJm91mP"
 #                       full.names = T, pattern = "Zeh_\\d{2}_\\d.*\\.mzXML$")
 #newPaths <- list.files("~/Messdaten/weil/schwebstoff/rhw_neg/", 
 #                       full.names = T, pattern = "W\\d{2}_neg\\d.*\\.mzXML$")
-newPaths <- list.files("~/messdaten/mosel/wasser/expn_tm_pos/", pattern = "TM", f= T)
+newPaths <- list.files("~/messdaten/mosel/wasser/expn_tm_pos/2210", pattern = "KOMO", f= T)
 
 
 #debug(add_rawfiles)
 #isdebugged(add_rawfiles)
 #undebug(add_rawfiles)
 
-add_rawfiles(escon, rfindex, templateId, newPaths[1])
+add_rawfiles(escon, rfindex, templateId, newPaths)
 
 
 

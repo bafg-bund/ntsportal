@@ -298,14 +298,36 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
   
   message("Please check ", file.path(getwd(), "add-rawfiles-check.json"))
   
-  isOk <- readline("Is it okay to proceed? (y/n): ")
-  if (isOk != "y") {
-    stop("processing stoped, files not added")
-  } 
-  # TODO use the changed documents for upload.
-  # TODO IDs to console
-  for (doci in newDocs)
-    elastic::docs_create(escon, rfindex, body = doci)
+  message("Is it okay to proceed? 
+          y = will be uploaded 
+          n = terminate process with out uploading 
+          c = json was changed manually. Only 1 doc allowed. Save changes before proceeding.")
+  isOk <- readline("(y/n/c): ")
+
+  switch(
+    isOk,
+    y = NULL,
+    n = stop("processing stoped, files not added"),
+    c = {
+      if (length(newDocs) != 1)
+        stop("You can only change one document and use this as template for others")
+      message("Adding changed document")
+      newDocsNew <- jsonlite::read_json("add-rawfiles-check.json")
+      if (all.equal(newDocsNew, newDocs) == TRUE)
+        stop("There was no change made, aborted process")
+      newDocs <- newDocsNew
+    },
+    stop("Unknown input, processing stoped, files not added")
+    )
+
+  ids <- character()
+  for (doci in newDocs) {
+    response <- elastic::docs_create(escon, rfindex, body = doci)
+    ids <- append(ids, response[["_id"]])
+  }
+  idString <- paste(shQuote(ids, type = "cmd"), collapse = ", ")
+  message("Documents were uploaded with the IDs")
+  cat(idString)
   
   Sys.sleep(10)
   # check that everything has been entered

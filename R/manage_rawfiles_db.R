@@ -201,7 +201,7 @@ move_dbas_alias <- function(escon, indexName, aliasName) {
   all(vapply(list(res3, res4), "[[", i = "acknowledged", logical(1)))
 }
 
-#' Change the path of a document in a rawfiles db
+#' Change the path of one document in a rawfiles db
 #'
 #' @param escon elastic connection object created by elastic::connect
 #' @param rfindex index name for rawfiles index
@@ -216,6 +216,7 @@ move_dbas_alias <- function(escon, indexName, aliasName) {
 #' @export
 #'
 change_msrawfile_path <- function(escon, rfindex, oldPath, newPath) {
+  stopifnot(length(oldPath) == 1, length(newPath) == 1)
   stopifnot(all(file.exists(oldPath, newPath)))
   # check that both files are the same
   stopifnot(basename(oldPath) == basename(newPath))

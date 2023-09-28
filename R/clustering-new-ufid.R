@@ -232,8 +232,8 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5,
       }', mzPosition, rtPosition, polarity)),
       error = function(cnd) {
         log_error("Error text: {conditionMessage(cnd)}")
-        log_info("Error retrieving new docs from ntsp, try again in 1 h")
-        Sys.sleep(3600)
+        log_info("Error retrieving new docs from ntsp, try again in 10 min")
+        Sys.sleep(600)
         skipToNext <<- TRUE
       }
     )
@@ -241,6 +241,10 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5,
       log_warn("Trying to retrieve documents again")
       next
     }
+    
+    # Get last hit
+    mzPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[1]]
+    rtPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[2]]
     
     log_info("In total, {res$hits$total$value} features left to process")
     
@@ -303,7 +307,7 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5,
         }
         log_info("Second stage clustering with {length(ids_of_compound)} features")
         
-        # cluster these candidates again by mz-rt-ms2 with non-parallel distance function
+        # Cluster these candidates again by mz-rt-ms2 with non-parallel distance function
         skipToNext <- FALSE
         tryCatch(
           {
@@ -389,7 +393,7 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5,
           # Assign new ufid to these ids, then build new ufid entry in ufid_db
           new_ufid <- ntsportal::get_next_ufid(udb, escon, index)
           
-          Sys.sleep(5)
+          
           log_info("Adding ufid {new_ufid} to docs in ntsp")
           skipToNext <- FALSE
           tryCatch(
@@ -415,7 +419,7 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5,
           
           # Wait a few seconds (it was theorized that errors in the next step
           # are occurring because ntsp is not ready yet)
-          Sys.sleep(5)
+          Sys.sleep(2)
           log_info("Updating ufid-db with averaged data from NTSP")
           # here we create a new ufid, so we are only interested in the current
           # index (no need to use generic g2_nts* index).
@@ -472,16 +476,11 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5,
       # results and continue searching
       log_info("Processed all available candidate clusters, moving to next page
                of features")
-      # Get last hit
-      mzPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[1]]
-      rtPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[2]]
+      
     } else if (length(names(table(dbscanRes$cluster))) == 1 &&
                names(table(dbscanRes$cluster)) == "0") {
       log_info("No 1st stage cluster with 10 or more features found, moving to next page
             of results")
-      # Get last hit
-      mzPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[1]]
-      rtPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[2]]
     } else {
       stop("Error in 1st stage clustering.")
     }
