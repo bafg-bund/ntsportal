@@ -241,7 +241,14 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
     doc$path <- normalizePath(pth)
     doc$filename <- basename(pth)
     poli <- stringr::str_extract(doc$filename, "pos|neg")
-    stopifnot(doc$pol == poli) 
+    if (doc$pol != poli) {
+      if (length(newPaths) == 1) {
+        message("File ", pth, " has other polarity than the template, please check")
+        doc$pol <- poli
+      } else {
+        stop("File ", pth, " does not have the same polarity as the template")
+      }
+    }
     
     # All blanks must also have a start from now on. 
     # TODO at the moment only dates can be read. This function must also
@@ -249,11 +256,12 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
     if (newStart == "filename") {
       dateString <- stringr::str_match(doc$filename, doc$dbas_date_regex)[,2]
       dateFormat <- doc$dbas_date_format
-      if (!is.element(dateFormat, c("ymd", "dmy"))) {
+      if (!is.element(dateFormat, c("ymd", "dmy", "yy"))) {
         stop("Unknown dbas_date_format ", dateFormat, " in ", doc$filename)
       }
       temp <- switch(
         dateFormat,
+        yy = lubridate::ymd(dateString, tz = "Europe/Berlin", truncated = 2),
         ymd = lubridate::ymd(dateString, tz = "Europe/Berlin", truncated = 2),
         dmy = lubridate::dmy(dateString, tz = "Europe/Berlin", truncated = 2)
       )
@@ -263,8 +271,15 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
       doc$start <- format(temp, "%Y-%m-%d", tz = "Europe/Berlin")
     }
     
-    if (is.na(doc$start))
-      stop("File ", pth, " produced an NA start date")
+    if (is.na(doc$start)) {
+      if (length(newPaths) == 1) {
+        message("File ", pth, " produced an NA start date, changed to 1970-01-01, must be corrected")
+        doc$start <- "1970-01-01"
+      } else {
+        stop("File ", pth, " produced an NA start date")
+      }
+    }
+      
     
     if (!is.list(newStation) && newStation == "filename") {
       stopifnot("dbas_station_regex" %in% names(doc))
@@ -300,7 +315,7 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
   
   message("Is it okay to proceed? 
           y = will be uploaded 
-          n = terminate process with out uploading 
+          n = terminate process without uploading 
           c = json was changed manually. Only 1 doc allowed. Save changes before proceeding.")
   isOk <- readline("(y/n/c): ")
 
@@ -313,7 +328,7 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
         stop("You can only change one document and use this as template for others")
       message("Adding changed document")
       newDocsNew <- jsonlite::read_json("add-rawfiles-check.json")
-      if (all.equal(newDocsNew, newDocs) == TRUE)
+      if (all.equal(newDocsNew, newDocs)[1] == TRUE)
         stop("There was no change made, aborted process")
       newDocs <- newDocsNew
     },
@@ -326,6 +341,7 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
     ids <- append(ids, response[["_id"]])
   }
   idString <- paste(shQuote(ids, type = "cmd"), collapse = ", ")
+  idString <- paste0(idString, "\n")
   message("Documents were uploaded with the IDs")
   cat(idString)
   
