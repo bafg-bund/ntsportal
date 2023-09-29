@@ -25,8 +25,10 @@
 #' @import dplyr
 #' @import logger
 #' @import glue
-ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5, 
-                         minPoints2 = 2, mzPosition = 0, rtPosition = 0) {
+#' @import future
+#' @import future.apply
+udb_new_ufid <- function(ubd, escon, index, polarity, mzPosition = 0, 
+                         rtPosition = 0) {
   # polarity <- "pos"
   # library(RcppXPtrUtils)
   # library(RcppArmadillo)
@@ -41,7 +43,12 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5,
   log_info("----- Starting clustering with udb_new_ufid -----")
   log_info("Current memory usage {round(pryr::mem_used()/1e6)} MB")
   if (!is.numeric(config::get("ms2_ndp_min_score"))) 
-    stop("config.yml file not found or settings missing")
+    stop("config.yml file not found or missing ms2_ndp_min_score")
+  
+  if (!is.numeric(config::get("min_points_clustering_stage1"))) 
+    stop("config.yml file not found or settings missing min_points_clustering_stage1")
+  minPoints1 <- config::get("min_points_clustering_stage1")
+  minPoints2 <- config::get("min_points_clustering_stage2")
   
   logger::log_info("compiling cpp function")
   
@@ -120,7 +127,7 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5,
     r_ndp <- (sum(WS1 * WS2))^2/(sum(WS1^2) * sum(WS2^2))
     
     # if either of the two spectra only have 1 fragment, then the most intense
-    # fragement in both spectra must be the same mass, otherwise return 0
+    # fragment in both spectra must be the same mass, otherwise return 0
     if (nrow(d_spec) == 1 || nrow(db_spec) == 1) {
       mzD <- d_spec[which.max(d_spec[, 2]), 1]
       mzS <- db_spec[which.max(db_spec[, 2]), 1]
@@ -136,7 +143,8 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5,
     inMz <- ifelse(abs(ftx$mz - fty$mz) <= mztol, TRUE, FALSE)
     inRt <- ifelse(abs(ftx$rt_clustering - fty$rt_clustering) <= rttol, TRUE, FALSE)
     inMS2 <- ifelse(
-      calc_ndp_purity(ftx$ms2, fty$ms2, ndp_m, ndp_n, ms2mztol) >= ms2dpthresh, TRUE, FALSE
+      calc_ndp_purity(ftx$ms2, fty$ms2, ndp_m, ndp_n, ms2mztol) >= ms2dpthresh, 
+      TRUE, FALSE
     )
     all(inMz, inRt, inMS2)
   }
@@ -147,8 +155,14 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5,
     ft1 <- listoFeatures[[id1]]
     ft2 <- listoFeatures[[id2]]
     
-    ifelse(feature_compare(ft1, ft2, mztol = mztol, rttol = rttol,
-                           ms2mztol = ms2mztol, ms2dpthresh = ms2dpthresh, ndp_m = ndp_m, ndp_n = ndp_n), 0, 1)
+    ifelse(
+      feature_compare(
+        ft1, ft2, mztol = mztol, rttol = rttol, ms2mztol = ms2mztol,
+        ms2dpthresh = ms2dpthresh, ndp_m = ndp_m, ndp_n = ndp_n
+      ), 
+      0, 
+      1
+    )
   }
   
   # begin computations ####
@@ -280,7 +294,7 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5,
     
     dbscanRes <- dbscan::dbscan(dist1, 0.1, minPoints1)
     
-    if (length(names(table(dbscanRes$cluster))) > 1) {
+    if (length(names(table(dbscanRes$cluster))) > 1 || names(table(dbscanRes$cluster)) == "1") {
       tblc <- table(dbscanRes$cluster)
       viableTblc <- tblc[names(tblc) != "0"]
       log_info("{length(viableTblc)} cluster(s) with {minPoints1} or more features found")
@@ -298,7 +312,7 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5,
       tblcdf <- tblcdf[tblcdf$Var1 != "0",]
       tblcdf <- tblcdf[order(tblcdf$Freq, decreasing = T),]
       
-      for (cl in as.numeric(tblcdf$Var1)) {  # cl <- 17
+      for (cl in as.numeric(tblcdf$Var1)) {  # cl <- 1
         # select the cluster
         ids_of_compound <- clusters[clusters$cluster == cl, "id"]
         if (length(ids_of_compound) < minPoints2) {
@@ -310,23 +324,13 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5,
         # Cluster these candidates again by mz-rt-ms2 with non-parallel distance function
         skipToNext <- FALSE
         tryCatch(
-          {
-            listoFeatures <- lapply(ids_of_compound, function(i) {
-              if (ntsportal::es_check_feat(escon, index, i)) {
-                suppressMessages(ntsportal::es_feat_from_id(escon, index, i))
-              } else {
-                NULL
-              } 
-            })
-            names(listoFeatures) <- ids_of_compound
-            listoFeatures <- Filter(Negate(is.null), listoFeatures) 
-          },
+          listoFeatures <- es_feat_from_ids(escon, index, ids_of_compound),
           error = function(cnd) {
+            skipToNext <<- TRUE
             log_error("Error retrieving features from IDs")
             log_info("Current m/z position: {mzPosition}")
             log_info("Current tR position: {rtPosition}")
             log_info("Current 1st stage cluster: {cl}")
-            skipToNext <<- TRUE
             log_info("Error text: {conditionMessage(cnd)}")
             ntsportal::es_error_handler(cnd)
           }
@@ -337,6 +341,9 @@ ubd_new_ufid <- function(ubd, escon, index, polarity, minPoints1 = 5,
         }
         
         # 2nd stage clustering ####
+        # Using future.apply which uses future::multicore backend, will not
+        # work in Windows or in RStudio (will revert to sequential)
+        plan(multicore, workers = config::get("cores"))
         dist2 <- usedist::dist_make(
           as.matrix(names(listoFeatures)),
           custom_distance,

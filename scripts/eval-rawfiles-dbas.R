@@ -266,7 +266,7 @@ log_info("Processing files (parallel)")
 # run tests using eval-rawfiles-dbas-tests.R
 # Process files ####
 numPeaksBatch <- parallel::mclapply(
-  allFlsIds, 
+  allFlsIds, #
   proc_batch, 
   escon = escon,
   rfindex = RFINDEX,

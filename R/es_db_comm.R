@@ -173,6 +173,54 @@ es_feat_from_id <- function(escon, index, id) { # id <- "2vLQwXsB5nUKfQcuMOAv"
   newFeat
 }
 
+#' Get list of features from ntsp with document-IDs
+#' 
+#' Can one or more IDs
+#' 
+#' @param escon Elasticsearch connection object created by elastic::connect
+#' @param index Elasticsearch index name
+#' @param esids character vector of IDs
+#'
+#' @return list of Feature objects
+#' @export
+#'
+es_feat_from_ids <- function(escon, index, esids) { 
+  
+  if (length(esids) == 1) {
+    res <- elastic::docs_get(escon, index, esids, verbose = FALSE)
+    docs <- list(res[["_source"]])
+  } else {
+    res <- elastic::docs_mget(escon, index, ids = esids, verbose = FALSE)
+    docs <- lapply(res$docs, "[[", i = "_source")
+  }
+  
+  newFeats <- Map(function(doc, esid) {
+    newFeat <- new_feature(mz = doc$mz, rt = doc$rt,
+                            pol = doc$pol, chrom_method = doc$chrom_method, 
+                            es_id = esid)
+    
+    if ("rtt" %in% names(doc))
+      newFeat$rtt <- do.call("rbind", lapply(doc$rtt, as.data.frame))
+    
+    if ("ms1" %in% names(doc))
+      newFeat$ms1 <- data.frame(mz = sapply(doc$ms1, function(x) x$mz),
+                                int = sapply(doc$ms1, function(x) x$int))
+    
+    if ("ms2" %in% names(doc))
+      newFeat$ms2 <- data.frame(mz = sapply(doc$ms2, function(x) x$mz),
+                                int = sapply(doc$ms2, function(x) x$int))
+    
+    if ("rt_clustering" %in% names(doc))
+      newFeat$rt_clustering <- doc$rt_clustering
+    
+    newFeat
+  }, docs, esids)
+  names(newFeats) <- esids
+  newFeats
+}
+
+
+
 #' Check feature 
 #'
 #' @param escon Elasticsearch connection object created by elastic::connect

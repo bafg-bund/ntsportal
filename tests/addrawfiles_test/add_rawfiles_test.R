@@ -2,7 +2,7 @@ source("~/connect-ntsp.R")
 library(ntsportal)
 rfindex <- "g2_msrawfiles"
 templateId <- find_templateid(escon, rfindex, polarity = "pos", station = "rhein_ko_l", isBlank = F)
-templateId <- "i_fZ34oBis-yLiJmYsvq"
+templateId <- "j_cH4IoBis-yLiJmR8t7"
 
 
 #newPaths <- "~/Messdaten/00_to_sort/20230831_SPM/pos/Wett_08_2_pos.mzXML"
@@ -19,7 +19,7 @@ newPaths <- list.files("~/messdaten/frame/neg/", pattern = "mzXML$", f= T)
 #isdebugged(add_rawfiles)
 #undebug(add_rawfiles)
 
-add_rawfiles(escon, rfindex, templateId, newPaths)
+add_rawfiles(escon, rfindex, templateId, newPaths[5])
 
 
 

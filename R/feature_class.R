@@ -20,22 +20,13 @@ new_feature <- function(pol = character(), mz = double(), rt = double(),
     mz <- as.double(mz)
   x <- list(mz = mz, rt = rt, pol = pol, es_id = es_id, chrom_method = chrom_method)
   furtherArgs <- list(...)
-  if ("ms1" %in% names(furtherArgs))
-    x$ms1 <- furtherArgs$ms1
-  if ("ms2" %in% names(furtherArgs))
-    x$ms2 <- furtherArgs$ms2
-  if ("rtt" %in% names(furtherArgs))
-    x$rtt <- furtherArgs$rtt
-  if ("eic" %in% names(furtherArgs))
-    x$eic <- furtherArgs$eic
-  if ("filename" %in% names(furtherArgs))
-    x$filename <- furtherArgs$filename
-  if ("data_source" %in% names(furtherArgs))
-    x$data_source <- furtherArgs$data_source
-  if ("date_import" %in% names(furtherArgs))
-    x$date_import <- furtherArgs$date_import
-  if ("intensity" %in% names(furtherArgs))
-    x$intensity <- furtherArgs$intensity
+  okfields <- c("ms1", "ms2", "rtt", "eic", "filename", "data_source", "date_import", "intensity")
+  stopifnot(all(names(furtherArgs) %in% okfields))
+  
+  for (newField in names(furtherArgs)) {
+    x[[newField]] <- furtherArgs[[newField]]
+  }
+  
   structure(x, class = "feature")
 }
 

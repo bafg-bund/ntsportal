@@ -395,7 +395,7 @@ create_ufid_lib <- function(pth) {
 #' @export
 #' @import dplyr
 reset_alignment <- function(escon, es_index, ufidLibPath) {
-  
+  message("Removing ufid from ", es_index)
   elastic::docs_update_by_query(escon, es_index, refresh = "true", body =
     '
     {
@@ -459,6 +459,8 @@ reset_alignment <- function(escon, es_index, ufidLibPath) {
     }
     '
   )
+  message("Complete")
+  message("Clearing all data in ", basename(ufidLibPath))
   udb <- DBI::dbConnect(RSQLite::SQLite(), ufidLibPath)
   
   DBI::dbExecute(udb, "PRAGMA foreign_keys = ON;")
@@ -473,6 +475,7 @@ reset_alignment <- function(escon, es_index, ufidLibPath) {
   if (any(nr != 0))
     warning("Some tables still have rows left over")
   DBI::dbDisconnect(udb)
+  message("Complete")
   invisible(TRUE)
 }
 
@@ -491,6 +494,11 @@ es_error_handler <- function(thisCnd) {
       grepl("429", conditionMessage(thisCnd))) {
     logger::log_warn("Error 429 from ElasticSearch, taking a 1 h break")
     Sys.sleep(3600)
+  }
+  if (is.character(conditionMessage(thisCnd)) && 
+      grepl("404", conditionMessage(thisCnd))) {
+    logger::log_warn("Error 404 from ElasticSearch, possibly because ID was
+                     not found")
   }
 }
 

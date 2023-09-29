@@ -256,12 +256,13 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
     if (newStart == "filename") {
       dateString <- stringr::str_match(doc$filename, doc$dbas_date_regex)[,2]
       dateFormat <- doc$dbas_date_format
-      if (!is.element(dateFormat, c("ymd", "dmy", "yy"))) {
+      if (!is.element(dateFormat, c("ymd", "dmy", "yy", "ym"))) {
         stop("Unknown dbas_date_format ", dateFormat, " in ", doc$filename)
       }
       temp <- switch(
         dateFormat,
         yy = lubridate::ymd(dateString, tz = "Europe/Berlin", truncated = 2),
+        ym = lubridate::ymd(dateString, tz = "Europe/Berlin", truncated = 2),
         ymd = lubridate::ymd(dateString, tz = "Europe/Berlin", truncated = 2),
         dmy = lubridate::dmy(dateString, tz = "Europe/Berlin", truncated = 2)
       )
