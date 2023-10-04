@@ -35,12 +35,14 @@ udb_new_ufid <- function(ubd, escon, index, polarity, mzPosition = 0,
   # library(dplyr)
   # library(logger)
   # library(glue)
+  # library(future)
+  # library(future.apply)
   # minPoints1 = 5
   # minPoints2 = 2
   # setwd("tests/ufid_alignment")
   
   # set up c++ function ####
-  log_info("----- Starting clustering with udb_new_ufid -----")
+  log_info("Starting clustering with udb_new_ufid")
   log_info("Current memory usage {round(pryr::mem_used()/1e6)} MB")
   if (!is.numeric(config::get("ms2_ndp_min_score"))) 
     stop("config.yml file not found or missing ms2_ndp_min_score")
@@ -185,7 +187,7 @@ udb_new_ufid <- function(ubd, escon, index, polarity, mzPosition = 0,
   
   numUfids <- 0
   repeat {
-    log_info("Access database from position m/z {mzPosition}, rt {rtPosition}, pol {polarity}")
+    log_info("Access database from position m/z {mzPosition}, rt {rtPosition}, {polarity}ESI")
     skipToNext <- FALSE
     tryCatch(
       res <- elastic::Search(escon, index, body = sprintf('{
@@ -246,21 +248,14 @@ udb_new_ufid <- function(ubd, escon, index, polarity, mzPosition = 0,
       }', mzPosition, rtPosition, polarity)),
       error = function(cnd) {
         log_error("Error text: {conditionMessage(cnd)}")
-        log_info("Error retrieving new docs from ntsp, try again in 10 min")
-        Sys.sleep(600)
         skipToNext <<- TRUE
       }
     )
     if (skipToNext) {
-      log_warn("Trying to retrieve documents again")
+      log_info("Error retrieving new docs from ntsp, try again in 10 min")
+      Sys.sleep(600)
       next
     }
-    
-    # Get last hit
-    mzPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[1]]
-    rtPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[2]]
-    
-    log_info("In total, {res$hits$total$value} features left to process")
     
     # If nothing is returned by the database, you have reached the end.
     # this is where the repeat breaks and the function ends
@@ -270,6 +265,10 @@ udb_new_ufid <- function(ubd, escon, index, polarity, mzPosition = 0,
       log_info("Completed clustering and assigned {numUfids} new ufids")
       return(TRUE)
     }
+    
+    # Get last hit
+    mzPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[1]]
+    rtPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[2]]
     
     log_info("Beginning computations on the next {length(res$hits$hits)} features")
     
@@ -288,9 +287,8 @@ udb_new_ufid <- function(ubd, escon, index, polarity, mzPosition = 0,
     )
     
     # 1st stage clustering ####
-    # cluster these by mz-rt using parallel distance function
+    # Compute dist matrix for large number of features by efficient, parallel C++ mz-rt function
     dist1 <- parallelDist::parDist(m, method="custom", func = mzrt_dist_FuncPtr)
-    #table(r1)
     
     dbscanRes <- dbscan::dbscan(dist1, 0.1, minPoints1)
     
@@ -298,12 +296,8 @@ udb_new_ufid <- function(ubd, escon, index, polarity, mzPosition = 0,
       tblc <- table(dbscanRes$cluster)
       viableTblc <- tblc[names(tblc) != "0"]
       log_info("{length(viableTblc)} cluster(s) with {minPoints1} or more features found")
-      distrib <- hist(viableTblc, plot = F)
-      message("Histogram:")
-      message(glue("Breaks: {paste(distrib$breaks[-1], collapse = ' ')}"))
-      message(glue("Counts: {paste(distrib$counts, collapse = ' ')}"))
-      log_info("Current memory usage {round(pryr::mem_used()/1e6)} MB")
-      # go through all viable clusters and perform second stage clustering
+     
+      # Go through all viable clusters and perform second stage clustering
       # with ms1 and ms2
       clusters <- data.frame(id = ids, cluster = dbscanRes$cluster)
       clusters <- clusters[clusters$cluster != 0, ]
@@ -314,17 +308,17 @@ udb_new_ufid <- function(ubd, escon, index, polarity, mzPosition = 0,
       
       for (cl in as.numeric(tblcdf$Var1)) {  # cl <- 1
         # select the cluster
-        ids_of_compound <- clusters[clusters$cluster == cl, "id"]
-        if (length(ids_of_compound) < minPoints2) {
+        idsFeature <- clusters[clusters$cluster == cl, "id"]
+        if (length(idsFeature) < minPoints2) {
           log_info("Not enough docs found for cluster {cl}, moving to next")
           next
         }
-        log_info("Second stage clustering with {length(ids_of_compound)} features")
+        log_info("Second stage clustering with {length(idsFeature)} features")
         
         # Cluster these candidates again by mz-rt-ms2 with non-parallel distance function
         skipToNext <- FALSE
         tryCatch(
-          listoFeatures <- es_feat_from_ids(escon, index, ids_of_compound),
+          listoFeatures <- es_feat_from_ids(escon, index, idsFeature),
           error = function(cnd) {
             skipToNext <<- TRUE
             log_error("Error retrieving features from IDs")
@@ -343,6 +337,7 @@ udb_new_ufid <- function(ubd, escon, index, polarity, mzPosition = 0,
         # 2nd stage clustering ####
         # Using future.apply which uses future::multicore backend, will not
         # work in Windows or in RStudio (will revert to sequential)
+        # Only works with the github version of usedist.
         plan(multicore, workers = config::get("cores"))
         dist2 <- usedist::dist_make(
           as.matrix(names(listoFeatures)),
@@ -354,34 +349,36 @@ udb_new_ufid <- function(ubd, escon, index, polarity, mzPosition = 0,
           ndp_m = config::get("ms2_ndp_m"),
           ndp_n = config::get("ms2_ndp_n")
         )
-        
+        plan(sequential)
         dbscanRes2 <- dbscan::dbscan(dist2, 0.1, minPoints2)
         
         if (length(names(table(dbscanRes2$cluster))) == 1 &&
             names(table(dbscanRes2$cluster)) == "0") {
-          message("no 2nd cluster with ", minPoints2 ,"or more features found, moving to next
-                  viable 1st stage cluster")
+          message("no 2nd cluster with ", minPoints2 ,"or more features found, 
+                   moving to next viable 1st stage cluster")
         } else {
           tblc2 <- table(dbscanRes2$cluster)
           viableTblc2 <- tblc2[names(tblc2) != "0"]
-          log_info("Found {length(viableTblc2)} cluster(s) with {minPoints2} or more features after 2nd stage clustering")
-          distrib2 <- hist(viableTblc2, plot = F)
-          message("Histogram:")
-          message(glue("Breaks: {paste(distrib2$breaks[-1], collapse = ' ')}"))
-          message(glue("Counts: {paste(distrib2$counts, collapse = ' ')}"))
+          log_info("Found {length(viableTblc2)} cluster(s) with {minPoints2} or 
+                   more features after 2nd stage clustering")
+          
           # take the cluster with the highest number first, what about the other 
           # second stage clusters?
           # At the moment these are just forgotten 
           # TODO additional for loop needed to add each group of second stage clustering
           clusters2 <- data.frame(id = names(listoFeatures), cluster = dbscanRes2$cluster)
-          ids_of_compound2 <- clusters2[clusters2$cluster == which.max(tblc2[names(tblc2) != "0"]), "id"]
+          idsFeature2 <- clusters2[clusters2$cluster == which.max(tblc2[names(tblc2) != "0"]), "id"]
           
-          res2 <- elastic::docs_mget(escon, index, ids = ids_of_compound2, verbose = F)
+          res2 <- elastic::docs_mget(escon, index, ids = idsFeature2, verbose = F)
           # if docs have a name, add this to ufid db as well
           named <- vapply(res2$docs, function(x) is.element("name", names(x[["_source"]])), logical(1))
           # if more than half have a name, add these to ufid DB
           if (sum(named) > length(named) * 0.5) {
-            comps <- vapply(res2$docs, function(x) paste(x[["_source"]][["name"]], collapse = ", "), character(1))
+            comps <- vapply(
+              res2$docs, 
+              function(x) paste(x[["_source"]][["name"]], collapse = ", "), 
+              character(1)
+            )
             comps <- comps[comps != ""]
             comp_name <- paste(unique(comps), collapse = ", ")
             log_info("Cluster is known compound(s) {comp_name}")
@@ -391,23 +388,28 @@ udb_new_ufid <- function(ubd, escon, index, polarity, mzPosition = 0,
               rm(comp_name)
             mzs <- vapply(res2$docs, function(x) x[["_source"]][["mz"]], numeric(1))
             rts <- vapply(res2$docs, function(x) x[["_source"]][["rt"]], numeric(1))
-            message(sprintf("m/z: %.4f, stdev: %.4f; rt: %.2f, stdev: %.2f", mean(mzs), sd(mzs), mean(rts), sd(rts)))
+            message(
+              sprintf(
+                "m/z: %.4f, stdev: %.4f; rt: %.2f, stdev: %.2f", 
+                mean(mzs), sd(mzs), mean(rts), sd(rts)
+              )
+            )
           }
           
           polarities <- sapply(res2$docs, function(x) x[["_source"]]$pol)
           stopifnot(length(unique(polarities)) == 1)
           
           # Assign new ufid to these ids, then build new ufid entry in ufid_db
-          new_ufid <- ntsportal::get_next_ufid(udb, escon, index)
+          newUfid <- ntsportal::get_next_ufid(udb, escon, index)
           
           
-          log_info("Adding ufid {new_ufid} to docs in ntsp")
+          log_info("Adding ufid {newUfid} to docs in ntsp")
           skipToNext <- FALSE
           tryCatch(
-            ntsportal::es_add_ufid_to_ids(escon, index, new_ufid, ids_of_compound2),
+            ntsportal::es_add_ufid_to_ids(escon, index, newUfid, idsFeature2),
             error = function(cnd) {
-              log_error("Error in es_add_ufid_to_ids for ufid {new_ufid}")
-              log_info("In total, {length(ids_of_compound2)} docs were to be updated")
+              log_error("Error in es_add_ufid_to_ids for ufid {newUfid}")
+              log_info("In total, {length(idsFeature2)} docs were to be updated")
               log_info("Current mzPosition: {mzPosition}")
               log_info("Current rtPosition: {rtPosition}")
               log_info("Current 1st stage cluster: {cl}")
@@ -419,7 +421,7 @@ udb_new_ufid <- function(ubd, escon, index, polarity, mzPosition = 0,
             # Remove any partial ufid assignments
             Sys.sleep(120)
             log_info("Rolling back changes to ntsp")
-            try(ntsportal::es_remove_ufid(escon, index, new_ufid))
+            try(ntsportal::es_remove_ufid(escon, index, newUfid))
             log_warn("Skipping to next 1st stage cluster")
             next
           }
@@ -432,9 +434,9 @@ udb_new_ufid <- function(ubd, escon, index, polarity, mzPosition = 0,
           # index (no need to use generic g2_nts* index).
           skiptToNext <- FALSE
           tryCatch(
-            udbUpdated <- ntsportal::udb_update(udb, escon, index, new_ufid),
+            udbUpdated <- ntsportal::udb_update(udb, escon, index, newUfid),
             error = function(cnd) {
-              log_error("Error in udb_update for ufid {new_ufid}")
+              log_error("Error in udb_update for ufid {newUfid}")
               log_info("Current mzPosition: {mzPosition}")
               log_info("Current rtPosition: {rtPosition}")
               log_info("Current 1st stage cluster: {cl}")
@@ -445,13 +447,13 @@ udb_new_ufid <- function(ubd, escon, index, polarity, mzPosition = 0,
           if (skipToNext) {
             Sys.sleep(120)
             log_info("Rolling back changes to ntsp")
-            try(ntsportal::es_remove_ufid(escon, index, new_ufid))
-            try(ntsportal::udb_remove_ufid(udb, new_ufid))
+            try(ntsportal::es_remove_ufid(escon, index, newUfid))
+            try(ntsportal::udb_remove_ufid(udb, newUfid))
             log_warn("Skipping to next 1st stage cluster")
             next
           }
           if (udbUpdated) {
-            log_info("new ufid {new_ufid} successfully added to ufid DB")
+            log_info("new ufid {newUfid} successfully added to ufid DB")
           }
           # add name to ufid-db
           if (sum(named) > length(named) * 0.5 && exists("comp_name")) {
@@ -460,7 +462,7 @@ udb_new_ufid <- function(ubd, escon, index, polarity, mzPosition = 0,
                SET compound_name = "%s"
                WHERE
                  ufid == %i;
-                 ', comp_name, new_ufid)))
+                 ', comp_name, newUfid)))
           }
           # success in defining new ufid, increment the counter
           numUfids <- numUfids + 1
@@ -468,9 +470,9 @@ udb_new_ufid <- function(ubd, escon, index, polarity, mzPosition = 0,
           # Do a ufid assignment run to catch any stragglers, if this fails
           # it is not such a problem.
           tryCatch(
-            ntsportal::es_assign_ufids(escon, udb, index, polarity, new_ufid),
+            ntsportal::es_assign_ufids(escon, udb, index, polarity, newUfid),
             error = function(cnd) {
-              log_error("Error in es_assign_ufids for ufid {new_ufid}")
+              log_error("Error in es_assign_ufids for ufid {newUfid}")
               log_info("Current mzPosition: {mzPosition}")
               log_info("Current rtPosition: {rtPosition}")
               log_info("Current 1st stage cluster: {cl}")
