@@ -1,2 +1,36 @@
-# ntsportal
-R-Package to build and maintain the ntsportal elasticsearch database
+
+# ntsportal-viewer
+
+Shiny App to view ntsportal elasticsearch database
+
+Wie ist die beste (Standard-)Struktur eines R-Skripts? Auf welche Dinge
+sollten wir achten?
+<https://www.r-bloggers.com/2018/08/structuring-r-projects/>
+
+.
+
+└── my_awesome_project
+
+  ├── src
+
+  ├── output
+
+  ├── man (if roxygen)
+
+  ├── renv
+
+  ├── data
+
+  │ ├── raw
+
+  │ └── processed
+
+  ├── README.md
+
+  ├── run_analyses.R
+
+  ├── renv.lock
+
+  ├── .Rprofile
+
+  └── .gitignore
