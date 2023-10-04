@@ -1,0 +1,14 @@
+library/
+library_root/
+
+local/
+cellar/
+lock/
+python/
+sandbox/
+staging/
+cache/
+index/
+source/
+
+.DS_Store
