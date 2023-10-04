@@ -47,3 +47,11 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# mac specific files
+.DS_Store
+config.yml
+
+
+
+
