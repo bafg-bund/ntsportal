@@ -71,7 +71,7 @@ request_ui <- function(id, df){
              
              sliderInput(NS(id, "inSlider_req_mz"), "mz:",
                          min = 1, max = 20, value = c(5, 15), step = 0.0005), 
-             sliderInput(NS(id, "inSlider_req_rtt"), "rtt:",
+             sliderInput(NS(id, "inSlider_req_rtt"), "rt:",
                          min = 1, max = 20, value = c(5, 15), step = 0.0005),
              
              
