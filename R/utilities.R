@@ -412,6 +412,7 @@ reset_alignment <- function(escon, es_index, ufidLibPath) {
     '
   )
   Sys.sleep(5)
+  message("Completed ntsp ufid removal")
   elastic::docs_update_by_query(escon, es_index, refresh = "true", body =
     '
     {
@@ -428,6 +429,7 @@ reset_alignment <- function(escon, es_index, ufidLibPath) {
     '
   )
   Sys.sleep(5)
+  message("Completed ntsp ucid removal")
   elastic::docs_update_by_query(escon, es_index, refresh = "true", body =
                                   '
     {
@@ -444,6 +446,7 @@ reset_alignment <- function(escon, es_index, ufidLibPath) {
     '
   )
   Sys.sleep(5)
+  message("Completed ntsp ufid2 removal")
   elastic::docs_update_by_query(escon, es_index, refresh = "true", body =
     '
     {
@@ -459,6 +462,7 @@ reset_alignment <- function(escon, es_index, ufidLibPath) {
     }
     '
   )
+  message("Completed ntsp ucid2 removal")
   message("Complete")
   message("Clearing all data in ", basename(ufidLibPath))
   udb <- DBI::dbConnect(RSQLite::SQLite(), ufidLibPath)

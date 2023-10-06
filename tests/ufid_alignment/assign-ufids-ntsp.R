@@ -17,7 +17,7 @@ library(logger)
 # 3: Neg initial pass
 # 4: Neg clustering and final pass
 STEPS <- 1:4
-VERSION <- "2023-09-27"
+VERSION <- "2023-10-06"
 
 startTime <- lubridate::now()
 configFile <- commandArgs(TRUE)
@@ -98,7 +98,7 @@ if (2 %in% STEPS) {
   successNewUfid <- FALSE
   while (!successNewUfid) {
     tryCatch(
-      successNewUfid <- ubd_new_ufid(udb, escon, index, "pos"),
+      successNewUfid <- udb_new_ufid(udb, escon, index, "pos"),
       error = function(cnd) {
         log_error("Error in step 2, udb_new_ufid")
         log_info("Error text: {conditionMessage(cnd)}")
@@ -148,7 +148,7 @@ if (4 %in% STEPS) {
   log_info("looking for new clusters, -ESI")
   success <- FALSE
   tryCatch(
-    success <- ubd_new_ufid(udb, escon, index, "neg"),
+    success <- udb_new_ufid(udb, escon, index, "neg"),
     error = function(cnd) {
       log_error("Error in step 4")
       message("error text: ", cnd)

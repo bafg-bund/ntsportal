@@ -3,15 +3,15 @@
 # Add ufid db to ntsp for data viewing
 # usage
 # nohup Rscript update-ufid-db-ntsp.R &> ~/log-files/update-ufid-db-ntsp-$(date +%y%m%d).log &
-
+# nohup Rscript ../update-ufid-db-ntsp.R &> update-ufid-db-ntsp-$(date +%y%m%d).log &
 
 library(dplyr)
 library(logger)
 
 VERSION <- "2023-01-13"
-UFIDDB <- "~/sqlite_local/ufid1.sqlite"
-UFIDJSON <- "~/sqlite_local/json/ufid1.json"
-INDEX <- "g2_ufid1"
+UFIDDB <- "~/projects/ntsportal/tests/ufid_alignment/sep-test/ufid-lib-sep-test.sqlite"
+UFIDJSON <- "~/projects/ntsportal/tests/ufid_alignment/sep-test/ufid-lib-sep-test.json"
+INDEX <- "g2_ufid_v3"
 INGESTPTH <- "~/projects/ntsautoeval/ingest.sh"
 CONFIG <- "~/config.yml"
 

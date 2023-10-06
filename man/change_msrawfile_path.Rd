@@ -2,7 +2,7 @@
 % Please edit documentation in R/manage_rawfiles_db.R
 \name{change_msrawfile_path}
 \alias{change_msrawfile_path}
-\title{Change the path of a document in a rawfiles db}
+\title{Change the path of one document in a rawfiles db}
 \usage{
 change_msrawfile_path(escon, rfindex, oldPath, newPath)
 }
@@ -19,7 +19,7 @@ change_msrawfile_path(escon, rfindex, oldPath, newPath)
 TRUE if change was successful (invisibly)
 }
 \description{
-Change the path of a document in a rawfiles db
+Change the path of one document in a rawfiles db
 }
 \details{
 Both files must exist when making the change. The function takes some time 
