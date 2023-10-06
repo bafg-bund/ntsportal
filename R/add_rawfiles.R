@@ -346,7 +346,7 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
   message("Documents were uploaded with the IDs")
   cat(idString)
   
-  Sys.sleep(10)
+  Sys.sleep(5)
   # check that everything has been entered
   
   checkAfter <- check_files(newPaths)

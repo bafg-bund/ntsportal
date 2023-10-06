@@ -6,6 +6,12 @@
 # carried out. Once everything is complete the script will 
 # change aliases to the newly created indices.
 
+# usage (from ntsportal):
+# nohup Rscript scripts/
+# nohup Rscript scripts/eval-rawfiles-dbas.R &> ~/messdaten/log_files/dbas/$(date +%y%m%d)_dbas_eval.log &
+# tail -f ~/messdaten/log_files/dbas/$(date +%y%m%d)_dbas_eval.log
+
+
 VERSION <- "2023-09-27"
 
 # Variables ####
