@@ -2,7 +2,7 @@
 
 #' Compute false positives and false negatives in ufid and ucid assignment
 #'
-#' Used for testing purposes
+#' Used for testing purposes.
 #'
 #' @param escon
 #' @param index
