@@ -6,7 +6,7 @@
 # json. The json is saved under ~/sqlite_local/json
 
 
-# nohup Rscript update-spectral-library-ntsp.R &> ~/logs/sdb-update-$(date +%y%m%d).log &
+# nohup Rscript update-spectral-library-ntsp.R &> ~/log-files/$(date +%y%m%d)-speclib-update.log &
 
 
 library(dplyr)
@@ -15,23 +15,22 @@ library(DBI)
 library(parallel)
 library(logger)
 
-VERSION <- "2022-12-21"
-SDBPATH <- "~/sqlite_local/MS2_db_v9.db"
-INDEX <- "g2_spectral_library"
+source("~/connect-ntsp.R")
+
+VERSION <- "2023-10-10"
+SDBPATH <- "/scratch/nts/MS2_db_v9.db"
+ALIAS <- "g2_spectral_library"
 CONFIG <- "~/config.yml"
 INGESTPTH <- "~/projects/ntsautoeval/ingest.sh"
 
 jsonName <- glue::glue("~/sqlite_local/json/{basename(SDBPATH)}-{format(Sys.Date(), '%y%m%d')}.json")
 
 log_info("----- update-spectral-library-ntsp.R v{VERSION} -----")
-log_info("Converting sqlite spectral database at {SDBPATH} to json and updating {INDEX} index")
+log_info("Converting sqlite spectral database at {SDBPATH} to json and updating {ALIAS} index")
+
+index <- paste0(ALIAS, "_v", format(Sys.Date(), '%y%m%d'))
 
 sdb <- DBI::dbConnect(RSQLite::SQLite(), SDBPATH)
-# dbListTables(sdb)
-# dbListFields(sdb, "retention_time")
-# dbListFields(sdb, "fragment")
-# dbListFields(sdb, "expGroupExp")
-# tbl(sdb, "retention_time") %>% collect()
 
 exps <- tbl(sdb, "experiment") %>%
   left_join(tbl(sdb, "compound"), by = "compound_id") %>%
@@ -181,43 +180,81 @@ jsonlite::write_json(exps, jsonName, pretty = T, digits = NA, auto_unbox = T)
 
 DBI::dbDisconnect(sdb)
 
+# Create new index 
+# See https://gitlab.lan.bafg.de/nts/ntsportal/-/wikis/Create-or-Recreate-Index/Index-mapping-for-g2_spectral_library
 
-# delete current contents of index g2_spectral_library index
-log_info("delete current contents of {INDEX} index")
-
-ec <- config::get("elastic_connect", file = CONFIG)
-
-escon <- elastic::connect(
-  host = 'elastic.dmz.bafg.de', 
-  port = 443, user=ec$user, 
-  pwd  = ec$pwd,
-  transport_schema = "https"
-)
-
-if (escon$ping()$cluster_name != "bfg-elastic-cluster") {
-  stop("Connection to es-db not established")
-}
-
-res <- elastic::docs_delete_by_query(
-  escon, INDEX, 
-  body = 
-    '
-      {
-        "query": {
-          "match_all": {}
+res <- elastic::index_create(escon, index, body = '
+{
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "date_import" : {
+        "type" : "date",
+        "format" : "epoch_second"
+      },
+      "cas" : {"type" : "keyword"},
+      "name" : {"type" : "keyword"},
+      "ms2" : {
+        "type" : "nested",
+        "properties" : {
+          "int" : {
+            "type" : "float"
+          },
+          "mz" : {
+            "type" : "float"
+          }
         }
-      }
-    '
-  )
+      },
+      "mz" : {"type" : "float"},
+      "tag": {"type": "keyword"},
+      "inchi" : {"type" : "keyword"},
+      "formula" : {"type" : "keyword"},
+      "smiles" : {"type" : "keyword"},
+      "comment": {"type": "text"},
+      "pol" : {"type" : "keyword"},
+      "isotopologue" : {"type" : "keyword"},
+      "adduct" : {"type" : "keyword"},
+      "rtt" : {
+        "type" : "nested",
+        "properties" : {
+          "method" : {
+            "type" : "keyword"
+          },
+          "doi" : {
+            "type" : "keyword"
+          },
+          "predicted" : {
+            "type" : "boolean"
+          },
+          "rt" : {
+            "type" : "float"
+          }
+        }
+      },
+      "inchikey" : {"type" : "keyword"},
+      "mw" : {"type" : "float"},
+      "ce" : {"type" : "float"},
+      "ces" : {"type" : "float"},
+      "instrument": {"type" : "keyword"},
+      "ionisation": {"type" : "keyword"},
+      "ce_unit": {"type" : "keyword"},
+      "frag_type": {"type" : "keyword"},
+      "comp_group": {"type" : "keyword"},
+      "data_source": {"type" : "keyword"}
+    }
+  }
+}
+ ')
 
-if (length(res$failures) == 0) {
-  log_info("Sucessful deletion of {res$deleted} entries")
+if (res$acknowledged) {
+  log_info("Ingest new spectra using {INGESTPTH}")
+  system(glue::glue("{INGESTPTH} {CONFIG} {index} {jsonName}"))
+  
+  # Change alias to new index
+  ntsportal::es_move_alias(escon, index, ALIAS)
+  
 } else {
-  stop("Error in deletion of current index")
-} 
-
-log_info("Ingest new spectra using {INGESTPTH}")
-
-system(glue::glue("{INGESTPTH} {CONFIG} {INDEX} {jsonName}"))
+  stop("error in index creation")
+}
 
 log_info("----- End of script update-spectral-library-ntsp.R -------")

@@ -2,16 +2,18 @@
 % Please edit documentation in R/internal_testing.R
 \name{es_test_fpfn}
 \alias{es_test_fpfn}
-\title{Compute false positives and false negatives in ufid and ucid assignment}
+\title{Compute validation statistics for ufid and ucid assignment}
 \usage{
-es_test_fpfn(escon, index)
+es_test_fpfn(escon, index, includeUfid2 = FALSE, includeUcid = FALSE)
 }
 \arguments{
-\item{index}{}
+\item{includeUfid2}{include ufid2 stats}
+
+\item{includeUcid}{include ucid stats}
 }
 \value{
 list of metrics used to assess quality of ufid and ucid assignments
 }
 \description{
-Used for testing purposes
+Used for testing purposes.
 }

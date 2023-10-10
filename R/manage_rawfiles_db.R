@@ -126,6 +126,7 @@ create_dbas_index <- function(escon, aliasName, rfIndex) {
           "station" : {"type" : "keyword"},
           "inchikey" : {"type" : "keyword"},
           "inchi" : {"type" : "keyword"},
+          "smiles" : {"type" : "keyword"},
           "mw" : {"type" : "float"},
           "adduct" : {"type" : "keyword"},
           "formula" : {"type" : "keyword"}
@@ -165,7 +166,33 @@ create_dbas_index <- function(escon, aliasName, rfIndex) {
   invisible(indNew)
 }
 
-#' Remove the old alias and create a new one
+
+#' Change alias of an index to a new index.
+#' 
+#' Will delete the previous alias
+#'
+#' @param escon elastic connection object created by elastic::connect
+#' @param indexName 
+#' @param aliasName 
+#'
+#' @return
+#' @export
+#'
+es_move_alias <- function(escon, indexName, aliasName) {
+  aliases <- elastic::cat_aliases(escon, index = aliasName, parse = T)
+  # Delete previous alias
+  if (!is.null(aliases)) {
+    res1 <- elastic::alias_delete(escon, index = aliases[1, 2], alias = aliases[1, 1]) 
+  }
+  res <- elastic::alias_create(escon, indexName, aliasName)
+  res$acknowledged
+}
+
+#' Remove the old dbas index alias and create a new one
+#' 
+#' This is specific for dbas aliases because of the need for v4 alias names for 
+#' Kibana (will be depricated in the future). For a general function to change
+#' alias names, see es_move_alias
 #'
 #' @param escon elastic connection object created by elastic::connect
 #' @param indexName 

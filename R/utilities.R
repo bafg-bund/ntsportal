@@ -552,13 +552,15 @@ get_next_ufid <- function(udb, escon, index) {
   newUfid
 }
 
-#' Connect to a sqlite db (ufid-library)
-#'
+#' Connect to a sqlite db
+#' 
+#' Remember to disconnect when finished.
+#' 
 #' @param pth 
 #'
-#' @return connection object
+#' @return DBI connection object
 #' @export
-conn_udb <- function(pth) {
+con_sqlite <- function(pth) {
   DBI::dbConnect(RSQLite::SQLite(), pth)
 }
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/manage_rawfiles_db.R
 \name{move_dbas_alias}
 \alias{move_dbas_alias}
-\title{Remove the old alias and create a new one}
+\title{Remove the old dbas index alias and create a new one}
 \usage{
 move_dbas_alias(escon, indexName, aliasName)
 }
@@ -14,5 +14,7 @@ move_dbas_alias(escon, indexName, aliasName)
 \item{aliasName}{}
 }
 \description{
-Remove the old alias and create a new one
+This is specific for dbas aliases because of the need for v4 alias names for 
+Kibana (will be depricated in the future). For a general function to change
+alias names, see es_move_alias
 }

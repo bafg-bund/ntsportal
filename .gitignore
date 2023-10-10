@@ -16,3 +16,4 @@ logs
 tests/plots
 tests/ufid-note
 tests/addrawfiles_test
+tests/reference-shewhart

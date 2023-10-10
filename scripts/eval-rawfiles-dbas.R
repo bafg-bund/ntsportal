@@ -12,13 +12,15 @@
 # tail -f ~/messdaten/log_files/dbas/$(date +%y%m%d)_dbas_eval.log
 
 
-VERSION <- "2023-09-27"
+VERSION <- "2023-10-10"
 
 # Variables ####
 RFINDEX <- "g2_msrawfiles"
 TEMPSAVE <- "/scratch/nts/tmp"
 CONFG <- "~/config.yml"
 INGESTPTH <- "/scratch/nts/ntsautoeval/ingest.sh"
+UPDATESPECDB <- "~/projects/ntsportal/scripts/update-spectral-library-ntsp.R"
+SPECLIBPATH <- "/scratch/nts/MS2_db_v9.db"  # temporary: only for adding group and formula after processing
 CORES <- 1
 CORESBATCH <- 6
 
@@ -290,12 +292,32 @@ log_info("Completed all batches")
 log_info("Average peaks found per batch: {mean(numPeaksBatch)}")
 log_info("currently {free_gb()} GB of memory available")
 
+# Transfer current spectral lib to ntsp
+
+system2("Rscript", UPDATESPECDB)
+
+# Add information to docs ####
+# should be moved to proc_batch function in the future
+
+sdb <- con_sqlite(SPECLIBPATH)
+
+# Add compound group, identifiers
+#i <- "g2_dbas_v231006_bfg"
+for (i in allInd) {
+  es_add_comp_groups(escon, sdb, i)
+  es_add_identifiers(escon, sdb, i)
+}
+
+DBI::dbDisconnect(sdb)
+
+
 # Move aliases to new indices ####
 log_info("Moving aliases to new indices")
 suca <- mapply(move_dbas_alias, indexName = allInd, aliasName = allAlia,
                MoreArgs = list(escon = escon))
 if (all(suca))
   log_info("Move alias successful")
+
 
 endTime <- lubridate::now()
 hrs <- round(as.numeric(endTime - startTime, units = "hours"))
