@@ -29,18 +29,18 @@ request_ui <- function(id, df){
       #textInput("inText_req_matrix",  "Matrix input:", value = "matrix"),
       textInput(NS(id, "inText_req_tag"),  "Tag input:", value = "tag"),
       textInput(NS(id, "inText_req_comp_group"),  "Comp Group input:", value = "comp group"),
-      selectInput(NS(id, "inText_req_rtt_method"), label = "rtt Method input:", choices = NULL, multiple = TRUE),
+      selectInput(NS(id, "inText_req_rtt_method"), label = "rt method input:", choices = NULL, multiple = TRUE),
       #textInput("inText_req_rtt_method",  "rtt Method input:", value = "rtt method"),
       
       numericInput(NS(id, "inNumber_req_mz"), "mz input:",
                    min = 1, max = 20, value = 5, step = 0.0005),
-      numericInput(NS(id, "inNumber_req_mz_tol"), "mz toleranz input:",
+      numericInput(NS(id, "inNumber_req_mz_tol"), "mz tolerance input:",
                    min = 0, max = 1, value = 0.5, step = 0.0005),
       
       
-      numericInput(NS(id, "inNumber_req_rtt"), "rtt input:",
+      numericInput(NS(id, "inNumber_req_rtt"), "rt input:",
                    min = 1, max = 20, value = 5, step = 0.0005),
-      numericInput(NS(id, "inNumber_req_rtt_tol"), "rtt toleranz input:",
+      numericInput(NS(id, "inNumber_req_rtt_tol"), "rt tolerance input:",
                    min = 0, max = 1, value = 0.5, step = 0.0005), 
       
       
