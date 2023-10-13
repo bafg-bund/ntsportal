@@ -1,0 +1,27 @@
+# r environment specific variables
+
+#RENV_PATHS_LIBRARY = "./renv/library_root/library"
+#RENV_PATHS_CACHE = "./renv/library_root/cache"
+RENV_PATHS_ROOT = "./renv/library_root"
+
+# Request Tab
+#source("./R/_Request/request_ui.R")
+#source("./R/_Request/request_server.R")
+
+# Help Tab
+HELP_INCLUDE_PATH = "R/_Help/include/include.md"
+
+# models path
+
+
+# functions specific variables
+
+
+# bafg specific variables
+
+
+# models specific variables
+
+
+# output
+

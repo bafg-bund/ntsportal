@@ -14,9 +14,11 @@ RUN apt-get update && apt-get install -y \
     libgit2-dev \
     openssh-client \
     zlib1g -y \
-    zlib1g-dev -y \
-    libpng-dev -y \
-    libgdal-dev -y \
+    zlib1g-dev \
+    libpng-dev \
+    libgdal-dev \
+    libxt-dev \
+    libsodium-dev \
     cmake
     
 

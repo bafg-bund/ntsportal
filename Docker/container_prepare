@@ -1,5 +1,0 @@
-install zlib.h
-
-sudo apt install zlib1g -y
-sudo apt install zlib1g-dev -y
-sudo apt install libsodium-dev

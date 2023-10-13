@@ -16,6 +16,8 @@ library(elastic)
 #library(config)
 library(leaflet)
 library(markdown)
+library(ggplot2)
+library(crosstalk)
 
 ##-------------------------------------user check
 # How many days should sessions last?
@@ -80,11 +82,14 @@ logout_link <- function(id, label = "logout", class = "text-success", style = "c
 
 ##-------------------------------------getdata
 
-json_data <- fromJSON("./Data/example-dataset-structure.json")
-test_data <- as.data.table(json_data$hits$hits)
+json_data <- fromJSON("./Data/cbz_cand.json")
+#test_data <- json_data
+test_data <- as.data.table(json_data)
 test_data <- test_data %>% unnest(X_source.rtt)
 test_data <- test_data %>% unnest(X_source.eic)
 
 
+##-------------------------------------dashboard-data
 
+dashboard_data <- as.data.table(json_data)
 

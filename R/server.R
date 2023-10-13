@@ -105,7 +105,7 @@ server <- function(input, output, session, clientData) {
 
     
   
-  dashboard_server("create_dashboard")
+  dashboard_server("create_dashboard", dashboard_data)
   output$dashboard_stuff <- renderUI({
     req(credentials()$user_auth)
     dashboard_ui("create_dashboard") 

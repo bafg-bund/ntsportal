@@ -1,15 +1,17 @@
-dashboard_ui <- function(id){
+dashboard_ui <- function(id, df){
   
   # !!!!!!!!! NS ID !!!!!!!
   # Choices for drop-downs
-  vars <- c(
-    "Is SuperZIP?" = "superzip",
-    "Centile score" = "centile",
-    "College education" = "college",
-    "Median income" = "income",
-    "Population" = "adultpop"
-  )
+  # vars <- c(
+  #   "Is SuperZIP?" = "superzip",
+  #   "Centile score" = "centile",
+  #   "College education" = "college",
+  #   "Median income" = "income",
+  #   "Population" = "adultpop"
+  # )
   
+  vars_name <- c("all", unique(test_data$X_source.name))
+  vars_source <- c("all", unique(test_data$X_source.data_source))
   
   navbarPage("my map", id="nav",
              
@@ -32,22 +34,50 @@ dashboard_ui <- function(id){
                                         
                                         h2("data explorer"),
                                         
-                                        selectInput("color", "Color", vars),
-                                        selectInput("size", "Size", vars, selected = "adultpop"),
-                                        conditionalPanel("input.color == 'superzip' || input.size == 'superzip'",
-                                                         # Only prompt for threshold when coloring or sizing by superzip
-                                                         numericInput("threshold", "SuperZIP threshold (top n percentile)", 5)
-                                        ),
-                                        
-                                        plotOutput("histCentile", height = 200),
-                                        plotOutput("scatterCollegeIncome", height = 250)
+                                        selectInput("filter_name", "Name", vars_name),
+                                        selectInput("filter_source", "Source", vars_source),
+                                        numericInput("threshold", "intensity threshold", 5),
+                                        plotOutput(NS(id, "line_plot_intensity"), height = 250),
+                                        plotOutput(NS(id, "line_plot_intensity_is"), height = 250)
                           )
                   
                       )
              ),
              
-             tabPanel("Data explorer")
+             tabPanel("Data explorer",
+                      fluidRow(
+                        column(7, plotOutput(NS(id, "line_plot_intensity_is_2"), height = 350)),
+                        column(5, leafletOutput(NS(id, "map2"), height = 350))
+                      ),
+                      hr(),
+                      fluidRow(
+                        column(3,
+                               selectInput(NS(id, "rivers"), "River", unique(test_data$X_source.river), multiple=TRUE) 
+                        ),
+                        column(3,
+                               selectInput(NS(id, "stations"), "Station", unique(test_data$X_source.station), multiple=TRUE)
+                        ),
+                        column(2,
+                               selectInput(NS(id, "sources"), "Source", unique(test_data$X_source.data_source), multiple=TRUE)
+                        ),
+                        column(2,
+                               numericInput(NS(id, "min_intensity_score"), "Min intensity score", 
+                                            min=min(test_data$X_source.intensity_normalized), 
+                                            max=max(test_data$X_source.intensity_normalized), 
+                                            value=min(test_data$X_source.intensity_normalized),
+                                            step = 0.0001)
+                        ),
+                        column(2,
+                               numericInput(NS(id, "max_intensity_score"), "Max intensity score", 
+                                            min=min(test_data$X_source.intensity_normalized), 
+                                            max=max(test_data$X_source.intensity_normalized), 
+                                            value=max(test_data$X_source.intensity_normalized),
+                                            step = 0.0001)
+                        )
+                      ),
+                      hr(),
+                      DT::dataTableOutput(NS(id, "bafg_data_explorer"))
+                      
+                      )
   )
-  
-  
 }

@@ -1,0 +1,28 @@
+---
+version: "3.9"
+services:
+  rstudio:
+#    image: rocker/rstudio:4.3
+    build: './workspace/ntsportal/Docker'
+    container_name: bafg_shiny_ntsportal_43
+    ports:
+      - 8787:8787
+      - 1313:1313
+    environment:
+#      - PUID=1000
+#      - PGID=1000
+#      - TZ=Europe/Berlin
+#      PUID: 1000
+#      PGID: 1000
+#      TZ: Europe/Berlin
+      PASSWORD: shiny #rstudio
+      ROOT: TRUE
+    volumes:
+#      - ./.rstudio_config:/home/rstudio/.config/rstudio
+      - ./workspace:/home/rstudio/workspace
+#      - /other_dir:/other_dir
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: "4g"
