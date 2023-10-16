@@ -103,7 +103,7 @@ dashboard_server <- function(id, df){
                                  unique(selected_station$X_source.station)
         ))), tags$br(),
         sprintf("Median rt: %s", as.numeric(median(selected_station$X_source.rt ))), tags$br(),
-        sprintf("Median mz: %s%%", as.numeric(median(selected_station$X_source.mz))), tags$br(),
+        sprintf("Median mz: %s", as.numeric(median(selected_station$X_source.mz))), tags$br(),
         sprintf("Median intensity: %s", as.numeric(median(selected_station$X_source.intensity)))
       ))
       leafletProxy("map") %>% addPopups(lng, lat, content, layerId = X_source.river)
