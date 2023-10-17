@@ -93,6 +93,7 @@ test_data <- test_data %>% unnest(X_source.eic)
 ##-------------------------------------dashboard-data
 # dashboard_data <- as.data.table(json_data)
 ##-------------------------------------filter dashboard
+#TO DO na handling, in df
 
 dashboard_data <- as.data.table(fromJSON("./Data/cbz_cand.json")) %>% 
   select( c(Name=X_source.name, # if available
@@ -121,23 +122,23 @@ dashboard_data <- as.data.table(fromJSON("./Data/cbz_cand.json")) %>%
 # dashboard_data %>% group_by(location) %>% summarise(Doc_count=n())
 
 
-summ_data <- dashboard_data %>%
-  group_by(location) %>%
-  reframe(Detections=n(),
-            lon=unique(lon),
-            lat=unique(lat),
-            Name=toString(na.omit(unique(Name))),
-            Formula=toString(na.omit(unique(Formula))),
-            Ufid=toString(na.omit(unique(Ufid))),
-            tRet=mean(tRet),
-            mz=mean(mz),
-            Classification=toString(na.omit(unique(Classification))),
-            Area=median(Area),
-            Area_normalized=median(Area_normalized),
-            Stations=toString(na.omit(unique(Stations))),
-            River=toString(na.omit(unique(River))),
-            Intensity=mean(Intensity)
-            )
+# summ_data <- dashboard_data %>%
+#   group_by(location) %>%
+#   reframe(Detections=n(),
+#             lon=unique(lon),
+#             lat=unique(lat),
+#             Name=toString(na.omit(unique(Name))),
+#             Formula=toString(na.omit(unique(Formula))),
+#             Ufid=toString(na.omit(unique(Ufid))),
+#             tRet=mean(tRet),
+#             mz=mean(mz),
+#             Classification=toString(na.omit(unique(Classification))),
+#             Area=median(Area),
+#             Area_normalized=median(Area_normalized),
+#             Stations=toString(na.omit(unique(Stations))),
+#             River=toString(na.omit(unique(River))),
+#             Intensity=mean(Intensity)
+#             )
 
 
 

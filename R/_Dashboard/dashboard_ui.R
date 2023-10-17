@@ -41,28 +41,38 @@ dashboard_ui <- function(id, df){
                       ),
                       hr(),
                       fluidRow(
-                        column(3,
-                               selectInput(NS(id, "rivers"), "River", unique(dashboard_data$River), multiple=TRUE) 
-                        ),
-                        column(3,
-                               selectInput(NS(id, "stations"), "Station", unique(dashboard_data$Stations), multiple=TRUE)
+                        column(2,
+                               selectInput(NS(id, "names"), "Name", unique(dashboard_data$Name), multiple=TRUE) 
                         ),
                         column(2,
-                               selectInput(NS(id, "ufids"), "Ufid", unique(dashboard_data$Ufid), multiple=TRUE)
+                               selectInput(NS(id, "formulas"), "Formula", unique(dashboard_data$Formula), multiple=TRUE)
                         ),
                         column(2,
-                               # numericInput(NS(id, "min_intensity_score"), "Min intensity score", 
-                               #              min=min(test_data$X_source.intensity_normalized), 
-                               #              max=max(test_data$X_source.intensity_normalized), 
-                               #              value=min(test_data$X_source.intensity_normalized),
-                               #              step = 0.0001)
+                               selectInput(NS(id, "cass"), "CAS-RN", unique(dashboard_data$CAS_RN), multiple=TRUE)
                         ),
                         column(2,
-                               # numericInput(NS(id, "max_intensity_score"), "Max intensity score", 
-                               #              min=min(test_data$X_source.intensity_normalized), 
-                               #              max=max(test_data$X_source.intensity_normalized), 
-                               #              value=max(test_data$X_source.intensity_normalized),
-                               #              step = 0.0001)
+                               selectInput(NS(id, "methods"), "Chrom. Meth.", unique(dashboard_data$Method), multiple=TRUE)
+                        ),
+                        column(2,
+                               selectInput(NS(id, "matrixs"), "Matrix", unique(dashboard_data$Matrix), multiple=TRUE)
+                        ),
+                      ),
+                      fluidRow(
+                        column(6,
+                               sliderInput(NS(id, "areas"), "Area:",
+                                           min = min(dashboard_data$Area), 
+                                           max = max(dashboard_data$Area), 
+                                           value = c(min(dashboard_data$Area), 
+                                                     max(dashboard_data$Area)), 
+                                           step = 0.0001), 
+                               ),
+                        column(6,
+                               sliderInput(NS(id, "intensitys"), "Intensity:",
+                                           min = min(dashboard_data$Intensity), 
+                                           max = max(dashboard_data$Intensity), 
+                                           value = c(min(dashboard_data$Intensity), 
+                                                     max(dashboard_data$Intensity)), 
+                                           step = 0.0001), 
                         )
                       ),
                       hr(),

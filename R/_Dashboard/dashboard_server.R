@@ -8,7 +8,7 @@ dashboard_server <- function(id, df){
     output$map <- renderLeaflet({
       leaflet() %>%
         addTiles() %>%
-        setView(lat = 49.04, lng = 8.25, zoom = 8) # zoom orig 6 !!!
+        setView(lat = 50.34, lng = 7.59, zoom = 10) # zoom orig 6 !!!
     })
     
     
@@ -29,8 +29,6 @@ dashboard_server <- function(id, df){
           
         ) %>%
         subset(lat >= latRng[1] & lat <= latRng[2] & lon >= lngRng[1] & lon <= lngRng[2])
-
-
     })
 
     
@@ -93,7 +91,7 @@ dashboard_server <- function(id, df){
         clearShapes() %>%
         addCircleMarkers(~lon, ~lat,
                    radius=6,
-                   layerId=~River, #X_source.station,
+                   layerId=~location, #X_source.station,
                    stroke=FALSE,
                    fillOpacity=0.7,
                    fillColor=~pal(Intensity)
@@ -102,31 +100,58 @@ dashboard_server <- function(id, df){
     })
     
     # Show a popup at the given location
-    show_staion_popup <- function(River, lat, lng) {
-      selected_station <- summ_data[summ_data$River == River,]
+    show_staion_popup <- function(location, lat, lng, summ_data) {
+      selected_station <- summ_data[summ_data$location == location,]
       content <- as.character(tagList(
-        tags$h4("Station:", selected_station$Stations),
-        tags$strong(HTML(sprintf("%s, %s %s",
-                                 unique(selected_station$River), 
-                                 unique(selected_station$Classification), 
-                                 unique(selected_station$Formula)
-        ))), tags$br(),
-        sprintf("Median rt: %s", as.numeric(median(selected_station$tRet ))), tags$br(),
-        sprintf("Median mz: %s", as.numeric(median(selected_station$mz))), tags$br(),
-        sprintf("Median intensity: %s", as.numeric(median(selected_station$Intensity)))
+        tags$h4("Station:", selected_station$Stations, 
+                "Detections:", selected_station$Detections),
+        tags$strong(HTML(sprintf("River: %s", unique(selected_station$River) ))),
+        tags$br(),
+        tags$strong(HTML(sprintf("Classification: %s", unique(selected_station$Classification) ))),
+        tags$br(),
+        tags$strong(HTML(sprintf("Formula: %s", unique(selected_station$Formula) ))),
+        tags$br(),
+        tags$strong(HTML(sprintf("Name: %s", unique(selected_station$Name) ))),
+        tags$br(),
+        tags$strong(HTML(sprintf("Ufid: %s", unique(selected_station$Ufid) ))),
+        tags$br(),
+        sprintf("Median rt: %s", as.numeric(median(selected_station$tRet ))), 
+        tags$br(),
+        sprintf("Median mz: %s", as.numeric(median(selected_station$mz))), 
+        tags$br(),
+        sprintf("Mean intensity: %s", as.numeric(median(selected_station$Intensity))),
+        tags$br(),
+        sprintf("Median Area: %s", as.numeric(median(selected_station$Area)))
       ))
-      leafletProxy("map") %>% addPopups(lng, lat, content, layerId = River)
+      leafletProxy("map") %>% addPopups(lng, lat, content, layerId = location)
     }
-
     # When map is clicked, show a popup with info
     observe({
+      summ_data <- station_bounds() %>%
+        group_by(location) %>%
+        reframe(Detections=n(),
+                lon=unique(lon),
+                lat=unique(lat),
+                Name=toString(na.omit(unique(Name))),
+                Formula=toString(na.omit(unique(Formula))),
+                Ufid=toString(na.omit(unique(Ufid))),
+                tRet=mean(tRet),
+                mz=mean(mz),
+                Classification=toString(na.omit(unique(Classification))),
+                Area=median(Area),
+                Area_normalized=median(Area_normalized),
+                Stations=toString(na.omit(unique(Stations))),
+                River=toString(na.omit(unique(River))),
+                Intensity=mean(Intensity)
+        )
+      
       leafletProxy("map") %>% clearPopups()
       event <- input$map_marker_click
       if (is.null(event))
         return()
 
       isolate({
-        show_staion_popup(event$id, event$lat, event$lng)
+        show_staion_popup(event$id, event$lat, event$lng, summ_data)
       })
     })
     
@@ -139,12 +164,18 @@ dashboard_server <- function(id, df){
       
       glob_dashboard_data %>% 
         filter(
-          #test_data$X_source.intensity_normalized >= as.numeric(input$min_intensity_score),
-          #test_data$X_source.intensity_normalized <= as.numeric(input$max_intensity_score),
-          is.null(input$rivers) | glob_dashboard_data$River %in% input$rivers,
-          is.null(input$stations) | glob_dashboard_data$Stations %in% input$stations,
-          is.null(input$ufids) | glob_dashboard_data$Ufid %in% input$ufids
-          )
+          is.null(input$names) | glob_dashboard_data$Name %in% input$names,
+          is.null(input$formulas) | glob_dashboard_data$Formula %in% input$formulas,
+          is.null(input$cass) | glob_dashboard_data$CAS_RN %in% input$cass,
+          is.null(input$methods) | glob_dashboard_data$Method %in% input$methods,
+          is.null(input$matrixs) | glob_dashboard_data$Matrix %in% input$matrixs
+          #between(as.numeric(glob_dashboard_data$Area), input$areas[1], input$areas[2])
+          # glob_dashboard_data$Area >= input$areas[1],
+          # glob_dashboard_data$Area <= input$areas[2]
+          ) %>%
+        as.data.table() %>%
+        subset(Area >= input$areas[1] & Area <= input$areas[2] &
+                 Intensity >= input$intensitys[1] & Intensity <= input$intensitys[2])
       
     })
     
@@ -152,7 +183,7 @@ dashboard_server <- function(id, df){
     #reactive(shared_bafg_data_explorer$data(withSelection = TRUE))
     
     
-    df_ggplot <- debounce(reactive_bafg_data_explorer, millis = 250)
+    df_ggplot <- debounce(reactive(shared_bafg_data_explorer$data(withSelection = TRUE)), millis = 250)
     output$line_plot_intensity_is_2 <- renderPlot({
       ggplot(df_ggplot()) +
         geom_line(aes(x = as.POSIXct(Time), y = Intensity, color = River), alpha = 0.5) +
@@ -188,22 +219,20 @@ dashboard_server <- function(id, df){
       
       leaflet(summ_data_exp) %>%
         addTiles() %>%
-        setView(lat = 50.04, lng = 8.25, zoom = 8) %>% # zoom orig 6 !!!
+        setView(lat = 50.34, lng = 7.59, zoom = 8) %>% # zoom orig 6 !!!
         addMarkers(~lon,
                    ~lat)
-        # addCircles(~X_source.loc.lon,
-        #            ~X_source.loc.lat,
-        #            radius=shared_bafg_data_explorer[["X_source.intensity"]] / max(shared_bafg_data_explorer[["X_source.intensity"]]) * 10000,
-        #            layerId=~X_source.river, #X_source.station,
-        #            stroke=FALSE,
-        #            fillOpacity=0.4,
-        #            fillColor=pal(colorData)
-        # )
     })
 
     
     output$bafg_data_explorer <- DT::renderDataTable({
-      DT::datatable(shared_bafg_data_explorer)
+      target <- which(names(shared_bafg_data_explorer$data()) %in% c("lon", "lat", "location")) - 1
+      DT::datatable(shared_bafg_data_explorer,
+                    options = list(
+                      columnDefs = list(list(visible=FALSE, targets=target)),  #<- y ???
+                      searchHighlight = TRUE)
+                    #filter = "top"
+                    )
     }, server = FALSE)
     
 
