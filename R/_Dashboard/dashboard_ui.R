@@ -1,7 +1,7 @@
 dashboard_ui <- function(id, df){
   
-  vars_name <- c("all", unique(test_data$X_source.name))
-  vars_source <- c("all", unique(test_data$X_source.data_source))
+  #vars_name <- c("all", unique(test_data$X_source.name))
+  #vars_source <- c("all", unique(test_data$X_source.data_source))
   
   navbarPage("my map", id="nav",
              
@@ -24,9 +24,9 @@ dashboard_ui <- function(id, df){
                                         
                                         h2("data explorer"),
                                         
-                                        selectInput("filter_name", "Name", vars_name),
-                                        selectInput("filter_source", "Source", vars_source),
-                                        numericInput("threshold", "intensity threshold", 5),
+                                        selectInput(NS(id, "filter_ufid"), "Ufid", unique(dashboard_data$Ufid), multiple=TRUE),
+                                        selectInput(NS(id, "filter_river"), "River", unique(dashboard_data$River), multiple=TRUE),
+                                        selectInput(NS(id, "filter_station"), "Stations", unique(dashboard_data$location), multiple=TRUE),
                                         plotOutput(NS(id, "line_plot_intensity"), height = 250),
                                         plotOutput(NS(id, "line_plot_intensity_is"), height = 250)
                           )
@@ -42,27 +42,27 @@ dashboard_ui <- function(id, df){
                       hr(),
                       fluidRow(
                         column(3,
-                               selectInput(NS(id, "rivers"), "River", unique(test_data$X_source.river), multiple=TRUE) 
+                               selectInput(NS(id, "rivers"), "River", unique(dashboard_data$River), multiple=TRUE) 
                         ),
                         column(3,
-                               selectInput(NS(id, "stations"), "Station", unique(test_data$X_source.station), multiple=TRUE)
+                               selectInput(NS(id, "stations"), "Station", unique(dashboard_data$Stations), multiple=TRUE)
                         ),
                         column(2,
-                               selectInput(NS(id, "sources"), "Source", unique(test_data$X_source.data_source), multiple=TRUE)
+                               selectInput(NS(id, "ufids"), "Ufid", unique(dashboard_data$Ufid), multiple=TRUE)
                         ),
                         column(2,
-                               numericInput(NS(id, "min_intensity_score"), "Min intensity score", 
-                                            min=min(test_data$X_source.intensity_normalized), 
-                                            max=max(test_data$X_source.intensity_normalized), 
-                                            value=min(test_data$X_source.intensity_normalized),
-                                            step = 0.0001)
+                               # numericInput(NS(id, "min_intensity_score"), "Min intensity score", 
+                               #              min=min(test_data$X_source.intensity_normalized), 
+                               #              max=max(test_data$X_source.intensity_normalized), 
+                               #              value=min(test_data$X_source.intensity_normalized),
+                               #              step = 0.0001)
                         ),
                         column(2,
-                               numericInput(NS(id, "max_intensity_score"), "Max intensity score", 
-                                            min=min(test_data$X_source.intensity_normalized), 
-                                            max=max(test_data$X_source.intensity_normalized), 
-                                            value=max(test_data$X_source.intensity_normalized),
-                                            step = 0.0001)
+                               # numericInput(NS(id, "max_intensity_score"), "Max intensity score", 
+                               #              min=min(test_data$X_source.intensity_normalized), 
+                               #              max=max(test_data$X_source.intensity_normalized), 
+                               #              value=max(test_data$X_source.intensity_normalized),
+                               #              step = 0.0001)
                         )
                       ),
                       hr(),

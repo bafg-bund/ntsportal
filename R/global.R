@@ -89,7 +89,66 @@ test_data <- test_data %>% unnest(X_source.rtt)
 test_data <- test_data %>% unnest(X_source.eic)
 
 
-##-------------------------------------dashboard-data
 
-dashboard_data <- as.data.table(json_data)
+##-------------------------------------dashboard-data
+# dashboard_data <- as.data.table(json_data)
+##-------------------------------------filter dashboard
+
+dashboard_data <- as.data.table(fromJSON("./Data/cbz_cand.json")) %>% 
+  select( c(Name=X_source.name, # if available
+            Formula=X_source.formula, 
+            CAS_RN=X_source.cas, 
+            Matrix=X_source.matrix, 
+            Intensity=X_source.intensity, 
+            X_source.rtt, # user needs to select rtt.method with Chrom. Method filter
+            Area=X_source.area, 
+            Chrom_Meth=X_source.chrom_method,
+            Ufid=X_source.ufid, # rm NA's , if available
+            mz=X_source.mz, # average mz
+            Classification=X_source.comp_group, # rm NA's, as comma sep list
+            Area_normalized=X_source.area_normalized,
+            Stations=X_source.station,
+            lat=X_source.loc.lat,
+            lon=X_source.loc.lon,
+            Time=X_source.start,
+            River=X_source.river
+            )) %>% 
+  unnest(X_source.rtt) %>%
+  rename(tRet=rt,
+         Method=method) %>%
+  mutate(location=paste0(lat,lon))
+
+# dashboard_data %>% group_by(location) %>% summarise(Doc_count=n())
+
+
+summ_data <- dashboard_data %>%
+  group_by(location) %>%
+  reframe(Detections=n(),
+            lon=unique(lon),
+            lat=unique(lat),
+            Name=toString(na.omit(unique(Name))),
+            Formula=toString(na.omit(unique(Formula))),
+            Ufid=toString(na.omit(unique(Ufid))),
+            tRet=mean(tRet),
+            mz=mean(mz),
+            Classification=toString(na.omit(unique(Classification))),
+            Area=median(Area),
+            Area_normalized=median(Area_normalized),
+            Stations=toString(na.omit(unique(Stations))),
+            River=toString(na.omit(unique(River))),
+            Intensity=mean(Intensity)
+            )
+
+
+
+
+
+
+
+
+
+
+
+
+
 
