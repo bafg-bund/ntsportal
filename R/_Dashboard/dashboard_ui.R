@@ -1,7 +1,7 @@
-dashboard_ui <- function(id, df){
+dashboard_ui <- function(id, func_get_dashboard_data){
   
-  #vars_name <- c("all", unique(test_data$X_source.name))
-  #vars_source <- c("all", unique(test_data$X_source.data_source))
+
+  dashboard_data <- func_get_dashboard_data
   
   navbarPage("my map", id="nav",
              

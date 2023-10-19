@@ -139,3 +139,10 @@ output$map2 <- renderLeaflet({
 #     })
 
 
+
+#                           pickerInput(inputId = 'pick_ufid', 
+#                                       label = 'ufid:',
+#                                       choices = colnames(data()),
+#                                       options = list(`actions-box` = TRUE), 
+#                                       multiple = T),
+

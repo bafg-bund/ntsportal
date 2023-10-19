@@ -93,7 +93,7 @@ server <- function(input, output, session, clientData) {
 
   
   
-  request_server("get_data", test_data)
+  request_server("get_data", test_data, func_get_index(), func_get_parameters())
   output$request_stuff <- renderUI({
     req(credentials()$user_auth)
   request_ui("get_data", test_data)  
@@ -105,10 +105,10 @@ server <- function(input, output, session, clientData) {
 
     
   
-  dashboard_server("create_dashboard", dashboard_data)
+  dashboard_server("create_dashboard", func_get_dashboard_data())
   output$dashboard_stuff <- renderUI({
     req(credentials()$user_auth)
-    dashboard_ui("create_dashboard") 
+    dashboard_ui("create_dashboard", func_get_dashboard_data()) 
   })
 
   

@@ -1,7 +1,10 @@
-dashboard_server <- function(id, df){ 
+dashboard_server <- function(id, func_get_dashboard_data){ 
   moduleServer(id, function(input, output, session) {
     
-    glob_dashboard_data <- df
+    
+    
+    glob_dashboard_data <- func_get_dashboard_data
+    #glob_dashboard_data <- df
     #test_data <- df
     #test_data <- dashboard_data
     

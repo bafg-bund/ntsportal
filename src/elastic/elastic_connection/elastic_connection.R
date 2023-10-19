@@ -17,3 +17,5 @@ rm(config_path)
 rm(ec)
 
 logger::log_info("Connection to ntsp successful")
+
+Search(es_conn, index = "g2_nts_v1_bfg", time_scroll = "5m")

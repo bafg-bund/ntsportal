@@ -1,85 +1,108 @@
-request_server <- function(id, df){ 
+request_server <- function(id, df, func_get_index, func_get_parameters){ 
   moduleServer(id, function(input, output, session) {
-    data_pre_req <- eventReactive(input$pre_request,{ df }) 
+    
+    get_index <- eventReactive(input$get_index,{
+      func_get_index
+      })
     observe({
-      # We'll use these multiple times, so use short var names for
-      # convenience.
-      index <- input$contin_req_index
-      #c_num <- input$control_num
-      c_num <- 5
-  
-      mz_in <- input$inNumber_req_mz
-      mz_in_tol <- input$inNumber_req_mz_tol
-  
-      rtt_in <- input$inNumber_req_rtt
-      rtt_in_tol <- input$inNumber_req_rtt_tol
-  
-  
-  
-      mz_med <- median(data_pre_req()$X_source.mz)
-      mz_min <- min(data_pre_req()$X_source.mz)
-      mz_max <- max(data_pre_req()$X_source.mz)
-  
-      rtt_med <- median(data_pre_req()$rt)
-      rtt_min <- min(data_pre_req()$rt)
-      rtt_max <- max(data_pre_req()$rt)
-  
-      method_rt <- unique(data_pre_req()$method)
-  
-      ufid <- unique(data_pre_req()$X_source.ufid2)
-  
-      matrix <- unique(data_pre_req()$X_source.matrix)
-  
-  
-  # Number ===================================================
-  # Change the label, value, min, and max
-  updateNumericInput(session, "inNumber_req_mz",
-                     #label = paste("Number ", c_label),
-                     value = mz_med, min = mz_min, max = mz_max, step = 0.0005)
-  
-  updateNumericInput(session, "inNumber_req_rtt",
-                     #label = paste("Number ", c_label),
-                     value = rtt_med, min = rtt_min, max = rtt_max, step = 0.0005)
-  
-  # Slider range input =======================================
-  # For sliders that pick out a range, pass in a vector of 2
-  # values.
-  updateSliderInput(session, "inSlider_req_mz",
-                    min = mz_min-1,
-                    max = mz_max+1,
-                    value = c(mz_in-mz_in_tol, mz_in+mz_in_tol))
-  
-  # An NA means to not change that value (the low or high one)
-  updateSliderInput(session, "inSlider_req_rtt",
-                    min = rtt_min-1,
-                    max = rtt_max+1,
-                    value = c(rtt_in-rtt_in_tol, rtt_in+rtt_in_tol))
-  
-  
-  # Date range input =========================================
-  # Only label and value can be set for date range input
-  updateDateRangeInput(session, "inDateRange",
-                       label = paste("Date range", index),
-                       start = paste("2013-01-", c_num, sep=""),
-                       end = paste("2013-12-", c_num, sep=""),
-                       min = paste("2001-01-", c_num, sep=""),
-                       max = paste("2030-12-", c_num, sep="")
-  )
-  
-  
-  updateSelectInput(session, "ufid", choices = ufid)
-  updateSelectInput(session, "inText_req_rtt_method", choices = method_rt)
-  updateSelectInput(session, "inText_req_matrix", choices = matrix)
-  
-  
-  # Tabset input =============================================
-  # Change the selected tab.
-  # The tabsetPanel must have been created with an 'id' argument
-  #      if (c_num %% 2) {
-  #        updateTabsetPanel(session, "inTabset", selected = "panel2")
-  #      } else {
-  #        updateTabsetPanel(session, "inTabset", selected = "panel1")
-  #      }
-})
-  })
+      print(get_index()$index[[1]])
+      updateSelectInput(session, "in_req_index", choices = get_index()$index[[1]])
+      updateSelectInput(session, "in_req_source", choices = get_index()$source[[1]])
+      updateDateRangeInput(session, "in_req_date_range",
+                           #label = paste("Date range", index),
+                           start = today()-365,
+                           end = today(),
+                           min = today()-7305,
+                           max = today()
+                           )
+      })
+
+    
+    get_parameters <- eventReactive(input$get_parameters,{
+      func_get_parameters
+      }) 
+    observe({
+      print(get_parameters()$river[[1]])
+
+      updateSelectInput(session, "in_req_station", choices = get_parameters()$station[[1]])
+      updateSelectInput(session, "in_req_river", choices = get_parameters()$river[[1]])
+      updateSelectInput(session, "in_req_matrix", choices = get_parameters()$matrix[[1]])
+     # updateSelectInput(session, "in_req_tag", choices = get_parameters()$)
+      updateSelectInput(session, "in_req_comp_group", choices = get_parameters()$comp_group[[1]])
+      updateSelectInput(session, "in_req_rtt_method", choices = get_parameters()$rtt_method[[1]])
+      updateSelectInput(session, "in_req_name", choices = get_parameters()$name[[1]])
+      updateSelectInput(session, "in_req_ufid", choices = get_parameters()$ufid[[1]])
+
+      updateSliderInput(session, "in_slider_req_mz",
+                        min = min(get_parameters()$mz_min_max),
+                        max = max(get_parameters()$mz_min_max),
+                        value = c(min(get_parameters()$mz_min_max), 
+                                  max(get_parameters()$mz_min_max)
+                                  ))
+      updateNumericInput(session, "in_number_req_mz",
+                         value = mean(get_parameters()$mz_min_max), 
+                         min = min(get_parameters()$mz_min_max), 
+                         max = max(get_parameters()$mz_min_max), 
+                         step = 0.0005)
+      
+      updateSliderInput(session, "in_slider_req_rtt",
+                        min = min(get_parameters()$rt_min_max),
+                        max = max(get_parameters()$rt_min_max),
+                        value = c(min(get_parameters()$rt_min_max), 
+                                  max(get_parameters()$rt_min_max)
+                                  )) 
+      updateNumericInput(session, "in_number_req_rtt",
+                         value = mean(get_parameters()$rt_min_max), 
+                         min = min(get_parameters()$rt_min_max), 
+                         max = max(get_parameters()$rt_min_max), 
+                         step = 0.0005)
+      })
+    
+    output$text_req_index <- renderText({
+      input$get_parameters
+      req(input$get_parameters)
+      isolate(paste0("your indeces: ", input$in_req_index, "\n",
+                     "your sources: ", input$in_req_source, "\n",
+                     "your date range:\n\t from: ", input$in_req_date_range[1], 
+                     "\n\t to: ", 
+                     input$in_req_date_range[2]))
+      
+    })
+    
+    
+    get_json_query <<- eventReactive(input$request_filtered_data,{
+      json_text <- paste0(
+      '{
+        "query": {
+          "range": {
+            "timestamp": {
+              "gte": "',as.character(input$in_req_date_range[1]),'",
+              "lte": "',as.character(input$in_req_date_range[2]),'"
+            }
+          },
+          "filtered" : {
+            "query" : {
+            	"match_all" : {}
+            },
+            "filter" : {
+            	"term" : {"station" : "',input$in_req_station,'"}
+            }
+          }
+        }
+      }'
+                          )
+      return(json_text)
+    })
+    # observe({
+    #   print(get_json_query)
+    # })
+
+    output$json_output <- renderText({
+      
+      input$request_filtered_data
+      req(input$request_filtered_data)
+      isolate((jsonlite::prettify(get_json_query(),1)))
+    })
+    
+    })
 }

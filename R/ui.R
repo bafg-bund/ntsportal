@@ -3,10 +3,21 @@
 ui <- dashboardPage(
   
   dashboardHeader(
-    title = "bafg",
+    #title = "bafg",
+    
+    title = tagList(
+      tags$span(
+        class = "logo-mini", "bafg"
+      ),
+      tags$span(
+        class = "logo-lg", "bafg"
+      )
+    ),
+    
+    
     disable = FALSE,
     titleWidth = 200,
-    #fixed = TRUE,
+    fixed = TRUE,
 #    tags$li(
 #      class = "dropdown",
 #      style = "padding: 8px;",
@@ -39,7 +50,7 @@ ui <- dashboardPage(
   ),
   
   dashboardBody(
-    #----------------------------------login ui
+#----------------------------------------login ui
     shinyauthr::loginUI(
       "login", 
       cookie_expiry = cookie_expiry, 
@@ -49,31 +60,33 @@ ui <- dashboardPage(
         HTML(knitr::kable(user_base[, -3], format = "html", table.attr = "style='width:100%;'"))
       )
     ),
-    #----------------------------------tabs
+#----------------------------------------tabs
     tabItems(
       #----------------------------------home
       tabItem("home",
+              tags$br(),tags$br(),tags$br(),
               uiOutput("home_stuff")
       ),
       #----------------------------------request
       # ui script in R/_Request/request_ui.R
       tabItem("request",
+              tags$br(),tags$br(),tags$br(),
               uiOutput("request_stuff")
               #request_ui("get_data", test_data)        
       ),
       #----------------------------------dashboard
       tabItem("dashboard",
-              #dashboard_ui("create_dashboard")
+              tags$br(),tags$br(),tags$br(),
               uiOutput("dashboard_stuff")
       ),
       #----------------------------------data
       tabItem("data",
-              uiOutput("data_stuff")
-              
+              tags$br(),tags$br(),tags$br(),
+              uiOutput("data_stuff")  
       ),
       #----------------------------------help
       tabItem("help",
-              #dashboard_ui("create_dashboard")
+              tags$br(),tags$br(),tags$br(),
               uiOutput("help_stuff")
       )
     )
