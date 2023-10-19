@@ -139,7 +139,7 @@ func_get_dashboard_data <- function(){
    param_data$station <- list(na.omit(unique(temp_data$X_source.station)))
    param_data$river <- list(na.omit(unique(temp_data$X_source.river)))
    param_data$matrix <- list(na.omit(unique(temp_data$X_source.matrix)))
-   #param_data$tag <- list(na.omit(unique(temp_data$X_index)))
+   param_data$tag <- list(na.omit(unique(temp_data$X_source.tag)))
    param_data$comp_group <- list(na.omit(unique(temp_data$X_source.comp_group)))
    param_data$rtt_method <- list(na.omit(unique(temp_data$method)))
    param_data$name <- list(na.omit(unique(temp_data$X_source.name)))
@@ -152,23 +152,19 @@ func_get_dashboard_data <- function(){
    return(param_data)
  }
 
-# summ_data <- dashboard_data %>%
-#   group_by(location) %>%
-#   reframe(Detections=n(),
-#             lon=unique(lon),
-#             lat=unique(lat),
-#             Name=toString(na.omit(unique(Name))),
-#             Formula=toString(na.omit(unique(Formula))),
-#             Ufid=toString(na.omit(unique(Ufid))),
-#             tRet=mean(tRet),
-#             mz=mean(mz),
-#             Classification=toString(na.omit(unique(Classification))),
-#             Area=median(Area),
-#             Area_normalized=median(Area_normalized),
-#             Stations=toString(na.omit(unique(Stations))),
-#             River=toString(na.omit(unique(River))),
-#             Intensity=mean(Intensity)
-#             )
+ 
+##-------------------------------------data data
+ 
+ func_get_data_data <- function(){
+   data_data <- as.data.table(fromJSON("./Data/cbz_cand.json")) %>% 
+     select(!c("X_source.ms2","X_source.eic", "X_source.ms1")) %>%
+     unnest(X_source.rtt) %>%
+     rename(tRet=rt,
+            Method=method)
+   return(data_data)
+ }
+ 
+
 
 
 

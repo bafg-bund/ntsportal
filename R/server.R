@@ -126,46 +126,13 @@ server <- function(input, output, session, clientData) {
   
   
 #--------------------------------------Start Data-Tab  
-  #data <- reactive({ test_data })
-
-  output$picker <- renderUI({
-    pickerInput(inputId = 'pick',
-                label = 'Choose',
-                choices = colnames(data_pre_req()),
-                options = list(`actions-box` = TRUE),multiple = T)
-  })
-
-  datasetInput <- eventReactive(input$view,{
-    datasetInput <- data_pre_req() %>%
-      select(input$pick)
-    return(datasetInput)
-  })
   
+  
+
+  data_server("create_data", func_get_data_data())
   output$data_stuff <- renderUI({
     req(credentials()$user_auth)
-    
-    fluidRow(
-      column(
-        tags$h4(glue("Your data is: ...")),
-        tags$h4(glue("Your data is: ...")),
-        width = 3,
-        uiOutput("picker"),
-        actionButton("view", "View Selection")
-      ),
-      column(
-        width = 9,
-        #tags$h4(glue("Your permission level is: {user_info()$permissions}.")),
-        #tags$h4(glue("You logged in at: {user_info()$login_time}.")),
-        tags$h4(glue("Your data is: ...")),
-        tags$h4(glue("Your data is: ...")),
-        box(
-          width = NULL,
-          status = "primary",
-          title = "bafg data",
-          DT::renderDT(datasetInput())
-        )
-      )
-    )
+    data_ui("create_data", func_get_data_data())
   })
   
   

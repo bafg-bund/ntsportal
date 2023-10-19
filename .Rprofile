@@ -18,3 +18,7 @@ source("./R/_Home/home_server.R")
 source("./R/_Help/help_ui.R")
 source("./R/_Help/help_server.R")
 
+# activate data-tab
+source("./R/_Data/data_ui.R")
+source("./R/_Data/data_server.R")
+

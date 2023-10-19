@@ -27,7 +27,7 @@ request_server <- function(id, df, func_get_index, func_get_parameters){
       updateSelectInput(session, "in_req_station", choices = get_parameters()$station[[1]])
       updateSelectInput(session, "in_req_river", choices = get_parameters()$river[[1]])
       updateSelectInput(session, "in_req_matrix", choices = get_parameters()$matrix[[1]])
-     # updateSelectInput(session, "in_req_tag", choices = get_parameters()$)
+      updateSelectInput(session, "in_req_tag", choices = get_parameters()$tag[[1]])
       updateSelectInput(session, "in_req_comp_group", choices = get_parameters()$comp_group[[1]])
       updateSelectInput(session, "in_req_rtt_method", choices = get_parameters()$rtt_method[[1]])
       updateSelectInput(session, "in_req_name", choices = get_parameters()$name[[1]])
@@ -70,7 +70,7 @@ request_server <- function(id, df, func_get_index, func_get_parameters){
     })
     
     
-    get_json_query <<- eventReactive(input$request_filtered_data,{
+    get_json_query <- eventReactive(input$request_filtered_data,{
       json_text <- paste0(
       '{
         "query": {
