@@ -23,3 +23,7 @@ add_rawfiles(escon, rfindex, templateId, newPaths[5])
 
 
 
+templateId <- "GwB2GYsBis-yLiJmgf4w"
+newPaths <- list.files("~/messdaten/mosel/wasser/expn_tm_pos/2104", pattern = "KOMO", f = T)
+
+add_rawfiles(escon, rfindex, templateId, newPaths)

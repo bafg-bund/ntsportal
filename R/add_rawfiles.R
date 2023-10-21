@@ -262,9 +262,9 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
       temp <- switch(
         dateFormat,
         yy = lubridate::ymd(dateString, tz = "Europe/Berlin", truncated = 2),
-        ym = lubridate::ymd(dateString, tz = "Europe/Berlin", truncated = 2),
-        ymd = lubridate::ymd(dateString, tz = "Europe/Berlin", truncated = 2),
-        dmy = lubridate::dmy(dateString, tz = "Europe/Berlin", truncated = 2)
+        ym = lubridate::ymd(dateString, tz = "Europe/Berlin", truncated = 1),
+        ymd = lubridate::ymd(dateString, tz = "Europe/Berlin"),
+        dmy = lubridate::dmy(dateString, tz = "Europe/Berlin")
       )
       doc$start <- format(temp, "%Y-%m-%d", tz = "Europe/Berlin")
     } else {
