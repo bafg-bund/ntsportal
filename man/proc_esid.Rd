@@ -4,7 +4,7 @@
 \alias{proc_esid}
 \title{Process an MS measurement file}
 \usage{
-proc_esid(escon, rfindex, esid)
+proc_esid(escon, rfindex, esid, compsProcess = NULL)
 }
 \arguments{
 \item{escon}{}

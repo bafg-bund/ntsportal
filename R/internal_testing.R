@@ -5,6 +5,7 @@
 
 #' Compute silhouette score for all ufids in the index
 #'
+#' @param escon 
 #' @param testIndex 
 #'
 #' @return dataframe with the scores for each feature

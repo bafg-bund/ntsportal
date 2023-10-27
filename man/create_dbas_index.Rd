@@ -14,5 +14,6 @@ create_dbas_index(escon, aliasName, rfIndex)
 \item{rfIndex}{index name for rawfiles index}
 }
 \description{
-Create a new, empty dbas index
+Will create a new index based on the alias with _v<date> appended after _dbas.
+The new index name will be written to msrawfiles index.
 }

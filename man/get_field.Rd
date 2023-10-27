@@ -4,12 +4,16 @@
 \alias{get_field}
 \title{Get a field for a set of documents}
 \usage{
-get_field(esids, fieldName, simplify = T, justone = F)
+get_field(escon, indexName, esids, fieldName, simplify = T, justone = F)
 }
 \arguments{
-\item{esids}{}
+\item{escon}{Elasticsearch connection object}
 
-\item{fieldName}{}
+\item{indexName}{}
+
+\item{esids}{Document IDs in the named index}
+
+\item{fieldName}{field to extract}
 
 \item{simplify}{}
 

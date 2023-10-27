@@ -325,7 +325,6 @@ es_add_ufid_to_ids <- function(escon, index, ufid_to_add, ids_for_update) {
 
   id_search_string <- paste(shQuote(ids_for_update, type = "cmd"), collapse = ", ")
   
-  
   res_update <- elastic::docs_update_by_query(
     escon, index, 
     refresh = "true", 

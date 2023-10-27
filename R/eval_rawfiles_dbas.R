@@ -87,23 +87,25 @@ check_uniformity <- function(escon, rfindex, esids, fieldName, onlyNonBlanks = F
 
 #' Get a field for a set of documents
 #'
-#' @param esids 
-#' @param fieldName 
+#' @param escon Elasticsearch connection object
+#' @param indexName 
+#' @param esids Document IDs in the named index
+#' @param fieldName field to extract
 #' @param simplify 
 #' @param justone 
 #'
 #' @return
 #' @export
 #'
-get_field <- function(esids, fieldName, simplify = T, justone = F) {
+get_field <- function(escon, indexName, esids, fieldName, simplify = T, justone = F) {
   if (length(esids) == 1) {
     res <- elastic::docs_get(
-      escon, RFINDEX, id = esids, source = fieldName, verbose = F
+      escon, indexName, id = esids, source = fieldName, verbose = F
     )  
     ret <- res[["_source"]][[fieldName]]
   } else {
     res <- elastic::docs_mget(
-      escon, RFINDEX, ids = esids, source = fieldName, verbose = F
+      escon, indexName, ids = esids, source = fieldName, verbose = F
     )
     if (simplify) {
       ret <- sapply(res$docs, function(x) {
@@ -183,6 +185,42 @@ norm_ms1 <- function(x, precursormz, precursorInt, noiselevel = 0.1) {
 
 
 
+#' Remove fields in a doc that are or contain NAs
+#'
+#' @param doc 
+#'
+#' @return list document with NAs removed
+#' @export
+#'
+remove_na_doc <- function(doc) {
+  doc <- lapply(doc, function(field) {
+    if (is.vector(field)) {
+      field <- field[!is.na(field)]
+      field <- field[!(field == "NA")]
+      if (length(field) == 0)
+        return(NULL) else return(field)
+    } else if (is.data.frame(field)) {
+      keep <- apply(field, 1, function(fieldEntry) {
+        !any(is.na(fieldEntry) | fieldEntry == "NA") 
+      })
+      field <- field[keep, ]
+      if (nrow(field) == 0)
+        return(NULL) else return(field)
+    } else if (is.list(field)) {
+      field <- lapply(field, function(fieldEntry) {
+        fieldEntry <- fieldEntry[!any(is.na(fieldEntry))]
+        fieldEntry <- fieldEntry[!any(fieldEntry == "NA")]
+        fieldEntry
+      })
+      if (length(field) == 0)
+        return(NULL) else return(field)
+    } else {
+      stop("unknown case when removing NAs")
+    }
+  })
+  Filter(Negate(is.null), doc)
+}
+
 #' Check that a field exists in all documents in rawfiles index
 #'
 #' @param escon 
@@ -259,8 +297,9 @@ check_field <- function(escon, rfindex, fieldName, onlyNonBlank = FALSE) {
 #' @param esid 
 #'
 #' @return an object of class ntsworkflow::Report
-#'
-proc_esid <- function(escon, rfindex, esid) { 
+#' @export
+#' @import ntsworkflow
+proc_esid <- function(escon, rfindex, esid, compsProcess = NULL) { 
   #browser()
   stopifnot(length(esid) == 1)
   dc <- elastic::docs_get(escon, rfindex, esid, verbose = F)
@@ -292,7 +331,7 @@ proc_esid <- function(escon, rfindex, esid) {
   dbas$changeSettings("numcores", 1)
   
   tryCatch(
-    suppressMessages(dbas$process_all()), 
+    suppressMessages(dbas$process_all(comp_names = compsProcess)), 
     error = function(cnd) {
       log_warn("Processing error in file ", dc$path)
       message(cnd)
@@ -317,13 +356,24 @@ proc_esid <- function(escon, rfindex, esid) {
 #' @param ingestpth 
 #' @param configfile 
 #' @param coresBatch 
+#' @param noIngest logical, for testing purposes, no upload, just create json.
 #'
 #' @return
 #' @export
 #'
 proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile, 
-                       coresBatch) {
-  dr <- paste(unique(dirname(get_field(esids, "path", justone = F))), collapse= ", ")
+                       coresBatch, noIngest = FALSE) {
+  
+  # create a get_field function with some default parameters
+  get_field_builder <- function(escon, index) {
+    function(esids, fieldName, simplify = T, justone = F) {
+      ntsportal::get_field(escon = escon, indexName = index, esids = esids, 
+                           fieldName = fieldName, simplify = simplify, justone = justone)
+    }
+  }
+  get_field2 <- get_field_builder(escon = escon, index = rfindex)
+  
+  dr <- paste(unique(dirname(get_field2(esids, "path", justone = F))), collapse= ", ")
   log_info("Starting batch {dr}")
   # generate name for saving the files
   savename <- tempfile("batch-", tmpdir = tempsavedir, fileext = ".report")
@@ -395,7 +445,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     # need to check that all entries in batch have the same
     
     # blank_regex settings
-    bregex <- get_field(esids, "dbas_blank_regex")
+    bregex <- get_field2(esids, "dbas_blank_regex")
     stopifnot(is.vector(bregex))
     bregex <- unique(bregex)
     stopifnot(length(bregex) == 1)
@@ -410,7 +460,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       dbas$deleteBackground(grep(bregex, dbas$rawFiles, invert = T), 
                             grep(bregex, dbas$rawFiles))
       dbas$remRawFiles(grep(bregex, dbas$rawFiles))
-      esids <- esids[!get_field(esids, "blank", simplify = T)]
+      esids <- esids[!get_field2(esids, "blank", simplify = T)]
     } else {
       log_info("No blanks found in {dr}")
     }
@@ -419,12 +469,12 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     
     # get list of false positives (will just add all of the fps)
     
-    bfps <- get_field(esids, "dbas_fp", simplify = F)
+    bfps <- get_field2(esids, "dbas_fp", simplify = F)
     # TODO in the future, delete fps on a by-sample basis
     # for now, just add them all together into a big list
     bfps <- unique(unlist(bfps))
     
-    bmindet <- unique(get_field(esids, "dbas_minimum_detections"))
+    bmindet <- unique(get_field2(esids, "dbas_minimum_detections"))
     stopifnot(length(bmindet) == 1, is.integer(bmindet))
     
     if (bmindet > 1)
@@ -463,7 +513,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     dbas$clearAndSave(F, newsavename)
     rm(dbas)
     log_info("Step 2 complete, processed report file created for: {newsavename}")
-    #browser()
+   
     dbas <- loadReport(F, newsavename)  
     # Step 3 - Conversion ####
     log_info("Collecting data for json export")
@@ -471,18 +521,22 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     compData <- dbas$integRes[, c("samp", "comp_name", "int_a")]
     compData$samp <- basename(compData$samp)
     
-    bist <- unique(get_field(esids, "dbas_is_table"))
+    
+    
+    bist <- unique(get_field2(esids, "dbas_is_table"))
     stopifnot(length(bist) == 1)
     
-    bisn <- unique(get_field(esids, "dbas_is_name"))
+    bisn <- unique(get_field2(esids, "dbas_is_name"))
     stopifnot(length(bisn) == 1)
     
     isData <- dbas$ISresults[dbas$ISresults$IS == bisn, c("samp", "int_a")]
+    
     # normalize intensities
     dat <- merge(compData, isData, by = "samp", suffix = c("", "_IS"))
     # verify columns are numeric
     dat[, c("int_a", "int_a_IS")] <- lapply(dat[, c("int_a", "int_a_IS")], as.numeric)
     dat$norm_a <- round(dat$int_a / dat$int_a_IS, 4)
+    dat$area_normalized <- dat$norm_a
     
     if (length(dat$int_a_IS) == 0)
       stop("IS not found in docs ", paste(esids, collapse = ", "))
@@ -495,7 +549,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
         log_warn("Die Standardabweichung des internen Standards ist über Grenzwert von 10%")
     }
     
-    brepr <- unlist(unique(get_field(esids, "dbas_replicate_regex")))
+    brepr <- unlist(unique(get_field2(esids, "dbas_replicate_regex")))
     
     #bstation <- unique(get_field(esids, "station"))
     #stopifnot(length(bstation) == 1)
@@ -522,7 +576,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       datTemp <- do.call("rbind", averages)
       #saveRDS(datTemp, file = glue::glue("{esids[1]}_replicateRSD_{format(Sys.Date(), '%Y%m%d')}.RDS"))
       
-      bba <- unique(get_field(esids, "dbas_build_averages"))
+      bba <- unique(get_field2(esids, "dbas_build_averages"))
       stopifnot(length(bba) == 1)
       if (bba) {
         log_info("Using averages for results")
@@ -550,32 +604,37 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     # round all int columns to 3 sig figs
     dat$int_a <- signif(dat$int_a, 3)
     dat$norm_a <- signif(dat$norm_a, 3)
+    dat$area_normalized <- signif(dat$area_normalized, 3)
     dat$int_a_IS <- signif(dat$int_a_IS, 3)
     
     # get start time for sample
     idSamp <- data.frame(
       id = esids,
-      samp = basename(get_field(esids, "path")),
-      start = get_field(esids, "start")
+      samp = basename(get_field2(esids, "path")),
+      start = get_field2(esids, "start")
     )
     
     dat <- merge(dat, idSamp, by = "samp", all.x = T)
     stopifnot(all(!is.na(dat$start)))
     
-    # Get CAS and other data
-    
+    # Get other data
+    # CAS-RN
     cas <- dbas$peakList[, c("comp_CAS", "comp_name")]
     cas <- cas[!duplicated(cas),]
     dat <- merge(dat, cas, by = "comp_name", all.x = T)
+    # Adduct
+    tempPl <- dbas$peakList[, c("comp_name", "adduct")]
+    tempPl <- tempPl[!duplicated(tempPl),]
+    dat <- merge(dat, tempPl, by = "comp_name", all.x = TRUE)
+    
     dat$date_import <- round(as.numeric(Sys.time()))  # epoch_seconds
-    #browser()
-    dat$duration <- get_field(esids, "duration", justone = T)
+    dat$duration <- get_field2(esids, "duration", justone = T)
     #dat$station <- bstation
     
-    dat$pol <- get_field(esids, "pol", justone = T)
-    dat$matrix <- get_field(esids, "matrix", justone = T)
-    dat$data_source <- get_field(esids, "data_source", justone = T)
-    dat$chrom_method <- get_field(esids, "chrom_method", justone = T)
+    dat$pol <- get_field2(esids, "pol", justone = T)
+    dat$matrix <- get_field2(esids, "matrix", justone = T)
+    dat$data_source <- get_field2(esids, "data_source", justone = T)
+    dat$chrom_method <- get_field2(esids, "chrom_method", justone = T)
     # change names to match ntsp
     colnames(dat) <- gsub("^comp_name$", "name", colnames(dat))
     colnames(dat) <- gsub("^int_a$", "area", colnames(dat))
@@ -589,17 +648,17 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     
     # Get coordinates, river km
     datl <- lapply(datl, function(doc) {
-      doc$loc <- get_field(doc$id, "loc", simplify = F) 
-      doc$station <- get_field(doc$id, "station", simplify = T)
-      dockm <- get_field(doc$id, "km", simplify = T)
+      doc$loc <- get_field2(doc$id, "loc", simplify = F) 
+      doc$station <- get_field2(doc$id, "station", simplify = T)
+      dockm <- get_field2(doc$id, "km", simplify = T)
       if (!is.null(dockm))
         doc$km <- dockm   
       
-      docriv <- get_field(doc$id, "river", simplify = T)
+      docriv <- get_field2(doc$id, "river", simplify = T)
       if (!is.null(docriv))
         doc$river <- docriv
       
-      docgkz <- get_field(doc$id, "glz", simplify = T)
+      docgkz <- get_field2(doc$id, "glz", simplify = T)
       if (!is.null(docgkz))
         doc$gkz <- docgkz
       
@@ -680,22 +739,27 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       doc
     })  
     
-    # remove NA values (there is no such thing as NA, the value just does not exist)
-    datl <- lapply(
-      datl, 
-      function(doc) Filter(function(x) is.list(x) || !(is.na(x) || x == "NA"), doc)
-    )
-    
     # add tags if available
     datl <- lapply(datl, function(doc) {
-      doctag <- get_field(doc$id, "tag", simplify = F)
+      doctag <- get_field2(doc$id, "tag", simplify = F)
       if (!is.null(doctag))
         doc$tag <- doctag
       doc
     })
     
+    # add comments if available
+    datl <- lapply(datl, function(doc) {
+      doccomment <- get_field2(doc$id, "comment", simplify = F)
+      if (!is.null(doccomment))
+        doc$comment <- doccomment
+      doc
+    })
+    
     # remove msrawfiles id
     datl <- lapply(datl, function(doc) {doc$id <- NULL; doc})
+    
+    # remove NA values (there is no such thing as NA, the value just does not exist)
+    datl <- lapply(datl, remove_na_doc)
     
     log_info("Writing json file")
     
@@ -705,19 +769,20 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     jsonlite::write_json(datl, jsonPath, pretty = T, digits = NA, auto_unbox = T)
     
     # Step 4 - Ingest ####
-    bindex <- get_field(esids, "dbas_index_name", justone = T)
-    log_info("Ingest starting")
-    system(
-      glue::glue("{ingestpth} {configfile} {bindex} {jsonPath} &> /dev/null")
-    )
-    log_info("Ingest complete")
-    
-    # need to add a pause so that elastic return ingested docs
-    Sys.sleep(10)
-    # check that everything is in the database
-    checkFiles <- basename(get_field(esids, "path"))
-    
-    resp5 <- elastic::Search(escon, bindex, body = sprintf('
+    if (!noIngest) {
+      bindex <- get_field2(esids, "dbas_index_name", justone = T)
+      log_info("Ingest starting")
+      system(
+        glue::glue("{ingestpth} {configfile} {bindex} {jsonPath} &> /dev/null")
+      )
+      log_info("Ingest complete")
+      
+      # need to add a pause so that elastic return ingested docs
+      Sys.sleep(10)
+      # check that everything is in the database
+      checkFiles <- basename(get_field2(esids, "path"))
+      
+      resp5 <- elastic::Search(escon, bindex, body = sprintf('
     {
       "query": {
         "terms": {
@@ -727,21 +792,22 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       "size": 0
     }
     ', paste(dQuote(checkFiles,q = "\""), collapse = ", "))
-    )
-    
-    if (resp5$hits$total$value == length(datl)) {
-      log_info("All docs imported into ElasticSearch")
-    } else {
-      #browser()
-      log_warn("Ingested data not found in batch starting with id {esids[1]}")
+      )
+      
+      if (resp5$hits$total$value == length(datl)) {
+        log_info("All docs imported into ElasticSearch")
+      } else {
+        #browser()
+        log_warn("Ingested data not found in batch starting with id {esids[1]}")
+      }
+      
+      # Remove files
+      resRemove <- file.remove(jsonPath, savename, newsavename)
+      if (all(resRemove))
+        log_info("Temporary files removed") else stop("Files not removed in batch", checkFiles[1])
+      
+      log_info("Completed batch starting with id {esids[1]}, file {checkFiles[1]}")
     }
-    
-    # Remove files
-    resRemove <- file.remove(jsonPath, savename, newsavename)
-    if (all(resRemove))
-      log_info("Temporary files removed") else stop("Files not removed in batch", checkFiles[1])
-    
-    log_info("Completed batch starting with id {esids[1]}, file {checkFiles[1]}")
   },
     error = function(cnd) {
       log_info("Error in proc_batch in batch starting with id {esids[1]}")
@@ -755,3 +821,251 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
   
   return(length(datl))
 }
+
+# IS processing functions ####
+
+#' Process all files in msrawfiles for IS
+#' 
+#' Will enter the results into the isindex. Will only process files which
+#' are not included in isindex.
+#'
+#' @param escon 
+#' @param rfindex 
+#' @param isindex 
+#' @param ingestpth 
+#' @param configfile 
+#' @param tmpPath 
+#' @param numCores Number of cores for parallel processing 
+#'
+#' @return
+#' @export
+#' @import dplyr
+#' @import future
+#' @import logger
+#' 
+process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile, 
+                           tmpPath = "/scratch/nts/tmp", numCores = 10) {
+  startTime <- lubridate::now()
+  # Find out what files are in msrawfiles and not in dbas_is 
+  res1 <- elastic::Search(escon, isindex, body = '
+    {
+      "aggs": {
+        "files": {
+          "terms": {
+            "field": "filename",
+            "size": 100000
+          }
+        }
+      },
+      "size": 0
+    }
+  ')
+  stopifnot(res1$aggregations$files$sum_other_doc_count == 0)
+  filesDbasIs <- vapply(res1$aggregations$files$buckets, "[[", i = "key", character(1))
+  
+  res2 <- elastic::Search(escon, rfindex, body = '
+    {
+      "aggs": {
+        "files": {
+          "terms": {
+            "field": "filename",
+            "size": 100000
+          }
+        }
+      },
+      "size": 0
+    }
+  ')
+  stopifnot(res2$aggregations$files$sum_other_doc_count == 0)
+  filesDbasRf <- vapply(res2$aggregations$files$buckets, "[[", i = "key", character(1))
+  filesToProcess <- setdiff(filesDbasRf, filesDbasIs)
+  if (length(filesToProcess) == 0) {
+    log_info("No files found to process")
+    return(NULL)
+  }
+    
+  # Get all ids of these files
+  # There is a limit to the number of files you can look for. Set with index.maxterms
+  # But it doesn't matter, this function will repeat anyway.
+  if (length(filesToProcess) > 65536)
+    filesToProcess <- filesToProcess[1:65536]
+  
+  fn_search_string <- paste(shQuote(filesToProcess, type = "cmd"), collapse = ", ")
+  res3 <- elastic::Search(escon, rfindex, body = sprintf('
+  {
+    "query": {
+      "terms": {
+        "filename": [%s]
+      }
+    },
+    "size": 10000,
+    "_source": false
+  }
+  ', fn_search_string))
+  
+  log_info("Found {res3$hits$total$value} files to process")
+  idsToProcess <- vapply(res3$hits$hits, "[[", i = "_id", character(1))
+  plan(multicore, workers = numCores)
+  featsBySample <- furrr::future_map(idsToProcess, function(id) {
+    proc_is_one(escon = escon, rfindex = rfindex, esid = id)
+  })
+  plan(sequential)
+  featsAll <- do.call("c", featsBySample)
+  featsAll <- Filter(Negate(is.null), featsAll)
+  jpth <- file.path(tmpPath, "is_dbas_temp.json")
+  log_info("Writing json")
+  jsonlite::write_json(featsAll, jpth, pretty = T, digits = NA, auto_unbox = T)
+  log_info("Ingesting")
+  system(
+    glue::glue("{ingestpth} {configfile} {isindex} {jpth}")
+  )
+  endTime <- lubridate::now()
+  hrs <- round(as.numeric(endTime - startTime, units = "hours"))
+  log_info("Processing IS (process_is_all) complete in {hrs} h")
+  invisible(TRUE)
+}
+
+
+#' Process IS in one file
+#'
+#' @param escon 
+#' @param rfindex 
+#' @param esid 
+#'
+#' @return
+#' @export
+#' @import ntsworkflow
+proc_is_one <- function(escon, rfindex, esid) {
+  
+  # Get list of IS
+  get_field_builder <- function(escon, index) {
+    function(esids, fieldName, simplify = T, justone = F) {
+      get_field(escon = escon, indexName = index, esids = esids, 
+                fieldName = fieldName, simplify = simplify, justone = justone)
+    }
+  }
+  get_field2 <- get_field_builder(escon = escon, index = rfindex)
+  isTab <- get_field2(esid, "dbas_is_table")
+  ises <- read.csv(isTab)$name
+  # run dbas processing
+  crash <- FALSE
+  tryCatch(
+    repo <- proc_esid(escon, rfindex, esid, compsProcess = ises),
+    error = function(cnd) {
+      log_error("IS screening id {esid[1]} failed at dbas proc_esid")
+      crash <<- TRUE
+      message(cnd)
+    }
+  )
+  if (crash || nrow(repo$ISresults) == 0) {
+    log_info("No results found for {esid[1]}")
+    return(NULL)
+  }
+  crash2 <- FALSE
+  tryCatch({
+    isr <- repo$ISresults
+    isr <- select(isr, filename = samp, name = IS, mz, rt, intensity = int_h, 
+                  area = int_a, peak_start, peak_end, eic_extraction_width)
+    isr$rt <- round(isr$rt, 2)
+    isr$mz <- round(isr$mz, 4)
+    isr$path <- get_field2(esid, "path")
+    isr$start <- get_field2(esid, "start")
+    isr$instrument <- get_field2(esid, "instrument")
+    isr$blank <- get_field2(esid, "blank")
+    isr$matrix <- get_field2(esid, "matrix")
+    isr$pol <- get_field2(esid, "pol")
+    isr$chrom_method <- get_field2(esid, "chrom_method")
+    isr$duration <- get_field2(esid, "duration")
+    isr$station <- get_field2(esid, "station")
+    isr$data_source <- get_field2(esid, "data_source")
+    isr$river <- get_field2(esid, "river")
+    pl <- select(repo$peakList, name = comp_name, peakID)
+    isr <- left_join(isr, pl, by = "name")
+    rownames(isr) <- NULL
+    isrl <- split(isr, seq_len(nrow(isr))) 
+    isrl <- lapply(isrl, as.list)
+    # add coordinates
+    isrl <- lapply(isrl, function(doc) {
+      doc$loc <- get_field2(esid, "loc", simplify = F) 
+      doc
+    })
+    # add eic
+    isrl <- lapply(isrl, function(doc) {
+      eictemp <- subset(repo$EIC, peakID == doc$peakID, c(time, int))
+      if (nrow(eictemp) > 0) {
+        eictemp$time <- round(eictemp$time)  # in seconds
+        eictemp$int <- round(eictemp$int, 4)
+        rownames(eictemp) <- NULL
+        doc$eic <- eictemp
+      }
+      doc
+    })
+    # add ms1
+    isrl <- lapply(isrl, function(doc) {
+      ms1temp <- subset(repo$MS1, peakID == doc$peakID, c(mz, int))
+      if (nrow(ms1temp) > 0 && is.numeric(doc$intensity)) {
+        ms1temp <- norm_ms1(ms1temp, doc$mz, doc$intensity)
+        if (!is.null(ms1temp)) {
+          ms1temp$mz <- round(ms1temp$mz, 4)
+          ms1temp$int <- round(ms1temp$int, 4)
+          rownames(ms1temp) <- NULL
+          doc$ms1 <- ms1temp
+        }
+      }
+      doc
+    })
+    # add ms2
+    isrl <- lapply(isrl, function(doc) {
+      ms2temp <- subset(repo$MS2, peakID == doc$peakID, c(mz, int))
+      if (nrow(ms2temp) > 0) {
+        ms2temp <- norm_ms2(ms2temp, doc$mz)
+        if (!is.null(ms2temp)) {
+          ms2temp$mz <- round(ms2temp$mz, 4)
+          ms2temp$int <- round(ms2temp$int, 4)
+          rownames(ms2temp) <- NULL
+          doc$ms2 <- ms2temp
+        }
+      } 
+      doc
+    })
+    # add tags
+    isrl <- lapply(isrl, function(doc) {
+      doc$tag <- get_field2(esid, "tag", simplify = F) 
+      doc
+    })
+    # add comments
+    isrl <- lapply(isrl, function(doc) {
+      doc$comment <- get_field2(esid, "comment", simplify = F)
+      peakWidth <- round(doc$peak_end - doc$peak_start, 2)
+      doc$comment <- c(
+        doc$comment, 
+        paste("Peak width (min):", peakWidth),
+        paste("EIC extractions width:", doc$eic_extraction_width)
+      )
+      doc
+    })
+    # Remove unneeded fields
+    isrl <- lapply(isrl, function(doc) {
+      doc$peak_start <- NULL
+      doc$peak_end <- NULL
+      doc$eic_extraction_width <- NULL
+      doc$peakID <- NULL
+      doc$path <- NULL
+      doc$blank <- NULL
+      doc
+    })
+    
+    # Remove any NA fields
+    isrl <- lapply(isrl, remove_na_doc)
+    isrl <- unname(isrl)
+  },
+  error = function(cnd) {
+    crash2 <<- TRUE
+    log_error("IS screening id {esid[1]} failed at data extraction")
+    message(cnd)
+  })
+  if (crash2) {
+    return(NULL)
+  }
+  isrl
+} 

@@ -8,9 +8,9 @@
 
 # usage (from ntsportal):
 # nohup Rscript scripts/
-# nohup Rscript scripts/eval-rawfiles-dbas.R &> ~/messdaten/log_files/dbas/$(date +%y%m%d)_dbas_eval.log &
-# tail -f ~/messdaten/log_files/dbas/$(date +%y%m%d)_dbas_eval.log
-
+# nohup Rscript scripts/eval-rawfiles-dbas.R &> /scratch/nts/logs/$(date +%y%m%d)_dbas_eval.log &
+# tail -f /scratch/nts/logs/$(date +%y%m%d)_dbas_eval.log
+# see crontab for processing
 
 VERSION <- "2023-10-10"
 

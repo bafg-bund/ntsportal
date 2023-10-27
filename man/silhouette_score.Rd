@@ -7,6 +7,8 @@
 silhouette_score(escon, testIndex)
 }
 \arguments{
+\item{escon}{}
+
 \item{testIndex}{}
 }
 \value{

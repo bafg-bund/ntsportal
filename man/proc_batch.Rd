@@ -11,7 +11,8 @@ proc_batch(
   tempsavedir,
   ingestpth,
   configfile,
-  coresBatch
+  coresBatch,
+  noIngest = FALSE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ proc_batch(
 \item{configfile}{}
 
 \item{coresBatch}{}
+
+\item{noIngest}{logical, for testing purposes, no upload, just create json.}
 }
 \description{
 takes a series of esids and processes these as a batch.

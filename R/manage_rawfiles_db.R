@@ -20,7 +20,10 @@ dbas_index_from_alias <- function(aliasName, dateNum = NULL) {
 }
 
 #' Create a new, empty dbas index 
-#'
+#' 
+#' Will create a new index based on the alias with _v<date> appended after _dbas.
+#' The new index name will be written to msrawfiles index.
+#' 
 #' @param escon elastic connection object created by elastic::connect
 #' @param aliasName 
 #' @param rfIndex index name for rawfiles index
@@ -34,106 +37,7 @@ create_dbas_index <- function(escon, aliasName, rfIndex) {
   indNew <- dbas_index_from_alias(aliasName)
   log_info("Creating new index {indNew}")
   
-  resCrea <- elastic::index_create(
-    escon, indNew, body = 
-      '
-    {
-      "mappings" : {
-        "dynamic": "strict",
-        "properties" : {
-          "area" : {"type" : "float"},
-          "area_is" : {"type" : "float"},
-          "area_normalized" : {"type" : "float"},
-          "intensity" : {"type" : "float"},
-          "intensity_is" : {"type" : "float"},
-          "intensity_normalized" : {"type" : "float"},
-          "cas" : {"type" : "keyword"},
-          "comment" : {"type" : "text"},
-          "comp_group" : {
-            "type" : "keyword"
-          },
-          "conc" : {"type" : "float"},  
-          "tag": {"type": "keyword"},
-          "data_source" : {"type" : "keyword"},
-          "start" : {
-            "type" : "date",
-            "format" : "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||yyyy-MM-dd HH:mm"
-          },
-          "km": { "type" : "float" },
-          "gkz" : { "type" : "integer" },
-          "river" : { "type" : "keyword" },
-          "duration" : {"type" : "float"},
-          "date_import" : {
-            "type" : "date",
-            "format" : "epoch_second"
-          },
-          "eic" : {
-            "type" : "nested",
-            "properties" : {
-              "int" : {
-                "type" : "float"
-              },
-              "time" : {
-                "type" : "short"
-              }
-            }
-          },
-          "chrom_method" : {"type" : "keyword"},
-          "loc" : {"type" : "geo_point"},
-          "matrix" : {"type" : "keyword"},
-          "ms1" : {                           
-            "type" : "nested",                
-            "properties" : {
-              "int" : {
-                "type" : "float"
-              },
-              "mz" : {
-                "type" : "float"
-              }
-            }
-          },
-          "ms2" : {
-            "type" : "nested",
-            "properties" : {
-              "int" : {
-                "type" : "float"
-              },
-              "mz" : {
-                "type" : "float"
-              }
-            }
-          },
-          "mz" : {"type" : "float"},
-          "name" : {"type" : "keyword"},
-          "norm_a" : {"type" : "float"},
-          "pol" : {"type" : "keyword"},
-          "rt" : {"type" : "float"},
-          "rtt" : {
-            "type" : "nested",
-            "properties" : {
-              "method" : {
-                "type" : "keyword"
-              },
-              "predicted" : {
-                "type" : "boolean"
-              },
-              "rt" : {
-                "type" : "float"
-              }
-            }
-          },
-          "filename" : {"type" : "keyword"},
-          "station" : {"type" : "keyword"},
-          "inchikey" : {"type" : "keyword"},
-          "inchi" : {"type" : "keyword"},
-          "smiles" : {"type" : "keyword"},
-          "mw" : {"type" : "float"},
-          "adduct" : {"type" : "keyword"},
-          "formula" : {"type" : "keyword"}
-        }
-      }
-    }
-    ')
+  resCrea <- put_dbas_index(escon, indNew)
   if (resCrea$acknowledged)
     log_info("Acknowledged index creation") else stop("Index creation failed")
   

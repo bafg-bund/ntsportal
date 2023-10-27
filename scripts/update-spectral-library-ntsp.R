@@ -6,8 +6,8 @@
 # json. The json is saved under ~/sqlite_local/json
 
 
-# nohup Rscript update-spectral-library-ntsp.R &> ~/log-files/$(date +%y%m%d)-speclib-update.log &
-
+# nohup Rscript ~/projects/ntsportal/scripts/update-spectral-library-ntsp.R &> /scratch/nts/logs/$(date +%y%m%d)-speclib-update.log &
+# see crontab -e for processing
 
 library(dplyr)
 library(lubridate)
