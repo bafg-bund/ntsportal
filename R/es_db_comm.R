@@ -175,7 +175,7 @@ es_feat_from_id <- function(escon, index, id) { # id <- "2vLQwXsB5nUKfQcuMOAv"
 
 #' Get list of features from ntsp with document-IDs
 #' 
-#' Can one or more IDs
+#' Can one or more IDs. Index patterns including comma-sep are not allowed for index name.
 #' 
 #' @param escon Elasticsearch connection object created by elastic::connect
 #' @param index Elasticsearch index name
@@ -271,7 +271,13 @@ es_add_ufid <- function(feat, escon, index) {
                               body = sprintf(
                                 '
     {
-      "script": "ctx._source.ufid = %i"
+      "script": {
+        "source": "ctx._source.ufid = params.thisUfid",
+        "params": {
+          "thisUfid": %i
+        }
+      }
+      
     }
     ', feat$ufid)
   )
@@ -831,7 +837,7 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
 #' ufids, or for a selection by giving a vector of integers. 
 #'
 #' @param escon Elasticsearch connection object created by elastic::connect
-#' @param udb
+#' @param udb Ufid library connection object created by DBI::dbConnect
 #' @param index Elasticsearch index name
 #' @param polarity
 #' @param ufids if ufids is NULL (default), then all ufids will be processed
@@ -852,8 +858,8 @@ es_assign_ufids <- function(
   # polarity <- "pos"
   # ufids <- 8429L
   
-  # At the moment the Ufid-db is small enough to fit in memory, so load it in, everything is much
-  # faster that way.
+  # At the moment the Ufid-db is small enough to fit in memory, so load it in, 
+  # everything is much faster that way.
   ftt <- tbl(udb, "feature") %>% collect()
   rtt <- tbl(udb, "retention_time") %>% filter(method == chromMethod) %>% collect()
   ms2t <- tbl(udb, "ms2") %>% collect()
@@ -1124,7 +1130,7 @@ es_assign_ufids <- function(
    
     logger::log_info("Completed screening for ufid {uf}")
   }
-  logger::log_info("Screening and assigning ufids complete for all 
+  logger::log_info("Screening and assigning ufids complete for all \
                    requested ufids in es_assign_ufids")
   invisible(TRUE)
 }

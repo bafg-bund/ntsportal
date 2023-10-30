@@ -145,6 +145,8 @@ station_from_code <- function(escon, rfindex, filename, stationRegex) {
 #' the station and loc values from the code in the filename (will compare to 
 #' other docs in msrawfiles index) or provide a list of length 3 with station, river  
 #' and loc values. See details.
+#' @param rootMeasDir Root directory where measurement files are located. The function
+#' will look for original (vendor) files in this directory or below. Must end with "/".
 #'
 #' @details newStation can be either "same_as_template" or "filename" or
 #' a new fixed station name and location (list with fields "station", "river" and "loc")
@@ -163,7 +165,20 @@ station_from_code <- function(escon, rfindex, filename, stationRegex) {
 #'
 add_rawfiles <- function(escon, rfindex, templateId, newPaths, 
                          newStart = "filename", 
-                         newStation = "same_as_template") {
+                         newStation = "same_as_template",
+                         rootMeasDir = "/srv/cifs-mounts/g2/G/G2/HRMS/Messdaten/") {
+  # Define internal functions
+  # Will add earliest measurement time of any file found with the same name 
+  # in the whole "messdaten" directory tree.
+  get_measurement_time <- function(pathMsFile) {
+    nm <- stringr::str_match(basename(pathMsFile), "^(.*)\\.mzXML$")[,2]
+    fd <- system(sprintf("find %s -name \"%s*\"", rootMeasDir, nm), intern = T)
+    if (length(fd) > 0) {
+      format(min(file.mtime(fd)), "%Y-%m-%d %H:%M:%S")
+    } else {
+      NULL
+    }
+  }
   
   fileFound <- vapply(newPaths, file.exists, logical(1))
   if (!all(fileFound))
@@ -307,6 +322,17 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
     doc$date_import <- as.integer(Sys.time())
     # Alphabetically sort names for easy reading
     doc <- doc[order(names(doc))]
+    doc
+  })
+  
+  # Add filesize
+  newDocs <- lapply(newDocs, function(doc) {
+    doc$filesize <- file.size(doc$path) / 1e6
+    doc
+  })
+  # Add measurement time
+  newDocs <- lapply(newDocs, function(doc) {
+    doc$date_measurement <- get_measurement_time(doc$path)
     doc
   })
   

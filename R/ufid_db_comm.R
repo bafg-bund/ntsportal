@@ -109,6 +109,31 @@ udb_add_feature <- function(feat, udb) {
   newUfid
 }
 
+
+#' Update the entire ufid library
+#'
+#' @param udb ufid-library connection object produced with DBI::dbConnect
+#' @param escon 
+#' @param index 
+#'
+#' @return
+#' @export
+#'
+udb_update_all <- function(udb, escon, index) {
+  allUfs <- tbl(udb, "feature") %>% select(ufid) %>% collect() %>% unlist()
+  logger::log_info("Updating entire ufid library with {length(allUfs)} ufids")
+  startTime <- lubridate::now()
+  for (u in allUfs) {
+    udb_update(udb = udb, escon = escon, index = index, ufid_to_update = u)
+  }
+  endTime <- lubridate::now()
+  
+  hrs <- round(as.numeric(endTime - startTime, units = "hours"))
+  
+  logger::log_info("Completed updating entire ufid library in {hrs} h")
+}
+
+
 #' Update ufid db based on average aggregated results from ntsportal
 #'
 #' The ufid database is updated at the end of a session to
@@ -117,7 +142,7 @@ udb_add_feature <- function(feat, udb) {
 #' standard"
 #' Index to be used should be index-pattern to include all available indexes.
 #'
-#' @param udb
+#' @param udb ufid-library connection object produced with DBI::dbConnect
 #' @param escon
 #' @param index
 #' @param ufid
@@ -127,15 +152,12 @@ udb_add_feature <- function(feat, udb) {
 #'
 #' @examples
 #' @import dplyr
-udb_update <- function(udb, escon, index, ufid_to_update) {  
-  # library(dplyr)
-  # index <- "g2_nts_v2_bfg"
-  # ufid_to_update <- 544L
-  # ufid_to_update <- 14952
+udb_update <- function(udb, escon, index, ufid_to_update) {
+  
   stopifnot(is.integer(ufid_to_update), !is.na(ufid_to_update))
-
+  
   # get ufid polarity
-
+  
   polres <- elastic::Search(escon, index, body = sprintf('
     {
       "query": {
@@ -158,9 +180,9 @@ udb_update <- function(udb, escon, index, ufid_to_update) {
     ', ufid_to_update))
   polarity_ <- vapply(polres$aggregations$polarity$buckets, function(x) x$key, character(1))
   stopifnot(length(polarity_) == 1)
-
+  
   # update mz
-
+  
   # get average mz from es
   res <- elastic::Search(escon, index, body = sprintf(
     '
@@ -185,20 +207,21 @@ udb_update <- function(udb, escon, index, ufid_to_update) {
   )
   mz_es <- round(res$aggregations$av_mz$value, 4)
   stopifnot(is.double(mz_es))
-
+  
   # replace mz in feature table
   DBI::dbExecute(udb, "PRAGMA foreign_keys = ON;")
-
+  DBI::dbExecute(udb, "PRAGMA cache_size = -10000000;")  # change cache to 10 GB
   # if ufid not present in the db, add it first
-  all_ufids <- tbl(udb, "feature") %>% select(ufid) %>% collect() %>% unlist()
-  if (!(ufid_to_update %in% all_ufids)) {
+  notFound <- tbl(udb, "feature") %>% filter(ufid == !!ufid_to_update) %>% 
+    select(ufid) %>% collect() %>% nrow() == 0
+  if (notFound) {
     newFeatRow <- data.frame(ufid = ufid_to_update, mz = mz_es, isotopologue = NA, adduct = NA,
                              compound_name = NA, cas = NA, smiles = NA, inchi = NA,
                              formula = NA, comment = NA, polarity = polarity_,
                              date_added = as.numeric(Sys.time()))
     DBI::dbAppendTable(udb, "feature", newFeatRow)
   }
-
+  
   resu <- DBI::dbExecute(udb, sprintf(
     "
     UPDATE feature
@@ -207,7 +230,7 @@ udb_update <- function(udb, escon, index, ufid_to_update) {
     ", mz_es, ufid_to_update))
   # res should be 1 (1 change made)
   stopifnot(resu == 1)
-
+  
   # get average rt from db
   # rt_clustering field is used since this has been set to bfg_nts_rp1 anyway and this
   # is the method currently used for clustering
@@ -215,7 +238,7 @@ udb_update <- function(udb, escon, index, ufid_to_update) {
   # average. Originally the idea was to only use experimental RTs, but what about
   # ufids only found in external data? Maybe there needs to be a query and use 
   # predicted RTs only when experimental RTs are not available... (not done yet)
-
+  
   res2 <- elastic::Search(escon, index, body = sprintf(
     '
     {
@@ -237,18 +260,20 @@ udb_update <- function(udb, escon, index, ufid_to_update) {
     }
     ', ufid_to_update)
   )
-
+  
   rt_es <- res2$aggregations$art$value
   stopifnot(is.double(rt_es), length(rt_es) == 1, !is.na(rt_es))
-
+  
   # if ufid does not exist, add it first
-  all_ufids2 <- tbl(udb, "retention_time") %>% select(ufid) %>% collect() %>% unlist()
-  if (!(ufid_to_update %in% all_ufids2)) {
+  notFound2 <- tbl(udb, "retention_time") %>% 
+    filter(ufid == !!ufid_to_update) %>% select(ufid) %>% 
+    collect() %>% nrow() == 0
+  if (notFound2) {
     newRtRow <- data.frame(method = "bfg_nts_rp1", rt = rt_es, ufid = ufid_to_update)
     DBI::dbAppendTable(udb, "retention_time", newRtRow)
   }
-
-  # update value in ufid db
+  
+  # Update value in ufid db
   resu2 <- DBI::dbExecute(udb,
                           sprintf('
           UPDATE retention_time
@@ -257,7 +282,7 @@ udb_update <- function(udb, escon, index, ufid_to_update) {
              method = "bfg_nts_rp1" AND ufid = %i;
           ', rt_es, ufid_to_update))
   stopifnot(resu2 == 1)
-
+  
   # Update MS1/MS2
   get_combined_spectrum <- function(msLevel, ufid_, mztol_combine, mz_precursor) {
     stopifnot(is.character(msLevel), length(msLevel) == 1,
@@ -308,20 +333,20 @@ udb_update <- function(udb, escon, index, ufid_to_update) {
     esSpecAll <- as.data.frame(do.call("rbind", esSpecs))
     colnames(esSpecAll) <- c("mz", "int")
     sp <- ntsportal::clean_spectrum(esSpecAll, mztol = mztol_combine, msLevel = msLevel,
-                          precursorMz = mz_precursor)
+                                    precursorMz = mz_precursor)
     sp
   }
-
+  
   udb_update_spectrum <- function(msLevel, method_, spec_, mz_, ufid_) {
-    #browser()
     stopifnot(is.character(msLevel), length(msLevel) == 1,
               msLevel %in% c("ms1", "ms2"))
     stopifnot(is.data.frame(spec_), nrow(spec_) > 0)
-
+    
     # delete rows of old spectrum (if they exist)
-    all_ufids3 <- tbl(udb, msLevel) %>% select(ufid) %>% collect() %>% unlist()
-    all_methods <- tbl(udb, msLevel) %>% select(method) %>% collect() %>% unlist()
-    if (ufid_ %in% all_ufids3 && method_ %in% all_methods) {
+    rowsExist <- tbl(udb, msLevel) %>% 
+      filter(ufid == !!ufid_ & method == !!method_) %>% 
+      slice_min(mz, n = 1) %>% collect() %>% nrow() > 0
+    if (rowsExist) {
       resu3 <- DBI::dbExecute(udb,
                               sprintf('
         DELETE FROM %s
@@ -329,8 +354,8 @@ udb_update <- function(udb, escon, index, ufid_to_update) {
                 ', msLevel, method_, ufid_))
       stopifnot(resu3 > 0)
     }
-
-    # add new columns
+    
+    # add new rows
     spec_$method <- method_
     spec_$ufid <- ufid_
     colnames(spec_) <- sub("int", "rel_int", colnames(spec_))
@@ -338,22 +363,23 @@ udb_update <- function(udb, escon, index, ufid_to_update) {
     stopifnot(resu4 > 0)
     TRUE
   }
-
-  #browser()
-
+  
   # get new averaged MS1 spectrum
   ms1spec <- get_combined_spectrum("ms1", ufid_to_update, mztol_combine = 0.01, mz_precursor = mz_es)
+  # get new averaged MS2 spectrum
+  ms2spec <- get_combined_spectrum("ms2", ufid_to_update, mztol_combine = 0.03, mz_precursor = mz_es)
+  
   # update ufid with new MS1 spectrum
   if (!is.null(ms1spec))
     success1 <- udb_update_spectrum("ms1", "bfg_nts_rp1", ms1spec, mz_es, ufid_to_update)
   
-  # get new averaged MS2 spectrum
-  ms2spec <- get_combined_spectrum("ms2", ufid_to_update, mztol_combine = 0.03, mz_precursor = mz_es)
+  
   # update ufid with new MS2 spectrum
   if (!is.null(ms2spec))
     success2 <- udb_update_spectrum("ms2", "bfg_nts_rp1", ms2spec, mz_es, ufid_to_update)
-
-  TRUE
+  
+  
+  invisible(TRUE)
 }
 
 udb_connect <- function(pth) {

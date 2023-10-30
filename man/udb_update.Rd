@@ -7,6 +7,8 @@
 udb_update(udb, escon, index, ufid_to_update)
 }
 \arguments{
+\item{udb}{ufid-library connection object produced with DBI::dbConnect}
+
 \item{ufid}{}
 }
 \description{

@@ -16,6 +16,8 @@ es_assign_ufids(
 \arguments{
 \item{escon}{Elasticsearch connection object created by elastic::connect}
 
+\item{udb}{Ufid library connection object created by DBI::dbConnect}
+
 \item{index}{Elasticsearch index name}
 
 \item{ufids}{if ufids is NULL (default), then all ufids will be processed}

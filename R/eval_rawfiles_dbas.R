@@ -282,6 +282,8 @@ check_field <- function(escon, rfindex, fieldName, onlyNonBlank = FALSE) {
 
 
 
+
+
 # Processing functions ####
 
 # will go through all stages dbas1-3+ingest for all files in the 
@@ -329,15 +331,16 @@ proc_esid <- function(escon, rfindex, esid, compsProcess = NULL) {
     dbas$changeSettings("chromatography", dc$chrom_method)
   }
   dbas$changeSettings("numcores", 1)
-  
+  crash <- FALSE
   tryCatch(
     suppressMessages(dbas$process_all(comp_names = compsProcess)), 
     error = function(cnd) {
       log_warn("Processing error in file ", dc$path)
+      crash <<- TRUE
       message(cnd)
     }
   )
-  if (!inherits(dbas, "Report"))
+  if (crash)
     return(NULL)
   
   dbas$clearData()
@@ -634,6 +637,8 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     dat$pol <- get_field2(esids, "pol", justone = T)
     dat$matrix <- get_field2(esids, "matrix", justone = T)
     dat$data_source <- get_field2(esids, "data_source", justone = T)
+    dat$sample_source <- get_field2(esids, "sample_source", justone = T)
+    dat$licence <- get_field2(esids, "licence", justone = T)
     dat$chrom_method <- get_field2(esids, "chrom_method", justone = T)
     # change names to match ntsp
     colnames(dat) <- gsub("^comp_name$", "name", colnames(dat))
@@ -910,6 +915,7 @@ process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile,
     proc_is_one(escon = escon, rfindex = rfindex, esid = id)
   })
   plan(sequential)
+  
   featsAll <- do.call("c", featsBySample)
   featsAll <- Filter(Negate(is.null), featsAll)
   jpth <- file.path(tmpPath, "is_dbas_temp.json")
@@ -957,7 +963,7 @@ proc_is_one <- function(escon, rfindex, esid) {
       message(cnd)
     }
   )
-  if (crash || nrow(repo$ISresults) == 0) {
+  if (is.null(repo) || crash || nrow(repo$ISresults) == 0) {
     log_info("No results found for {esid[1]}")
     return(NULL)
   }

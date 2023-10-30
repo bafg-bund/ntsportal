@@ -17,5 +17,5 @@ es_feat_from_ids(escon, index, esids)
 list of Feature objects
 }
 \description{
-Can one or more IDs
+Can one or more IDs. Index patterns including comma-sep are not allowed for index name.
 }

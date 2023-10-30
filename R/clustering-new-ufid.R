@@ -149,22 +149,7 @@ udb_new_ufid <- function(udb, escon, index, polarity, mzPosition = 0,
     all(inMz, inRt, inMS2)
   }
   
-  custom_distance <- function(id1, id2, mztol = 0.005, rttol = 0.5,
-                              ms2mztol = 0.03, ms2dpthresh = 400, 
-                              ndp_m = 2, ndp_n = 1) {
-    
-    ft1 <- listoFeatures[[id1]]
-    ft2 <- listoFeatures[[id2]]
-    
-    ifelse(
-      feature_compare(
-        ft1, ft2, mztol = mztol, rttol = rttol, ms2mztol = ms2mztol,
-        ms2dpthresh = ms2dpthresh, ndp_m = ndp_m, ndp_n = ndp_n
-      ), 
-      0, 
-      1
-    )
-  }
+  
   
   # begin computations ####
   
@@ -339,6 +324,23 @@ udb_new_ufid <- function(udb, escon, index, polarity, mzPosition = 0,
         # Using future.apply which uses future::multicore backend, will not
         # work in Windows or in RStudio (will revert to sequential)
         # Only works with the github version of usedist.
+        
+        custom_distance <- function(id1, id2, mztol = 0.005, rttol = 0.5,
+                                    ms2mztol = 0.03, ms2dpthresh = 400, 
+                                    ndp_m = 2, ndp_n = 1) {
+          
+          ft1 <- listoFeatures[[id1]]
+          ft2 <- listoFeatures[[id2]]
+          
+          ifelse(
+            feature_compare(
+              ft1, ft2, mztol = mztol, rttol = rttol, ms2mztol = ms2mztol,
+              ms2dpthresh = ms2dpthresh, ndp_m = ndp_m, ndp_n = ndp_n
+            ), 
+            0, 
+            1
+          )
+        }
      
         plan(multicore, workers = config::get("cores"))
         dist2 <- usedist::dist_make(

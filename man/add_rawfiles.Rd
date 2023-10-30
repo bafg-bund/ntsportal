@@ -10,7 +10,8 @@ add_rawfiles(
   templateId,
   newPaths,
   newStart = "filename",
-  newStation = "same_as_template"
+  newStation = "same_as_template",
+  rootMeasDir = "/srv/cifs-mounts/g2/G/G2/HRMS/Messdaten/"
 )
 }
 \arguments{
@@ -31,6 +32,9 @@ copy the value from the template document, or "filename", meaning extract
 the station and loc values from the code in the filename (will compare to 
 other docs in msrawfiles index) or provide a list of length 3 with station, river  
 and loc values. See details.}
+
+\item{rootMeasDir}{Root directory where measurement files are located. The function
+will look for original (vendor) files in this directory or below. Must end with "/".}
 }
 \description{
 Add new MS measurement files to msrawfiles index

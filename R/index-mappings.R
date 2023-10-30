@@ -32,6 +32,8 @@ put_dbas_index <- function(eson, index) {
           "conc" : {"type" : "float"},  
           "tag": {"type": "keyword"},
           "data_source" : {"type" : "keyword"},
+          "sample_source" : {"type" : "keyword"},
+          "licence" : {"type" : "keyword"}
           "start" : {
             "type" : "date",
             "format" : "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||yyyy-MM-dd HH:mm"
