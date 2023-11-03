@@ -1,6 +1,3 @@
-
-
-
 #' Get data from elastic
 #'
 #' @param escon connection objected created with elastic::connect
@@ -14,45 +11,45 @@
 #' @return data.frame
 #' @export
 #'
-#' @examples 
+#' @examples
 #' \dontrun{
 #' config_path <- "~/projects/config.yml"
 #' ec <- config::get("elastic_connect", file = config_path)
-#' escon <- elastic::connect(host = '10.140.73.204', user=ec$user, pwd=ec$pwd)
+#' escon <- elastic::connect(host = "10.140.73.204", user = ec$user, pwd = ec$pwd)
 #' index <- "g2_nts_expn"
 #' get_time_series(
-#'   escon, 
+#'   escon,
 #'   station = "KOMO",
 #'   startRange = c("2021-01-01", "2022-01-01"),
 #'   responseField = "intensity"
 #' )
 #' }
-#' 
+#'
 #' @import lubridate
 get_time_series <- function(
-  escon,
-  index = "g2_nts_expn",
-  station = "KOMO",
-  startRange = c("2021-01-01", "2022-01-01"),
-  responseField = "intensity",
-  ufidLevel = 2,
-  form = "long") {
-  
+    escon,
+    index = "g2_nts_expn",
+    station = "KOMO",
+    startRange = c("2021-01-01", "2022-01-01"),
+    responseField = "intensity",
+    ufidLevel = 2,
+    form = "long") {
   stopifnot(length(startRange) == 2)
-  if (!all(grepl("^\\d{4}-\\d{2}-\\d{2}$", startRange)))
+  if (!all(grepl("^\\d{4}-\\d{2}-\\d{2}$", startRange))) {
     stop("'start_range' must be length 2 character with the format 'yyyy-mm-dd'")
+  }
   stopifnot(length(responseField) == 1, is.element(responseField, c("intensity", "intensity_normalized", "area", "area_normalized")))
-  stopifnot(length(station) == 1,is.element(station, c("KOMO", "FAN", "WIN", "rhein_ko_l")))
+  stopifnot(length(station) == 1, is.element(station, c("KOMO", "FAN", "WIN", "rhein_ko_l")))
   stopifnot(length(form) == 1, is.element(form, c("long", "wide")))
   stopifnot(length(index) == 1, is.element(index, c("g2_nts_expn", "g2_nts_bfg")))
   stopifnot(inherits(escon, "Elasticsearch"))
-  stopifnot(is.numeric(ufidLevel), length(ufidLevel) == 1, is.element(ufidLevel, c(1,2)))
+  stopifnot(is.numeric(ufidLevel), length(ufidLevel) == 1, is.element(ufidLevel, c(1, 2)))
   ufidType <- ifelse(ufidLevel == 1, "ufid", "ufid2")
   ucidType <- ifelse(ufidLevel == 1, "ucid", "ucid2")
-  
+
   # need to partition results since bucket overload may occur
   # get number of ufids
-  
+
   numUfids <- elastic::Search(escon, index, body = sprintf(
     '
     {
@@ -75,7 +72,7 @@ get_time_series <- function(
           ]
         }
       },
-      "size": 0, 
+      "size": 0,
       "aggs": {
         "ufid_num": {
           "cardinality": {
@@ -86,16 +83,16 @@ get_time_series <- function(
     }
     ', startRange[1], startRange[2], station, ufidType
   ))$aggregations$ufid_num$value
-  
+
   # get number of days
-  
+
   numDays <- interval(ymd(startRange[1]), ymd(startRange[2])) / ddays(1)
-  
+
   # estimate number of partitions to ufids so that max buckets < 50000
-  numPartitions <- ceiling(numUfids/(50000/numDays))
+  numPartitions <- ceiling(numUfids / (50000 / numDays))
   message("Request split into ", numPartitions, " partitions.")
-  
-  get_data_partition <- function(part) {  # part <- 1
+
+  get_data_partition <- function(part) {
     message("Partition ", part)
     ans <- elastic::Search(escon, index, body = sprintf(
       '
@@ -185,7 +182,7 @@ get_time_series <- function(
     }
     ', station, startRange[1], startRange[2], ufidType, part - 1, numPartitions, ucidType, responseField
     ))
-    
+
     message(ans$hits$total$value, " features returned")
     ufids <- ans$aggregations$ufids$buckets
     message("Grouped into ", length(ufids), " ufids")
@@ -223,13 +220,13 @@ get_time_series <- function(
           return(paste(vapply(nb, "[[", character(1), i = "key"), collapse = ", "))
         }
       }, character(1))
-    ) 
-    
-    resp <- lapply(ufids, function(ufidBuck) {  
+    )
+
+    resp <- lapply(ufids, function(ufidBuck) {
       dayBucks <- ufidBuck$over_time$buckets
-      dayRows <- lapply(dayBucks, function(dayBuck) {  
+      dayRows <- lapply(dayBucks, function(dayBuck) {
         durBucks <- dayBuck$durations$buckets
-        responseRows <- lapply(durBucks, function(durBuck) { 
+        responseRows <- lapply(durBucks, function(durBuck) {
           c(
             ufid = ufidBuck$key,
             start = dayBuck$key_as_string,
@@ -250,20 +247,21 @@ get_time_series <- function(
     resp$start <- ymd(resp$start)
     merge(df, resp, by = "ufid")
   }
-  
+
   aligTables <- lapply(seq_len(numPartitions), get_data_partition)
-  
+
   # long form
-  aligTable <- do.call("rbind", aligTables) 
-  
+  aligTable <- do.call("rbind", aligTables)
+
   if (ufidLevel == 2) {
     colnames(aligTable) <- sub("^ufid$", "ufid2", colnames(aligTable))
     colnames(aligTable) <- sub("^ucid$", "ucid2", colnames(aligTable))
   }
-  
+
   # wide form
-  if (form == "wide")
+  if (form == "wide") {
     aligTable <- tidyr::pivot_wider(aligTable, names_from = "start", values_from = "response", values_fill = 0)
-  
+  }
+
   aligTable
 }
