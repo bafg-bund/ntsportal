@@ -20,7 +20,8 @@ new_feature <- function(pol = character(), mz = double(), rt = double(),
     mz <- as.double(mz)
   x <- list(mz = mz, rt = rt, pol = pol, es_id = es_id, chrom_method = chrom_method)
   furtherArgs <- list(...)
-  okfields <- c("ms1", "ms2", "rtt", "eic", "filename", "data_source", "date_import", "intensity")
+  okfields <- c("ms1", "ms2", "rtt", "eic", "filename", "data_source", 
+                "date_import", "intensity", "ufid")
   stopifnot(all(names(furtherArgs) %in% okfields))
   
   for (newField in names(furtherArgs)) {

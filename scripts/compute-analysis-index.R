@@ -7,22 +7,15 @@
 
 INDEX <- "g2_dbas_upb"
 ANALYSIS_INDEX <- "g2_dbas_upb_analysis"
-dateId <- format(Sys.Date(), "%y%m%d")
-SAVE_LOC <- "~/projects/ntsportal/tests/analysis_index"
-INGEST_SCRIPT <- "~/projects/ntsautoeval/ingest.sh"
+SAVE_LOC <- "/scratch/nts/tmp"
+INGEST_SCRIPT <- "/scratch/nts/ntsautoeval/ingest.sh"
 CONFIG_PATH <- "~/config.yml"
-logFile <- file.path(SAVE_LOC, paste0(dateId, ".log")) 
-cat("----- compute-analysis-index.R v2022-10-28 -----\n", file = logFile)
-cat(date(), "\n", file = logFile, append = T)
+source("~/connect-ntsp.R")
+library(logger)
 
-ec <- config::get("elastic_connect", file = CONFIG_PATH)
-escon <- elastic::connect(host = 'elastic.dmz.bafg.de', port = 443, user=ec$user, pwd=ec$pwd,
-                          transport_schema = "https", ssl_verifypeer = FALSE)
+log_info("----- compute-analysis-index.R v2023-11-16 -----")
 
-if (escon$ping()$cluster_name == "bfg-elastic-cluster")
-  cat("Connection to elasticsearch successful\n", file = logFile, append = TRUE)
 
-#escon$ping()
 res <- elastic::Search(
   escon, INDEX, 
   body = '
@@ -118,29 +111,31 @@ reg$change_per_ms <- NULL
 reg$datapoints <- NULL
 
 if (file.exists(file.path(SAVE_LOC, "reg.json"))) {
-  cat("Deleting old json\n", file = logFile, append = TRUE)
+  log_info("Deleting old json")
   file.remove(file.path(SAVE_LOC, "reg.json"))
 }
 
-cat("Writing new json\n", file = logFile, append = TRUE)
+reg$matrix <- "spm"
+
+log_info("Writing new json")
 jsonlite::write_json(reg, file.path(SAVE_LOC, "reg.json"), pretty = T, digits = NA, auto_unbox = T)
 
 # clear contents of current analysis index
-cat("Clearing old data\n", file = logFile, append = TRUE)
+log_info("Clearing old data")
 mes <- elastic::docs_delete_by_query(escon, ANALYSIS_INDEX, '{
   "query": {
     "match_all": {}
   }
 }')
-cat(mes$deleted, "docs cleared\n", file = logFile, append = TRUE)
+log_info(mes$deleted, "docs cleared")
 
 # upload newly formed index
-cat("Uploading new docs\n", file = logFile, append = TRUE)
+log_info("Uploading new docs")
 
 if (file.exists(file.path(SAVE_LOC, "reg.json")))
   ingestMes <- system(paste(INGEST_SCRIPT, CONFIG_PATH, ANALYSIS_INDEX, file.path(SAVE_LOC, "reg.json")), intern = T)
 
-cat(ingestMes, "\n", file = logFile, append = TRUE, fill = TRUE)
+log_info("Completed compute-analysis-index.R")
 
 
 

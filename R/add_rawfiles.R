@@ -103,32 +103,68 @@ station_from_code <- function(escon, rfindex, filename, stationRegex) {
   regex2 <- sub("\\(.*\\)", stationCode, regex2)
   
   # Find which other docs have this identifier
-  # TODO need to also add km if it is present
   res <- elastic::Search(escon, rfindex, body = sprintf('
                                                         {
   "query": {
-    "regexp": {
-      "filename": "%s"
-    }
-  },
-  "size": 10000,
-  "_source": ["station", "loc", "river"]
-}
-', regex2))
+      "regexp": {
+        "filename": "%s"
+      }
+    },
+    "size": 10000,
+    "_source": ["station", "loc", "river", "km", "gkz"]
+  }
+  ', regex2))
   
   stopifnot(res$hits$total$relation == "eq")
   if (res$hits$total$value == 0)
-    stop("No documents found with the station code: ", stationCode)
+    stop("No documents found with the station code: ", stationCode, 
+         " for filename ", filename)
+  # Station and loc must exist. So these can be searched for directly
   # Check that there is no ambiguity
   hits <- res$hits$hits
   st <- vapply(hits, function(doc) doc[["_source"]][["station"]], character(1))
   stopifnot(length(unique(st)) == 1)
+  #browser()
   locs <- lapply(hits, function(doc) doc[["_source"]][["loc"]])
-  stopifnot(all(outer(locs, locs, Vectorize(all.equal))))
-  rivs <- vapply(hits, function(doc) doc[["_source"]][["river"]], character(1))
-  stopifnot(length(unique(st)) == 1)
-  
-  list(station = st[1], loc = locs[[1]], river = rivs[1])
+  testLocs <- outer(locs, locs, Vectorize(all.equal))
+  if (is.list(testLocs)) {
+    message("Not all locs for station ", st[1], " are exactly the same")
+    message(paste(unlist(testLocs)[unlist(testLocs) != "TRUE"], collapse = "\n"))
+    isOk <- readline("Continue anyway? (y/n): ")
+    switch(
+      isOk, 
+      y = {
+        message(
+          "Taking the first loc ", 
+          paste(unlist(locs[[1]]), collapse = ", "),
+          " for station ", st[1])
+      },
+      n = {
+        stop("Processing terminated.")
+      },
+      {
+        stop("Could not understand input.")
+      }
+    )
+  }
+  resList <- list(station = st[1], loc = locs[[1]])
+  #browser()
+  # river, gkz and km are optional, so first check if they are present
+  add_others <- function(field, resListTemp) {
+    if (all(vapply(hits, function(doc) !is.null(doc[["_source"]][[field]]), logical(1)))) {
+      vals <- vapply(hits, function(doc) doc[["_source"]][[field]], 
+                     switch(field, river = character(1), km = numeric(1), gkz = numeric(1)))
+      if (length(unique(vals)) != 1) {
+        stop("Not all ", field, " are the same for station ", st[1])
+      }
+      resListTemp[[field]] <- vals[1]
+    }
+    resListTemp
+  }
+  resList <- add_others("river", resList)
+  resList <- add_others("km", resList)
+  resList <- add_others("gkz", resList)
+  resList
 }
 
 #' Add new MS measurement files to msrawfiles index
@@ -172,10 +208,11 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
   # in the whole "messdaten" directory tree.
   get_measurement_time <- function(pathMsFile) {
     nm <- stringr::str_match(basename(pathMsFile), "^(.*)\\.mzXML$")[,2]
-    fd <- system(sprintf("find %s -name \"%s*\"", rootMeasDir, nm), intern = T)
+    fd <- list.files(rootMeasDir, pattern = nm, recursive = T, full.names = T)
     if (length(fd) > 0) {
       format(min(file.mtime(fd)), "%Y-%m-%d %H:%M:%S")
     } else {
+      message("Measurement time not found")
       NULL
     }
   }
@@ -191,12 +228,10 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
   stopifnot(any(newStation %in% c("same_as_template", "filename")) || is.list(newStation))
   if (is.list(newStation)) {
     stopifnot(
-      length(newStation) == 3, 
-      all(c("station", "loc", "river") %in% names(newStation)),
+      length(newStation) >= 2, 
+      all(c("station", "loc") %in% names(newStation)),
       is.character(newStation$station),
       length(newStation$station) == 1,
-      is.character(newStation$river),
-      length(newStation$river) == 1,
       all(c("lat", "lon") %in% names(newStation$loc)),
       all(vapply(newStation$loc, is.numeric, logical(1)))
     )
@@ -298,18 +333,37 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
       
     
     if (!is.list(newStation) && newStation == "filename") {
-      stopifnot("dbas_station_regex" %in% names(doc))
+      if (!is.element("dbas_station_regex", names(doc)))
+        stop("dbas_station_regex, not found in template")
       staList <- station_from_code(
         escon = escon, 
         rfindex = rfindex, 
         filename = doc$filename,
         stationRegex = doc$dbas_station_regex
       )
-      if (is.list(staList) && length(staList) == 3 && 
+      #browser()
+      if (is.list(staList) && length(staList) >= 2 && 
           all(c("station", "loc") %in% names(staList))) {
         doc$station <- staList$station
         doc$loc <- staList$loc
-        doc$river <- staList$river
+        if ("river" %in% names(staList)) {
+          doc$river <- staList$river
+        } else {
+          doc$river <- NULL
+        }
+          
+        if ("km" %in% names(staList)) {
+          doc$km <- staList$km
+        } else {
+          doc$km <- NULL
+        }
+          
+        if ("gkz" %in% names(staList)) {
+          doc$gkz <- staList$gkz
+        } else {
+          doc$gkz <- NULL
+        }
+          
       } else {
         stop("Station parsing in file ", pth, " failed")
       }
@@ -331,6 +385,9 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
     doc
   })
   # Add measurement time
+  
+  message("Looking for corresponding Wiff files in ", rootMeasDir, 
+          " to find measurement time")
   newDocs <- lapply(newDocs, function(doc) {
     doc$date_measurement <- get_measurement_time(doc$path)
     doc
@@ -359,7 +416,7 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
         stop("There was no change made, aborted process")
       newDocs <- newDocsNew
     },
-    stop("Unknown input, processing stoped, files not added")
+    stop("Unknown input, processing stopped, files not added")
     )
 
   ids <- character()

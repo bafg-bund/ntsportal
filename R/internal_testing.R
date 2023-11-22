@@ -897,9 +897,13 @@ mz_rt_stats_plots <- function(escon, testIndex, hideTitleX = FALSE) {
     )
   df <- silhouette_score(escon, testIndex)
   
+  gt <- round(100*nrow(subset(df, QScore > .5))/nrow(df))
+  
   silPlot <- ggplot(df, aes(QScore)) + 
     geom_density() +
-    theme_bw(9)+ 
+    theme_bw(9) +
+    annotate("text", x = -Inf, y = Inf, 
+             label = glue::glue("{gt}% QScore > .5"), hjust = -.05, vjust = 1.3) +
     theme(
       axis.text.y = element_blank(),
       axis.title.y = element_blank(),

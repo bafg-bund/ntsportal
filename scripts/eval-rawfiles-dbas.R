@@ -12,7 +12,7 @@
 # tail -f /scratch/nts/logs/$(date +%y%m%d)_dbas_eval.log
 # see crontab for processing
 
-VERSION <- "2023-10-10"
+VERSION <- "2023-11-16"
 
 # Variables ####
 RFINDEX <- "g2_msrawfiles"
@@ -20,6 +20,7 @@ TEMPSAVE <- "/scratch/nts/tmp"
 CONFG <- "~/config.yml"
 INGESTPTH <- "/scratch/nts/ntsautoeval/ingest.sh"
 UPDATESPECDB <- "~/projects/ntsportal/scripts/update-spectral-library-ntsp.R"
+ADDANALYSIS <- "~/projects/ntsportal/scripts/compute-analysis-index.R"
 SPECLIBPATH <- "/scratch/nts/MS2_db_v9.db"  # temporary: only for adding group and formula after processing
 CORES <- 1
 CORESBATCH <- 6
@@ -292,8 +293,7 @@ log_info("Completed all batches")
 log_info("Average peaks found per batch: {mean(numPeaksBatch)}")
 log_info("currently {free_gb()} GB of memory available")
 
-# Transfer current spectral lib to ntsp
-
+# Transfer current spectral lib to ntsp ####
 system2("Rscript", UPDATESPECDB)
 
 # Add information to docs ####
@@ -318,6 +318,8 @@ suca <- mapply(move_dbas_alias, indexName = allInd, aliasName = allAlia,
 if (all(suca))
   log_info("Move alias successful")
 
+# Add analysis index ####
+system2("Rscript", ADDANALYSIS)
 
 endTime <- lubridate::now()
 hrs <- round(as.numeric(endTime - startTime, units = "hours"))

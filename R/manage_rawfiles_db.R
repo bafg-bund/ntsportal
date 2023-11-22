@@ -96,7 +96,9 @@ es_move_alias <- function(escon, indexName, aliasName) {
 #' 
 #' This is specific for dbas aliases because of the need for v4 alias names for 
 #' Kibana (will be depricated in the future). For a general function to change
-#' alias names, see es_move_alias
+#' alias names, see es_move_alias. 
+#' 
+#' This function will also close the old index after creation of the new alias
 #'
 #' @param escon elastic connection object created by elastic::connect
 #' @param indexName 
@@ -108,7 +110,6 @@ es_move_alias <- function(escon, indexName, aliasName) {
 move_dbas_alias <- function(escon, indexName, aliasName) {
   #browser(expr = grepl("hessen", aliasName))
   # name of index currently at alias
-  
   aliasName2 <- sub("^(g2_dbas)", "\\1_v4", aliasName)
   
   aliases <- elastic::cat_aliases(escon, index = aliasName, parse = T)
@@ -116,6 +117,7 @@ move_dbas_alias <- function(escon, indexName, aliasName) {
     aliases <- data.frame(aliasName, indexName)
   } else {
     # delete previous alias
+    previousIndex <- aliases[1, 2]
     res1 <- elastic::alias_delete(escon, index = aliases[1, 2], alias = aliases[1, 1]) 
   }
   
@@ -129,7 +131,12 @@ move_dbas_alias <- function(escon, indexName, aliasName) {
   # create new alias
   res3 <- elastic::alias_create(escon, indexName, aliasName)
   res4 <- elastic::alias_create(escon, indexName, aliasName2)
-  all(vapply(list(res3, res4), "[[", i = "acknowledged", logical(1)))
+  
+  ok <- all(vapply(list(res3, res4), "[[", i = "acknowledged", logical(1)))
+  if (ok && exists("previousIndex") && length(previousIndex) == 1)
+    elastic::index_close(escon, previousIndex)
+  
+  ok
 }
 
 #' Change the path of one document in a rawfiles db

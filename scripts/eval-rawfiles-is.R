@@ -4,8 +4,9 @@
 # tail -f ~/scratch_nts/logs/$(date +%y%m%d)_is_eval.log
 # see crontab -e for processing
 
-source("~/connect-ntsp.R")
 logger::log_info("Processing files for IS (process_is_all)")
+
+source("~/connect-ntsp.R")
 
 ntsportal::process_is_all(
   escon = escon, 

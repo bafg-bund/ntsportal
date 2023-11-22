@@ -614,7 +614,8 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     idSamp <- data.frame(
       id = esids,
       samp = basename(get_field2(esids, "path")),
-      start = get_field2(esids, "start")
+      start = get_field2(esids, "start"),
+      date_measurement = get_field2(esids, "date_measurement")
     )
     
     dat <- merge(dat, idSamp, by = "samp", all.x = T)
@@ -851,8 +852,9 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
 process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile, 
                            tmpPath = "/scratch/nts/tmp", numCores = 10) {
   startTime <- lubridate::now()
-  # Find out what files are in msrawfiles and not in dbas_is 
-  res1 <- elastic::Search(escon, isindex, body = '
+  # Find out what files are in msrawfiles and not in dbas_is
+  get_files <- function(escon, indexToSearch) {
+    resx <- elastic::Search(escon, indexToSearch, body = '
     {
       "aggs": {
         "files": {
@@ -865,24 +867,12 @@ process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile,
       "size": 0
     }
   ')
-  stopifnot(res1$aggregations$files$sum_other_doc_count == 0)
-  filesDbasIs <- vapply(res1$aggregations$files$buckets, "[[", i = "key", character(1))
+    stopifnot(resx$aggregations$files$sum_other_doc_count == 0)
+    vapply(resx$aggregations$files$buckets, "[[", i = "key", character(1))
+  }
   
-  res2 <- elastic::Search(escon, rfindex, body = '
-    {
-      "aggs": {
-        "files": {
-          "terms": {
-            "field": "filename",
-            "size": 100000
-          }
-        }
-      },
-      "size": 0
-    }
-  ')
-  stopifnot(res2$aggregations$files$sum_other_doc_count == 0)
-  filesDbasRf <- vapply(res2$aggregations$files$buckets, "[[", i = "key", character(1))
+  filesDbasIs <- get_files(escon, isindex)
+  filesDbasRf <- get_files(escon, rfindex)
   filesToProcess <- setdiff(filesDbasRf, filesDbasIs)
   if (length(filesToProcess) == 0) {
     log_info("No files found to process")
@@ -935,8 +925,8 @@ process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile,
 #' Process IS in one file
 #'
 #' @param escon 
-#' @param rfindex 
-#' @param esid 
+#' @param rfindex index name (msrawfiles index)
+#' @param esid ID of document in rfindex
 #'
 #' @return
 #' @export
@@ -952,6 +942,7 @@ proc_is_one <- function(escon, rfindex, esid) {
   }
   get_field2 <- get_field_builder(escon = escon, index = rfindex)
   isTab <- get_field2(esid, "dbas_is_table")
+  stopifnot(length(isTab) == 1)
   ises <- read.csv(isTab)$name
   # run dbas processing
   crash <- FALSE
@@ -984,6 +975,7 @@ proc_is_one <- function(escon, rfindex, esid) {
     isr$duration <- get_field2(esid, "duration")
     isr$station <- get_field2(esid, "station")
     isr$data_source <- get_field2(esid, "data_source")
+    isr$date_measurement <- get_field2(esid, "date_measurement")
     isr$river <- get_field2(esid, "river")
     pl <- select(repo$peakList, name = comp_name, peakID)
     isr <- left_join(isr, pl, by = "name")
