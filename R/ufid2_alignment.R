@@ -1,33 +1,23 @@
-
-
-
 #' Alignment by m/z and RT
 #'
 #'
 #' Function will assign ufid2 to features
 #'
-#' @param escon 
-#' @param index 
-#' @param rtTol 
-#' @param mzTolmDa 
-#' @param minPoints 
+#' @param escon
+#' @param index default is "g2_nts*"
+#' @param rtTol retentiontime tolerance in minutes - default is 0.3min
+#' @param mzTolmDa mass tolerance in mDa - default is 5mDa
+#' @param minPoints
 #'
 #' @return TRUE
 #' @export
 #'
 ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5, minPoints = 5) {
-
-  # index <- "g2_nts*"
-  # rtTol <- 0.3
-  # mzTolmDa <- 5
-  # minPoints <- 5
-  # config_path <- "~/config.yml"
-  # ec <- config::get("elastic_connect", file = config_path)
-  # escon <- elastic::connect(host = '10.140.73.204', user=ec$user, pwd=ec$pwd)
   message("Starting ufid2 assignment at ", date())
   message("compiling cpp function")
   mzrtpol_dist_FuncPtr <- RcppXPtrUtils::cppXPtr(
-    sprintf("
+    sprintf(
+      "
       double customDist(const arma::mat &A, const arma::mat &B) {
         int mzscore;
         int rtscore;
@@ -71,8 +61,8 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
         dblfinalscore = (double)finalscore;  // function must return double
         return dblfinalscore;
       }",
-            mzTolmDa / 1000,
-            rtTol
+      mzTolmDa / 1000,
+      rtTol
     ),
     depends = c("RcppArmadillo")
   )
@@ -82,7 +72,7 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
   mzPosition <- 0
   numUfids <- 0
 
-  alles <- data.frame(id= character(), ufid2 = numeric())
+  alles <- data.frame(id = character(), ufid2 = numeric())
 
   repeat {
     # if (numUfids > 500)
@@ -116,8 +106,7 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
       },
       "size": 10000,
       "_source": ["mz", "rt", "filename", "pol"]
-      }', mzPosition)
-    )
+      }', mzPosition))
     numReturned <- length(res$hits$hits)
     sameSort <- max(sapply(res$hits$hits, function(x) x[["sort"]][[1]]))
     # last hit gives new mz position
@@ -151,7 +140,7 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
     message("Clustering...")
 
     # cluster these by mz-rt using parallel distance function
-    dist1 <- parallelDist::parDist(m, method="custom", func = mzrtpol_dist_FuncPtr, threads = 6)
+    dist1 <- parallelDist::parDist(m, method = "custom", func = mzrtpol_dist_FuncPtr, threads = 6)
 
     dbscanRes <- dbscan::dbscan(dist1, 0.1, minPoints)
 
@@ -163,73 +152,62 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
     alles <- rbind(alles, ergebnis)
 
     numUfids <- max(newcluster)
-    
+
     # set new mz position
     mzPosition <- newMzPosition
   }
-  
+
   # remove all 0 ufids
   alles <- alles[alles$ufid2 != 0, ]
-  
-  # save alles to ~/temp for testing
-  #saveRDS(alles, file = "~/temp/ufid2_alignment_alles.RDS")
-  #alles <- readRDS("~/temp/ufid2_alignment_alles.RDS")
+
   # check for duplicate features
-  
+
   compare_ufids <- function(u1, u2) {
     set1 <- alles[alles$ufid2 == u1, "id"]
     set2 <- alles[alles$ufid2 == u2, "id"]
-    # the same
+
     if (setequal(set1, set2)) {
       return(1L)
-    # one is subset of the other
+      # one is subset of the other
     } else if (all(is.element(set1, set2)) || all(is.element(set2, set1))) {
       return(2L)
-    # one is almost a subset of the other
+      # one is almost a subset of the other
     } else if (length(intersect(set1, set2)) > 0.9 * min(c(length(set1), length(set2)))) {
       return(3L)
-    # There is some small amount of overlap
+      # There is some small amount of overlap
     } else if (length(intersect(set1, set2)) > 0) {
       return(4L)
-    # There is no overlap
+      # There is no overlap
     } else if (length(intersect(set1, set2)) == 0) {
       return(0L)
-    # something else unknown
+      # something else unknown
     } else {
       stop("unknown case with ufid ", u1, " and ", u2)
     }
   }
-  
+
   if (any(duplicated(alles$id))) {
     message("Combining duplicates at ", date())
     dupIds <- alles[duplicated(alles$id), "id"]
     dupUfids <- parallel::mclapply(dupIds, function(x) alles[alles$id == x, "ufid2"], mc.cores = 10)
     dupUfids <- unique(do.call("c", dupUfids))
-    
-    #saveRDS(dupUfids, file = "~/temp/ufid2_alignment_dupUfids.RDS")
-    #dupUfids <- readRDS("~/temp/ufid2_alignment_dupUfids.RDS")
-    
+
     compMat <- as.matrix(ntsportal::dist_make_parallel(as.matrix(dupUfids), compare_ufids, numCores = 10))
-    #compMat <- as.matrix(ntsportal::dist_make_parallel(as.matrix(dupUfids[1106:1110]), compare_ufids, numCores = 10))
-    #compMat <- as.matrix(usedist::dist_make(as.matrix(dupUfids), compare_ufids))
-    
-    #saveRDS(compMat, file = "~/temp/ufid2_alignment_compMat.RDS")
-    #compMat <- readRDS("~/temp/ufid2_alignment_compMat.RDS")
-    
+
     compMat[lower.tri(compMat)] <- 0
     # in the case where they are exactly the same, delete one of them
     if (any(compMat == 1)) {
-      pairs <- which(compMat == 1, arr.ind = T)
-      for (i in seq_len(nrow(pairs))) {  # i <- 1
-        toCombine <- dupUfids[pairs[i, , drop = T]]
+      pairs <- which(compMat == 1, arr.ind = TRUE)
+      for (i in seq_len(nrow(pairs))) {
+        toCombine <- dupUfids[pairs[i, , drop = TRUE]]
         alles <- alles[alles$ufid2 != toCombine[1], ]
       }
     }
     # In the case where one is the set of another, delete the smaller of the two
     if (any(compMat == 2)) {
-      pairs <- which(compMat == 2, arr.ind = T)
-      for (i in seq_len(nrow(pairs))) {  # i <- 1
-        toCombine <- dupUfids[pairs[i, , drop = T]]
+      pairs <- which(compMat == 2, arr.ind = TRUE)
+      for (i in seq_len(nrow(pairs))) {
+        toCombine <- dupUfids[pairs[i, , drop = TRUE]]
         subAlles <- subset(alles, ufid2 %in% toCombine)
         smaller <- which.min(by(subAlles, subAlles$ufid2, nrow))
         alles <- alles[alles$ufid2 != toCombine[smaller], ]
@@ -238,28 +216,28 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
     # In the case where one is almost a subset of the other, add the missing ids to the larger group
     # and delete the smaller group
     if (any(compMat == 3)) {
-      pairs <- which(compMat == 3, arr.ind = T)
-      for (i in seq_len(nrow(pairs))) {  # i <- 2
-        toCombine <- dupUfids[pairs[i, , drop = T]]  # toCombine <- c(17708, 17710)
+      pairs <- which(compMat == 3, arr.ind = TRUE)
+      for (i in seq_len(nrow(pairs))) {
+        toCombine <- dupUfids[pairs[i, , drop = TRUE]]
         subAlles <- subset(alles, ufid2 %in% toCombine)
         smaller <- which.min(by(subAlles, subAlles$ufid2, nrow))
         larger <- which.max(by(subAlles, subAlles$ufid2, nrow))
         idsToChange <- setdiff(
-          subset(alles, ufid2 == toCombine[smaller], id, drop = T), 
-          subset(alles, ufid2 == toCombine[larger], id, drop = T)
+          subset(alles, ufid2 == toCombine[smaller], id, drop = TRUE),
+          subset(alles, ufid2 == toCombine[larger], id, drop = TRUE)
         )
         stopifnot(length(idsToChange) > 0)
-        alles[alles$id %in% idsToChange, "ufid2"] <- toCombine[larger] 
+        alles[alles$id %in% idsToChange, "ufid2"] <- toCombine[larger]
         alles <- alles[alles$ufid2 != toCombine[smaller], ]
       }
     }
     # for any other cases, remove the duplicated ids from both groups but keep the rest as they
-    # are, the unclassifiable ids will be left as noise...
+    # are, the unclassifiable ids will be left as noise
     if (any(compMat == 4)) {
       stop("case 4 has not been tested yet")
-      pairs <- which(compMat == 4, arr.ind = T)
-      for (i in seq_len(nrow(pairs))) {  # i <- 1
-        toCombine <- dupUfids[pairs[i, , drop = T]]
+      pairs <- which(compMat == 4, arr.ind = TRUE)
+      for (i in seq_len(nrow(pairs))) {
+        toCombine <- dupUfids[pairs[i, , drop = TRUE]]
         subAlles <- subset(alles, ufid2 %in% toCombine)
         subDupIds <- subAlles[duplicated(subAlles$id), "id"]
         alles <- alles[!is.element(alles$id, subDupIds), ]
@@ -267,23 +245,23 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
     }
   }
 
-  if (any(duplicated(alles$id)))
+  if (any(duplicated(alles$id))) {
     stop("Duplicate filter did not work")
+  }
 
   # write all ufids to Ids
-  #u <- 1
   message("Writing ", numUfids, " ufid2 to esdb at ", date())
 
   for (u in unique(alles$ufid2)) {
     message("Updating ", u, " at ", date())
     ntsportal::es_add_ufid2_to_ids(
-      escon, 
-      index, 
-      ufid2_to_add = u, 
-      ids_for_update = alles[alles$ufid2 == u, "id" , drop = T]
+      escon,
+      index,
+      ufid2_to_add = u,
+      ids_for_update = alles[alles$ufid2 == u, "id", drop = T]
     )
   }
-  
+
   message("Completed ufid2 assignment at ", date())
   TRUE
 }

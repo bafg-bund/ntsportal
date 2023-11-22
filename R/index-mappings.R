@@ -3,7 +3,7 @@
 # https://gitlab.lan.bafg.de/nts/ntsportal/-/wikis/Create-index
 
 
-#' Send index creation request for dbas index 
+#' Send index creation request for dbas index
 #'
 #' @param eson elasticsearch connection object created with elastic::connect
 #' @param index Name of the index you wish to create
@@ -12,7 +12,8 @@
 #' @export
 put_dbas_index <- function(eson, index) {
   elastic::index_create(
-    escon, index, body = 
+    escon, index,
+    body =
       '
     {
       "mappings" : {
@@ -29,7 +30,7 @@ put_dbas_index <- function(eson, index) {
           "comp_group" : {
             "type" : "keyword"
           },
-          "conc" : {"type" : "float"},  
+          "conc" : {"type" : "float"},
           "tag": {"type": "keyword"},
           "data_source" : {"type" : "keyword"},
           "sample_source" : {"type" : "keyword"},
@@ -65,8 +66,8 @@ put_dbas_index <- function(eson, index) {
           "instrument": { "type" : "text"},
           "loc" : {"type" : "geo_point"},
           "matrix" : {"type" : "keyword"},
-          "ms1" : {                           
-            "type" : "nested",                
+          "ms1" : {
+            "type" : "nested",
             "properties" : {
               "int" : {
                 "type" : "float"
@@ -117,5 +118,6 @@ put_dbas_index <- function(eson, index) {
         }
       }
     }
-    ')
+    '
+  )
 }
