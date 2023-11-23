@@ -2,7 +2,8 @@
 #' Get all esids from an index
 #' 
 #' The maximum allowed number of return ids is 10000. This function will
-#' hang if there are more than 10000 docs in the index
+#' hang if there are more than 10000 docs in the index. In that case it must
+#' be re-written to page over all results.
 #'  
 #' @param escon elastic connection object created by elastic::connect
 #' @param rfindex index name for rawfiles index
@@ -87,7 +88,8 @@ norm_rf_paths <- function(escon, rfindex) {
 station_from_code <- function(escon, rfindex, filename, stationRegex) {
   # Unique identifier for the station
   stationCode <- stringr::str_match(filename, stationRegex)[,2]
-  
+  #browser(expr = stationCode == 117)
+  #browser()
   # Convert regex for Query DSL
   regex2 <- stationRegex
   if (grepl("^\\^", stationRegex)) {
@@ -101,7 +103,7 @@ station_from_code <- function(escon, rfindex, filename, stationRegex) {
     regex2 <- paste0(regex2, ".*")
   } 
   regex2 <- sub("\\(.*\\)", stationCode, regex2)
-  
+  regex3 <- gsub("\\\\", "\\\\\\\\", regex2)
   # Find which other docs have this identifier
   res <- elastic::Search(escon, rfindex, body = sprintf('
                                                         {
@@ -113,7 +115,7 @@ station_from_code <- function(escon, rfindex, filename, stationRegex) {
     "size": 10000,
     "_source": ["station", "loc", "river", "km", "gkz"]
   }
-  ', regex2))
+  ', regex3))
   
   stopifnot(res$hits$total$relation == "eq")
   if (res$hits$total$value == 0)
@@ -304,6 +306,7 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
     # TODO at the moment only dates can be read. This function must also
     # work for ymd_hms datetimes.
     if (newStart == "filename") {
+      #browser()
       dateString <- stringr::str_match(doc$filename, doc$dbas_date_regex)[,2]
       dateFormat <- doc$dbas_date_format
       if (!is.element(dateFormat, c("ymd", "dmy", "yy", "ym"))) {
