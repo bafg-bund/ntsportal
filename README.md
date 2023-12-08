@@ -37,7 +37,7 @@ sollten wir achten?
 
 
 
-
+'''ruby
 bafg_elastic_connect:
   user: "user"
   pwd: "pwd"
@@ -45,3 +45,4 @@ bafg_elastic_connect:
   port: "port"
   transport_schema: "https"
   authorization: "ApiKey"
+'''
