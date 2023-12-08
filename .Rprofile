@@ -22,3 +22,10 @@ source("./R/_Help/help_server.R")
 source("./R/_Data/data_ui.R")
 source("./R/_Data/data_server.R")
 
+# elastic
+
+source("./src/elastic/elastic_queries/list_all_indices_elastic.R")
+source("./src/elastic/elastic_queries/get_data_from_elastic.R")
+
+
+

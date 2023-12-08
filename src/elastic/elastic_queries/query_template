@@ -1,0 +1,77 @@
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "range": {
+            "start": {
+              "gte": "2011-01-24" ,
+              "lte": "now"
+            }
+          }
+        },
+        {
+          "terms": {
+            "data_source": ["BfG"]
+          }
+        },
+        {
+          "terms": {
+            "station": ["rhein_ko_l"]
+          }
+        },
+        {
+          "terms": {
+            "river": ["Rhein"]
+          }
+        },
+        {
+          "terms": {
+            "matrix": ["water"]
+          }
+        },
+        {
+          "terms": {
+            "tag": ["component_167394941953"]
+          }
+        },
+        {
+          "terms": {
+            "comp_group": ["*"]
+          }
+        },
+        {
+          "terms": {
+            "rtt.method": ["bfg_nts_rp1"]
+          }
+        },
+        {
+          "terms": {
+            "name": ["*"]
+          }
+        },
+        {
+          "terms": {
+            "ufid": ["10942"]
+          }
+        },
+        {
+          "range": {
+            "rtt.rt": {
+              "gte": 2,
+              "lte": 19
+            }
+          }
+        },
+        {
+          "range": {
+            "mz": {
+              "gte": 145,
+              "lte": 900
+            }
+          }
+        }
+      ]
+    }
+  }
+}

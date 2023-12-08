@@ -8,7 +8,7 @@ dashboard_server <- function(id, func_get_dashboard_data){
     output$map <- renderLeaflet({
       leaflet() %>%
         addTiles() %>%
-        setView(lat = 50.34, lng = 7.59, zoom = 10) # zoom orig 6 !!!
+        setView(lat = 50.34, lng = 7.59, zoom = 6) # zoom orig 6 !!!
     })
     
     
@@ -219,7 +219,7 @@ dashboard_server <- function(id, func_get_dashboard_data){
       
       leaflet(summ_data_exp) %>%
         addTiles() %>%
-        setView(lat = 50.34, lng = 7.59, zoom = 8) %>% # zoom orig 6 !!!
+        setView(lat = 50.34, lng = 7.59, zoom = 6) %>% # zoom orig 6 !!!
         addMarkers(~lon,
                    ~lat)
     })

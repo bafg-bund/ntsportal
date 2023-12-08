@@ -1,43 +1,35 @@
 
-ec <- config::get(config = Sys.getenv("R_CONFIG_ACTIVE", "elastic_connect"))
 
-es_conn <- elastic::connect(
-  host = 'elastic.bafg.de',  #'elastic.dmz.bafg.de'
-  port = 443, 
-  user=ec$user,
-  pwd  = ec$pwd,
-  transport_schema = "https"
-)
-
-if (es_conn$ping()$cluster_name != "bfg-elastic-cluster") {
-  stop("Connection to es-db not established")
+x_es_fun_connect_to_elastic <- function() {
+  
+  ec <- config::get(config = Sys.getenv("R_CONFIG_ACTIVE", "bafg_elastic_connect"))
+  es_conn <- connect(transport_schema=ec$transport_schema, 
+                     headers = list(Authorization = ec$authorization),
+                     host=ec$host,
+                     port=ec$port,
+                     ssl_verifypeer = FALSE,
+                     ssl_verifyhost = FALSE)
+  return(es_conn)
+  
 }
 
-rm(config_path)
-rm(ec)
 
-logger::log_info("Connection to ntsp successful")
 
-Search(es_conn, index = "g2_nts_v1_bfg", time_scroll = "5m")
 
-bodyx <- '{
 
-  "query": {
 
-    "term": {
 
-      "name": {
 
-        "value": "Carbamazepine"
 
-      }
 
-    }
 
-  },
+# if (es_conn$ping()$cluster_name != "bfg-elastic-cluster") {
+#   stop("Connection to es-db not established")
+# }
+# 
+# rm(config_path)
+# rm(ec)
+# 
+# logger::log_info("Connection to ntsp successful")
 
-  "size": 1,
 
-  "_source": ["name", "cas"]
-
-}'

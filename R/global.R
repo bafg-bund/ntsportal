@@ -96,7 +96,7 @@ test_data <- test_data %>% unnest(X_source.eic)
 #TO DO na handling, in df
 
 func_get_dashboard_data <- function(){
-  dash_data <- as.data.table(fromJSON("./Data/cbz_cand.json")) %>% 
+  dash_data <- x_es_fun_get_data_from_elastic(index_list = unlist(x_es_fun_list_indices()$index), size = 100) %>% #as.data.table(fromJSON("./Data/cbz_cand.json")) %>% 
     select( c(Name=X_source.name, # if available
               Formula=X_source.formula, 
               CAS_RN=X_source.cas, 
@@ -105,7 +105,8 @@ func_get_dashboard_data <- function(){
               X_source.rtt, # user needs to select rtt.method with Chrom. Method filter
               Area=X_source.area, 
               Chrom_Meth=X_source.chrom_method,
-              Ufid=X_source.ufid, # rm NA's , if available
+              #Ufid=X_source.ufid, # rm NA's , if available
+              Ufid=X_source.river,
               mz=X_source.mz, # average mz
               Classification=X_source.comp_group, # rm NA's, as comma sep list
               Area_normalized=X_source.area_normalized,
@@ -132,29 +133,31 @@ func_get_dashboard_data <- function(){
  }
  
  
- func_get_parameters <- function(){
-   temp_data <- as.data.table(fromJSON("./Data/cbz_cand.json"))
-   temp_data <- temp_data %>% unnest(X_source.rtt)
-   param_data <- list()
-   param_data$station <- list(na.omit(unique(temp_data$X_source.station)))
-   param_data$river <- list(na.omit(unique(temp_data$X_source.river)))
-   param_data$matrix <- list(na.omit(unique(temp_data$X_source.matrix)))
-   param_data$tag <- list(na.omit(unique(temp_data$X_source.tag)))
-   param_data$comp_group <- list(na.omit(unique(temp_data$X_source.comp_group)))
-   param_data$rtt_method <- list(na.omit(unique(temp_data$method)))
-   param_data$name <- list(na.omit(unique(temp_data$X_source.name)))
-   param_data$ufid <- list(na.omit(unique(temp_data$X_source.ufid)))
-   
-   param_data$rt_min_max <- c(min(temp_data$rt), max(temp_data$rt))
-   param_data$mz_min_max <- c(min(temp_data$X_source.mz), max(temp_data$X_source.mz))
-   
-   rm(temp_data)
-   return(param_data)
- }
+ # func_get_parameters <- function(){
+ #   temp_data <- x_es_fun_get_data_from_elastic(index_list = unlist(x_es_fun_list_indices()$index)) #as.data.table(fromJSON("./Data/cbz_cand.json"))
+ #   temp_data <- temp_data %>% unnest(X_source.rtt)
+ #   param_data <- list()
+ #   param_data$station <- list(na.omit(unique(temp_data$X_source.station)))
+ #   param_data$river <- list(na.omit(unique(temp_data$X_source.river)))
+ #   param_data$matrix <- list(na.omit(unique(temp_data$X_source.matrix)))
+ #   param_data$tag <- list(na.omit(unique(temp_data$X_source.tag)))
+ #   param_data$comp_group <- list(na.omit(unique(temp_data$X_source.comp_group)))
+ #   param_data$rtt_method <- list(na.omit(unique(temp_data$method)))
+ #   param_data$name <- list(na.omit(unique(temp_data$X_source.name)))
+ #   param_data$ufid <- list(na.omit(unique(temp_data$X_source.ufid)))
+ #   
+ #   param_data$rt_min_max <- c(min(temp_data$rt), max(temp_data$rt))
+ #   param_data$mz_min_max <- c(min(temp_data$X_source.mz), max(temp_data$X_source.mz))
+ #   
+ #   rm(temp_data)
+ #   return(param_data)
+ # }
 
  
 ##-------------------------------------data data
  
+ 
+ #x_es_fun_get_data_from_elastic(index_list = unlist(x_es_fun_list_indices()$index)) %>% #
  func_get_data_data <- function(){
    data_data <- as.data.table(fromJSON("./Data/cbz_cand.json")) %>% 
      select(!c("X_source.ms2","X_source.eic", "X_source.ms1")) %>%

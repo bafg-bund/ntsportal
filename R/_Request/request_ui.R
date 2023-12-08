@@ -68,7 +68,7 @@ request_ui <- function(id, df){
       )),
     
     column(3,
-           verbatimTextOutput(NS(id, "json_output"))
+          # verbatimTextOutput(NS(id, "json_output"))
            )
     )
   )}

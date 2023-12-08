@@ -34,3 +34,14 @@ sollten wir achten?
   ├── .Rprofile
 
   └── .gitignore
+
+
+
+
+bafg_elastic_connect:
+  user: "user"
+  pwd: "pwd"
+  host: "host"
+  port: "port"
+  transport_schema: "https"
+  authorization: "ApiKey"

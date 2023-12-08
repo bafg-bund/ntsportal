@@ -93,12 +93,23 @@ server <- function(input, output, session, clientData) {
 
   
   
-  request_server("get_data", test_data, func_get_index(), func_get_parameters())
+  request_server("get_data", 
+                 test_data, 
+                 #x_es_fun_list_indices(),
+                 x_es_fun_get_data_from_elastic(),
+                 func_get_parameters()) #func_get_index(),
   output$request_stuff <- renderUI({
     req(credentials()$user_auth)
   request_ui("get_data", test_data)  
   })
 
+  
+  es_glob_df <- func_get_data_data()
+  
+  observe({
+    print("server change df")
+    print(es_glob_df)
+  })
   
 
 #--------------------------------------Start Dashboard-Tab
@@ -129,10 +140,10 @@ server <- function(input, output, session, clientData) {
   
   
 
-  data_server("create_data", func_get_data_data())
+  data_server("create_data", func_get_data_data(), es_glob_df)
   output$data_stuff <- renderUI({
     req(credentials()$user_auth)
-    data_ui("create_data", func_get_data_data())
+    data_ui("create_data", func_get_data_data(), es_glob_df)
   })
   
   
