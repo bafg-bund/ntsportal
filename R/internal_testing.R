@@ -7,11 +7,12 @@
 #'
 #' @param escon 
 #' @param testIndex 
+#' @param ufidType Either "ufid" or "ufid2"
 #'
 #' @return dataframe with the scores for each feature
 #' @export
 #'
-silhouette_score <- function(escon, testIndex) {
+silhouette_score <- function(escon, testIndex, ufidType = "ufid") {
   # Section to define Functions ####
 
   fast_mean_distance <- function(x){
@@ -130,21 +131,21 @@ silhouette_score <- function(escon, testIndex) {
    "search_after": [%i],
     "query" : {
       "exists": {
-        "field": "ufid"
+        "field": "%s"
       }
     },
     "sort": [
       {
-        "ufid": {
+        "%s": {
           "order": "asc"
         }
       }
     ],
-    "_source": ["mz", "rt", "ufid"],
+    "_source": ["mz", "rt_clustering", "%s"],
     "size": 10000
   }
 
-  ', startAfterUfid)
+  ', startAfterUfid, ufidType, ufidType, ufidType)
     )
     hitsLeft <- length(Testresult$hits$hits)
     if (hitsLeft == 0)
@@ -157,12 +158,12 @@ silhouette_score <- function(escon, testIndex) {
     rt <- c()
     ID <- c()
     for(k in 1:length(Testresult$hits$hits)) {
-      mz[k] <- Testresult$hits$hits[[k]]$`_source`$mz
-      rt[k] <- Testresult$hits$hits[[k]]$`_source`$rt
-      if (is.null(Testresult$hits$hits[[k]]$`_source`$ufid)) {
+      mz[k] <- Testresult$hits$hits[[k]][["_source"]]$mz
+      rt[k] <- Testresult$hits$hits[[k]][["_source"]]$rt_clustering
+      if (is.null(Testresult$hits$hits[[k]][["_source"]][[ufidType]])) {
         ID[k] <- NA
       } else {
-        ID[k] <- Testresult$hits$hits[[k]]$`_source`$ufid  
+        ID[k] <- Testresult$hits$hits[[k]][["_source"]][[ufidType]]  
       }
     }
     tempdf <- data.frame(mz=mz,rt=rt,ID=ID)
@@ -683,7 +684,9 @@ es_test_fpfn <- function(escon, index, includeUfid2 = FALSE, includeUcid = FALSE
 
     b <- res$aggregations$files$buckets
     # there should be one feature for each file, all others are fp
-    sum(vapply(b, function(x) x$doc_count, numeric(1)) - 1)
+    tot <- sum(vapply(b, function(x) x$doc_count, numeric(1)) - 1)
+    #browser(expr = tot > 0 && ufidType == "ufid2")
+    tot
   }
   logger::log_info("Computing duplicated ufid assignments to one sample")
   numberMultiAssignUfid <- sum(
@@ -814,45 +817,45 @@ es_test_fpfn <- function(escon, index, includeUfid2 = FALSE, includeUcid = FALSE
 #' Produce plots showing mz, rt stats of ufids in an index
 #'
 #' @param escon 
-#' @param testIndex 
+#' @param testIndex
+#' @param ufidType Either "ufid" or "ufid2"
 #'
 #' @return
 #' @export
 #' @import ggplot2
-mz_rt_stats_plots <- function(escon, testIndex, hideTitleX = FALSE) {
+mz_rt_stats_plots <- function(escon, testIndex, hideTitleX = FALSE, ufidType = "ufid") {
   
   # Collect aggregation data
-  res <- elastic::Search(escon, testIndex, body = '
-{
-  "query": {
-    "exists": {
-      "field": "ufid"
-    }
-  },
-  "size": 0,
-  "aggs": {
-    "ufids": {
-      "terms": {
-        "field": "ufid",
-        "size": 10000
-      },
-      "aggs": {
-        "mz_stats": {
-          "extended_stats": {
-            "field": "mz"
-          }
+  res <- elastic::Search(escon, testIndex, body = sprintf('
+  {
+    "query": {
+      "exists": {
+        "field": "%s"
+      }
+    },
+    "size": 0,
+    "aggs": {
+      "ufids": {
+        "terms": {
+          "field": "%s",
+          "size": 100000
         },
-        "rt_stats": {
-          "extended_stats": {
-            "field": "rt_clustering"
+        "aggs": {
+          "mz_stats": {
+            "extended_stats": {
+              "field": "mz"
+            }
+          },
+          "rt_stats": {
+            "extended_stats": {
+              "field": "rt_clustering"
+            }
           }
         }
       }
     }
   }
-}
-                ')
-  
+  ', ufidType, ufidType))
   
   ufs <- res$aggregations$ufids$buckets
   stds <- data.frame(
@@ -895,7 +898,7 @@ mz_rt_stats_plots <- function(escon, testIndex, hideTitleX = FALSE) {
       panel.grid.major = element_blank(), 
       panel.grid.minor = element_blank()
     )
-  df <- silhouette_score(escon, testIndex)
+  df <- silhouette_score(escon, testIndex, ufidType = ufidType)
   
   gt <- round(100*nrow(subset(df, QScore > .5))/nrow(df))
   

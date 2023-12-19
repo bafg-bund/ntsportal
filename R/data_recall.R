@@ -265,3 +265,87 @@ get_time_series <- function(
 
   aligTable
 }
+
+
+#' Get entire time series for one compound at one station
+#'
+#' Function should be expanded to allow user to choose date range and get data
+#' from more than one compound, more than one station.
+#'
+#' @param escon 
+#' @param index 
+#' @param compound 
+#' @param station 
+#' @param pol 
+#' @param matrix 
+#' @param calendarInterval 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+get_time_series_known <- function(escon, index = "g2_dbas_bfg", 
+                         compound = "Carbamazepine", 
+                         station = "rhein_ko_l", 
+                         pol = "pos", matrix = "water", 
+                         calendarInterval = "day") {
+  
+  
+  result <- elastic::Search(escon, index = index, body = sprintf('
+  {
+    "size": 0,
+    "query": {
+      "bool": {
+        "filter": [
+          {
+            "term": {
+              "name": "%s"
+            }
+          },
+          {
+            "term": {
+              "station": "%s"
+            }
+          },
+          {
+            "term": {
+              "pol": "%s"
+            }
+          },
+          {
+            "term": {
+              "matrix": "%s"
+            }
+          }
+        ]
+      }
+    },
+    "aggs": {
+      "dates": {
+        "date_histogram": {
+          "field": "start",
+          "calendar_interval": "%s"
+        },
+        "aggs": {
+          "avg_norm_a": {
+            "avg": {
+              "field": "norm_a"
+            }
+          }
+        }
+      }
+    }
+  }
+  ', compound, station, pol, matrix, calendarInterval))
+  
+  dates <- vapply(result$aggregations$dates$buckets, "[[", i = "key_as_string", character(1))
+  areas <- vapply(result$aggregations$dates$buckets, function(x) {
+    temp <- x$avg_norm_a$value
+    if (is.null(temp)) NA else temp
+  }, numeric(1))
+  dates <- lubridate::ymd_hms(dates)
+  data.frame(start = dates, norm_a = areas, stringsAsFactors = F)
+}
+
+
+

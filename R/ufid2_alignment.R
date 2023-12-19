@@ -7,14 +7,22 @@
 #' @param index default is "g2_nts*"
 #' @param rtTol retentiontime tolerance in minutes - default is 0.3min
 #' @param mzTolmDa mass tolerance in mDa - default is 5mDa
-#' @param minPoints
+#' @param minPoints minimum number of points to build one cluster
+#' @param mzRange For testing purposes, restrict clustering by m/z, numeric length 2 lower and upper limit, default = c(0, 1e6)
+#' @param rtRange For testing purposes, restrict clustering by rt, numeric length 2 lower and upper limit, default = c(0, 100)
+#' @param numCores Number of cores for parallelization, default 10
 #'
 #' @return TRUE
 #' @export
-#'
-ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5, minPoints = 5) {
-  message("Starting ufid2 assignment at ", date())
-  message("compiling cpp function")
+#' @import logger
+#' @import future.apply
+ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
+                            minPoints = 5, mzRange = c(0, 1e6), rtRange = c(0, 100), numCores = 10) {
+
+  stopifnot(is.numeric(mzRange), length(mzRange) == 2)
+  stopifnot(is.numeric(rtRange), length(mzRange) == 2)
+  
+  log_info("Compiling cpp function")
   mzrtpol_dist_FuncPtr <- RcppXPtrUtils::cppXPtr(
     sprintf(
       "
@@ -67,9 +75,9 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
     depends = c("RcppArmadillo")
   )
 
-  message("done.")
+  log_info("Done.")
 
-  mzPosition <- 0
+  mzPosition <- mzRange[1]
   numUfids <- 0
 
   alles <- data.frame(id = character(), ufid2 = numeric())
@@ -77,7 +85,7 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
   repeat {
     # if (numUfids > 500)
     #   break
-    message("We are at mz ", mzPosition, " at ", date())
+    log_info("Current mz position: {mzPosition}")
 
     res <- elastic::Search(escon, index, body = sprintf('{
       "search_after": [%.4f],
@@ -100,23 +108,48 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
               "exists": {
                 "field": "rt"
               }
+            },
+            {
+              "exists": {
+                "field": "rt_clustering"
+              }
+            },
+            {
+              "range": {
+                "mz": {
+                  "gte": %f,
+                  "lte": %f
+                }
+              }
+            },
+            {
+              "range": {
+                "rt": {
+                  "gte": %f,
+                  "lte": %f
+                }
+              }
             }
           ]
         }
       },
       "size": 10000,
-      "_source": ["mz", "rt", "filename", "pol"]
-      }', mzPosition))
+      "_source": ["mz", "rt", "filename", "pol", "rt_clustering"]
+      }', mzPosition, mzRange[1], mzRange[2], rtRange[1], rtRange[2]))
     numReturned <- length(res$hits$hits)
-    sameSort <- max(sapply(res$hits$hits, function(x) x[["sort"]][[1]]))
-    # last hit gives new mz position
+    #sameSort <- max(sapply(res$hits$hits, function(x) x[["sort"]][[1]]))
+    # Last hit gives new mz position
     newMzPosition <- res$hits$hits[[length(res$hits$hits)]]$sort[[1]] - 2 * mzTolmDa / 1000
     if (numReturned <= minPoints || mzPosition == newMzPosition) {
-      message("All features were analyzed, no further clusters found")
-      message("completed clustering and found ", numUfids, " ufid2s")
+      log_info("All features were analyzed, no further clusters found")
+      log_info("Completed clustering and found {numUfids} ufid2s")
       break
     }
-
+    #browser()
+    ids <- sapply(res$hits$hits, function(x) x[["_id"]])
+    #browser(expr = "Mk67d4UBGz9h5Cn9wRl7" %in% ids && "Hk67d4UBGz9h5Cn9xR4U" %in% ids)
+    #which("Mk67d4UBGz9h5Cn9wRl7" == ids)
+    #which("Hk67d4UBGz9h5Cn9xR4U" == ids)
     # convert filenames to numeric hash
     filenames <- sapply(res$hits$hits, function(x) x[["_source"]]$filename)
     filenames <- sapply(filenames, digest::digest, algo = "xxhash32")
@@ -132,23 +165,25 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
 
     m <- cbind(
       sapply(res$hits$hits, function(x) x[["_source"]]$mz),
-      sapply(res$hits$hits, function(x) x[["_source"]]$rt),
+      sapply(res$hits$hits, function(x) x[["_source"]]$rt_clustering),
       unname(filenames),
       unname(pols)
     )
-
-    message("Clustering...")
+    #browser()
+    log_info("Clustering...")
 
     # cluster these by mz-rt using parallel distance function
-    dist1 <- parallelDist::parDist(m, method = "custom", func = mzrtpol_dist_FuncPtr, threads = 6)
-
-    dbscanRes <- dbscan::dbscan(dist1, 0.1, minPoints)
-
-    newcluster <- dbscanRes$cluster
+    dist1 <- parallelDist::parDist(m, method = "custom", func = mzrtpol_dist_FuncPtr, threads = numCores)
+    #usedist::dist_get(dist1, 2068, 3414)
+    #dbscanRes <- dbscan::dbscan(dist1, 0.1, minPoints)
+    #newcluster <- dbscanRes$cluster
+    hc <- hclust(dist1, method = "complete")
+    newcluster <- cutree(hc, h = 0)
+    newcluster[newcluster %in% which(table(newcluster) < minPoints)] <- 0
     newcluster[newcluster != 0] <- newcluster[newcluster != 0] + numUfids
 
     ergebnis <- data.frame(id = ids, ufid2 = newcluster)
-
+    # subset(ergebnis, id %in% c("Mk67d4UBGz9h5Cn9wRl7", "Hk67d4UBGz9h5Cn9xR4U"))
     alles <- rbind(alles, ergebnis)
 
     numUfids <- max(newcluster)
@@ -187,15 +222,23 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
   }
 
   if (any(duplicated(alles$id))) {
-    message("Combining duplicates at ", date())
+    logger::log_info("Combining duplicates")
     dupIds <- alles[duplicated(alles$id), "id"]
-    dupUfids <- parallel::mclapply(dupIds, function(x) alles[alles$id == x, "ufid2"], mc.cores = 10)
+    dupUfids <- parallel::mclapply(dupIds, function(x) alles[alles$id == x, "ufid2"], mc.cores = numCores)
     dupUfids <- unique(do.call("c", dupUfids))
-
-    compMat <- as.matrix(ntsportal::dist_make_parallel(as.matrix(dupUfids), compare_ufids, numCores = 10))
+    plan(multicore, workers = numCores)
+    options(future.globals.maxSize = 600e6)
+    compMat <- as.matrix(usedist::dist_make(as.matrix(dupUfids), compare_ufids))
+    plan(sequential)
 
     compMat[lower.tri(compMat)] <- 0
-    # in the case where they are exactly the same, delete one of them
+    log_info("Completed combining duplicates")
+    log_info("Current memory usage {round(pryr::mem_used()/1e6)} MB")
+    
+    saveRDS(compMat, "compMat.RDS")
+    saveRDS(dupUfids, "dupUfids.RDS")
+    saveRDS(alles, "alles.RDS")
+    # In the case where they are exactly the same, delete one of them
     if (any(compMat == 1)) {
       pairs <- which(compMat == 1, arr.ind = TRUE)
       for (i in seq_len(nrow(pairs))) {
@@ -220,21 +263,22 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
       for (i in seq_len(nrow(pairs))) {
         toCombine <- dupUfids[pairs[i, , drop = TRUE]]
         subAlles <- subset(alles, ufid2 %in% toCombine)
-        smaller <- which.min(by(subAlles, subAlles$ufid2, nrow))
-        larger <- which.max(by(subAlles, subAlles$ufid2, nrow))
+        if (nrow(subAlles) == 0 || length(unique(subAlles$ufid2)) == 1)
+          next
+        smaller <- as.numeric(names(which.min(by(subAlles, subAlles$ufid2, nrow))))
+        larger <- toCombine[toCombine != smaller]
         idsToChange <- setdiff(
-          subset(alles, ufid2 == toCombine[smaller], id, drop = TRUE),
-          subset(alles, ufid2 == toCombine[larger], id, drop = TRUE)
+          subset(alles, ufid2 == larger, id, drop = TRUE),
+          subset(alles, ufid2 == smaller, id, drop = TRUE)
         )
         stopifnot(length(idsToChange) > 0)
-        alles[alles$id %in% idsToChange, "ufid2"] <- toCombine[larger]
-        alles <- alles[alles$ufid2 != toCombine[smaller], ]
+        alles[alles$id %in% idsToChange, "ufid2"] <- larger
+        alles <- alles[alles$ufid2 != smaller, ]
       }
     }
-    # for any other cases, remove the duplicated ids from both groups but keep the rest as they
+    # For any other cases, remove the duplicated ids from both groups but keep the rest as they
     # are, the unclassifiable ids will be left as noise
     if (any(compMat == 4)) {
-      stop("case 4 has not been tested yet")
       pairs <- which(compMat == 4, arr.ind = TRUE)
       for (i in seq_len(nrow(pairs))) {
         toCombine <- dupUfids[pairs[i, , drop = TRUE]]
@@ -244,24 +288,65 @@ ufid2_alignment <- function(escon, index = "g2_nts*", rtTol = 0.3, mzTolmDa = 5,
       }
     }
   }
-
+  
+  if (any(duplicated(alles$id))) {
+    alles <- alles[!duplicated(alles),]  
+  }
+  
   if (any(duplicated(alles$id))) {
     stop("Duplicate filter did not work")
   }
-
+  
   # write all ufids to Ids
-  message("Writing ", numUfids, " ufid2 to esdb at ", date())
-
+  log_info("Writing {numUfids} ufid2 to esdb")
+  ufidErrors <- numeric()
   for (u in unique(alles$ufid2)) {
-    message("Updating ", u, " at ", date())
-    ntsportal::es_add_ufid2_to_ids(
-      escon,
-      index,
-      ufid2_to_add = u,
-      ids_for_update = alles[alles$ufid2 == u, "id", drop = T]
+    if (u %% 100 == 0)
+      logger::log_info("Currently at ufid2 {u}")
+    ids <- alles[alles$ufid2 == u, "id", drop = T]
+    if (length(ids) == 0)
+      next
+    tryCatch(
+      ntsportal::es_add_ufid_to_ids(
+        escon,
+        index,
+        ufid_to_add = u,
+        ids_for_update = ids,
+        ufidType = "ufid2"
+      ),
+      error = function(cnd) {
+        logger::log_error("Error adding ufid2 {u}: {conditionMessage(cnd)}")
+        # Add this ufid to list of ufids to repeat.
+        ufidErrors <<- c(ufidErrors, u)
+        # Wait before continuing
+        Sys.sleep(10)
+      }
     )
   }
+  
+  if (length(ufidErrors) > 0) {
+    logger::log_info("There were {length(ufidErrors)} errors, trying these again")
+    for (u in ufidErrors) {
+      ids <- alles[alles$ufid2 == u, "id", drop = T]
+      if (length(ids) == 0)
+        next
+      tryCatch(
+        ntsportal::es_add_ufid_to_ids(
+          escon,
+          index,
+          ufid_to_add = u,
+          ids_for_update = ids,
+          ufidType = "ufid2"
+        ),
+        error = function(cnd) {
+          logger::log_error("Error in second attempt at adding ufid2 {u}: {conditionMessage(cnd)}")
+          # Just skip it then, wait before continuing
+          Sys.sleep(10)
+        }
+      )
+    }
+  }
 
-  message("Completed ufid2 assignment at ", date())
+  logger::log_info("Completed ufid2 assignment")
   TRUE
 }

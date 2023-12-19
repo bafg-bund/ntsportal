@@ -322,13 +322,16 @@ es_remove_ufid <- function(escon, index, ufidToDelete) {
 #' @param index Elasticsearch index name
 #' @param ufid_to_add integer length 1 ufid to add
 #' @param ids_for_update character of document IDs, max. 65536
+#' @param ufidType either ufid or ufid2
 #'
 #' @return TRUE if update successful
 #' @export
-es_add_ufid_to_ids <- function(escon, index, ufid_to_add, ids_for_update) {
+es_add_ufid_to_ids <- function(escon, index, ufid_to_add, ids_for_update,
+                               ufidType = "ufid", verbose = FALSE) {
   if (length(ids_for_update) > 65536)
     stop("exceeded maximum allowed ids for ufid ", ufid_to_add)
-
+  
+  stopifnot(ufidType %in% c("ufid", "ufid2"))
   id_search_string <- paste(shQuote(ids_for_update, type = "cmd"), collapse = ", ")
   
   res_update <- elastic::docs_update_by_query(
@@ -342,7 +345,7 @@ es_add_ufid_to_ids <- function(escon, index, ufid_to_add, ids_for_update) {
           }
         },
         "script": {
-          "source" : "ctx._source.ufid = params.thisUfid",
+          "source" : "ctx._source.%s = params.thisUfid",
           "params" : {
             "thisUfid" : %i
           }
@@ -350,6 +353,7 @@ es_add_ufid_to_ids <- function(escon, index, ufid_to_add, ids_for_update) {
       }
       ', 
       id_search_string, 
+      ufidType,
       ufid_to_add
     )
   )
@@ -357,7 +361,8 @@ es_add_ufid_to_ids <- function(escon, index, ufid_to_add, ids_for_update) {
   if (is.null(res_update))
     stop("Ufid update failed for ufid ", ufid_to_add)
   if (length(ids_for_update) == res_update$updated) {
-    logger::log_info("Successful ntsp update of ufid {ufid_to_add}")
+    if (verbose)
+      logger::log_info("Successful ntsp update of ufid {ufid_to_add}")
   } else {
     stop("Ufid update failed for ufid ", ufid_to_add)
   }
@@ -382,8 +387,8 @@ es_add_ufid2_to_ids <- function(escon, index, ufid2_to_add, ids_for_update) {
   res_update <- elastic::docs_update_by_query(escon, index, refresh = "true", body = sprintf('
       {
         "query": {
-          "terms": {
-            "_id": [%s]
+          "ids": {
+            "values": [%s]
           }
         },
         "script": {
