@@ -35,11 +35,10 @@ create_dbas_index <- function(escon, aliasName, rfIndex) {
   
   # Name of index for this alias
   indNew <- dbas_index_from_alias(aliasName)
-  log_info("Creating new index {indNew}")
   
   resCrea <- put_dbas_index(escon, indNew)
   if (resCrea$acknowledged)
-    log_info("Acknowledged index creation") else stop("Index creation failed")
+    logger::log_info("Acknowledged index creation {indNew}") else stop("Index creation {indNew} failed")
   
   # Add new index name to rfIndex
   resNameChange <- elastic::docs_update_by_query(
@@ -64,8 +63,11 @@ create_dbas_index <- function(escon, aliasName, rfIndex) {
     ', aliasName, indNew)
   )
   
-  if (length(resNameChange$failures) == 0)
-    log_info("Successful index name change") else stop("Unable to change index name")
+  if (resCrea$acknowledged && length(resNameChange$failures) == 0) {
+    logger::log_info("Added index name to msrawfiles")
+  } else {
+    stop("Adding index name {indNew} to msrawfiles failed")
+  }
   
   invisible(indNew)
 }
@@ -77,19 +79,32 @@ create_dbas_index <- function(escon, aliasName, rfIndex) {
 #'
 #' @param escon elastic connection object created by elastic::connect
 #' @param indexName 
-#' @param aliasName 
+#' @param aliasName
+#' @param closeAfter logical, should the previous index, to which the alias 
+#' linked to prior to the change, be closed? 
 #'
 #' @return
 #' @export
 #'
-es_move_alias <- function(escon, indexName, aliasName) {
+es_move_alias <- function(escon, indexName, aliasName, closeAfter = FALSE) {
   aliases <- elastic::cat_aliases(escon, index = aliasName, parse = T)
   # Delete previous alias
   if (!is.null(aliases)) {
-    res1 <- elastic::alias_delete(escon, index = aliases[1, 2], alias = aliases[1, 1]) 
+    res1 <- elastic::alias_delete(escon, index = aliases[1, 2], alias = aliases[1, 1])
+    previousIndex <- aliases[1, 2]
   }
   res <- elastic::alias_create(escon, indexName, aliasName)
-  res$acknowledged
+  ok <- res$acknowledged
+  if (ok) {
+    logger::log_error("Success creating alias {aliasName} on index {indexName}")
+  } else {
+    logger::log_error("Error creating alias {aliasName} on index {indexName}")
+  }
+  if (ok && exists("previousIndex") && length(previousIndex) == 1 && closeAfter) {
+    elastic::index_close(escon, previousIndex)
+    logger::log_info("Closed index {previousIndex}")
+  }
+  invisible(res$acknowledged)
 }
 
 #' Remove the old dbas index alias and create a new one
@@ -105,12 +120,14 @@ es_move_alias <- function(escon, indexName, aliasName) {
 #' @param aliasName 
 #'
 #' @return
-#' @export
 #'
 move_dbas_alias <- function(escon, indexName, aliasName) {
+  stop("deprecated 2024-01-02")
+  
   #browser(expr = grepl("hessen", aliasName))
   # name of index currently at alias
-  aliasName2 <- sub("^(g2_dbas)", "\\1_v4", aliasName)
+  #aliasName2 <- sub("^(g2_dbas)", "\\1_v4", aliasName)
+  
   
   aliases <- elastic::cat_aliases(escon, index = aliasName, parse = T)
   if (is.null(aliases)) {
@@ -121,20 +138,29 @@ move_dbas_alias <- function(escon, indexName, aliasName) {
     res1 <- elastic::alias_delete(escon, index = aliases[1, 2], alias = aliases[1, 1]) 
   }
   
-  aliases2 <- elastic::cat_aliases(escon, index = aliasName2, parse = T)
-  if (is.null(aliases2)) {
-    aliases2 <- data.frame(aliasName2, indexName)
-  } else {
-    res2 <- elastic::alias_delete(escon, index = aliases2[1, 2], alias = aliases2[1, 1])  
-  }
+  # aliases2 <- elastic::cat_aliases(escon, index = aliasName2, parse = T)
+  # if (is.null(aliases2)) {
+  #   aliases2 <- data.frame(aliasName2, indexName)
+  # } else {
+  #   res2 <- elastic::alias_delete(escon, index = aliases2[1, 2], alias = aliases2[1, 1])  
+  # }
   
   # create new alias
   res3 <- elastic::alias_create(escon, indexName, aliasName)
-  res4 <- elastic::alias_create(escon, indexName, aliasName2)
+  logger::log_info("Created alias {aliasName} on index {indexName}")
+  #res4 <- elastic::alias_create(escon, indexName, aliasName2)
   
-  ok <- all(vapply(list(res3, res4), "[[", i = "acknowledged", logical(1)))
-  if (ok && exists("previousIndex") && length(previousIndex) == 1)
+  #ok <- all(vapply(list(res3, res4), "[[", i = "acknowledged", logical(1)))
+  ok <- res3$acknowledged
+  
+  if (!ok) {
+    logger::log_error("Error in creating alias {aliasName} on index {indexName}")
+  }
+  
+  if (ok && exists("previousIndex") && length(previousIndex) == 1) {
     elastic::index_close(escon, previousIndex)
+    logger::log_info("Closed index {previousIndex}")
+  }
   
   ok
 }

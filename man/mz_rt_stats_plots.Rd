@@ -4,12 +4,12 @@
 \alias{mz_rt_stats_plots}
 \title{Produce plots showing mz, rt stats of ufids in an index}
 \usage{
-mz_rt_stats_plots(escon, testIndex, hideTitleX = FALSE)
+mz_rt_stats_plots(escon, testIndex, hideTitleX = FALSE, ufidType = "ufid")
 }
 \arguments{
 \item{escon}{}
 
-\item{testIndex}{}
+\item{ufidType}{Either "ufid" or "ufid2"}
 }
 \description{
 Produce plots showing mz, rt stats of ufids in an index

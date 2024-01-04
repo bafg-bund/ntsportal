@@ -24,7 +24,7 @@ TRUE if the function ended successfully
 }
 \description{
 This is the main function for the clustering stage of NTSP alignment.
-New features, which do not yet have a ufid entry, are clustered based on 
+New features, which do not yet have a ufid entry, are clustered based on
 their similarity (within tolerances, set in the configuration file) in the
 m/z, tR and MS2 domains. New ufids are added both to NTSP and ufid-library.
 }

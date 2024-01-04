@@ -9,19 +9,26 @@ ufid2_alignment(
   index = "g2_nts*",
   rtTol = 0.3,
   mzTolmDa = 5,
-  minPoints = 5
+  minPoints = 5,
+  mzRange = c(0, 1e+06),
+  rtRange = c(0, 100),
+  numCores = 10
 )
 }
 \arguments{
-\item{escon}{}
+\item{index}{default is "g2_nts*"}
 
-\item{index}{}
+\item{rtTol}{retentiontime tolerance in minutes - default is 0.3min}
 
-\item{rtTol}{}
+\item{mzTolmDa}{mass tolerance in mDa - default is 5mDa}
 
-\item{mzTolmDa}{}
+\item{minPoints}{minimum number of points to build one cluster}
 
-\item{minPoints}{}
+\item{mzRange}{For testing purposes, restrict clustering by m/z, numeric length 2 lower and upper limit, default = c(0, 1e6)}
+
+\item{rtRange}{For testing purposes, restrict clustering by rt, numeric length 2 lower and upper limit, default = c(0, 100)}
+
+\item{numCores}{Number of cores for parallelization, default 10}
 }
 \value{
 TRUE

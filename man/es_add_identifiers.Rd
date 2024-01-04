@@ -7,10 +7,6 @@
 es_add_identifiers(escon, sdb, index)
 }
 \arguments{
-\item{escon}{}
-
-\item{sdb}{}
-
 \item{index}{}
 }
 \description{

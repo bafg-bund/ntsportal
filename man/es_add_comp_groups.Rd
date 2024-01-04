@@ -7,8 +7,6 @@
 es_add_comp_groups(escon, sdb, index)
 }
 \arguments{
-\item{escon}{}
-
 \item{sdb}{connection to spec lib}
 
 \item{index}{}

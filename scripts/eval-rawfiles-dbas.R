@@ -12,7 +12,7 @@
 # tail -f /scratch/nts/logs/$(date +%y%m%d)_dbas_eval.log
 # see crontab for processing
 
-VERSION <- "2023-11-16"
+VERSION <- "2024-01-02"
 
 # Variables ####
 RFINDEX <- "g2_msrawfiles"
@@ -30,7 +30,7 @@ library(logger)
 library(ntsportal)
 
 startTime <- lubridate::now()
-setwd("~/projects/ntsautoeval/msrawfiles-db/")
+#setwd("~/projects/ntsautoeval/msrawfiles-db/")
 
 # Create escon variable
 source("~Jewell/connect-ntsp.R")
@@ -52,7 +52,7 @@ resp2 <- elastic::Search(escon, RFINDEX, body = '
     "csl_loc": {
       "terms": {
         "field": "dbas_spectral_library",
-        "size": 10
+        "size": 100
       }
     }
   },
@@ -93,8 +93,6 @@ istp <- sapply(buc, function(x) x$key)
 stopifnot(all(file.exists(istp)), all(grepl("\\.csv$", istp)))
 
 # check db integrity
-
-
 # check that these fields exist in all docs
 stopifnot(
   check_field(escon, RFINDEX, "dbas_is_table"),
@@ -145,19 +143,15 @@ stopifnot(checkLoc$hits$total$value == 0)
 
 
 # Collect rawfiles ####
-resp <- elastic::Search(escon, RFINDEX, body = 
-'
+resp <- es_search_paged(escon, RFINDEX, searchBody = '
   {
     "query": {
       "match_all": {}
     },
-  "size": 10000,
   "_source": ["path"]
   }
-'
-)
-# if there are more than 10000, you need to page over the results
-stopifnot(resp$hits$total$relation == "eq")
+', sort = "path:asc")
+
 
 hits <- resp$hits$hits
 allFls <- data.frame(
@@ -190,6 +184,8 @@ if (any(duplicated(allFls$base))) {
     stop("There are duplicated filenames in the db")  
   }
 }
+
+
 
 # Create batches for processing
 # split list by matrix, station, pol, and then by month in case of daily sampling
@@ -259,7 +255,8 @@ resAlia <- elastic::Search(escon, RFINDEX, body = '
     "aggs": {
       "aliases": {
         "terms": {
-          "field": "dbas_alias_name"
+          "field": "dbas_alias_name",
+          "size": 200
         }
       }
     },
@@ -267,8 +264,9 @@ resAlia <- elastic::Search(escon, RFINDEX, body = '
   }
   ')$aggregations$aliases$buckets
 
-allAlia <- sapply(resAlia, "[[", i = "key")
-allInd <- sapply(allAlia, create_dbas_index, escon = escon, rfIndex = RFINDEX)
+allAlia <- vapply(resAlia, "[[", i = "key", character(1))
+allInd <- vapply(allAlia, create_dbas_index, escon = escon, rfIndex = RFINDEX, 
+                 character(1))
 
 log_info("currently {free_gb()} GB of memory available")
 log_info("Processing files (parallel)")
@@ -313,10 +311,10 @@ DBI::dbDisconnect(sdb)
 
 # Move aliases to new indices ####
 log_info("Moving aliases to new indices")
-suca <- mapply(move_dbas_alias, indexName = allInd, aliasName = allAlia,
-               MoreArgs = list(escon = escon))
+suca <- mapply(es_move_alias, indexName = allInd, aliasName = allAlia,
+               MoreArgs = list(escon = escon, closeAfter = TRUE))
 if (all(suca))
-  log_info("Move alias successful")
+  log_info("Move aliases successful") else log_error("Move aliases unsuccessful")
 
 # Add analysis index ####
 system2("Rscript", ADDANALYSIS)

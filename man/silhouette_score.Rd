@@ -4,12 +4,14 @@
 \alias{silhouette_score}
 \title{Compute silhouette score for all ufids in the index}
 \usage{
-silhouette_score(escon, testIndex)
+silhouette_score(escon, testIndex, ufidType = "ufid")
 }
 \arguments{
 \item{escon}{}
 
 \item{testIndex}{}
+
+\item{ufidType}{Either "ufid" or "ufid2"}
 }
 \value{
 dataframe with the scores for each feature

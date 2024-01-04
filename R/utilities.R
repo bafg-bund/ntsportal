@@ -588,3 +588,69 @@ free_gb <- function() {
   x <- strsplit(x[2], "\\s+")
   as.numeric(x[[1]][length(x[[1]])])
 }  
+
+
+#' Get search results for more than 10000 docs by pagination.
+#'
+#' @param escon 
+#' @param index 
+#' @param searchBody search body, if NULL, will return all docs
+#' @param sort Sort argument passed onto elastic::Search. Defines which field 
+#' the results are sorted by (best if this is unique for all docs to avoid ties) 
+#' currently can only be one field.
+#' @param totalSize 
+#' @param ... further arguments to elastic::Search
+#'
+#' @return
+#' @export
+#'
+es_search_paged <- function(escon, index, searchBody = NULL, sort, totalSize = Inf, ...) {
+  # initial request
+  #browser()
+  if (is.null(searchBody)) {
+    searchBody <- list(query = list(match_all = list()))
+    names(searchBody$query$match_all) <- character()
+  }
+    
+  stopifnot(length(sort) == 1)
+  newSize <- 10000
+  if (totalSize < 10000)
+    newSize <- totalSize
+  res1 <- elastic::Search(escon, index, body = searchBody, sort = sort, 
+                          size = newSize, ...)
+  numHits <- length(res1$hits$hits)
+  
+  if (res1$hits$total$value < 10000 || numHits < 10000)
+    return(res1)
+  
+  # Get the rest of the results
+  searchAfter <- res1$hits$hits[[numHits]]$sort[[1]]
+  
+  if (!is.list(searchBody) && is.character(searchBody)) {
+    searchBodyList <- jsonlite::fromJSON(searchBody)
+  } else if (is.list(searchBody)) {
+    searchBodyList <- searchBody
+  } else {
+    stop("Unknown searchBody format") 
+  }
+  
+  searchBodyList$search_after <- list(searchAfter)
+  
+  repeat {
+    nextRes <- elastic::Search(escon, index, body = searchBodyList, sort = sort, 
+                               size = 10000, ...)
+    newNumHits <- length(nextRes$hits$hits)
+    if (newNumHits > 0)
+      res1$hits$hits <- append(res1$hits$hits, nextRes$hits$hits)
+    
+    if (newNumHits < 10000) {
+      break
+    } else {
+      newSearchAfter <- nextRes$hits$hits[[newNumHits]]$sort[[1]]
+      searchBodyList$search_after <- list(newSearchAfter)
+    }
+      
+  }
+  res1  
+}
+

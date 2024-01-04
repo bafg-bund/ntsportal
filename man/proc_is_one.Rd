@@ -9,9 +9,9 @@ proc_is_one(escon, rfindex, esid)
 \arguments{
 \item{escon}{}
 
-\item{rfindex}{}
+\item{rfindex}{index name (msrawfiles index)}
 
-\item{esid}{}
+\item{esid}{ID of document in rfindex}
 }
 \description{
 Process IS in one file

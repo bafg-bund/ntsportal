@@ -4,14 +4,15 @@
 \alias{es_move_alias}
 \title{Change alias of an index to a new index.}
 \usage{
-es_move_alias(escon, indexName, aliasName)
+es_move_alias(escon, indexName, aliasName, closeAfter = FALSE)
 }
 \arguments{
 \item{escon}{elastic connection object created by elastic::connect}
 
 \item{indexName}{}
 
-\item{aliasName}{}
+\item{closeAfter}{logical, should the previous index, to which the alias 
+linked to prior to the change, be closed?}
 }
 \description{
 Will delete the previous alias

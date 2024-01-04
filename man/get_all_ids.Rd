@@ -16,5 +16,6 @@ character vector of IDs
 }
 \description{
 The maximum allowed number of return ids is 10000. This function will
-hang if there are more than 10000 docs in the index
+hang if there are more than 10000 docs in the index. In that case it must
+be re-written to page over all results.
 }

@@ -402,7 +402,7 @@ es_add_identifiers <- function(escon, sdb, index) {
         fdf[i, "smiles"]
       )),
       error = function(cnd) {
-        logger::log_error("Error in es_add_identifiers for compound {fdf[i, 'name']}")
+        logger::log_error("Error in es_add_identifiers for compound {fdf[i, 'name']} in index {index}")
       }
     )
   }

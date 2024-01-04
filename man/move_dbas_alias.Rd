@@ -16,5 +16,8 @@ move_dbas_alias(escon, indexName, aliasName)
 \description{
 This is specific for dbas aliases because of the need for v4 alias names for 
 Kibana (will be depricated in the future). For a general function to change
-alias names, see es_move_alias
+alias names, see es_move_alias.
+}
+\details{
+This function will also close the old index after creation of the new alias
 }

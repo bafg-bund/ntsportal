@@ -14,6 +14,14 @@ new_feature(
 )
 }
 \arguments{
+\item{pol}{polarity of the feature}
+
+\item{mz}{mass of the feature}
+
+\item{rt}{retentiontime of the feature}
+
+\item{chrom_method}{which method was used to measure}
+
 \item{...}{}
 }
 \description{
