@@ -1,4 +1,4 @@
-request_server <- function(id, df, x_es_fun_get_data_from_elastic_1, func_get_parameters_1){ #func_get_index, x_es_fun_list_indices,
+request_server <- function(id, df, func_get_demo_data, x_es_fun_get_data_from_elastic_1, func_get_parameters_1){ #func_get_index, x_es_fun_list_indices,
   moduleServer(id, function(input, output, session) {
     
     # index_source_list <- reactiveVal()
@@ -70,11 +70,14 @@ request_server <- function(id, df, x_es_fun_get_data_from_elastic_1, func_get_pa
                          step = 0.0005)
       })
     
+    
+    #data_source <- toString(paste(input$in_req_source, collapse = '", "'))
+    
     output$text_req_index <- renderText({
       input$get_parameters
       req(input$get_parameters)
-      isolate(paste0("your indeces: ", input$in_req_index, "\n",
-                     "your sources: ", input$in_req_source, "\n",
+      isolate(paste0("your indeces:\n\t ", toString(paste(input$in_req_index, collapse = ', \n\t ')), "\n",
+                     "your sources:\n\t ", toString(paste(input$in_req_source, collapse = ', \n\t ')), "\n",
                      "your date range:\n\t from: ", input$in_req_date_range[1], 
                      "\n\t to: ", 
                      input$in_req_date_range[2],"\n\n"))
@@ -82,35 +85,70 @@ request_server <- function(id, df, x_es_fun_get_data_from_elastic_1, func_get_pa
     })
     
     
-    get_json_query <- eventReactive(input$request_filtered_data,{
-      # json_text <- paste0(
-      # '{
-      #   "query": {
-      #     "range": {
-      #       "timestamp": {
-      #         "gte": "',as.character(input$in_req_date_range[1]),'",
-      #         "lte": "',as.character(input$in_req_date_range[2]),'"
-      #       }
-      #     },
-      #     "filtered" : {
-      #       "query" : {
-      #       	"match_all" : {}
-      #       },
-      #       "filter" : {
-      #       	"term" : {"station" : "',input$in_req_station,'"}
-      #       }
-      #     }
-      #   }
-      # }'
-      #                     )
-      # return(json_text)
+
+    get_json_query_1 <- eventReactive(input$request_filtered_data,{
       
-         data <- x_es_fun_get_data_from_elastic(index_list = input$in_req_index)#(index_list = input$in_req_index)
-         #print(data)
-         return(data)
+      data_source <- toString(paste(input$in_req_source, collapse = '", "'))
       
-      
+      json_text <- paste0(
+    '{
+      "_source": ["station", "river", "matrix", "tag", "comp_group", "rtt", "name", "ufid", "mz"],
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "range": {
+                "start": {
+                  "gte": "',input$in_req_date_range[1],'" ,
+                  "lte": "',input$in_req_date_range[2],'"
+                }
+              }
+            },
+            {
+              "terms": {
+                "data_source": ["',data_source,'"]
+              }
+            }
+          ]
+        }
+      }
+    }'
+        )
+
+      return(json_text)
     })
+    
+    
+    # #temp_data_for_demo <- func_get_demo_data
+    # es_glob_df <- func_get_demo_data
+    #   #reactive({temp_data_for_demo})
+    # print(es_glob_df)
+    # 
+    # observeEvent(get_json_query_1(),{
+    #   print("action get data")
+    #   es_glob_df <- x_es_fun_get_data_from_elastic(index_list = input$in_req_index, body = get_json_query_1()) #(index_list = input$in_req_index)
+    #   print(es_glob_df)
+    # })
+    
+    
+    es_glob_df <- reactiveVal(func_get_demo_data)
+    #es_glob_df$data_table <- func_get_demo_data
+    #print(es_glob_df$data_table)
+    
+    observeEvent(get_json_query_1(),{
+      print("action get data")
+      temp_data <- x_es_fun_get_data_from_elastic(index_list = input$in_req_index, body = get_json_query_1()) #(index_list = input$in_req_index)
+      es_glob_df(temp_data)
+      print(es_glob_df())
+    })
+    
+    # es_glob_df <- eventReactive(input$request_filtered_data,{
+    #   print("action get data")
+    #   data <- x_es_fun_get_data_from_elastic(index_list = input$in_req_index)#(index_list = input$in_req_index)
+    #   #print(data)
+    #   return(data)
+    # })
+    # 
     
     
     
@@ -129,25 +167,25 @@ request_server <- function(id, df, x_es_fun_get_data_from_elastic_1, func_get_pa
 
     # 
     
-    es_globe_df <- reactive({
-      es_globe_df <- get_json_query()
-      return(es_globe_df)
-    })
+    # es_globe_df <- reactive({
+    #   es_globe_df <- get_json_query()
+    #   return(es_globe_df)
+    # })
     
-    observe({
-      print(get_json_query())
-      es_glob_df <<- get_json_query()
-    })
+    # observe({
+    #   print(get_json_query())
+    #   es_glob_df <<- get_json_query()
+    # })
 
-    #output$json_output <- renderText({
-      
-      #input$request_filtered_data
-      #req(input$request_filtered_data)
-      
-      #isolate((jsonlite::prettify(get_json_query(),1)))
-    #})
+    output$json_output <- renderText({
+
+      input$request_filtered_data
+      req(input$request_filtered_data)
+
+      isolate((jsonlite::prettify(get_json_query_1(),1)))
+    })
     
-     return( reactive({es_glob_df}))
+     es_glob_df
      
     })
 }

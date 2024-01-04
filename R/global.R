@@ -105,8 +105,8 @@ func_get_dashboard_data <- function(){
               X_source.rtt, # user needs to select rtt.method with Chrom. Method filter
               Area=X_source.area, 
               Chrom_Meth=X_source.chrom_method,
-              #Ufid=X_source.ufid, # rm NA's , if available
-              Ufid=X_source.river,
+              Ufid=X_source.ufid, # rm NA's , if available
+              #Ufid=X_source.river,
               mz=X_source.mz, # average mz
               Classification=X_source.comp_group, # rm NA's, as comma sep list
               Area_normalized=X_source.area_normalized,
@@ -168,7 +168,33 @@ func_get_dashboard_data <- function(){
  }
  
 
-
+ func_get_demo_data <- function(){
+   dash_data <- as.data.table(fromJSON("./Data/cbz_cand.json")) %>% 
+     select( c(Name=X_source.name, # if available
+               Formula=X_source.formula, 
+               CAS_RN=X_source.cas, 
+               Matrix=X_source.matrix, 
+               Intensity=X_source.intensity, 
+               X_source.rtt, # user needs to select rtt.method with Chrom. Method filter
+               Area=X_source.area, 
+               Chrom_Meth=X_source.chrom_method,
+               Ufid=X_source.ufid, # rm NA's , if available
+               #Ufid=X_source.river,
+               mz=X_source.mz, # average mz
+               Classification=X_source.comp_group, # rm NA's, as comma sep list
+               Area_normalized=X_source.area_normalized,
+               Stations=X_source.station,
+               lat=X_source.loc.lat,
+               lon=X_source.loc.lon,
+               Time=X_source.start,
+               River=X_source.river
+     )) %>% 
+     unnest(X_source.rtt) %>%
+     rename(tRet=rt,
+            Method=method) %>%
+     mutate(location=paste0(lat,lon))
+   return(dash_data)
+ }
 
 
 

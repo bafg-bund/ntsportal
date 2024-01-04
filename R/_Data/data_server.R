@@ -3,17 +3,20 @@ data_server <- function(id, func_get_data_data, es_glob_df){
     
     # data_explorer_data <- func_get_data_data
     # 
-     observe({ 
-       print(colnames(es_glob_df))
-       data_explorer_data <- es_glob_df
-       updatePickerInput(session, "picker", choices = colnames(es_glob_df))
-       #print(colnames(data_explorer_data))
-       #updatePickerInput(session, "picker", choices = colnames(data_explorer_data))
-     })
+     # observe({
+     #   print("data server observe 1")
+     #   print(colnames(es_glob_df))
+     #   data_explorer_data <- es_glob_df
+     #   print("data server observe 2")
+     #   print(colnames(data_explorer_data))
+     #   updatePickerInput(session, "picker", choices = colnames(es_glob_df ))
+     #   #print(colnames(data_explorer_data))
+     #   #updatePickerInput(session, "picker", choices = colnames(data_explorer_data))
+     # })
 
     
     datasetInput <- eventReactive(input$view_bafg_data,{
-      datasetInput <- data_explorer_data %>%
+      datasetInput <- es_glob_df %>%   #data_explorer_data
         select(input$picker)
       return(datasetInput)
     })

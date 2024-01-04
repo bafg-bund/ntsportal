@@ -26,7 +26,7 @@ dashboard_ui <- function(id, func_get_dashboard_data){
                                         
                                         selectInput(NS(id, "filter_ufid"), "Ufid", unique(dashboard_data$Ufid), multiple=TRUE),
                                         selectInput(NS(id, "filter_river"), "River", unique(dashboard_data$River), multiple=TRUE),
-                                        selectInput(NS(id, "filter_station"), "Stations", unique(dashboard_data$location), multiple=TRUE),
+                                        selectInput(NS(id, "filter_station"), "Stations", unique(dashboard_data$Stations), multiple=TRUE),
                                         plotOutput(NS(id, "line_plot_intensity"), height = 250),
                                         plotOutput(NS(id, "line_plot_intensity_is"), height = 250)
                           )

@@ -24,7 +24,7 @@ dashboard_server <- function(id, func_get_dashboard_data){
       glob_dashboard_data %>% 
         filter(
           is.null(input$filter_river) | glob_dashboard_data$River %in% input$filter_river,
-          is.null(input$filter_station) | glob_dashboard_data$location %in% input$filter_station,
+          is.null(input$filter_station) | glob_dashboard_data$Stations %in% input$filter_station,
           is.null(input$filter_ufid) | glob_dashboard_data$Ufid %in% input$filter_ufid,
           
         ) %>%
@@ -64,7 +64,7 @@ dashboard_server <- function(id, func_get_dashboard_data){
       
       
       summ_data <- station_bounds() %>%
-        group_by(location) %>%
+        group_by(Stations) %>%
         reframe(Detections=n(),
                   lon=unique(lon),
                   lat=unique(lat),
@@ -91,7 +91,7 @@ dashboard_server <- function(id, func_get_dashboard_data){
         clearShapes() %>%
         addCircleMarkers(~lon, ~lat,
                    radius=6,
-                   layerId=~location, #X_source.station,
+                   layerId=~Stations, #X_source.station,
                    stroke=FALSE,
                    fillOpacity=0.7,
                    fillColor=~pal(Intensity)
@@ -99,21 +99,21 @@ dashboard_server <- function(id, func_get_dashboard_data){
         addLegend("bottomright", pal=pal, values=colorData, title="Intensity", layerId="colorLegend")
     })
     
-    # Show a popup at the given location
-    show_staion_popup <- function(location, lat, lng, summ_data) {
-      selected_station <- summ_data[summ_data$location == location,]
+    # Show a popup at the given Stations
+    show_staion_popup <- function(Stations, lat, lng, summ_data) {
+      selected_station <- summ_data[summ_data$Stations == Stations,]
       content <- as.character(tagList(
         tags$h4("Station:", selected_station$Stations, 
                 "Detections:", selected_station$Detections),
         tags$strong(HTML(sprintf("River: %s", unique(selected_station$River) ))),
         tags$br(),
-        tags$strong(HTML(sprintf("Classification: %s", unique(selected_station$Classification) ))),
+        tags$strong(HTML(sprintf("Classification: %s", na.omit(unique(unlist(selected_station$Classification))) ))),
         tags$br(),
-        tags$strong(HTML(sprintf("Formula: %s", unique(selected_station$Formula) ))),
+        tags$strong(HTML(sprintf("Formula: %s", na.omit(unique(unlist(selected_station$Formula))) ))),
         tags$br(),
-        tags$strong(HTML(sprintf("Name: %s", unique(selected_station$Name) ))),
+        tags$strong(HTML(sprintf("Name: %s", na.omit(unique(unlist(selected_station$Name))) ))),  #list(na.omit(unique(unlist(temp_data$X_source.name))))
         tags$br(),
-        tags$strong(HTML(sprintf("Ufid: %s", unique(selected_station$Ufid) ))),
+        tags$strong(HTML(sprintf("Ufid: %s", na.omit(unique(unlist(selected_station$Ufid))) ))),
         tags$br(),
         sprintf("Median rt: %s", as.numeric(median(selected_station$tRet ))), 
         tags$br(),
@@ -123,12 +123,12 @@ dashboard_server <- function(id, func_get_dashboard_data){
         tags$br(),
         sprintf("Median Area: %s", as.numeric(median(selected_station$Area)))
       ))
-      leafletProxy("map") %>% addPopups(lng, lat, content, layerId = location)
+      leafletProxy("map") %>% addPopups(lng, lat, content, layerId = Stations)
     }
     # When map is clicked, show a popup with info
     observe({
       summ_data <- station_bounds() %>%
-        group_by(location) %>%
+        group_by(Stations) %>%
         reframe(Detections=n(),
                 lon=unique(lon),
                 lat=unique(lat),

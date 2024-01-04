@@ -91,11 +91,11 @@ server <- function(input, output, session, clientData) {
   
 #--------------------------------------Start Request-Tab  
 
+
   
-  
-  request_server("get_data", 
+  es_glob_df <- request_server("get_data", 
                  test_data, 
-                 #x_es_fun_list_indices(),
+                 func_get_demo_data(),
                  x_es_fun_get_data_from_elastic(),
                  func_get_parameters()) #func_get_index(),
   output$request_stuff <- renderUI({
@@ -104,11 +104,12 @@ server <- function(input, output, session, clientData) {
   })
 
   
-  es_glob_df <- func_get_data_data()
+  #es_glob_df <- func_get_data_data()
+  #es_glob_df <- moduleServer(module = request_server, id = "get_data")
   
   observe({
     print("server change df")
-    print(es_glob_df)
+    print(es_glob_df())
   })
   
 
@@ -140,10 +141,10 @@ server <- function(input, output, session, clientData) {
   
   
 
-  data_server("create_data", func_get_data_data(), es_glob_df)
+  data_server("create_data", func_get_data_data(), es_glob_df())
   output$data_stuff <- renderUI({
     req(credentials()$user_auth)
-    data_ui("create_data", func_get_data_data(), es_glob_df)
+    data_ui("create_data", func_get_data_data(), es_glob_df())
   })
   
   
