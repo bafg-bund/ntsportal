@@ -1,9 +1,18 @@
-dashboard_server <- function(id, func_get_dashboard_data){ 
+dashboard_server <- function(id, func_get_demo_data_dash, es_glob_df){ 
   moduleServer(id, function(input, output, session) {
     
     
     
-    glob_dashboard_data <- func_get_dashboard_data
+    #glob_dashboard_data <- func_get_dashboard_data
+    #glob_dashboard_data <- func_get_demo_data_dash
+    #print("dash data")
+    #print(es_glob_df)
+    observeEvent(es_glob_df,{
+      print("dash server")
+      #glob_dashboard_data <- x_func_preprocessing_dashboard_data(data = es_glob_df)
+    })
+    
+    glob_dashboard_data <- reactive({ x_func_preprocessing_dashboard_data(data = es_glob_df) })
     
     output$map <- renderLeaflet({
       leaflet() %>%
@@ -16,16 +25,16 @@ dashboard_server <- function(id, func_get_dashboard_data){
    # in bounds right now
     station_bounds <- reactive({
       if (is.null(input$map_bounds))
-        return(glob_dashboard_data[FALSE,])
+        return(glob_dashboard_data()[FALSE,])
       bounds <- input$map_bounds
       latRng <- range(bounds$north, bounds$south)
       lngRng <- range(bounds$east, bounds$west)
       
-      glob_dashboard_data %>% 
+      glob_dashboard_data() %>% 
         filter(
-          is.null(input$filter_river) | glob_dashboard_data$River %in% input$filter_river,
-          is.null(input$filter_station) | glob_dashboard_data$Stations %in% input$filter_station,
-          is.null(input$filter_ufid) | glob_dashboard_data$Ufid %in% input$filter_ufid,
+          is.null(input$filter_river) | glob_dashboard_data()$River %in% input$filter_river,
+          is.null(input$filter_station) | glob_dashboard_data()$Stations %in% input$filter_station,
+          is.null(input$filter_ufid) | glob_dashboard_data()$Ufid %in% input$filter_ufid,
           
         ) %>%
         subset(lat >= latRng[1] & lat <= latRng[2] & lon >= lngRng[1] & lon <= lngRng[2])
@@ -83,7 +92,7 @@ dashboard_server <- function(id, func_get_dashboard_data){
 
       
 
-        colorData <- glob_dashboard_data[["Intensity"]]
+        colorData <- glob_dashboard_data()[["Intensity"]]
         pal <- colorBin("viridis", colorData, 7, pretty = FALSE)
         
 
@@ -162,13 +171,13 @@ dashboard_server <- function(id, func_get_dashboard_data){
     
     reactive_bafg_data_explorer <- reactive({
       
-      glob_dashboard_data %>% 
+      glob_dashboard_data() %>% 
         filter(
-          is.null(input$names) | glob_dashboard_data$Name %in% input$names,
-          is.null(input$formulas) | glob_dashboard_data$Formula %in% input$formulas,
-          is.null(input$cass) | glob_dashboard_data$CAS_RN %in% input$cass,
-          is.null(input$methods) | glob_dashboard_data$Method %in% input$methods,
-          is.null(input$matrixs) | glob_dashboard_data$Matrix %in% input$matrixs
+          is.null(input$names) | glob_dashboard_data()$Name %in% input$names,
+          is.null(input$formulas) | glob_dashboard_data()$Formula %in% input$formulas,
+          is.null(input$cass) | glob_dashboard_data()$CAS_RN %in% input$cass,
+          is.null(input$methods) | glob_dashboard_data()$Method %in% input$methods,
+          is.null(input$matrixs) | glob_dashboard_data()$Matrix %in% input$matrixs
           #between(as.numeric(glob_dashboard_data$Area), input$areas[1], input$areas[2])
           # glob_dashboard_data$Area >= input$areas[1],
           # glob_dashboard_data$Area <= input$areas[2]

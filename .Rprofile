@@ -9,6 +9,7 @@ source("./R/_Request/request_server.R")
 # activate dashboard-tab
 source("./R/_Dashboard/dashboard_ui.R")
 source("./R/_Dashboard/dashboard_server.R")
+source("./src/data_preprocessing/dashboard_preprocessing/preprocessing_dashboard_data.R")
 
 # activate home-tab
 source("./R/_Home/home_ui.R")

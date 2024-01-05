@@ -94,18 +94,13 @@ server <- function(input, output, session, clientData) {
 
   
   es_glob_df <- request_server("get_data", 
-                 test_data, 
-                 func_get_demo_data(),
-                 x_es_fun_get_data_from_elastic(),
-                 func_get_parameters()) #func_get_index(),
+                 func_get_demo_data())
   output$request_stuff <- renderUI({
     req(credentials()$user_auth)
   request_ui("get_data", test_data)  
   })
 
   
-  #es_glob_df <- func_get_data_data()
-  #es_glob_df <- moduleServer(module = request_server, id = "get_data")
   
   observe({
     print("server change df")
@@ -117,10 +112,10 @@ server <- function(input, output, session, clientData) {
 
     
   
-  dashboard_server("create_dashboard", func_get_dashboard_data())
+  dashboard_server("create_dashboard", func_get_demo_data_dash(), es_glob_df())
   output$dashboard_stuff <- renderUI({
     req(credentials()$user_auth)
-    dashboard_ui("create_dashboard", func_get_dashboard_data()) 
+    dashboard_ui("create_dashboard", func_get_demo_data_dash(), es_glob_df()) 
   })
 
   

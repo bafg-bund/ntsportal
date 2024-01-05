@@ -1,11 +1,7 @@
-request_server <- function(id, df, func_get_demo_data, x_es_fun_get_data_from_elastic_1, func_get_parameters_1){ #func_get_index, x_es_fun_list_indices,
+request_server <- function(id, func_get_demo_data){
   moduleServer(id, function(input, output, session) {
     
-    # index_source_list <- reactiveVal()
-    # observeEvent(input$get_index,{
-    #   index_source_list <- x_es_fun_list_indices
-    # })
-    
+
     get_index <- eventReactive(input$get_index,{
       x_es_fun_list_indices()
       })
@@ -89,10 +85,10 @@ request_server <- function(id, df, func_get_demo_data, x_es_fun_get_data_from_el
     get_json_query_1 <- eventReactive(input$request_filtered_data,{
       
       data_source <- toString(paste(input$in_req_source, collapse = '", "'))
-      
+      # ["station", "river", "matrix", "tag", "comp_group", "rtt", "name", "ufid", "mz"]
       json_text <- paste0(
     '{
-      "_source": ["station", "river", "matrix", "tag", "comp_group", "rtt", "name", "ufid", "mz"],
+      "_source": ["station", "river", "matrix", "tag", "comp_group", "rtt", "name", "ufid", "mz", "formula", "cas","intensity", "area", "chrom_method", "area_normalized", "loc", "start"],
       "query": {
         "bool": {
           "must": [

@@ -82,11 +82,11 @@ logout_link <- function(id, label = "logout", class = "text-success", style = "c
 
 ##-------------------------------------getdata
 
-json_data <- fromJSON("./Data/cbz_cand.json")
-#test_data <- json_data
-test_data <- as.data.table(json_data)
-test_data <- test_data %>% unnest(X_source.rtt)
-test_data <- test_data %>% unnest(X_source.eic)
+# json_data <- fromJSON("./Data/cbz_cand.json")
+# #test_data <- json_data
+# test_data <- as.data.table(json_data)
+# test_data <- test_data %>% unnest(X_source.rtt)
+# test_data <- test_data %>% unnest(X_source.eic)
 
 
 
@@ -168,15 +168,15 @@ func_get_dashboard_data <- function(){
  }
  
 
- func_get_demo_data <- function(){
-   dash_data <- as.data.table(fromJSON("./Data/cbz_cand.json")) %>% 
+ func_get_demo_data_dash <- function(){
+   dash_data <- as.data.table(fromJSON("./Data/cbz_cand.json")) %>%
      select( c(Name=X_source.name, # if available
-               Formula=X_source.formula, 
-               CAS_RN=X_source.cas, 
-               Matrix=X_source.matrix, 
-               Intensity=X_source.intensity, 
+               Formula=X_source.formula,
+               CAS_RN=X_source.cas,
+               Matrix=X_source.matrix,
+               Intensity=X_source.intensity,
                X_source.rtt, # user needs to select rtt.method with Chrom. Method filter
-               Area=X_source.area, 
+               Area=X_source.area,
                Chrom_Meth=X_source.chrom_method,
                Ufid=X_source.ufid, # rm NA's , if available
                #Ufid=X_source.river,
@@ -188,7 +188,7 @@ func_get_dashboard_data <- function(){
                lon=X_source.loc.lon,
                Time=X_source.start,
                River=X_source.river
-     )) %>% 
+     )) %>%
      unnest(X_source.rtt) %>%
      rename(tRet=rt,
             Method=method) %>%
@@ -196,6 +196,10 @@ func_get_dashboard_data <- function(){
    return(dash_data)
  }
 
+ func_get_demo_data <- function(){
+   dash_data <- as.data.table(fromJSON("./Data/cbz_cand.json"))
+   return(dash_data)
+ }
 
 
 

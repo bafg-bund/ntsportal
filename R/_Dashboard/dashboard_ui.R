@@ -1,7 +1,12 @@
-dashboard_ui <- function(id, func_get_dashboard_data){
+dashboard_ui <- function(id, func_get_demo_data_dash, es_glob_df){
   
 
-  dashboard_data <- func_get_dashboard_data
+  #dashboard_data <- func_get_demo_data_dash
+  dashboard_data <- x_func_preprocessing_dashboard_data(data = es_glob_df)
+  observeEvent(dashboard_data,{
+    print("dash ui update :)")
+    #print(dashboard_data)
+  })
   
   navbarPage("my map", id="nav",
              
@@ -42,13 +47,13 @@ dashboard_ui <- function(id, func_get_dashboard_data){
                       hr(),
                       fluidRow(
                         column(2,
-                               selectInput(NS(id, "names"), "Name", unique(dashboard_data$Name), multiple=TRUE) 
+                               selectInput(NS(id, "names"), "Name", unique(unlist(dashboard_data$Name)), multiple=TRUE) 
                         ),
                         column(2,
-                               selectInput(NS(id, "formulas"), "Formula", unique(dashboard_data$Formula), multiple=TRUE)
+                               selectInput(NS(id, "formulas"), "Formula", unique(unlist(dashboard_data$Formula)), multiple=TRUE)
                         ),
                         column(2,
-                               selectInput(NS(id, "cass"), "CAS-RN", unique(dashboard_data$CAS_RN), multiple=TRUE)
+                               selectInput(NS(id, "cass"), "CAS-RN", unique(unlist(dashboard_data$CAS_RN)), multiple=TRUE)
                         ),
                         column(2,
                                selectInput(NS(id, "methods"), "Chrom. Meth.", unique(dashboard_data$Method), multiple=TRUE)
