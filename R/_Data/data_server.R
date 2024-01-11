@@ -15,7 +15,9 @@ data_server <- function(id, func_get_data_data, es_glob_df){
      # })
 
     
+    
     datasetInput <- eventReactive(input$view_bafg_data,{
+      print(is.reactive(es_glob_df))
       datasetInput <- es_glob_df %>%   #data_explorer_data
         select(input$picker)
       return(datasetInput)

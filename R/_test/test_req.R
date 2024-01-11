@@ -42,3 +42,62 @@ data <- rbindlist(list(test_df_1,
                        test_df_7),
                   fill = TRUE,
                   use.names = TRUE)
+
+
+
+
+
+
+
+
+
+
+#09.01.24
+
+
+
+# #temp_data_for_demo <- func_get_demo_data
+# es_glob_df <- func_get_demo_data
+#   #reactive({temp_data_for_demo})
+# print(es_glob_df)
+# 
+# observeEvent(get_json_query_1(),{
+#   print("action get data")
+#   es_glob_df <- x_es_fun_get_data_from_elastic(index_list = input$in_req_index, body = get_json_query_1()) #(index_list = input$in_req_index)
+#   print(es_glob_df)
+# })
+
+# es_glob_df <- eventReactive(input$request_filtered_data,{
+#   print("action get data")
+#   data <- x_es_fun_get_data_from_elastic(index_list = input$in_req_index)#(index_list = input$in_req_index)
+#   #print(data)
+#   return(data)
+# })
+# 
+
+
+
+
+
+#  
+# get_data <- eventReactive(input$request_filtered_data,{
+#   #print("go")
+#   data <<- x_es_fun_get_data_from_elastic(index_list = input$in_req_index)
+#   #print(data)
+#   return(data)
+# })
+# 
+
+#es_glob_dfs <- reactiveValues(es_df_data_tab = NULL) 
+
+# 
+
+# es_globe_df <- reactive({
+#   es_globe_df <- get_json_query()
+#   return(es_globe_df)
+# })
+
+# observe({
+#   print(get_json_query())
+#   es_glob_df <<- get_json_query()
+# })

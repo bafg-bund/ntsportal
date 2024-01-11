@@ -1,4 +1,4 @@
-dashboard_server <- function(id, func_get_demo_data_dash, es_glob_df){ 
+dashboard_server <- function(id, es_glob_df){ 
   moduleServer(id, function(input, output, session) {
     
     
@@ -7,12 +7,18 @@ dashboard_server <- function(id, func_get_demo_data_dash, es_glob_df){
     #glob_dashboard_data <- func_get_demo_data_dash
     #print("dash data")
     #print(es_glob_df)
-    observeEvent(es_glob_df,{
+    observeEvent(input$filter_river,{
       print("dash server")
+      print(head(es_glob_df[,1:4]))
       #glob_dashboard_data <- x_func_preprocessing_dashboard_data(data = es_glob_df)
     })
     
-    glob_dashboard_data <- reactive({ x_func_preprocessing_dashboard_data(data = es_glob_df) })
+    #glob_dashboard_data <- reactive({ x_func_preprocessing_dashboard_data(data = es_glob_df) })
+    glob_dashboard_data <- eventReactive(input$filter_river,{ 
+      temp_data <- x_func_preprocessing_dashboard_data(data = es_glob_df) 
+      return(temp_data)
+      })
+    
     
     output$map <- renderLeaflet({
       leaflet() %>%
@@ -33,8 +39,8 @@ dashboard_server <- function(id, func_get_demo_data_dash, es_glob_df){
       glob_dashboard_data() %>% 
         filter(
           is.null(input$filter_river) | glob_dashboard_data()$River %in% input$filter_river,
-          is.null(input$filter_station) | glob_dashboard_data()$Stations %in% input$filter_station,
-          is.null(input$filter_ufid) | glob_dashboard_data()$Ufid %in% input$filter_ufid,
+          #is.null(input$filter_station) | glob_dashboard_data()$Stations %in% input$filter_station,
+          #is.null(input$filter_ufid) | glob_dashboard_data()$Ufid %in% input$filter_ufid,
           
         ) %>%
         subset(lat >= latRng[1] & lat <= latRng[2] & lon >= lngRng[1] & lon <= lngRng[2])
@@ -114,15 +120,15 @@ dashboard_server <- function(id, func_get_demo_data_dash, es_glob_df){
       content <- as.character(tagList(
         tags$h4("Station:", selected_station$Stations, 
                 "Detections:", selected_station$Detections),
-        tags$strong(HTML(sprintf("River: %s", unique(selected_station$River) ))),
+        #tags$strong(HTML(sprintf("River: %s", unique(selected_station$River) ))),
         tags$br(),
-        tags$strong(HTML(sprintf("Classification: %s", na.omit(unique(unlist(selected_station$Classification))) ))),
+        #tags$strong(HTML(sprintf("Classification: %s", na.omit(unique(unlist(selected_station$Classification))) ))),
         tags$br(),
-        tags$strong(HTML(sprintf("Formula: %s", na.omit(unique(unlist(selected_station$Formula))) ))),
+        #tags$strong(HTML(sprintf("Formula: %s", na.omit(unique(unlist(selected_station$Formula))) ))),
         tags$br(),
-        tags$strong(HTML(sprintf("Name: %s", na.omit(unique(unlist(selected_station$Name))) ))),  #list(na.omit(unique(unlist(temp_data$X_source.name))))
+        #tags$strong(HTML(sprintf("Name: %s", na.omit(unique(unlist(selected_station$Name))) ))),  #list(na.omit(unique(unlist(temp_data$X_source.name))))
         tags$br(),
-        tags$strong(HTML(sprintf("Ufid: %s", na.omit(unique(unlist(selected_station$Ufid))) ))),
+        #tags$strong(HTML(sprintf("Ufid: %s", na.omit(unique(unlist(selected_station$Ufid))) ))),
         tags$br(),
         sprintf("Median rt: %s", as.numeric(median(selected_station$tRet ))), 
         tags$br(),
