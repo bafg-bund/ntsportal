@@ -1,10 +1,55 @@
 
-# Functions for eval-rawfiles-dbas.R
+# Functions for eval-rawfiles-dbas.R ####
+
+
+# Utility and local functions ####
 
 # esids <- allFlsIds[[78]]
 # cat(paste(shQuote(esids, type = "cmd"), collapse = ", "))
 # rfindex <- RFINDEX
 # fieldName <- "duration"
+# source("~/connect-ntsp.R")
+# rfindex <- "g2_msrawfiles"
+
+#' Get files which have not yet been processed
+#' 
+#' A processed file will have a time stamp. This function will return the ids
+#' of all files without a time stamp for the given evaluation type.
+#' 
+#' @param escon 
+#' @param rfindex
+#' @param evalType either dbas or dbas_is
+#'
+#' @return character vector of ids of documents
+#' @export
+#'
+get_unevaluated <- function(escon, rfindex, evalType = "dbas") {
+  stopifnot(evalType %in% c("dbas", "dbas_is"))
+  fieldName <- switch(
+    evalType,
+    dbas = "dbas_last_eval",
+    dbas_is = "dbas_is_last_eval"
+  )
+  
+  resp <- ntsportal::es_search_paged(escon, rfindex, searchBody = sprintf('
+    {
+      "query": {
+        "bool": {
+          "must_not": [
+            {
+              "exists": {
+                "field": "%s"
+              }
+            }
+          ]
+        }
+      },
+    "_source": ["path"]
+    }
+  ', fieldName), sort = "path:asc")
+  
+  vapply(resp$hits$hits, "[[", i = "_id", character(1))
+}
 
 
 #' Check that fields are the same for a set of documents
@@ -16,7 +61,6 @@
 #' @param onlyNonBlanks 
 #'
 #' @return
-#' @export
 #'
 check_uniformity <- function(escon, rfindex, esids, fieldName, onlyNonBlanks = F) {
   bodyAll <- sprintf(
@@ -276,13 +320,379 @@ check_field <- function(escon, rfindex, fieldName, onlyNonBlank = FALSE) {
                       
     ', fieldName))
   }
-   
+  
   res$hits$total$value == 0
 }
 
 
+#' Add eval time to msrawfiles
+#'
+#' @param escon 
+#' @param index must be an msrawfiles index
+#' @param esid elasicsearch id doc to be updated
+#' @param fieldName field name to be updated, must be either dbas_last_eval or dbas_is_last_eval
+#'
+#' @return true if successful
+#'
+add_latest_eval <- function(escon, index, esid, fieldName = "dbas_last_eval") {
+  stopifnot(fieldName %in% c("dbas_last_eval", "dbas_is_last_eval"))
+  timeText <- format(Sys.time(), "%Y-%m-%d %H:%M:%S")
+  res <- elastic::docs_update(conn = escon, index = index, id = esid, body = sprintf('
+  {
+    "script" : "ctx._source.%s = \'%s\'"
+  }
+  ', fieldName, timeText))
+  
+  invisible(res$result == "updated")
+}
 
+#' Add hash of spectral library in current state to msrawfiles
+#' 
+#' This is used to see with which spectral library the last evaluation was done with.
+#'
+#' @param escon 
+#' @param rfindex 
+#' @param esid 
+#'
+#' @return
+#'
+add_sha256_spectral_library <- function(escon, rfindex, esid) {
+  path <- elastic::docs_get(
+    escon, rfindex, esid, verbose = F)[["_source"]][["dbas_spectral_library"]]
+  if (!is.null(path) && file.exists(path)) {
+    cs <- system2("sha256sum", path, stdout = TRUE)
+    cs <- stringr::str_split_i(cs, " ", 1)
+    res <- elastic::docs_update(conn = escon, index = rfindex, id = esid, body = sprintf('
+      {
+        "script" : "ctx._source.dbas_spectral_library_sha256 = \'%s\'"
+      }
+      ', cs))
+    invisible(res$result == "updated")
+  } else {
+    FALSE 
+  }
+}
 
+#' Removal of documents from dbas documents based on filename
+#'
+#' @param escon 
+#' @param index 
+#' @param filenames 
+#'
+#' @return
+#' @export
+#'
+es_remove_by_filename <- function(escon, index, filenames) {
+  # must be a dbas index, not msrawfiles!
+  stopifnot(grepl("g2_dbas", index))
+  stopifnot(is.character(filenames), length(filenames) > 0)
+  qbod <- list(
+    query = list(
+      terms = list(
+        filename = as.list(filenames)
+      )
+    )
+  )
+  suc <- TRUE
+  if (elastic::Search(escon, index, body = qbod, size = 0)$hits$total$value == 0)
+    return(invisible(FALSE))
+  
+  tryCatch(
+    res <- elastic::docs_delete_by_query(escon, index, body = qbod, refresh = "true"),
+    error = function(cnd) {
+      logger::log_error("Could not remove docs from {index}, \
+                        {conditionMessage(cnd)}")
+      suc <<- FALSE
+    }
+  )
+  if (suc) {
+    invisible(TRUE)  
+  } else {
+    invisible(FALSE)
+  }
+}
+
+# Integrity checks ####
+
+#' Check consistency of msrawfiles DB
+#' 
+#' Must be done before any processing operation
+#'
+#' @param escon 
+#' @param rfindex 
+#'
+#' @return TRUE if successful (invisibly)
+#' @import logger
+#' @export
+#'
+check_integrity_msrawfiles <- function(escon, rfindex) {
+  
+  # Check presence of spectral library
+  resp2 <- elastic::Search(escon, rfindex, body = '
+                {
+  "query": {
+    "match_all": {}
+  },
+  "aggs": {
+    "csl_loc": {
+      "terms": {
+        "field": "dbas_spectral_library",
+        "size": 100
+      }
+    }
+  },
+  "size": 0
+}
+                ')
+  
+  buc <- resp2$aggregations$csl_loc$buckets
+  cslp <- sapply(buc, function(x) x$key)
+  stopifnot(all(file.exists(cslp)), all(grepl("\\.db$", cslp)))
+  for (pth in cslp) {
+    dbtest <- DBI::dbConnect(RSQLite::SQLite(), pth)
+    if (!DBI::dbExistsTable(dbtest, "experiment"))
+      stop("DB not of the correct format")
+    DBI::dbDisconnect(dbtest)
+  }
+  
+  # check presence of IS tables
+  resp3 <- elastic::Search(escon, rfindex, body = '
+  {
+    "query": {
+      "match_all": {}
+    },
+    "aggs": {
+      "ist_loc": {
+        "terms": {
+          "field": "dbas_is_table",
+          "size": 100
+        }
+      }
+    },
+    "size": 0
+  }
+  ')
+  
+  buc <- resp3$aggregations$ist_loc$buckets
+  istp <- sapply(buc, function(x) x$key)
+  stopifnot(all(file.exists(istp)), all(grepl("\\.csv$", istp)))
+  
+  # Check that certain fields exist in all docs
+  stopifnot(
+    check_field(escon, rfindex, "dbas_is_table"),
+    check_field(escon, rfindex, "dbas_area_threshold"),
+    check_field(escon, rfindex, "dbas_rttolm"),
+    check_field(escon, rfindex, "dbas_mztolu"),
+    check_field(escon, rfindex, "dbas_mztolu_fine"),
+    check_field(escon, rfindex, "dbas_ndp_threshold"),
+    check_field(escon, rfindex, "dbas_rtTolReinteg"),
+    check_field(escon, rfindex, "dbas_ndp_m"),
+    check_field(escon, rfindex, "dbas_ndp_n"),
+    check_field(escon, rfindex, "dbas_instr"),
+    check_field(escon, rfindex, "pol"),
+    check_field(escon, rfindex, "chrom_method"),
+    check_field(escon, rfindex, "matrix"),
+    check_field(escon, rfindex, "data_source"),
+    check_field(escon, rfindex, "dbas_index_name"),
+    check_field(escon, rfindex, "blank"),
+    check_field(escon, rfindex, "path"),
+    check_field(escon, rfindex, "duration", onlyNonBlank = TRUE)
+  )
+  
+  # Check that blank files do not have coordinates
+  checkLoc <- elastic::Search(escon, rfindex, body = '
+                {
+  "query": {
+    "bool": {
+      "must_not": [
+        {
+          "exists": {
+            "field": "loc"
+          }
+        }
+      ],
+      "must": [
+        {
+          "term": {
+            "blank": {
+              "value": false
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+                ')
+  stopifnot(checkLoc$hits$total$value == 0)
+  
+  # Collect rawfiles ####
+  resp <- es_search_paged(escon, rfindex, searchBody = '
+  {
+    "query": {
+      "match_all": {}
+    },
+  "_source": ["path"]
+  }
+', sort = "path:asc")
+  
+  
+  hits <- resp$hits$hits
+  allFls <- data.frame(
+    id = sapply(hits, function(x) x[["_id"]]),
+    path = sapply(hits, function(x) x[["_source"]]$path)
+  )
+  
+  fileCheck <- sapply(allFls$path, file.exists)
+  if (!all(fileCheck)) {
+    log_warn("The following files do not exist")
+    noFile <- allFls$path[!fileCheck]
+    for (i in noFile)
+      message(i)
+    stop("Missing raw files")
+  }
+  
+  allFls$dir <- dirname(allFls$path)
+  allFls$base <- basename(allFls$path)
+  
+  # there can not be any duplicated filenames, because the filename is used
+  # by the alignment to distinguish between files.
+  # but in blanks it's okay, these will not factor into alignment anyway
+  
+  if (any(duplicated(allFls$base))) {
+    idsDup <- allFls[duplicated(allFls$base), "id"]
+    isBlank <- elastic::docs_mget(
+      escon, rfindex, ids = idsDup, source = "blank", verbose = FALSE
+    )$docs
+    if (all(sapply(isBlank, function(d) d[["_source"]][["blank"]]))) {
+      log_warn("There are duplicated filenames in the db (but only for blanks)")
+    } else {
+      stop("There are duplicated filenames in the db")  
+    }
+  }
+  
+  # check that there are no mismatches between IS table and polarity
+  polcheck_body <- function(pols) {
+    sprintf('
+  {
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "regexp": {
+              "dbas_is_table": ".*%s.*"
+            }
+          },
+          {
+            "regexp": {
+              "filename": ".*%s.*"
+            }
+          },
+          {
+            "term": {
+              "pol": "%s"
+            }
+          }
+        ]
+      }
+    }
+  }             
+  ', pols[1], pols[2], pols[3])
+  }
+  check_polarity_consitency <- function(pols) {
+    elastic::Search(escon, rfindex, body = polcheck_body(pols))$hits$total$value == 0
+  }
+  
+  # Get all permutations of 3 polarities
+  perms <- gtools::permutations(2, 3, c("pos", "neg"), repeats.allowed = T)[2:7,]
+  polCheck <- apply(perms, 1, check_polarity_consitency)
+  if (any(!polCheck)) {
+    stop("Inconsistencies in the polarity of filename, pol and dbas_is_table,
+         use this query to find them:", 
+         apply(perms[!polCheck, , drop = F], 1, polcheck_body))
+  }
+  
+  # Check that all files are located in HRMS/Messdaten. If not, give a warning.
+  resm <- elastic::Search(escon, rfindex, source = "path", size = 10000, body = '
+    {
+      "query": {
+        "bool": {
+          "must_not": [
+            {
+              "regexp": {
+                "path": ".*HRMS/Messdaten.*"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ')
+  if (resm$hits$total$value > 0) {
+    badp <- vapply(resm$hits$hits, function(x) x[["_source"]]$path, character(1))
+    tx <- paste(unique(dirname(badp)), collapse = "\n")
+    log_warn("{length(badp)} files are not saved in HRMS/Messdaten, see directories:\n {tx}")
+  }
+  
+  invisible(TRUE)
+}
+
+#' Check that evaluation batches have consistent settings
+#' 
+#' Evaluation is run in batches and certain settings must be the same
+#' for all files in the batch.
+#'
+#' @param escon 
+#' @param rfindex 
+#' @param batches a list of batches, where each batch is character vector of 
+#' elasticsearch document ids
+#'
+#' @return TRUE if successful
+#' @export
+#'
+check_batches_eval <- function(escon, rfindex, batches) {
+  # for each of these batches, certain fields must be the same
+  # for all docs, these include:
+  mustBeSame <- c(
+    "dbas_blank_regex",
+    "dbas_minimum_detections",
+    "dbas_is_table",
+    "dbas_is_name",
+    "duration",
+    "pol",
+    "matrix",
+    "data_source",
+    "chrom_method",
+    "dbas_index_name",
+    "dbas_alias_name"
+  )
+  
+  allSame <- vapply(batches, function(x) {
+    all(vapply(mustBeSame, check_uniformity, esids = x, escon = escon, 
+               rfindex = rfindex, logical(1)))
+  }, logical(1))
+  
+  if (!all(allSame))
+    stop("Batch similarity checks have failed")
+  
+  mustBeSameNonBlanks <- c(
+    "dbas_build_averages",
+    "dbas_replicate_regex"
+  )
+  
+  allSame2 <- vapply(batches, function(x) {
+    all(vapply(mustBeSameNonBlanks, check_uniformity, esids = x, escon = escon, 
+               rfindex = rfindex, onlyNonBlanks = T, logical(1)))
+  }, logical(1))
+  
+  if (!all(allSame2))
+    stop("Batch similarity checks have failed")
+  
+  # Check that the batch length is consistent with minimum number of detections
+  
+  
+  invisible(TRUE)
+}
 
 # Processing functions ####
 
@@ -350,7 +760,9 @@ proc_esid <- function(escon, rfindex, esid, compsProcess = NULL) {
 
 #' Process a batch of MS measurement files stored in the msrawfiles index
 #' 
-#' takes a series of esids and processes these as a batch. 
+#' Takes a vector of esids and performs dbas on these as a batch. Files are
+#' evaluated using the settings in the msrawfiles index. Results are ingested to
+#' the indicated dbas results index
 #' 
 #' @param escon 
 #' @param rfindex 
@@ -510,21 +922,18 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       }
     )
     
-    
     # save report
     newsavename <- sub("\\.report$", "_i.report", savename)
     dbas$clearAndSave(F, newsavename)
     rm(dbas)
     log_info("Step 2 complete, processed report file created for: {newsavename}")
-   
+    
     dbas <- loadReport(F, newsavename)  
     # Step 3 - Conversion ####
     log_info("Collecting data for json export")
     
     compData <- dbas$integRes[, c("samp", "comp_name", "int_a")]
     compData$samp <- basename(compData$samp)
-    
-    
     
     bist <- unique(get_field2(esids, "dbas_is_table"))
     stopifnot(length(bist) == 1)
@@ -554,8 +963,6 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     
     brepr <- unlist(unique(get_field2(esids, "dbas_replicate_regex")))
     
-    #bstation <- unique(get_field(esids, "station"))
-    #stopifnot(length(bstation) == 1)
     # build average area from replicates
     if (!is.null(brepr) && !is.na(brepr)) {
       log_info("Building replicate averages for testing")
@@ -587,10 +994,9 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
         # remove column
         dat$sd_norm_a <- NULL
         dat$rsd_norm_a <- NULL
-        
       }
       
-      # warning if sd for any comp is high
+      # Warning if sd for any comp is high
       if (any((100*datTemp$rsd_norm_a >= 30), na.rm = T))   {
         log_info("The SD of a detection in the replicates may be high")
         probleme <- subset(datTemp, 100*rsd_norm_a >= 30, comp_name, drop = TRUE)
@@ -789,19 +1195,36 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       checkFiles <- basename(get_field2(esids, "path"))
       
       resp5 <- elastic::Search(escon, bindex, body = sprintf('
-    {
-      "query": {
-        "terms": {
-          "filename": [%s]
+        {
+          "query": {
+            "terms": {
+              "filename": [%s]
+            }
+          },
+          "size": 0
         }
-      },
-      "size": 0
-    }
-    ', paste(dQuote(checkFiles,q = "\""), collapse = ", "))
+        ', paste(dQuote(checkFiles,q = "\""), collapse = ", "))
       )
       
       if (resp5$hits$total$value == length(datl)) {
         log_info("All docs imported into ElasticSearch")
+        # Add processing time and spectral library checksum to msrawfiles
+        for (i in esids) {
+          tryCatch(
+            add_latest_eval(escon, rfindex, esid = i, fieldName = "dbas_last_eval"),
+            error = function(cnd) {
+              log_error("Could not add processing time to id {i}")
+              message(cnd)
+            }
+          )
+          tryCatch(
+            add_sha256_spectral_library(escon, rfindex, esid = i),
+            error = function(cnd) {
+              log_error("Could not add sha256 of spec lib to id {i}")
+              message(cnd)
+            }
+          )
+        }
       } else {
         #browser()
         log_warn("Ingested data not found in batch starting with id {esids[1]}")
@@ -815,11 +1238,10 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       log_info("Completed batch starting with id {esids[1]}, file {checkFiles[1]}")
     }
   },
-    error = function(cnd) {
-      log_info("Error in proc_batch in batch starting with id {esids[1]}")
-      message(cnd)
-    },
-    finally = system("rm -f /scratch/nts/tmp/*")
+  error = function(cnd) {
+    log_error("Fail proc_batch in batch starting with id {esids[1]}: {conditionMessage(cnd)}")
+  },
+  finally = system("rm -f /scratch/nts/tmp/*")
   )
   
   if (!exists("datl") || length(datl) == 0)
@@ -852,54 +1274,61 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
 process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile, 
                            tmpPath = "/scratch/nts/tmp", numCores = 10) {
   startTime <- lubridate::now()
+  
+  # run checks
+  cr <- ntsportal::check_integrity_msrawfiles(escon = escon, rfindex = rfindex)
+  if (cr)
+    log_info("{rfindex} integrity checks complete")
   # Find out what files are in msrawfiles and not in dbas_is
-  get_files <- function(escon, indexToSearch) {
-    resx <- elastic::Search(escon, indexToSearch, body = '
-    {
-      "aggs": {
-        "files": {
-          "terms": {
-            "field": "filename",
-            "size": 100000
-          }
-        }
-      },
-      "size": 0
-    }
-  ')
-    stopifnot(resx$aggregations$files$sum_other_doc_count == 0)
-    vapply(resx$aggregations$files$buckets, "[[", i = "key", character(1))
-  }
-  
-  filesDbasIs <- get_files(escon, isindex)
-  filesDbasRf <- get_files(escon, rfindex)
-  filesToProcess <- setdiff(filesDbasRf, filesDbasIs)
-  if (length(filesToProcess) == 0) {
-    log_info("No files found to process")
-    return(NULL)
-  }
-    
-  # Get all ids of these files
-  # There is a limit to the number of files you can look for. Set with index.maxterms
-  # But it doesn't matter, this function will repeat anyway.
-  if (length(filesToProcess) > 65536)
-    filesToProcess <- filesToProcess[1:65536]
-  
-  fn_search_string <- paste(shQuote(filesToProcess, type = "cmd"), collapse = ", ")
-  res3 <- elastic::Search(escon, rfindex, body = sprintf('
-  {
-    "query": {
-      "terms": {
-        "filename": [%s]
-      }
-    },
-    "size": 10000,
-    "_source": false
-  }
-  ', fn_search_string))
-  
-  log_info("Found {res3$hits$total$value} files to process")
-  idsToProcess <- vapply(res3$hits$hits, "[[", i = "_id", character(1))
+  # get_files <- function(escon, indexToSearch) {
+  #   resx <- elastic::Search(escon, indexToSearch, body = '
+  #   {
+  #     "aggs": {
+  #       "files": {
+  #         "terms": {
+  #           "field": "filename",
+  #           "size": 100000
+  #         }
+  #       }
+  #     },
+  #     "size": 0
+  #   }
+  # ')
+  #   stopifnot(resx$aggregations$files$sum_other_doc_count == 0)
+  #   vapply(resx$aggregations$files$buckets, "[[", i = "key", character(1))
+  # }
+  # 
+  # filesDbasIs <- get_files(escon, isindex)
+  # filesDbasRf <- get_files(escon, rfindex)
+  # filesToProcess <- setdiff(filesDbasRf, filesDbasIs)
+  # filesToProcess <- get_uneval(escon, rfindex, evalType = "dbas_is")
+  # if (length(filesToProcess) == 0) {
+  #   log_info("No files found to process")
+  #   return(NULL)
+  # }
+  #   
+  # # Get all ids of these files
+  # # There is a limit to the number of files you can look for. Set with index.maxterms
+  # # But it doesn't matter, this function will repeat anyway.
+  # if (length(filesToProcess) > 65536)
+  #   filesToProcess <- filesToProcess[1:65536]
+  # 
+  # fn_search_string <- paste(shQuote(filesToProcess, type = "cmd"), collapse = ", ")
+  # res3 <- elastic::Search(escon, rfindex, body = sprintf('
+  # {
+  #   "query": {
+  #     "terms": {
+  #       "filename": [%s]
+  #     }
+  #   },
+  #   "size": 10000,
+  #   "_source": false
+  # }
+  # ', fn_search_string))
+  # 
+  # log_info("Found {res3$hits$total$value} files to process")
+  idsToProcess <- ntsportal::get_unevaluated(escon, rfindex, evalType = "dbas_is")
+  log_info("Processing {length(idsToProcess)} files")
   plan(multicore, workers = numCores)
   featsBySample <- furrr::future_map(idsToProcess, function(id) {
     proc_is_one(escon = escon, rfindex = rfindex, esid = id)
@@ -915,6 +1344,18 @@ process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile,
   system(
     glue::glue("{ingestpth} {configfile} {isindex} {jpth}")
   )
+  
+  # Add processing time to msrawfiles
+  for (i in idsToProcess) {
+    tryCatch(
+      add_latest_eval(escon, rfindex, esid = i, fieldName = "dbas_is_last_eval"),
+      error = function(cnd) {
+        log_error("Could not add processing time to id {i}")
+        message(cnd)
+      }
+    )
+  }
+  
   endTime <- lubridate::now()
   hrs <- round(as.numeric(endTime - startTime, units = "hours"))
   log_info("Processing IS (process_is_all) complete in {hrs} h")
@@ -954,8 +1395,9 @@ proc_is_one <- function(escon, rfindex, esid) {
       message(cnd)
     }
   )
-  if (is.null(repo) || crash || nrow(repo$ISresults) == 0) {
-    log_info("No results found for {esid[1]}")
+  if (!exists("repo") || is.null(repo) || crash || nrow(repo$ISresults) == 0) {
+    pth <- get_field(escon, rfindex, esid[1], fieldName = "path")
+    log_warn("No results found for {esid[1]}, {pth}")
     return(NULL)
   }
   crash2 <- FALSE

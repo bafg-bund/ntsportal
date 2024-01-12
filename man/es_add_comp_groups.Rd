@@ -2,18 +2,19 @@
 % Please edit documentation in R/es_add_data_to_docs.R
 \name{es_add_comp_groups}
 \alias{es_add_comp_groups}
-\title{Add compound classification data from spectral library to ntsp index}
+\title{Add compound classification data from spectral library to ntsp dbas index}
 \usage{
-es_add_comp_groups(escon, sdb, index)
+es_add_comp_groups(escon, sdb, index, filenames = "all")
 }
 \arguments{
 \item{sdb}{connection to spec lib}
 
-\item{index}{}
+\item{filenames}{Limit the update to results documents from specific files defined by 'filename' field.
+If 'all' (default) all dbas documents are updated.}
 }
 \value{
 True (invisibly)
 }
 \description{
-Add compound classification data from spectral library to ntsp index
+The dbas index will be updated with
 }

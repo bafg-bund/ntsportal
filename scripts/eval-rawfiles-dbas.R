@@ -6,8 +6,10 @@
 # carried out. Once everything is complete the script will 
 # change aliases to the newly created indices.
 
+# This script will processes all files and create new indices
+# For iterative processing of newly added files, use the script eval-new-rawfiles-dbas.R
+
 # usage (from ntsportal):
-# nohup Rscript scripts/
 # nohup Rscript scripts/eval-rawfiles-dbas.R &> /scratch/nts/logs/$(date +%y%m%d)_dbas_eval.log &
 # tail -f /scratch/nts/logs/$(date +%y%m%d)_dbas_eval.log
 # see crontab for processing
@@ -38,109 +40,10 @@ source("~Jewell/connect-ntsp.R")
 log_info("--------- eval-rawfiles-dbas.R v{VERSION} -----------")
 
 
-# Checks ####
+# Overall checks ####
 stopifnot(file.exists(CONFG))
 stopifnot(CORES == 1 || CORESBATCH == 1)
-
-# check presence of library
-resp2 <- elastic::Search(escon, RFINDEX, body = '
-                {
-  "query": {
-    "match_all": {}
-  },
-  "aggs": {
-    "csl_loc": {
-      "terms": {
-        "field": "dbas_spectral_library",
-        "size": 100
-      }
-    }
-  },
-  "size": 0
-}
-                ')
-
-buc <- resp2$aggregations$csl_loc$buckets
-cslp <- sapply(buc, function(x) x$key)
-stopifnot(all(file.exists(cslp)), all(grepl("\\.db$", cslp)))
-for (pth in cslp) {
-  dbtest <- DBI::dbConnect(RSQLite::SQLite(), pth)
-  if (!DBI::dbExistsTable(dbtest, "experiment"))
-    stop("DB not of the correct format")
-  DBI::dbDisconnect(dbtest)
-}
-
-# check presence of IS tables
-resp3 <- elastic::Search(escon, RFINDEX, body = '
-                {
-  "query": {
-    "match_all": {}
-  },
-  "aggs": {
-    "ist_loc": {
-      "terms": {
-        "field": "dbas_is_table",
-        "size": 100
-      }
-    }
-  },
-  "size": 0
-}
-                ')
-
-buc <- resp3$aggregations$ist_loc$buckets
-istp <- sapply(buc, function(x) x$key)
-stopifnot(all(file.exists(istp)), all(grepl("\\.csv$", istp)))
-
-# check db integrity
-# check that these fields exist in all docs
-stopifnot(
-  check_field(escon, RFINDEX, "dbas_is_table"),
-  check_field(escon, RFINDEX, "dbas_area_threshold"),
-  check_field(escon, RFINDEX, "dbas_rttolm"),
-  check_field(escon, RFINDEX, "dbas_mztolu"),
-  check_field(escon, RFINDEX, "dbas_mztolu_fine"),
-  check_field(escon, RFINDEX, "dbas_ndp_threshold"),
-  check_field(escon, RFINDEX, "dbas_rtTolReinteg"),
-  check_field(escon, RFINDEX, "dbas_ndp_m"),
-  check_field(escon, RFINDEX, "dbas_ndp_n"),
-  check_field(escon, RFINDEX, "dbas_instr"),
-  check_field(escon, RFINDEX, "pol"),
-  check_field(escon, RFINDEX, "chrom_method"),
-  check_field(escon, RFINDEX, "matrix"),
-  check_field(escon, RFINDEX, "data_source"),
-  check_field(escon, RFINDEX, "dbas_index_name"),
-  check_field(escon, RFINDEX, "blank"),
-  check_field(escon, RFINDEX, "path"),
-  check_field(escon, RFINDEX, "duration", onlyNonBlank = TRUE)
-)
-
-checkLoc <- elastic::Search(escon, RFINDEX, body = '
-                {
-  "query": {
-    "bool": {
-      "must_not": [
-        {
-          "exists": {
-            "field": "loc"
-          }
-        }
-      ],
-      "must": [
-        {
-          "term": {
-            "blank": {
-              "value": false
-            }
-          }
-        }
-      ]
-    }
-  }
-}
-                ')
-stopifnot(checkLoc$hits$total$value == 0)
-
+check_integrity_msrawfiles(escon = escon, rfindex = RFINDEX)
 
 # Collect rawfiles ####
 resp <- es_search_paged(escon, RFINDEX, searchBody = '
@@ -159,39 +62,14 @@ allFls <- data.frame(
   path = sapply(hits, function(x) x[["_source"]]$path)
 )
 
-fileCheck <- sapply(allFls$path, file.exists)
-if (!all(fileCheck)) {
-  log_warn("The following files do not exist")
-  noFile <- allFls$path[!fileCheck]
-  for (i in noFile)
-    message(i)
-  stop("Missing raw files")
-}
-
 allFls$dir <- dirname(allFls$path)
 allFls$base <- basename(allFls$path)
-
-# there can not be any duplicated filenames, because the filename is used
-# by the alignment to distinguish between files.
-# but in blanks it's okay, these will not factor into alignment anyway
-
-if (any(duplicated(allFls$base))) {
-  idsDup <- allFls[duplicated(allFls$base), "id"]
-  isBlank <- elastic::docs_mget(escon, RFINDEX, ids = idsDup, source = "blank")$docs
-  if (all(sapply(isBlank, function(d) d[["_source"]][["blank"]]))) {
-    warning("There are duplicated filenames in the db (but only for blanks)")
-  } else {
-    stop("There are duplicated filenames in the db")  
-  }
-}
-
-
 
 # Create batches for processing
 # split list by matrix, station, pol, and then by month in case of daily sampling
 # in the case of daily sampling, the batches are separated by the directory
 # they are in. The easiest way to split these is by the directory (which is
-# coincidentaly also the month)
+# coincidentally also the month)
 
 allFlsSpl <- split(allFls, allFls$dir)
 #View(allFlsSpl[[150]])
@@ -206,45 +84,8 @@ allFlsIds <- lapply(allFlsSpl, function(x) x$id)
 
 # Check batches
 log_info("Checking batches for consistency")
-# for each of these batches, certain fields must be the same
-# for all docs, these include:
-mustBeSame <- c(
-  "dbas_blank_regex",
-  "dbas_minimum_detections",
-  "dbas_is_table",
-  "dbas_is_name",
-  "duration",
-  "pol",
-  "matrix",
-  "data_source",
-  "chrom_method",
-  "dbas_index_name",
-  "dbas_alias_name"
-)
-
-allSame <- vapply(allFlsIds, function(x) {
-  all(vapply(mustBeSame, check_uniformity, esids = x, escon = escon, 
-             rfindex = RFINDEX, logical(1)))
-}, logical(1))
-
-if (!all(allSame))
-  stop("Batch similarity checks have failed")
-
-mustBeSameNonBlanks <- c(
-  "dbas_build_averages",
-  "dbas_replicate_regex"
-)
-
-allSame2 <- vapply(allFlsIds, function(x) {
-  all(vapply(mustBeSameNonBlanks, check_uniformity, esids = x, escon = escon, 
-             rfindex = RFINDEX, onlyNonBlanks = T, logical(1)))
-}, logical(1))
-
-if (!all(allSame2))
-  stop("Batch similarity checks have failed")
-
-
-log_info("Batch checks complete")
+check_batches_eval(escon = escon, rfindex = RFINDEX, batches = allFlsIds)
+log_info("Complete")
 
 # Create new indices ####
 resAlia <- elastic::Search(escon, RFINDEX, body = '
@@ -271,6 +112,8 @@ allInd <- vapply(allAlia, create_dbas_index, escon = escon, rfIndex = RFINDEX,
 log_info("currently {free_gb()} GB of memory available")
 log_info("Processing files (parallel)")
 # run tests using eval-rawfiles-dbas-tests.R
+
+
 # Process files ####
 numPeaksBatch <- parallel::mclapply(
   allFlsIds, #
@@ -296,7 +139,6 @@ system2("Rscript", UPDATESPECDB)
 
 # Add information to docs ####
 # should be moved to proc_batch function in the future
-
 sdb <- con_sqlite(SPECLIBPATH)
 
 # Add compound group, identifiers

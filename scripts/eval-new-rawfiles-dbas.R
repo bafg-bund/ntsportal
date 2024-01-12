@@ -1,0 +1,183 @@
+
+
+# Script to process remaining files in msrawfiles, which have not been processed yet.
+
+# The script will create batches from the new files by splitting the data by 
+# directory
+# If no new blanks are in the batches, these will be added to using the blanks
+# that are already in the directory from which the files were added
+
+# If files need to be reprocessed, this can be done by removing the field
+# "dbas_last_eval" from the msrawfiles doc. This means that any data from
+# this file will be removed in dbas index and the file will be reprocessed 
+# (including ingest).
+
+# usage (from ntsportal):
+# nohup Rscript scripts/eval-new-rawfiles-dbas.R &> /scratch/nts/logs/$(date +%y%m%d)_dbas_eval.log &
+# tail -f /scratch/nts/logs/$(date +%y%m%d)_dbas_eval.log
+
+VERSION <- "2024-01-11"
+
+# Variables ####
+RFINDEX <- "g2_msrawfiles"
+TEMPSAVE <- "/scratch/nts/tmp"
+CONFG <- "~/config.yml"
+INGESTPTH <- "/scratch/nts/ntsautoeval/ingest.sh"
+UPDATESPECDB <- "~/projects/ntsportal/scripts/update-spectral-library-ntsp.R"
+ADDANALYSIS <- "~/projects/ntsportal/scripts/compute-analysis-index.R"
+SPECLIBPATH <- "/scratch/nts/MS2_db_v9.db"  # temporary: only for adding group and formula after processing
+CORES <- 1
+CORESBATCH <- 6
+
+library(ntsworkflow)
+library(logger)
+library(ntsportal)
+
+startTime <- lubridate::now()
+#setwd("~/projects/ntsautoeval/msrawfiles-db/")
+
+# Create escon variable
+source("~Jewell/connect-ntsp.R")
+
+log_info("--------- eval-new-rawfiles-dbas.R v{VERSION} -----------")
+
+
+# Overall checks ####
+stopifnot(file.exists(CONFG))
+stopifnot(CORES == 1 || CORESBATCH == 1)
+# debug(check_integrity_msrawfiles)
+check_integrity_msrawfiles(escon = escon, rfindex = RFINDEX)
+
+# Collect rawfiles ####
+resp <- es_search_paged(escon, RFINDEX, searchBody = '
+  {
+    "query": {
+      "bool": {
+        "must_not": [
+          {
+            "exists": {
+              "field": "dbas_last_eval"
+            }
+          },
+          {
+            "term": {
+              "blank": true
+            }
+          }
+        ]
+      }
+    },
+  "_source": ["path"]
+  }
+', sort = "path:asc")
+hits <- resp$hits$hits
+dirs <- unique(dirname(vapply(hits, function(x) x[["_source"]]$path, character(1))))
+
+# Reprocess the entire directory
+# Each batch will be made up of the entire directory in which the file is found
+# and must contain at least one blank
+allFlsSpl <- lapply(dirs, function(pth) { # pth <- dirs[12]
+  res2 <- elastic::Search(
+    escon, RFINDEX, source = c("blank", "path"), size = 10000, 
+    body = list(
+      query = list(
+        regexp = list(
+          path = paste0(pth, ".*")
+        )
+      )
+    )
+  )
+  h <- res2$hits$hits
+  df <- data.frame(
+    id = vapply(h, function(x) x[["_id"]], character(1)),
+    index = vapply(h, function(x) x[["_index"]], character(1)),
+    path = vapply(h, function(x) x[["_source"]]$path, character(1)),
+    blank = vapply(h, function(x) x[["_source"]]$blank, logical(1))
+  )
+  if (!any(df$blank)) {
+    log_warn("No blanks found in {pth}, will not be processed")
+    return(NULL)
+  } else {
+    df$dir <- dirname(df$path)
+    df$base <- basename(df$path)
+    return(df)
+  }
+})
+
+allFlsSpl <- Filter(Negate(is.null), allFlsSpl)
+log_info("Processing {length(allFlsSpl)} batches, {nrow(do.call('rbind', allFlsSpl))} files")
+allFlsIds <- lapply(allFlsSpl, function(x) x$id)
+
+# Check batches
+log_info("Checking batches for consistency")
+
+check_batches_eval(escon = escon, rfindex = RFINDEX, batches = allFlsIds)
+log_info("Complete")
+
+log_info("currently {free_gb()} GB of memory available")
+
+# Remove the data in the dbas indices ####
+# Only data which are associated with the files to be processed will be removed
+# Get filenames of IDs
+allFlsNames <- lapply(allFlsSpl, function(x) x$base)
+allFlsIndex <- vapply(
+  allFlsIds, ntsportal::get_field, indexName = RFINDEX, 
+  fieldName = "dbas_index_name", escon = escon, justone = T, character(1)
+)
+
+for (fn in allFlsNames) {
+  for (iName in allFlsIndex) {
+    ntsportal::es_remove_by_filename(escon, iName, fn)
+  }
+}
+# For some reason doing it again works, the first time always fails with a conflict
+for (fn in allFlsNames) {
+  for (iName in allFlsIndex) {
+    ntsportal::es_remove_by_filename(escon, iName, fn)
+  }
+}
+
+#debug(proc_batch)
+# Minimum injections are two but the batch only has one sample
+numPeaksBatch <- parallel::mclapply(
+  allFlsIds, #
+  #allFlsIds[19],
+  proc_batch, 
+  escon = escon,
+  rfindex = RFINDEX,
+  tempsavedir = TEMPSAVE, 
+  ingestpth = INGESTPTH, 
+  configfile = CONFG,
+  coresBatch = CORESBATCH,
+  mc.cores = CORES,
+  mc.preschedule = FALSE
+)
+numPeaksBatch <- numPeaksBatch[sapply(numPeaksBatch, is.numeric)]
+numPeaksBatch <- as.numeric(numPeaksBatch)
+
+log_info("Completed all batches")
+log_info("Average peaks found per batch: {mean(numPeaksBatch)}")
+log_info("currently {free_gb()} GB of memory available")
+
+# Add data to newly created docs ####
+# Use filenames to find out which docs are new
+
+sdb <- con_sqlite(SPECLIBPATH)
+for (i in allFlsIndex) {
+  for (j in seq_along(allFlsNames)) {
+    es_add_comp_groups(escon, sdb, i, filenames = allFlsNames[[j]])
+    es_add_identifiers(escon, sdb, i, filenames = allFlsNames[[j]])
+  }
+}
+DBI::dbDisconnect(sdb)
+# Add analysis index ####
+if (any(grepl("_upb", allFlsIndex)))
+  system2("Rscript", ADDANALYSIS)
+
+endTime <- lubridate::now()
+hrs <- round(as.numeric(endTime - startTime, units = "hours"))
+
+log_info("--------- Completed eval-rawfiles-dbas.R in {hrs} h ------------")
+
+
+

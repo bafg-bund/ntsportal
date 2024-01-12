@@ -33,5 +33,7 @@ proc_batch(
 \item{noIngest}{logical, for testing purposes, no upload, just create json.}
 }
 \description{
-takes a series of esids and processes these as a batch.
+Takes a vector of esids and performs dbas on these as a batch. Files are
+evaluated using the settings in the msrawfiles index. Results are ingested to
+the indicated dbas results index
 }

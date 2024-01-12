@@ -163,17 +163,62 @@ es_add_rt_cluster <- function(escon, esindex) {
 }
 
 
-#' Add compound classification data from spectral library to ntsp index
+#' Get list of all compounds in an ntsp index
+#'
+#' Option to add a query to limit the documents
+#' @param escon 
+#' @param index 
+#' @param addQuery query content in the form of a list.
+#'
+#' @return
+#'
+#' @examples 
+#' \dontrun{
+#' termsSearch <- list(
+#'   terms = list(
+#'     filename = as.list(filenames)
+#'   )
+#' )
+#' 
+#' comps <- es_get_comps(escon, index, termsSearch)
+#' }
+#' 
+#' 
+es_get_comps <- function(escon, index, addQuery = NULL) {
+  aggsList <- list(
+    comps = list(
+      terms = list(
+        field = "name",
+        size = 100000
+      )
+    )
+  )
+  if (is.null(addQuery)) {
+    r <- elastic::Search(escon, index, body = list(aggs = aggsList), size = 0)
+  } else {
+    r <- elastic::Search(
+      escon, index, body = list(query = addQuery, aggs = aggsList), size = 0
+    )
+  }
+  vapply(r$aggregations$comps$buckets, function(x) x$key, character(1))
+}
+
+
+#' Add compound classification data from spectral library to ntsp dbas index
+#'
+#' The dbas index will be updated with 
 #'
 #' @param escon
 #' @param sdb connection to spec lib
 #' @param index
+#' @param filenames Limit the update to results documents from specific files defined by 'filename' field.
+#' If 'all' (default) all dbas documents are updated. 
 #'
 #' @return True (invisibly)
 #' @export
 #' @import dplyr
 #' @import logger
-es_add_comp_groups <- function(escon, sdb, index) {
+es_add_comp_groups <- function(escon, sdb, index, filenames = "all") {
   # allowed comp groups, as they are currently formated in spectral-lib
   # ntsp uses all lower case
   COMPGROUPS <- c(
@@ -203,54 +248,62 @@ es_add_comp_groups <- function(escon, sdb, index) {
   # first delete current compound groups, making sure there is no duplication
 
   log_info("Removing current comp_group field")
-
-
-  res <- elastic::docs_update_by_query(escon, index, body = '
-{
-  "query": {
-   "exists": {
-     "field": "comp_group"
-   }
- },
-  "script": {
-    "source": "ctx._source.remove(\'comp_group\')",
-    "lang": "painless"
-  }
-}
-')
-
-
+  
+  # build query body
+  queryBody = list(
+    bool = list(
+      must = list(
+        list(
+          exists = list(
+            field = "comp_group"
+          )
+        )
+      )
+    )
+  )
+  
+  if (filenames[1] != "all") {
+    termsSearch <- list(
+      terms = list(
+        filename = as.list(filenames)
+      )
+    )
+    res <- elastic::Search(escon, index, body = list(query = termsSearch), size = 0)
+    if (res$hits$total$value == 0) {
+      log_info("es_add_comp_groups: nothing to update")
+      return(FALSE)
+    }
+    queryBody$bool$must <- append(queryBody$bool$must, list(termsSearch))
+  } 
+  
+  # Build update body
+  updateBod <- list(
+    query = queryBody,
+    script = list(
+      source = "ctx._source.remove(\'comp_group\')",
+      lang = "painless"
+    )
+  )
+  
+  res <- elastic::docs_update_by_query(escon, index, body = updateBod)
+  
   if (res$timed_out) {
     stop("Unsuccessful removal of comp_group field")
   }
 
   log_info("Removed comp_group from {res$total} docs, adding new comp_group")
   rm(res)
-  # addition of compound groups ####
-  # get list of all compounds in db
-
-  res <- elastic::Search(escon, index,
-    body =
-      '
-{
-  "query": {
-    "match_all": {}
-  },
-  "size": 0,
-  "aggs": {
-    "comps": {
-      "terms": {
-        "field": "name",
-        "size": 10000
-      }
-    }
+  
+  # Addition of compound groups
+  # Get list of all compounds in db
+  
+  if (filenames[1] != "all") {
+    comps <- es_get_comps(escon, index, termsSearch)
+  } else {
+    comps <- es_get_comps(escon, index)
   }
-}
-'
-  )
-  comps <- sapply(res$aggregations$comps$buckets, function(x) x$key)
 
-  # function to get compound groups for each compound
+  # Function to get compound groups from sdb for each compound
   get_groups <- function(compName) {
     compt <- tbl(sdb, "compound")
     cg <- tbl(sdb, "compoundGroup")
@@ -275,84 +328,85 @@ es_add_comp_groups <- function(escon, sdb, index) {
 
   log_info("Updating comp_group on {length(compGroups)} compounds")
 
-  # loop through each compound and add classifications to elastic documents
+  # Loop through each compound and add classifications to elastic documents
 
   for (cp in names(compGroups)) {
     for (gr in compGroups[[cp]]) {
-      elastic::docs_update_by_query(escon, index, refresh = "true", body = sprintf(
-        '
-      {
-        "query": {
-          "term": {
-            "name": {
-              "value": "%s"
+      tryCatch(
+        elastic::docs_update_by_query(
+          escon, index, refresh = "true", 
+          body = sprintf(
+          '
+          {
+            "query": {
+              "term": {
+                "name": {
+                  "value": "%s"
+                }
+              }
+            },
+            "script": {
+              "source": "
+                if (ctx._source.comp_group == null) {
+                  ctx._source.comp_group = params.newGroup;
+                } else {
+                  ctx._source.comp_group = [ctx._source.comp_group];
+                  ctx._source.comp_group.add(params.newGroup);
+                }
+              ",
+              "lang": "painless",
+              "params": {
+                "newGroup": "%s"
+              }
             }
           }
-        },
-        "script": {
-          "source": "
-            if (ctx._source.comp_group == null) {
-              ctx._source.comp_group = params.newGroup;
-            } else {
-              ctx._source.comp_group = [ctx._source.comp_group];
-              ctx._source.comp_group.add(params.newGroup);
-            }
-          ",
-          "lang": "painless",
-          "params": {
-            "newGroup": "%s"
-          }
+          ', cp, gr
+          )
+        ),
+        error = function(cnd) {
+          log_error("Updated group {gr} failed for comp {cp}")
         }
-      }
-      ', cp, gr
-      ))
+      )
     }
   }
-
-
   log_info("Completed es_add_comp_groups on index {index}")
   invisible(TRUE)
 }
-
-
 
 #' Add formula, inchi and inchikey to docs in ntsp
 #'
 #' @param escon
 #' @param sdb
 #' @param index
+#' @param filenames Limit the update to results documents from specific files defined by 'filename' field.
+#' If 'all' (default) all dbas documents are updated. 
 #'
 #' @return
 #' @export
 #' @import dplyr
-es_add_identifiers <- function(escon, sdb, index) {
+es_add_identifiers <- function(escon, sdb, index, filenames = "all") {
   ctb <- tbl(sdb, "compound") %>%
     select(name, formula, inchi, inchikey, SMILES) %>%
     collect()
 
   # Get all compound names
-
-  res <- elastic::Search(escon, index, body = '
-                       {
-  "query": {
-    "match_all": {}
-  },
-  "size": 0,
-  "aggs": {
-    "comps": {
-      "terms": {
-        "field": "name",
-        "size": 100000
-      }
+  if (filenames[1] != "all") {
+    termsSearch <- list(
+      terms = list(
+        filename = as.list(filenames)
+      )
+    )
+    res <- elastic::Search(escon, index, body = list(query = termsSearch), size = 0)
+    if (res$hits$total$value == 0) {
+      logger::log_warn("es_add_identifiers: nothing to update")
+      return(FALSE)
     }
+    allComps <- es_get_comps(escon, index, termsSearch)
+  } else {
+    allComps <- es_get_comps(escon, index)
   }
-}
-')
 
-  # write table for checking
-  allComps <- vapply(res$aggregations$comps$buckets, "[[", character(1), i = "key")
-
-  # for each name, get formula
+  # For each comp, get formula and other data
 
   fdf <- data.frame(
     name = allComps,
@@ -361,51 +415,57 @@ es_add_identifiers <- function(escon, sdb, index) {
     inchikey = vapply(allComps, function(x) ctb[ctb$name == x, "inchikey", drop = TRUE], character(1)),
     smiles = vapply(allComps, function(x) ctb[ctb$name == x, "SMILES", drop = TRUE], character(1))
   )
-
   rownames(fdf) <- NULL
+  
   # Remove any rows with NA values, this data must be added to spec lib
   if (any(is.na(fdf))) {
     logger::log_warn("There are NA values in spectral library for formula, \
                      inchi, inchikey or smiles")
-    keep <- !apply(
+    narow <- apply(
       fdf[, c("formula", "inchi", "inchikey", "smiles")],
       1,
       function(x) any(is.na(x))
     )
-    fdf <- fdf[keep, ]
+    fdf <- fdf[!narow, ]
   }
-
+  
   for (i in seq_len(nrow(fdf))) {
-    tryCatch(
-      elastic::docs_update_by_query(escon, index, body = sprintf(
-        '
-    {
-      "query": {
-        "term": {
-          "name": {
-            "value": "%s"
-          }
-        }
-      },
-      "script": {
-        "source": "ctx._source.formula = params.form; ctx._source.inchi = params.inchi; ctx._source.inchikey = params.inchikey; ctx._source.smiles = params.smiles;",
-        "params": {
-          "form": "%s",
-          "inchi": "%s",
-          "inchikey": "%s",
-          "smiles": "%s"
-        },
-        "lang": "painless"
-      }
+    queryPart <- list(
+      term = list(
+        name = fdf[i, "name"]
+      )
+    )
+    if (filenames[1] != "all") {
+      queryPart <- list(
+        bool = list(
+          must = list(
+            queryPart,
+            termsSearch
+          )
+        )
+      )
     }
-    ', fdf[i, "name"], fdf[i, "formula"], fdf[i, "inchi"], fdf[i, "inchikey"],
-        fdf[i, "smiles"]
-      )),
+    scriptPart <- list(
+      source = "ctx._source.formula = params.form; ctx._source.inchi = params.inchi; ctx._source.inchikey = params.inchikey; ctx._source.smiles = params.smiles;",
+      params = list(
+        form = fdf[i, "formula"],
+        inchi = fdf[i, "inchi"],
+        inchikey = fdf[i, "inchikey"],
+        smiles = fdf[i, "smiles"]
+      )
+    )
+    tryCatch(
+      elastic::docs_update_by_query(
+        escon, index, body = list(query = queryPart, script = scriptPart)
+      ),
       error = function(cnd) {
-        logger::log_error("Error in es_add_identifiers for compound {fdf[i, 'name']} in index {index}")
+        logger::log_error(
+          "In es_add_identifiers for \
+          compound {fdf[i, 'name']} in index {index} \
+          with message {conditionMessage(cnd)}"
+        )
       }
     )
   }
-  logger::log_info("Completed es_add_identifiers")
   invisible(TRUE)
 }
