@@ -18,6 +18,7 @@ library(leaflet)
 library(markdown)
 library(ggplot2)
 library(crosstalk)
+library(shinybusy)
 
 ##-------------------------------------user check
 # How many days should sessions last?

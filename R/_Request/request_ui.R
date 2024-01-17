@@ -1,5 +1,4 @@
 request_ui <- function(id, df){ 
-  
   fluidPage(
   titlePanel("Title my awesome title"),
   fluidRow(

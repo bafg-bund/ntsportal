@@ -1,4 +1,4 @@
-data_ui <- function(id, func_get_data_data, es_glob_df){ 
+data_ui <- function(id, es_glob_df){ 
   
   #data_explorer_data_colnames <-colnames(es_glob_df)
   # observe({ 

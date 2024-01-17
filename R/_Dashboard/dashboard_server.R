@@ -7,15 +7,15 @@ dashboard_server <- function(id, es_glob_df){
     #glob_dashboard_data <- func_get_demo_data_dash
     #print("dash data")
     #print(es_glob_df)
-    observeEvent(input$filter_river,{
-      print("dash server")
-      print(head(es_glob_df[,1:4]))
+    observeEvent(es_glob_df(),{ # input$filter_river
+      print("dash server update :)")
+      print(dim(es_glob_df()))
       #glob_dashboard_data <- x_func_preprocessing_dashboard_data(data = es_glob_df)
     })
     
     #glob_dashboard_data <- reactive({ x_func_preprocessing_dashboard_data(data = es_glob_df) })
-    glob_dashboard_data <- eventReactive(input$filter_river,{ 
-      temp_data <- x_func_preprocessing_dashboard_data(data = es_glob_df) 
+    glob_dashboard_data <- eventReactive(es_glob_df(),{ # input$filter_river
+      temp_data <- x_func_preprocessing_dashboard_data( data = es_glob_df() ) 
       return(temp_data)
       })
     
@@ -38,7 +38,8 @@ dashboard_server <- function(id, es_glob_df){
       
       glob_dashboard_data() %>% 
         filter(
-          is.null(input$filter_river) | glob_dashboard_data()$River %in% input$filter_river,
+          #is.null(input$filter_river) | glob_dashboard_data()$River %in% input$filter_river,
+          glob_dashboard_data()$River %in% input$filter_river,
           #is.null(input$filter_station) | glob_dashboard_data()$Stations %in% input$filter_station,
           #is.null(input$filter_ufid) | glob_dashboard_data()$Ufid %in% input$filter_ufid,
           
@@ -96,47 +97,47 @@ dashboard_server <- function(id, es_glob_df){
                   Intensity=mean(Intensity)
         )
 
-      
+        print(summ_data)
 
         colorData <- glob_dashboard_data()[["Intensity"]]
-        pal <- colorBin("viridis", colorData, 7, pretty = FALSE)
+        pal <- colorBin("viridis", colorData, 7, pretty = TRUE)
         
 
         leafletProxy("map", data = summ_data) %>%
-        clearShapes() %>%
+        clearMarkers() %>%
         addCircleMarkers(~lon, ~lat,
                    radius=6,
-                   layerId=~Stations, #X_source.station,
+                   layerId=~Stations, #X_source.station, Stations
                    stroke=FALSE,
                    fillOpacity=0.7,
                    fillColor=~pal(Intensity)
                    ) %>%
-        addLegend("bottomright", pal=pal, values=colorData, title="Intensity", layerId="colorLegend")
+        addLegend("bottomright", pal=pal, colorData, title="Intensity", layerId="colorLegend")
     })
     
     # Show a popup at the given Stations
     show_staion_popup <- function(Stations, lat, lng, summ_data) {
       selected_station <- summ_data[summ_data$Stations == Stations,]
       content <- as.character(tagList(
-        tags$h4("Station:", selected_station$Stations, 
-                "Detections:", selected_station$Detections),
-        #tags$strong(HTML(sprintf("River: %s", unique(selected_station$River) ))),
+        tags$h4("Station:", selected_station$Stations[1], 
+                "Detections:", selected_station$Detections[1]),
+        tags$strong(HTML(sprintf("River: %s", unique(selected_station$River[1]) ))),
         tags$br(),
-        #tags$strong(HTML(sprintf("Classification: %s", na.omit(unique(unlist(selected_station$Classification))) ))),
+        #tags$strong(HTML(sprintf("Classification: %s", na.omit(unique(unlist(selected_station$Classification[1] ))) ))),
         tags$br(),
-        #tags$strong(HTML(sprintf("Formula: %s", na.omit(unique(unlist(selected_station$Formula))) ))),
+        tags$strong(HTML(sprintf("Formula: %s", na.omit(unique(unlist(selected_station$Formula[1] ))) ))),
         tags$br(),
-        #tags$strong(HTML(sprintf("Name: %s", na.omit(unique(unlist(selected_station$Name))) ))),  #list(na.omit(unique(unlist(temp_data$X_source.name))))
+        tags$strong(HTML(sprintf("Name: %s", na.omit(unique(unlist(selected_station$Name[1] ))) ))),  #list(na.omit(unique(unlist(temp_data$X_source.name))))
         tags$br(),
-        #tags$strong(HTML(sprintf("Ufid: %s", na.omit(unique(unlist(selected_station$Ufid))) ))),
+        tags$strong(HTML(sprintf("Ufid: %s", na.omit(unique(unlist(selected_station$Ufid[1] ))) ))),
         tags$br(),
-        sprintf("Median rt: %s", as.numeric(median(selected_station$tRet ))), 
+        sprintf("Median rt: %s", as.numeric(median(selected_station$tRet[1] ))), 
         tags$br(),
-        sprintf("Median mz: %s", as.numeric(median(selected_station$mz))), 
+        sprintf("Median mz: %s", as.numeric(median(selected_station$mz[1] ))), 
         tags$br(),
-        sprintf("Mean intensity: %s", as.numeric(median(selected_station$Intensity))),
+        sprintf("Mean intensity: %s", as.numeric(median(selected_station$Intensity[1] ))),
         tags$br(),
-        sprintf("Median Area: %s", as.numeric(median(selected_station$Area)))
+        sprintf("Median Area: %s", as.numeric(median(selected_station$Area[1] )))
       ))
       leafletProxy("map") %>% addPopups(lng, lat, content, layerId = Stations)
     }
@@ -161,10 +162,13 @@ dashboard_server <- function(id, es_glob_df){
         )
       
       leafletProxy("map") %>% clearPopups()
+
       event <- input$map_marker_click
       if (is.null(event))
         return()
 
+      print("event id")
+      print(event$id)
       isolate({
         show_staion_popup(event$id, event$lat, event$lng, summ_data)
       })
@@ -229,22 +233,25 @@ dashboard_server <- function(id, es_glob_df){
         )
       
 
-      colorData <- shared_bafg_data_explorer[["X_source.intensity"]]
-      pal <- colorBin("viridis", colorData, 7, pretty = FALSE)
+      #colorData <- shared_bafg_data_explorer[["Intensity"]]
+      #pal <- colorBin("viridis", colorData, 7, pretty = TRUE)
       
       leaflet(summ_data_exp) %>%
         addTiles() %>%
-        setView(lat = 50.34, lng = 7.59, zoom = 6) %>% # zoom orig 6 !!!
+        setView(lat = 50.34, lng = 7.59, zoom = 5) %>% # zoom orig 6 !!!
         addMarkers(~lon,
                    ~lat)
     })
 
     
     output$bafg_data_explorer <- DT::renderDataTable({
-      target <- which(names(shared_bafg_data_explorer$data()) %in% c("lon", "lat", "location")) - 1
+      #target <- which(names(shared_bafg_data_explorer$data()) %in% c("lon", "lat", "location")) - 1
       DT::datatable(shared_bafg_data_explorer,
+                    extensions = 'Buttons',
                     options = list(
-                      columnDefs = list(list(visible=FALSE, targets=target)),  #<- y ???
+                      dom = 'Bfrtip',
+                      buttons = c('csv', 'excel'),
+                      #columnDefs = list(list(visible=FALSE, targets=target)),  #<- y ???
                       searchHighlight = TRUE)
                     #filter = "top"
                     )

@@ -1,11 +1,16 @@
 x_func_preprocessing_dashboard_data <- function(data = NULL){
+  
+  list_col_name <- c("X_source.intensity", "X_source.ufid", "X_source.comp_group")
+  col_name_to_add <- list_col_name[!list_col_name %in% colnames(data)] 
+  if(length(col_name_to_add)!=0){data[,(col_name_to_add) := list(0)]}
+  
   dash_data <- data %>% 
     select( c(Name=X_source.name, # if available
               Formula=X_source.formula, 
               CAS_RN=X_source.cas, 
               Matrix=X_source.matrix, 
               Intensity=X_source.intensity, 
-              X_source.rtt, # user needs to select rtt.method with Chrom. Method filter
+              #X_source.rtt, # user needs to select rtt.method with Chrom. Method filter
               Area=X_source.area, 
               Chrom_Meth=X_source.chrom_method,
               Method=X_source.chrom_method,
@@ -30,7 +35,7 @@ x_func_preprocessing_dashboard_data <- function(data = NULL){
   return(dash_data)
 }
 
-
+# test <- x_func_preprocessing_dashboard_data(temp_data)
 
 
 

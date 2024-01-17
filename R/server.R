@@ -104,9 +104,9 @@ server <- function(input, output, session, clientData) {
 
   
   observe({
-    print("server change df")
+    print("main server change df")
     print(is.reactive(es_glob_df()))
-    print(head(es_glob_df()[,1:4]))
+    print(dim(es_glob_df()))
   })
   
 
@@ -114,7 +114,7 @@ server <- function(input, output, session, clientData) {
 
     
   
-  dashboard_server("create_dashboard", es_glob_df())
+  dashboard_server("create_dashboard", reactive(es_glob_df()))
   output$dashboard_stuff <- renderUI({
     req(credentials()$user_auth)
     dashboard_ui("create_dashboard", func_get_demo_data_dash(), es_glob_df()) 
@@ -138,10 +138,10 @@ server <- function(input, output, session, clientData) {
   
   
 
-  data_server("create_data", func_get_data_data(), es_glob_df())
+  data_server("create_data", reactive(es_glob_df()))
   output$data_stuff <- renderUI({
     req(credentials()$user_auth)
-    data_ui("create_data", func_get_data_data(), es_glob_df())
+    data_ui("create_data", es_glob_df())
   })
   
   
