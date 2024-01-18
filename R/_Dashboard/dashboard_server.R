@@ -209,6 +209,9 @@ dashboard_server <- function(id, es_glob_df, current_tab){
     
     df_ggplot <- debounce(reactive(shared_bafg_data_explorer$data(withSelection = TRUE)), millis = 250)
     output$line_plot_intensity_is_2 <- renderPlot({
+      # if (nrow(df_ggplot()) == 0)
+      #   return(NULL)
+      
       ggplot(df_ggplot()) +
         geom_line(aes(x = as.POSIXct(Time), y = Intensity, color = River), alpha = 0.5) +
         scale_colour_discrete(name  ="River") +
