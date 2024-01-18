@@ -1,10 +1,10 @@
-request_ui <- function(id, df){ 
+request_ui <- function(id){ 
   fluidPage(
   titlePanel("Title my awesome title"),
   fluidRow(
     column(3, wellPanel(
       h4("pre-request for data param"),
-      #--------------------------------get index
+#-------------------------------------- get index/source
       tags$h5("get index"),
       actionButton(NS(id, "get_index"), "connect to elastic", class = "btn-primary"),
       
@@ -21,7 +21,7 @@ request_ui <- function(id, df){
       tags$br(),tags$br(),tags$br(),tags$br(),tags$br(),tags$br(),
       verbatimTextOutput(NS(id, "text_req_index"))
       )),
-    
+#-------------------------------------- get parameter
     column(3, wellPanel(
       selectInput(NS(id, "in_req_station"),  "(in progress) Station input:", 
                   choices = NULL, multiple = TRUE),
@@ -40,7 +40,7 @@ request_ui <- function(id, df){
       selectInput(NS(id, "in_req_ufid"), "(in progress) Ufid input:", 
                   choices = NULL, multiple = TRUE)
       )),
-    
+#-------------------------------------- get parameter
     column(3,wellPanel(
       numericInput(NS(id, "in_number_req_mz"), "mz input:", 
                    min = 1, max = 20, value = 5, step = 0.0005),
@@ -65,7 +65,7 @@ request_ui <- function(id, df){
       tags$h5("get data"),
       actionButton(NS(id, "request_filtered_data"), "connect to elastic", class = "btn-primary")
       )),
-    
+#-------------------------------------- get json
     column(3,
            verbatimTextOutput(NS(id, "json_output"))
            )

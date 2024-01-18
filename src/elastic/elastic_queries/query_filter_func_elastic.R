@@ -1,65 +1,5 @@
 # body-function 
 
-# x_es_fun_body_time_source <- function(date_start="2011-01-24",
-#                                       date_end="2023-01-24",
-#                                       data_source="bfg"){
-#   body_filter <- paste0(
-#   '{
-#       "_source": {        
-#         "excludes": ["eic", "ms1", "ms2"]
-#       },
-#       "query": {
-#         "bool": {
-#           "must": [
-#             {
-#               "range": {
-#                 "start": {
-#                   "gte": "',date_start,'" ,
-#                   "lte": "',date_end,'"
-#                 }
-#               }
-#             },
-#             {
-#               "terms": {
-#                 "data_source": ["',data_source,'"]
-#               }
-#             }
-#           ]
-#         }
-#       }
-#     }'
-#   )
-#   
-#   return(body_filter)
-# }
-
-
-
-
-# x_es_fun_body_query_filter <- function(date_start="2011-01-24",
-#                                        date_end="2023-01-24",
-#                                        data_source="bfg",
-#                                        station="rhein_ko_l",
-#                                        river="rhine",
-#                                        matrix="water",
-#                                        tag="component_167394941953",
-#                                        comp_group="*",
-#                                        rtt_method=NULL,
-#                                        name=NULL,
-#                                        ufid=NULL,
-#                                        rtt_rt_min=NULL,
-#                                        rtt_rt_max=NULL,
-#                                        mz_min=NULL,
-#                                        mz_amx=NULL
-#                                        ){
-#   
-#   
-# }
-
-
-
-
-
 x_es_fun_query_filter_func_elastic <- function(date_start="2011-01-24",
                                                date_end="2023-01-24",
                                                data_source="bfg",
@@ -170,6 +110,62 @@ x_es_fun_query_filter_func_elastic <- function(date_start="2011-01-24",
 
 
 
+
+# x_es_fun_body_time_source <- function(date_start="2011-01-24",
+#                                       date_end="2023-01-24",
+#                                       data_source="bfg"){
+#   body_filter <- paste0(
+#   '{
+#       "_source": {        
+#         "excludes": ["eic", "ms1", "ms2"]
+#       },
+#       "query": {
+#         "bool": {
+#           "must": [
+#             {
+#               "range": {
+#                 "start": {
+#                   "gte": "',date_start,'" ,
+#                   "lte": "',date_end,'"
+#                 }
+#               }
+#             },
+#             {
+#               "terms": {
+#                 "data_source": ["',data_source,'"]
+#               }
+#             }
+#           ]
+#         }
+#       }
+#     }'
+#   )
+#   
+#   return(body_filter)
+# }
+
+
+
+
+# x_es_fun_body_query_filter <- function(date_start="2011-01-24",
+#                                        date_end="2023-01-24",
+#                                        data_source="bfg",
+#                                        station="rhein_ko_l",
+#                                        river="rhine",
+#                                        matrix="water",
+#                                        tag="component_167394941953",
+#                                        comp_group="*",
+#                                        rtt_method=NULL,
+#                                        name=NULL,
+#                                        ufid=NULL,
+#                                        rtt_rt_min=NULL,
+#                                        rtt_rt_max=NULL,
+#                                        mz_min=NULL,
+#                                        mz_amx=NULL
+#                                        ){
+#   
+#   
+# }
 
 
 

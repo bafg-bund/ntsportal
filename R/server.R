@@ -94,10 +94,10 @@ server <- function(input, output, session, clientData) {
 
   
   es_glob_df <- request_server("get_data", 
-                 func_get_demo_data())
+                               func_get_demo_data())
   output$request_stuff <- renderUI({
     req(credentials()$user_auth)
-  request_ui("get_data", test_data)  
+  request_ui("get_data")  
   })
 
 
@@ -106,11 +106,12 @@ server <- function(input, output, session, clientData) {
     return(temp_data)
   })
   
-  observe({
-    print("main server change df")
-    print(current_tab())
-    print(dim(es_glob_df()))
-  })
+  # debugging
+  # observe({
+  #   print("main server change df")
+  #   print(current_tab())
+  #   print(dim(es_glob_df()))
+  # })
   
 
 #--------------------------------------Start Dashboard-Tab

@@ -68,11 +68,9 @@ ui <- dashboardPage(
               uiOutput("home_stuff")
       ),
       #----------------------------------request
-      # ui script in R/_Request/request_ui.R
       tabItem("request",
               tags$br(),tags$br(),tags$br(),
               uiOutput("request_stuff")
-              #request_ui("get_data", test_data)        
       ),
       #----------------------------------dashboard
       tabItem("dashboard",

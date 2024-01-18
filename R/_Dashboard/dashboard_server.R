@@ -3,18 +3,13 @@ dashboard_server <- function(id, es_glob_df, current_tab){
     
     
     
-    #glob_dashboard_data <- func_get_dashboard_data
-    #glob_dashboard_data <- func_get_demo_data_dash
-    #print("dash data")
-    #print(es_glob_df)
-    observeEvent(es_glob_df(),{ # input$filter_river
-      print("dash server update :)")
-      print(dim(es_glob_df()))
-      #glob_dashboard_data <- x_func_preprocessing_dashboard_data(data = es_glob_df)
-    })
+    # observeEvent(es_glob_df(),{ c
+    #   print("dash server update :)")
+    #   print(dim(es_glob_df()))
+    # })
     
-    #glob_dashboard_data <- reactive({ x_func_preprocessing_dashboard_data(data = es_glob_df) })
-    glob_dashboard_data <- eventReactive(es_glob_df(),{ # input$filter_river
+
+    glob_dashboard_data <- eventReactive(es_glob_df(),{ 
       temp_data <- x_func_preprocessing_dashboard_data( data = es_glob_df() ) 
       return(temp_data)
       })
@@ -34,8 +29,6 @@ dashboard_server <- function(id, es_glob_df, current_tab){
    # A reactive expression that returns the set of stations that are
    # in bounds right now
     station_bounds <- reactive({
-      #print("map param")
-      #print(input$map_bounds)
       if (is.null(input$map_bounds))
         return(glob_dashboard_data()[FALSE,])
       bounds <- input$map_bounds
@@ -56,7 +49,7 @@ dashboard_server <- function(id, es_glob_df, current_tab){
     
     
     output$line_plot_intensity <- renderPlot({
-      # If no stations are in view, don't plot
+      # If no river are in view, don't plot
       if (nrow(station_bounds()) == 0)
         return(NULL)
       
@@ -68,7 +61,7 @@ dashboard_server <- function(id, es_glob_df, current_tab){
     })
     
     output$line_plot_intensity_is <- renderPlot({
-      # If no stations are in view, don't plot
+      # If no river are in view, don't plot
       if (nrow(station_bounds()) == 0)
         return(NULL)
       
@@ -105,13 +98,11 @@ dashboard_server <- function(id, es_glob_df, current_tab){
         )
       })
 
-        print("circle")
-        #print(summ_data())
-        print(current_tab())
-        print(input$nav)
+        # print("circle") # for debugging
+        # print(summ_data()) # for debugging
+        # print(current_tab()) # for debugging
+        # print(input$nav) # for debugging
         
-        
-        #req(current_tab() == "dashboard") 
         colorData <- summ_data()[["Intensity"]]
         pal <- colorBin("Dark2", colorData, 7, pretty = TRUE) # viridis
         
@@ -140,7 +131,7 @@ dashboard_server <- function(id, es_glob_df, current_tab){
         tags$br(),
         tags$strong(HTML(sprintf("Formula: %s", na.omit(unique(unlist(selected_station$Formula[1] ))) ))),
         tags$br(),
-        tags$strong(HTML(sprintf("Name: %s", na.omit(unique(unlist(selected_station$Name[1] ))) ))),  #list(na.omit(unique(unlist(temp_data$X_source.name))))
+        tags$strong(HTML(sprintf("Name: %s", na.omit(unique(unlist(selected_station$Name[1] ))) ))),  
         tags$br(),
         tags$strong(HTML(sprintf("Ufid: %s", na.omit(unique(unlist(selected_station$Ufid[1] ))) ))),
         tags$br(),
@@ -183,8 +174,8 @@ dashboard_server <- function(id, es_glob_df, current_tab){
       if (is.null(event))
         return()
 
-      print("event id")
-      print(event)
+      # print("event id") # for debugging
+      # print(event) # for debugging
       isolate({
         show_staion_popup(event$id, event$lat, event$lng, summ_data)
       })
@@ -192,7 +183,7 @@ dashboard_server <- function(id, es_glob_df, current_tab){
     
     
     
-    ## Data Explorer ###########################################
+#-------------------------------------- Data Explorer
     
     
     reactive_bafg_data_explorer <- reactive({
@@ -215,8 +206,6 @@ dashboard_server <- function(id, es_glob_df, current_tab){
     })
     
     shared_bafg_data_explorer <- SharedData$new(reactive_bafg_data_explorer)
-    #reactive(shared_bafg_data_explorer$data(withSelection = TRUE))
-    
     
     df_ggplot <- debounce(reactive(shared_bafg_data_explorer$data(withSelection = TRUE)), millis = 250)
     output$line_plot_intensity_is_2 <- renderPlot({
@@ -226,7 +215,6 @@ dashboard_server <- function(id, es_glob_df, current_tab){
         xlab(label = NULL) +
         ylab(label = "Intensity")
     })
-    
     
     output$map2 <- renderLeaflet({
       
@@ -272,8 +260,6 @@ dashboard_server <- function(id, es_glob_df, current_tab){
                     #filter = "top"
                     )
     }, server = FALSE)
-    
-
     
   })
 }

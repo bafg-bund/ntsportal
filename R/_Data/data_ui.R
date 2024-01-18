@@ -1,12 +1,5 @@
 data_ui <- function(id, es_glob_df){ 
   
-  #data_explorer_data_colnames <-colnames(es_glob_df)
-  # observe({ 
-  #   print("data_ui_col_names")
-  #   data_explorer_data_colnames <- colnames(es_glob_df)
-  #   print(data_explorer_data_colnames)
-  # })
-  
   fluidPage(
     titlePanel("bafg data explorer"),
     fluidRow(
@@ -14,16 +7,12 @@ data_ui <- function(id, es_glob_df){
              tags$br(),
              actionButton(NS(id, "view_bafg_data"), "View Selection", class = "btn-primary"),
              tags$br(),tags$br(),tags$br(),
-             pickerInput(NS(id, "picker"), "Choose", choices = colnames(es_glob_df), #data_explorer_data_colnames,
+             pickerInput(NS(id, "picker"), "Choose", choices = colnames(es_glob_df), 
                          options = list(`actions-box` = TRUE), multiple = TRUE)
              
              ),
       column(11,
              tags$br(),
-             #box(
-               #width = NULL,
-               #status = "primary",
-               #title = "bafg data",
                DT::dataTableOutput(NS(id, "bafg_data"))
                
                #)

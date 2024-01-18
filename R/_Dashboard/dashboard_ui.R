@@ -1,16 +1,17 @@
 dashboard_ui <- function(id, es_glob_df){
   
 
-  #dashboard_data <- func_get_demo_data_dash
   dashboard_data <- x_func_preprocessing_dashboard_data(data = es_glob_df)
   observeEvent(dashboard_data,{
-    print("dash ui update :)")
-    #print(dashboard_data)
+    # print("dash ui update :)") # for debugging
+    # print(dashboard_data) # for debugging
   })
   
   navbarPage("my map", 
              id=NS(id, "nav"),
-             
+ 
+#-------------------------------------- interactive map             
+                         
              tabPanel("Interactive map",
                       div(class="outer",
                           
@@ -39,7 +40,9 @@ dashboard_ui <- function(id, es_glob_df){
                   
                       )
              ),
-             
+
+#-------------------------------------- data explorer 
+
              tabPanel("Data explorer",
                       fluidRow(
                         column(7, plotOutput(NS(id, "line_plot_intensity_is_2"), height = 350)),

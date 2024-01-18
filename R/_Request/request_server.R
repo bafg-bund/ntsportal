@@ -1,7 +1,8 @@
 request_server <- function(id, func_get_demo_data){
   moduleServer(id, function(input, output, session) {
     
-
+#-------------------------------------- get and fill index/source 
+    
     get_index <- eventReactive(input$get_index,{
       show_modal_spinner()
       temp_data <- x_es_fun_list_indices()
@@ -9,7 +10,7 @@ request_server <- function(id, func_get_demo_data){
       })
     
     observe({
-      print("get index done :)")
+      # print("get index done :)") # for debugging
       updateSelectInput(session, "in_req_index", choices = get_index()$index[[1]], selected = get_index()$index[[1]])
       updateSelectInput(session, "in_req_source", choices = get_index()$source[[1]], selected = get_index()$source[[1]])
       updateDateRangeInput(session, "in_req_date_range",
@@ -23,25 +24,23 @@ request_server <- function(id, func_get_demo_data){
       })
 
     
-    
-    
-    
+#-------------------------------------- get and fill parameter   
     
     get_parameters <- eventReactive(input$get_parameters,{
       show_modal_spinner()
-      print("get param :)") # for debugging
-      print(input$in_req_source)
+      # print("get param :)") # for debugging
+      # print(input$in_req_source) # for debugging
       temp_data <- x_es_func_get_parameters(index_list = input$in_req_index, 
                                             data_source = ifelse(is.null(input$in_req_source), "bfg", input$in_req_source), #input$in_req_source, 
                                             date_start = input$in_req_date_range[1], 
                                             date_end = input$in_req_date_range[2], 
                                             size = 10000)
       return(temp_data)
-      }) 
+      })
+    
     observe({
-      print(get_parameters()$rtt_method[[1]]) # for debugging
+      # print(get_parameters()$rtt_method[[1]]) # for debugging
       
-
       updateSelectInput(session, "in_req_station", choices = get_parameters()$station[[1]])
       updateSelectInput(session, "in_req_river", choices = get_parameters()$river[[1]])
       updateSelectInput(session, "in_req_matrix", choices = get_parameters()$matrix[[1]])
@@ -78,7 +77,6 @@ request_server <- function(id, func_get_demo_data){
       })
     
     
-    #data_source <- toString(paste(input$in_req_source, collapse = '", "'))
     
     output$text_req_index <- renderText({
       input$get_parameters
@@ -91,7 +89,7 @@ request_server <- function(id, func_get_demo_data){
       
     })
     
-    
+#-------------------------------------- create query json     
 
     get_json_query_1 <- eventReactive(input$request_filtered_data,{
       
@@ -141,22 +139,22 @@ request_server <- function(id, func_get_demo_data){
       return(json_text)
     })
     
-    
+
+#-------------------------------------- load data demo/elastic        
 
     es_glob_df <- reactiveVal({func_get_demo_data})
-    #es_glob_df$data_table <- func_get_demo_data
-    #print(es_glob_df$data_table)
+
 
     observeEvent(get_json_query_1(),{
       show_modal_spinner()
-      print("action get data")
+      #print("action get data") # for debugging
       temp_data <- x_es_fun_get_data_from_elastic(index_list = input$in_req_index, body = get_json_query_1()) #(index_list = input$in_req_index)
       es_glob_df(temp_data)
-      print(dim(es_glob_df()))
+      #print(dim(es_glob_df())) # for debugging
       remove_modal_spinner()
     })
     
-
+#-------------------------------------- display query json 
 
     output$json_output <- renderText({
 
@@ -165,7 +163,8 @@ request_server <- function(id, func_get_demo_data){
 
       isolate((jsonlite::prettify(get_json_query_1(),1)))
     })
-    
+
+#-------------------------------------- return reactive glob df          
      return(es_glob_df)
      
     })
