@@ -1,6 +1,6 @@
 x_func_preprocessing_dashboard_data <- function(data = NULL){
   
-  list_col_name <- c("X_source.intensity", "X_source.ufid", "X_source.comp_group")
+  list_col_name <- c("X_source.intensity", "X_source.ufid", "X_source.comp_group", "X_source.name", "X_source.formula")
   col_name_to_add <- list_col_name[!list_col_name %in% colnames(data)] 
   if(length(col_name_to_add)!=0){data[,(col_name_to_add) := list(0)]}
   

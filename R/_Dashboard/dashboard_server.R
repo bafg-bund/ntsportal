@@ -1,4 +1,4 @@
-dashboard_server <- function(id, es_glob_df){ 
+dashboard_server <- function(id, es_glob_df, current_tab){ 
   moduleServer(id, function(input, output, session) {
     
     
@@ -19,17 +19,23 @@ dashboard_server <- function(id, es_glob_df){
       return(temp_data)
       })
     
+
     
     output$map <- renderLeaflet({
+      req(current_tab() == "dashboard") 
       leaflet() %>%
         addTiles() %>%
         setView(lat = 50.34, lng = 7.59, zoom = 6) # zoom orig 6 !!!
     })
     
+
+    
     
    # A reactive expression that returns the set of stations that are
    # in bounds right now
     station_bounds <- reactive({
+      #print("map param")
+      #print(input$map_bounds)
       if (is.null(input$map_bounds))
         return(glob_dashboard_data()[FALSE,])
       bounds <- input$map_bounds
@@ -76,10 +82,11 @@ dashboard_server <- function(id, es_glob_df){
     
     # This observer is responsible for maintaining the circles and legend,
     # according to the variables the user has chosen to map to color and size.
-    observe({
+    observeEvent(station_bounds(),{
       
       
-      summ_data <- station_bounds() %>%
+      summ_data <- reactive({
+        station_bounds() %>%
         group_by(Stations) %>%
         reframe(Detections=n(),
                   lon=unique(lon),
@@ -96,14 +103,20 @@ dashboard_server <- function(id, es_glob_df){
                   River=toString(na.omit(unique(River))),
                   Intensity=mean(Intensity)
         )
+      })
 
-        print(summ_data)
-
-        colorData <- glob_dashboard_data()[["Intensity"]]
-        pal <- colorBin("viridis", colorData, 7, pretty = TRUE)
+        print("circle")
+        #print(summ_data())
+        print(current_tab())
+        print(input$nav)
+        
+        
+        #req(current_tab() == "dashboard") 
+        colorData <- summ_data()[["Intensity"]]
+        pal <- colorBin("Dark2", colorData, 7, pretty = TRUE) # viridis
         
 
-        leafletProxy("map", data = summ_data) %>%
+        leafletProxy("map", session, data = summ_data()) %>%
         clearMarkers() %>%
         addCircleMarkers(~lon, ~lat,
                    radius=6,
@@ -142,18 +155,19 @@ dashboard_server <- function(id, es_glob_df){
       leafletProxy("map") %>% addPopups(lng, lat, content, layerId = Stations)
     }
     # When map is clicked, show a popup with info
-    observe({
+    observeEvent(input$map_marker_click,{
+
       summ_data <- station_bounds() %>%
         group_by(Stations) %>%
         reframe(Detections=n(),
                 lon=unique(lon),
                 lat=unique(lat),
-                Name=toString(na.omit(unique(Name))),
-                Formula=toString(na.omit(unique(Formula))),
-                Ufid=toString(na.omit(unique(Ufid))),
+                Name=toString(na.omit(unique(Name)[1:10])),
+                Formula=toString(na.omit(unique(Formula)[1:10])),
+                Ufid=toString(na.omit(unique(Ufid)[1:10])),
                 tRet=mean(tRet),
                 mz=mean(mz),
-                Classification=toString(na.omit(unique(Classification))),
+                Classification=toString(na.omit(unique(Classification)[1:10])),
                 Area=median(Area),
                 Area_normalized=median(Area_normalized),
                 Stations=toString(na.omit(unique(Stations))),
@@ -161,6 +175,8 @@ dashboard_server <- function(id, es_glob_df){
                 Intensity=mean(Intensity)
         )
       
+
+
       leafletProxy("map") %>% clearPopups()
 
       event <- input$map_marker_click
@@ -168,7 +184,7 @@ dashboard_server <- function(id, es_glob_df){
         return()
 
       print("event id")
-      print(event$id)
+      print(event)
       isolate({
         show_staion_popup(event$id, event$lat, event$lng, summ_data)
       })

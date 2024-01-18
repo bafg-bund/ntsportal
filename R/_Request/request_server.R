@@ -30,7 +30,12 @@ request_server <- function(id, func_get_demo_data){
     get_parameters <- eventReactive(input$get_parameters,{
       show_modal_spinner()
       print("get param :)") # for debugging
-      temp_data <- x_es_func_get_parameters(index_list = input$in_req_index, data_source = input$in_req_source, date_start = input$in_req_date_range[1], date_end = input$in_req_date_range[2], size = 10000)
+      print(input$in_req_source)
+      temp_data <- x_es_func_get_parameters(index_list = input$in_req_index, 
+                                            data_source = ifelse(is.null(input$in_req_source), "bfg", input$in_req_source), #input$in_req_source, 
+                                            date_start = input$in_req_date_range[1], 
+                                            date_end = input$in_req_date_range[2], 
+                                            size = 10000)
       return(temp_data)
       }) 
     observe({
@@ -103,6 +108,22 @@ request_server <- function(id, func_get_demo_data){
                 "start": {
                   "gte": "',input$in_req_date_range[1],'" ,
                   "lte": "',input$in_req_date_range[2],'"
+                }
+              }
+            },
+            {
+              "range": {
+                "mz": {
+                  "gte": "',input$in_slider_req_mz[1],'" ,
+                  "lte": "',input$in_slider_req_mz[2],'"
+                }
+              }
+            },
+            {
+              "range": {
+                "rt": {
+                  "gte": "',input$in_slider_req_rtt[1],'" ,
+                  "lte": "',input$in_slider_req_rtt[2],'"
                 }
               }
             },

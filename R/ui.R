@@ -36,16 +36,16 @@ ui <- dashboardPage(
       
     ),
 
-    sidebarMenu(
+    sidebarMenu(id="main_tabs",
       menuItem("Home", icon = icon("home"), tabName = "home"),
       menuItem("Request", icon = icon("database"), tabName = "request"),
       menuItem("Dashboard", icon = icon("chart-line"), tabName = "dashboard"),
       menuItem("Data", icon = icon("table"), tabName = "data"),
-      menuItem("Help", icon = icon("hands-helping"), tabName = "help"),
-      menuItem("Generate Report", tabName = "sectors", icon = icon("download"),
-               radioButtons('format', 'Document format', c('PDF', 'Word'),inline = FALSE, selected = 1),
-               downloadButton("report", "Download Report", class = "butt"),
-               tags$head(tags$style(".butt{color: blue !important;}")))
+      menuItem("Help", icon = icon("hands-helping"), tabName = "help")
+      # menuItem("Generate Report", tabName = "sectors", icon = icon("download"),
+      #          radioButtons('format', 'Document format', c('PDF', 'Word'),inline = FALSE, selected = 1),
+      #          downloadButton("report", "Download Report", class = "butt"),
+      #          tags$head(tags$style(".butt{color: blue !important;}")))
     )
   ),
   

@@ -1,4 +1,4 @@
-dashboard_ui <- function(id, func_get_demo_data_dash, es_glob_df){
+dashboard_ui <- function(id, es_glob_df){
   
 
   #dashboard_data <- func_get_demo_data_dash
@@ -8,7 +8,8 @@ dashboard_ui <- function(id, func_get_demo_data_dash, es_glob_df){
     #print(dashboard_data)
   })
   
-  navbarPage("my map", id="nav",
+  navbarPage("my map", 
+             id=NS(id, "nav"),
              
              tabPanel("Interactive map",
                       div(class="outer",
