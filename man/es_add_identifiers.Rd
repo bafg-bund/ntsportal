@@ -4,11 +4,14 @@
 \alias{es_add_identifiers}
 \title{Add formula, inchi and inchikey to docs in ntsp}
 \usage{
-es_add_identifiers(escon, sdb, index, filenames = "all")
+es_add_identifiers(escon, sdb, index, filenames = "all", compoundLimit = "all")
 }
 \arguments{
 \item{filenames}{Limit the update to results documents from specific files defined by 'filename' field.
 If 'all' (default) all dbas documents are updated.}
+
+\item{compoundLimit}{Limit the update to particular compounds, if 'all', 
+(default) all compounds are updated.}
 }
 \description{
 Add formula, inchi and inchikey to docs in ntsp

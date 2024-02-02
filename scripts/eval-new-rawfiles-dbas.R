@@ -16,7 +16,11 @@
 # nohup Rscript scripts/eval-new-rawfiles-dbas.R &> /scratch/nts/logs/$(date +%y%m%d)_dbas_eval.log &
 # tail -f /scratch/nts/logs/$(date +%y%m%d)_dbas_eval.log
 
-VERSION <- "2024-01-11"
+# If there is an error in processing a file, you can use the function 
+# ntsportal::reset_eval, which will remove the last processing date and
+# and therefore the file will be processed again
+
+VERSION <- "2024-01-23"
 
 # Variables ####
 RFINDEX <- "g2_msrawfiles"
@@ -82,7 +86,7 @@ allFlsSpl <- lapply(dirs, function(pth) { # pth <- dirs[12]
     body = list(
       query = list(
         regexp = list(
-          path = paste0(pth, ".*")
+          path = paste0(pth, "/[^/]*")
         )
       )
     )
@@ -105,6 +109,8 @@ allFlsSpl <- lapply(dirs, function(pth) { # pth <- dirs[12]
 })
 
 allFlsSpl <- Filter(Negate(is.null), allFlsSpl)
+stopifnot(all(sapply(allFlsSpl, function(x) length(unique(x$dir))) == 1))
+
 log_info("Processing {length(allFlsSpl)} batches, {nrow(do.call('rbind', allFlsSpl))} files")
 allFlsIds <- lapply(allFlsSpl, function(x) x$id)
 
@@ -125,6 +131,8 @@ allFlsIndex <- vapply(
   fieldName = "dbas_index_name", escon = escon, justone = T, character(1)
 )
 
+log_info("Removing old files")
+
 for (fn in allFlsNames) {
   for (iName in allFlsIndex) {
     ntsportal::es_remove_by_filename(escon, iName, fn)
@@ -137,11 +145,12 @@ for (fn in allFlsNames) {
   }
 }
 
-#debug(proc_batch)
-# Minimum injections are two but the batch only has one sample
+#######################
+# Start processing ####
+log_info("Begin processing")
+
 numPeaksBatch <- parallel::mclapply(
-  allFlsIds, #
-  #allFlsIds[19],
+  allFlsIds, 
   proc_batch, 
   escon = escon,
   rfindex = RFINDEX,
@@ -177,7 +186,7 @@ if (any(grepl("_upb", allFlsIndex)))
 endTime <- lubridate::now()
 hrs <- round(as.numeric(endTime - startTime, units = "hours"))
 
-log_info("--------- Completed eval-rawfiles-dbas.R in {hrs} h ------------")
+log_info("--------- Completed eval-new-rawfiles-dbas.R in {hrs} h ------------")
 
 
 

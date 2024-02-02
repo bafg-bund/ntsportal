@@ -9,7 +9,52 @@
 # rfindex <- RFINDEX
 # fieldName <- "duration"
 # source("~/connect-ntsp.R")
-# rfindex <- "g2_msrawfiles"
+
+
+
+
+#' Reset files in msrawfiles, so that they will be processed again.
+#' 
+#' If there are errors it may be necessary to reprocess files. This function
+#' will remove the fields "dbas_last_eval" and "dbas_spectral_library_sha256"
+#' so that during the next processing, the files will be processed again.
+#'
+#' @param escon 
+#' @param rfindex 
+#' @param queryBody 
+#' @param indexType 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+reset_eval <- function(escon, rfindex, queryBody, indexType = "dbas") {
+  if (indexType == "dbas") {
+    field <- "dbas_last_eval"
+  } else {
+    stop("no other option yet")
+  }
+  toChange <- elastic::Search(escon, rfindex, body = list(query = queryBody), 
+                              size = 0)$hits$total$value
+  message(toChange, " docs will be changed.")
+  okToGo <- readline("Proceed? (y/n)")
+  field2 <- "dbas_spectral_library_sha256"
+  if (okToGo == "y") {
+    elastic::docs_update_by_query(
+      escon,
+      rfindex,
+      body = list(
+        query = queryBody,
+        script = sprintf("ctx._source.remove('%s'); ctx._source.remove('%s')", field, field2)
+      )
+    )
+  } else {
+    message("Nothing was changed")
+  }
+  invisible(TRUE)
+}
+
+
 
 #' Get files which have not yet been processed
 #' 
@@ -119,17 +164,25 @@ check_uniformity <- function(escon, rfindex, esids, fieldName, onlyNonBlanks = F
     escon, rfindex, 
     body = ifelse(onlyNonBlanks, bodyNonBlanks, bodyAll)
   )
+  
+  
   if (res$aggregations$uniformity$value == 1 ||
       res$aggregations$uniformity$value == 0) {
     return(TRUE) 
   } else {
-    warning("Non-uniformity in batch ", esids[1], " and field ", fieldName)
+    logger::log_error("Non-uniformity in batch starting with id {esids[1]} and \
+                     field {fieldName}")
     return(FALSE)
   } 
 }
 
+res_field <- function(res, field, value = character(1)) {
+  vapply(
+    res$hits$hits, 
+    function(x) x[["_source"]][[field]], value)
+}
 
-#' Get a field for a set of documents
+#' Get a field for a set of documents defined by id
 #'
 #' @param escon Elasticsearch connection object
 #' @param indexName 
@@ -176,6 +229,20 @@ get_field <- function(escon, indexName, esids, fieldName, simplify = T, justone 
   ret
 }
 
+#' Function factory just to avoid typing escon and index every time
+#'
+#' @param esids 
+#' @param fieldName 
+#' @param simplify 
+#' @param justone 
+#'
+#' @return
+get_field_builder <- function(escon, index) {
+  function(esids, fieldName, simplify = T, justone = F) {
+    get_field(escon = escon, indexName = index, esids = esids, 
+              fieldName = fieldName, simplify = simplify, justone = justone)
+  }
+}
 
 #' Get rare compounds from a Report
 #' 
@@ -414,6 +481,83 @@ es_remove_by_filename <- function(escon, index, filenames) {
 
 # Integrity checks ####
 
+check_dbas_replicate_regex <- function(escon, rfindex) {
+  
+  # dbas_replicate_regex must have brackets
+  ask_es <- function(rgx) {
+    elastic::Search(
+      escon, rfindex, size = 10000, source ="dbas_replicate_regex", 
+      body = list(
+        query = list(
+          bool = list(
+            must = list(
+              list(
+                exists = list(
+                  field = "dbas_replicate_regex"
+                )
+              )
+            ),
+            must_not = list(
+              list(
+                regexp = list(
+                  dbas_replicate_regex = rgx
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  }
+  res1 <- ask_es(".*\\(.*")
+  res2 <- ask_es(".*\\).*")
+  addUp <- sum(c(res1$hits$total$value, res2$hits$total$value))
+  if (addUp > 0) {
+    bad <- paste(
+      c(
+        unique(res_field(res1, "dbas_replicate_regex")),
+        unique(res_field(res2, "dbas_replicate_regex"))
+      ),
+      collapse = "\n"
+    )
+    stop("There are dbas_replicate_regex which are missing '()':\n", bad)
+  }
+  
+  # For each entry, check that the regex and filename work with str_replace
+  # Which is how the processing groups the replicates together
+  res3 <- ntsportal::es_search_paged(
+    escon, rfindex, source = c("filename", "dbas_replicate_regex"),
+    sort = "filename",
+    searchBody = list(
+      query = list(
+        exists = list(
+          field = "dbas_replicate_regex"
+        )
+      )
+    )
+  )
+  df <- data.frame(
+    rgx = res_field(res3, "dbas_replicate_regex"),
+    fn = res_field(res3, "filename")
+  )
+  df$repn <- apply(df, 1, function(x) stringr::str_replace(x[2], x[1], "\\1"))
+  df$bad <- df$fn == df$repn
+  
+  if (sum(df$bad > 0)) {
+    message("There are dbas_replicate_regex entries which do not match the filename")
+    print(subset(df, bad, c("rgx", "fn")))
+    stop("Correct errors before continuing")
+  }
+  perGroup <- as.numeric(by(df, df$repn, nrow, simplify = T))
+  if (any(perGroup < 2)) {
+    b <- df[df$repn %in% names(which(by(df, df$repn, nrow, simplify = T) < 2)), "fn"]
+    stop("These files do not produce replicate groups\n", 
+         paste(b, collapse = "\n"))
+  }
+  
+  invisible(TRUE)
+} 
+
 #' Check consistency of msrawfiles DB
 #' 
 #' Must be done before any processing operation
@@ -496,6 +640,7 @@ check_integrity_msrawfiles <- function(escon, rfindex) {
     check_field(escon, rfindex, "dbas_index_name"),
     check_field(escon, rfindex, "blank"),
     check_field(escon, rfindex, "path"),
+    check_field(escon, rfindex, "sample_source"),
     check_field(escon, rfindex, "duration", onlyNonBlank = TRUE)
   )
   
@@ -634,6 +779,8 @@ check_integrity_msrawfiles <- function(escon, rfindex) {
     log_warn("{length(badp)} files are not saved in HRMS/Messdaten, see directories:\n {tx}")
   }
   
+  check_dbas_replicate_regex(escon, rfindex)
+  
   invisible(TRUE)
 }
 
@@ -688,8 +835,17 @@ check_batches_eval <- function(escon, rfindex, batches) {
   if (!all(allSame2))
     stop("Batch similarity checks have failed")
   
-  # Check that the batch length is consistent with minimum number of detections
-  
+  # Check that each batch contains at least one blank
+  okBlank <- vapply(batches, function(x) {
+    br <- get_field(escon, rfindex, x, "dbas_blank_regex", justone = T)
+    fn <- get_field(escon, rfindex, x, "filename")
+    any(grepl(br, fn))
+  }, logical(1))
+  if (any(!okBlank)) {
+    b <- paste(vapply(batches[!okBlank], "[", i = 1, character(1)), collapse = ", ")
+    logger::log_error("Blanks not found in batch(s) starting with {b}")
+    return(FALSE)
+  }
   
   invisible(TRUE)
 }
@@ -962,11 +1118,12 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     }
     
     brepr <- unlist(unique(get_field2(esids, "dbas_replicate_regex")))
-    
+  
     # build average area from replicates
     if (!is.null(brepr) && !is.na(brepr)) {
       log_info("Building replicate averages for testing")
-      # using the regex, give all replicate samples the same name (best when replicates are indicated by _1 at the end)
+      # using the regex, give all replicate samples the same name 
+      # (best when replicates are indicated by _1 at the end)
       dat$reps <- stringr::str_replace(dat$samp, brepr, "\\1")
       averages <- by(dat, list(dat$reps, dat$comp_name), function(part) {
         comp1 <- part$comp_name[1]
@@ -1279,54 +1436,7 @@ process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile,
   cr <- ntsportal::check_integrity_msrawfiles(escon = escon, rfindex = rfindex)
   if (cr)
     log_info("{rfindex} integrity checks complete")
-  # Find out what files are in msrawfiles and not in dbas_is
-  # get_files <- function(escon, indexToSearch) {
-  #   resx <- elastic::Search(escon, indexToSearch, body = '
-  #   {
-  #     "aggs": {
-  #       "files": {
-  #         "terms": {
-  #           "field": "filename",
-  #           "size": 100000
-  #         }
-  #       }
-  #     },
-  #     "size": 0
-  #   }
-  # ')
-  #   stopifnot(resx$aggregations$files$sum_other_doc_count == 0)
-  #   vapply(resx$aggregations$files$buckets, "[[", i = "key", character(1))
-  # }
-  # 
-  # filesDbasIs <- get_files(escon, isindex)
-  # filesDbasRf <- get_files(escon, rfindex)
-  # filesToProcess <- setdiff(filesDbasRf, filesDbasIs)
-  # filesToProcess <- get_uneval(escon, rfindex, evalType = "dbas_is")
-  # if (length(filesToProcess) == 0) {
-  #   log_info("No files found to process")
-  #   return(NULL)
-  # }
-  #   
-  # # Get all ids of these files
-  # # There is a limit to the number of files you can look for. Set with index.maxterms
-  # # But it doesn't matter, this function will repeat anyway.
-  # if (length(filesToProcess) > 65536)
-  #   filesToProcess <- filesToProcess[1:65536]
-  # 
-  # fn_search_string <- paste(shQuote(filesToProcess, type = "cmd"), collapse = ", ")
-  # res3 <- elastic::Search(escon, rfindex, body = sprintf('
-  # {
-  #   "query": {
-  #     "terms": {
-  #       "filename": [%s]
-  #     }
-  #   },
-  #   "size": 10000,
-  #   "_source": false
-  # }
-  # ', fn_search_string))
-  # 
-  # log_info("Found {res3$hits$total$value} files to process")
+  # Get files to process
   idsToProcess <- ntsportal::get_unevaluated(escon, rfindex, evalType = "dbas_is")
   log_info("Processing {length(idsToProcess)} files")
   plan(multicore, workers = numCores)
@@ -1375,12 +1485,7 @@ process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile,
 proc_is_one <- function(escon, rfindex, esid) {
   
   # Get list of IS
-  get_field_builder <- function(escon, index) {
-    function(esids, fieldName, simplify = T, justone = F) {
-      get_field(escon = escon, indexName = index, esids = esids, 
-                fieldName = fieldName, simplify = simplify, justone = justone)
-    }
-  }
+  
   get_field2 <- get_field_builder(escon = escon, index = rfindex)
   isTab <- get_field2(esid, "dbas_is_table")
   stopifnot(length(isTab) == 1)

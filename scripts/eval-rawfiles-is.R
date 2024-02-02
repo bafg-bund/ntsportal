@@ -7,11 +7,11 @@
 logger::log_info("Processing files for IS (process_is_all)")
 
 source("~/connect-ntsp.R")
-
+#debug(process_is_all)
 ntsportal::process_is_all(
   escon = escon, 
   rfindex = "g2_msrawfiles",
-  isindex = "g2_dbas_is_bfg",
+  isindex = "ntsp_alias_is_dbas_bfg",
   ingestpth = "/scratch/nts/ntsautoeval/ingest.sh",
   configfile = "~/config.yml",
   tmpPath = "/scratch/nts/tmp", 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/eval_rawfiles_dbas.R
 \name{get_field}
 \alias{get_field}
-\title{Get a field for a set of documents}
+\title{Get a field for a set of documents defined by id}
 \usage{
 get_field(escon, indexName, esids, fieldName, simplify = T, justone = F)
 }
@@ -20,5 +20,5 @@ get_field(escon, indexName, esids, fieldName, simplify = T, justone = F)
 \item{justone}{}
 }
 \description{
-Get a field for a set of documents
+Get a field for a set of documents defined by id
 }

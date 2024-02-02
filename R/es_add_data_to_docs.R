@@ -237,7 +237,7 @@ es_add_comp_groups <- function(escon, sdb, index, filenames = "all") {
     "Pigment"
   )
 
-  log_info("{length(COMPGROUPS)} allowed groups: {paste(COMPGROUPS, collapse = ', ')}")
+  # log_info("{length(COMPGROUPS)} allowed groups: {paste(COMPGROUPS, collapse = ', ')}")
 
   # check that allowed comp groups are all in database
   testGroups <- tbl(sdb, "compoundGroup") %>% collect()
@@ -246,8 +246,6 @@ es_add_comp_groups <- function(escon, sdb, index, filenames = "all") {
   }
 
   # first delete current compound groups, making sure there is no duplication
-
-  log_info("Removing current comp_group field")
   
   # build query body
   queryBody = list(
@@ -270,7 +268,7 @@ es_add_comp_groups <- function(escon, sdb, index, filenames = "all") {
     )
     res <- elastic::Search(escon, index, body = list(query = termsSearch), size = 0)
     if (res$hits$total$value == 0) {
-      log_info("es_add_comp_groups: nothing to update")
+      #log_info("es_add_comp_groups: nothing to update")
       return(FALSE)
     }
     queryBody$bool$must <- append(queryBody$bool$must, list(termsSearch))
@@ -284,14 +282,12 @@ es_add_comp_groups <- function(escon, sdb, index, filenames = "all") {
       lang = "painless"
     )
   )
-  
-  res <- elastic::docs_update_by_query(escon, index, body = updateBod)
-  
-  if (res$timed_out) {
-    stop("Unsuccessful removal of comp_group field")
-  }
-
-  log_info("Removed comp_group from {res$total} docs, adding new comp_group")
+  tryCatch(
+    res <- elastic::docs_update_by_query(escon, index, body = updateBod),
+    error = function(cnd) {
+      logger::log_error("While deleting old comp groups: {conditionMessage(cnd)}")
+    }
+  )
   rm(res)
   
   # Addition of compound groups
@@ -325,8 +321,6 @@ es_add_comp_groups <- function(escon, sdb, index, filenames = "all") {
   compGroups <- lapply(comps, get_groups)
   names(compGroups) <- comps
   compGroups <- Filter(function(x) length(x) != 0, compGroups)
-
-  log_info("Updating comp_group on {length(compGroups)} compounds")
 
   # Loop through each compound and add classifications to elastic documents
 
@@ -364,12 +358,11 @@ es_add_comp_groups <- function(escon, sdb, index, filenames = "all") {
           )
         ),
         error = function(cnd) {
-          log_error("Updated group {gr} failed for comp {cp}")
+          log_error("Updating group {gr} failed for comp {cp}: {conditionMessage(cnd)}")
         }
       )
     }
   }
-  log_info("Completed es_add_comp_groups on index {index}")
   invisible(TRUE)
 }
 
@@ -380,11 +373,13 @@ es_add_comp_groups <- function(escon, sdb, index, filenames = "all") {
 #' @param index
 #' @param filenames Limit the update to results documents from specific files defined by 'filename' field.
 #' If 'all' (default) all dbas documents are updated. 
+#' @param compoundLimit Limit the update to particular compounds, if 'all', 
+#' (default) all compounds are updated.
 #'
 #' @return
 #' @export
 #' @import dplyr
-es_add_identifiers <- function(escon, sdb, index, filenames = "all") {
+es_add_identifiers <- function(escon, sdb, index, filenames = "all", compoundLimit = "all") {
   ctb <- tbl(sdb, "compound") %>%
     select(name, formula, inchi, inchikey, SMILES) %>%
     collect()
@@ -405,7 +400,16 @@ es_add_identifiers <- function(escon, sdb, index, filenames = "all") {
   } else {
     allComps <- es_get_comps(escon, index)
   }
-
+  
+  if (compoundLimit != "all") {
+    allComps <- allComps[allComps %in% compoundLimit]
+  }
+  
+  if (length(allComps) == 0) {
+    logger::log_error("No compounds to process")
+    return(FALSE)
+  }
+  
   # For each comp, get formula and other data
 
   fdf <- data.frame(

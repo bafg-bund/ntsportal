@@ -4,14 +4,14 @@
 \alias{add_latest_eval}
 \title{Add eval time to msrawfiles}
 \usage{
-add_latest_eval(escon, index, id, fieldName = "dbas_last_eval")
+add_latest_eval(escon, index, esid, fieldName = "dbas_last_eval")
 }
 \arguments{
 \item{escon}{}
 
 \item{index}{must be an msrawfiles index}
 
-\item{id}{elasicsearch id doc to be updated}
+\item{esid}{elasicsearch id doc to be updated}
 
 \item{fieldName}{field name to be updated, must be either dbas_last_eval or dbas_is_last_eval}
 }
