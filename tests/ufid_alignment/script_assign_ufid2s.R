@@ -2,8 +2,7 @@
 # Process all indices to assign ufid2s to all features
 
 # usage 
-# cd tests/ufid_alignment
-# nohup Rscript script_assign_ufid2s.R &> /scratch/nts/logs/$(date +%F)_ufid2_assignment.log &
+# nohup Rscript tests/ufid_alignment/script_assign_ufid2s.R &> /scratch/nts/logs/$(date +%F)_ufid2_assignment.log &
 # nohup Rscript ../script_assign_ufid2s.R &> $(date +%F)_ufid2_all_assignment.log &
 
 index <- "g2_nts_bfg,g2_nts_upb,g2_nts_lanuv"
