@@ -1140,3 +1140,50 @@ es_assign_ufids <- function(
   invisible(TRUE)
 }
 
+#' Add a tag to certain Templates 
+#'
+#' @param escon Elasticsearch connection object created by elastic::connect
+#' @param index Elasticsearch index name
+#' @param ids character of document IDs, max. 65536
+#' @param tagToAdd your comment in the field tag ("yourtexthere")
+#'
+#' @return Integer. Number of docs updated (0 for no assignment)
+#' @export
+#'
+#' @examples
+es_add_tag_to_ids <- function(escon, index, ids, tagToAdd) {
+  id_string <-  paste(shQuote(ids, type = "cmd"), collapse = ", ")
+  res_update <- elastic::docs_update_by_query(
+    escon, index, 
+    refresh = "true", 
+    body = sprintf('{
+        "query": {
+          "ids": {
+            "values": [%s]
+          }
+        },
+        "script": {
+          "params": {
+            "fieldToChange": "tag",
+            "newValue": "%s"
+          },
+          "source": "
+            if (ctx._source[params.fieldToChange] == null) {
+              ctx._source[params.fieldToChange] = [params.newValue];
+            } else if (!(ctx._source[params.fieldToChange] instanceof List)) {
+              ctx._source[params.fieldToChange] = [ctx._source[params.fieldToChange]];
+              ctx._source[params.fieldToChange].add(params.newValue);
+            } else {
+              ctx._source[params.fieldToChange].add(params.newValue)
+            }
+            "
+        }
+      } ', 
+        id_string,
+        tagToAdd
+    )
+  )
+  logger::log_info("Completed update on {res_update$updated} docs")
+  invisible(res_update$updated)
+}
+
