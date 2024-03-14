@@ -31,7 +31,7 @@ CONFG <- "~/config.yml"
 INGESTPTH <- "/scratch/nts/ntsautoeval/ingest.sh"
 UPDATESPECDB <- "~/projects/ntsportal/scripts/update-spectral-library-ntsp.R"
 ADDANALYSIS <- "~/projects/ntsportal/scripts/compute-analysis-index.R"
-ROOTDIR_RF <- "/srv"
+ROOTDIR_RF <- "/scratch/nts/messdaten"
 SPECLIBPATH <- "/scratch/nts/MS2_db_v9.db"  # temporary: only for adding group and formula after processing
 CORES <- 1
 CORESBATCH <- 6
