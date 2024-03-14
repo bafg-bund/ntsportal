@@ -2,6 +2,8 @@
 
 # Script to process remaining files in msrawfiles, which have not been processed yet.
 
+# WARNING: Make a copy of this document for changes and testing, do not edit this script.
+
 # The script will create batches from the new files by splitting the data by 
 # directory
 # If no new blanks are in the batches, these will be added to using the blanks
@@ -13,14 +15,14 @@
 # (including ingest).
 
 # usage (from ntsportal):
-# nohup Rscript scripts/eval-new-rawfiles-dbas.R &> /scratch/nts/logs/$(date +%y%m%d)_dbas_eval.log &
-# tail -f /scratch/nts/logs/$(date +%y%m%d)_dbas_eval.log
+# nohup Rscript scripts/eval-new-rawfiles-dbas.R &> /scratch/nts/logs/$(date +%F)_dbas_eval.log &
+# tail -f /scratch/nts/logs/$(date +%F)_dbas_eval.log
 
 # If there is an error in processing a file, you can use the function 
 # ntsportal::reset_eval, which will remove the last processing date and
 # and therefore the file will be processed again
 
-VERSION <- "2024-01-23"
+VERSION <- "2024-02-26"
 
 # Variables ####
 RFINDEX <- "g2_msrawfiles"
@@ -29,6 +31,7 @@ CONFG <- "~/config.yml"
 INGESTPTH <- "/scratch/nts/ntsautoeval/ingest.sh"
 UPDATESPECDB <- "~/projects/ntsportal/scripts/update-spectral-library-ntsp.R"
 ADDANALYSIS <- "~/projects/ntsportal/scripts/compute-analysis-index.R"
+ROOTDIR_RF <- "/srv"
 SPECLIBPATH <- "/scratch/nts/MS2_db_v9.db"  # temporary: only for adding group and formula after processing
 CORES <- 1
 CORESBATCH <- 6
@@ -50,7 +53,7 @@ log_info("--------- eval-new-rawfiles-dbas.R v{VERSION} -----------")
 stopifnot(file.exists(CONFG))
 stopifnot(CORES == 1 || CORESBATCH == 1)
 # debug(check_integrity_msrawfiles)
-check_integrity_msrawfiles(escon = escon, rfindex = RFINDEX)
+check_integrity_msrawfiles(escon = escon, rfindex = RFINDEX, locationRf = ROOTDIR_RF)
 
 # Collect rawfiles ####
 resp <- es_search_paged(escon, RFINDEX, searchBody = '

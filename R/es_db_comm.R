@@ -1140,7 +1140,9 @@ es_assign_ufids <- function(
   invisible(TRUE)
 }
 
-#' Add a tag to certain Templates 
+#' Add a tag to selected docs
+#' 
+#' Docs are selected by passing a vector of IDs 
 #'
 #' @param escon Elasticsearch connection object created by elastic::connect
 #' @param index Elasticsearch index name

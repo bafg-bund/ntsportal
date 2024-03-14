@@ -10,8 +10,27 @@
 # fieldName <- "duration"
 # source("~/connect-ntsp.R")
 
-
-
+# Function to print a search query string to be used for log files
+# Takes a vector of esids and a vector of fields for _source
+build_es_query_for_ids <- function(ids, toShow) {
+  message("\nUse the following query to search for the docs:")
+  cat(
+    sprintf('GET %s/_search
+  {
+    "query": {
+      "ids": {
+        "values": [%s]
+      }
+    },
+    "_source": [%s]
+  }\n', 
+      rfindex, 
+      paste(shQuote(ids, type = "cmd") , collapse = ", "),
+      paste(shQuote(toShow, type = "cmd") , collapse = ", ")
+    )
+  )
+  invisible(T)
+}
 
 #' Reset files in msrawfiles, so that they will be processed again.
 #' 
@@ -558,18 +577,55 @@ check_dbas_replicate_regex <- function(escon, rfindex) {
   invisible(TRUE)
 } 
 
+
+check_dbas_blank_regex <- function(escon, rfindex) {
+  
+  res <- elastic::Search(
+    escon, rfindex, source = c("dbas_blank_regex", "filename", "path", "blank"),
+    size = 10000, asdf = T,
+    body = list(
+      query = list(
+        term = list(
+          blank = T
+        )
+      )
+    )
+  )
+  
+  df <- res$hits$hits
+  
+  patFound <- mapply(
+    function(pat, fn)  grepl(pat, fn),
+    df$`_source.dbas_blank_regex`, df$`_source.filename`
+  )
+  if (!all(patFound)) {
+    pths <- paste(df[!patFound, "_source.path"], collapse = "\n")
+    logger::log_error("dbas_blank_regex not found in the following files:\n{pths}")
+    build_es_query_for_ids(
+      ids = df[!patFound, "_id"], 
+      toShow = c("blank", "dbas_blank_regex", "filename")
+    )
+    stop("check_dbas_blank_regex failed")
+  }
+  invisible(T)
+}
+
+
+
+
 #' Check consistency of msrawfiles DB
 #' 
 #' Must be done before any processing operation
 #'
 #' @param escon 
-#' @param rfindex 
+#' @param rfindex
+#' @param locationRf Root directory for all rawfiles
 #'
 #' @return TRUE if successful (invisibly)
 #' @import logger
 #' @export
 #'
-check_integrity_msrawfiles <- function(escon, rfindex) {
+check_integrity_msrawfiles <- function(escon, rfindex, locationRf) {
   
   # Check presence of spectral library
   resp2 <- elastic::Search(escon, rfindex, body = '
@@ -599,7 +655,7 @@ check_integrity_msrawfiles <- function(escon, rfindex) {
     DBI::dbDisconnect(dbtest)
   }
   
-  # check presence of IS tables
+  # Check presence of IS tables
   resp3 <- elastic::Search(escon, rfindex, body = '
   {
     "query": {
@@ -630,6 +686,7 @@ check_integrity_msrawfiles <- function(escon, rfindex) {
     check_field(escon, rfindex, "dbas_mztolu_fine"),
     check_field(escon, rfindex, "dbas_ndp_threshold"),
     check_field(escon, rfindex, "dbas_rtTolReinteg"),
+    check_field(escon, rfindex, "date_measurement"),
     check_field(escon, rfindex, "dbas_ndp_m"),
     check_field(escon, rfindex, "dbas_ndp_n"),
     check_field(escon, rfindex, "dbas_instr"),
@@ -716,7 +773,7 @@ check_integrity_msrawfiles <- function(escon, rfindex) {
     }
   }
   
-  # check that there are no mismatches between IS table and polarity
+  # Check that there are no mismatches between IS table and polarity
   polcheck_body <- function(pols) {
     sprintf('
   {
@@ -757,29 +814,31 @@ check_integrity_msrawfiles <- function(escon, rfindex) {
          apply(perms[!polCheck, , drop = F], 1, polcheck_body))
   }
   
-  # Check that all files are located in HRMS/Messdaten. If not, give a warning.
-  resm <- elastic::Search(escon, rfindex, source = "path", size = 10000, body = '
+  # Check that all files are located in correct location. If not, give a warning.
+  resm <- elastic::Search(escon, rfindex, source = "path", size = 10000, body = sprintf('
     {
       "query": {
         "bool": {
           "must_not": [
             {
               "regexp": {
-                "path": ".*HRMS/Messdaten.*"
+                "path": "%s.*"
               }
             }
           ]
         }
       }
     }
-  ')
+  ', locationRf))
   if (resm$hits$total$value > 0) {
     badp <- vapply(resm$hits$hits, function(x) x[["_source"]]$path, character(1))
     tx <- paste(unique(dirname(badp)), collapse = "\n")
     log_warn("{length(badp)} files are not saved in HRMS/Messdaten, see directories:\n {tx}")
   }
   
+  # Check that 
   check_dbas_replicate_regex(escon, rfindex)
+  check_dbas_blank_regex(escon, rfindex)
   
   invisible(TRUE)
 }

@@ -204,7 +204,7 @@ station_from_code <- function(escon, rfindex, filename, stationRegex) {
 add_rawfiles <- function(escon, rfindex, templateId, newPaths, 
                          newStart = "filename", 
                          newStation = "same_as_template",
-                         rootMeasDir = "/srv/cifs-mounts/g2/G/G2/HRMS/Messdaten/") {
+                         rootMeasDir = "/scratch/nts/messdaten-local") {
   # Define internal functions
   # Will add earliest measurement time of any file found with the same name 
   # in the whole "messdaten" directory tree.

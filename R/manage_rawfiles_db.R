@@ -171,21 +171,31 @@ move_dbas_alias <- function(escon, indexName, aliasName) {
 #' @param rfindex index name for rawfiles index
 #' @param oldPath Current path in rawfiles index, file must exist
 #' @param newPath New path, file must exist
-#'
+#' @param checkType Method to check that files are the same, either "md5" (default) or "filesize"
+#' 
 #' @details
 #' Both files must exist when making the change. The function takes some time 
-#' because it compares md5-checksums of the two files.
+#' if it compares md5-checksums of the two files. For large numbers of files use the
+#' filesize check.
 #' 
 #' @return TRUE if change was successful (invisibly)
 #' @export
 #'
-change_msrawfile_path <- function(escon, rfindex, oldPath, newPath) {
+change_msrawfile_path <- function(escon, rfindex, oldPath, newPath, checkType = "md5") {
   stopifnot(length(oldPath) == 1, length(newPath) == 1)
   stopifnot(all(file.exists(oldPath, newPath)))
-  # check that both files are the same
+  stopifnot(checkType %in% c("md5", "filesize"))
+  # Check that both files are the same
+  # Same name
   stopifnot(basename(oldPath) == basename(newPath))
-  if (tools::md5sum(oldPath) != tools::md5sum(newPath))
+  # Same content (slow)
+  if (checkType == "md5" && tools::md5sum(oldPath) != tools::md5sum(newPath))
     stop(oldPath, " and ", newPath, " are not the same")
+  # Same size (faster)
+  if (checkType == "filesize" && file.size(oldPath) != file.size(newPath)) {
+    stop(oldPath, " and ", newPath, " are not the same")
+  }
+  
   res1 <- elastic::Search(escon, rfindex, body = sprintf('
     {
       "query": {
@@ -208,10 +218,12 @@ change_msrawfile_path <- function(escon, rfindex, oldPath, newPath) {
     docId <- as.character(res1$hits$hits[[1]]["_id"])
     res2 <- elastic::docs_update(escon, rfindex, id = docId, body = 
                                    sprintf('
-     {
+      {
         "script": {
-          "source": "ctx._source.path = \'%s\'",
-          "lang": "painless"
+          "source": "ctx._source.path = params.newPath",
+          "params": {
+            "newPath": "%s"
+          }
         }
       }
      ', normalizePath(newPath))                               

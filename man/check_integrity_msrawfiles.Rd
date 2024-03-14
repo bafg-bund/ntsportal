@@ -4,12 +4,12 @@
 \alias{check_integrity_msrawfiles}
 \title{Check consistency of msrawfiles DB}
 \usage{
-check_integrity_msrawfiles(escon, rfindex)
+check_integrity_msrawfiles(escon, rfindex, locationRf)
 }
 \arguments{
 \item{escon}{}
 
-\item{rfindex}{}
+\item{locationRf}{Root directory for all rawfiles}
 }
 \value{
 TRUE if successful (invisibly)
