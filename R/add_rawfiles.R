@@ -292,6 +292,8 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
     doc <- templDoc
     doc$path <- normalizePath(pth)
     doc$filename <- basename(pth)
+    doc$dbas_is_last_eval <- NULL
+    doc$dbas_last_eval <- NULL
     poli <- stringr::str_extract(doc$filename, "pos|neg")
     if (doc$pol != poli) {
       if (length(newPaths) == 1) {
