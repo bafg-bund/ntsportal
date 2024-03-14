@@ -4,7 +4,7 @@
 \alias{change_msrawfile_path}
 \title{Change the path of one document in a rawfiles db}
 \usage{
-change_msrawfile_path(escon, rfindex, oldPath, newPath)
+change_msrawfile_path(escon, rfindex, oldPath, newPath, checkType = "md5")
 }
 \arguments{
 \item{escon}{elastic connection object created by elastic::connect}
@@ -14,6 +14,8 @@ change_msrawfile_path(escon, rfindex, oldPath, newPath)
 \item{oldPath}{Current path in rawfiles index, file must exist}
 
 \item{newPath}{New path, file must exist}
+
+\item{checkType}{Method to check that files are the same, either "md5" (default) or "filesize"}
 }
 \value{
 TRUE if change was successful (invisibly)
@@ -23,5 +25,6 @@ Change the path of one document in a rawfiles db
 }
 \details{
 Both files must exist when making the change. The function takes some time 
-because it compares md5-checksums of the two files.
+if it compares md5-checksums of the two files. For large numbers of files use the
+filesize check.
 }

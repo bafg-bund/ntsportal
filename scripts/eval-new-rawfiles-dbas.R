@@ -134,6 +134,8 @@ allFlsIndex <- vapply(
   fieldName = "dbas_index_name", escon = escon, justone = T, character(1)
 )
 
+# Test up to here
+
 log_info("Removing old files")
 
 for (fn in allFlsNames) {
