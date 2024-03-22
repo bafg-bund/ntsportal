@@ -627,6 +627,8 @@ check_dbas_blank_regex <- function(escon, rfindex) {
 #'
 check_integrity_msrawfiles <- function(escon, rfindex, locationRf) {
   
+  locationRf <- normalizePath(locationRf)
+  
   # Check presence of spectral library
   resp2 <- elastic::Search(escon, rfindex, body = '
                 {
