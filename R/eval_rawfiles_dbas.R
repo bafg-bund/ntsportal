@@ -1456,8 +1456,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
   },
   error = function(cnd) {
     log_error("Fail proc_batch in batch starting with id {esids[1]}: {conditionMessage(cnd)}")
-  },
-  finally = system("rm -f /scratch/nts/tmp/*")
+  }
   )
   
   if (!exists("datl") || length(datl) == 0)

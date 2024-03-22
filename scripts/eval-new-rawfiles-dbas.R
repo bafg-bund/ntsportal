@@ -150,6 +150,10 @@ for (fn in allFlsNames) {
   }
 }
 
+# Delete previous temp files
+
+system("rm -f /scratch/nts/tmp/*")
+
 #######################
 # Start processing ####
 log_info("Begin processing")
