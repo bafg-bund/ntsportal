@@ -114,7 +114,8 @@ put_dbas_index <- function(eson, index) {
           "smiles" : {"type" : "keyword"},
           "mw" : {"type" : "float"},
           "adduct" : {"type" : "keyword"},
-          "formula" : {"type" : "keyword"}
+          "formula" : {"type" : "keyword"},
+          "mz_error" : {"type" : "float"}
         }
       }
     }

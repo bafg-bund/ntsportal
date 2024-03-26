@@ -1,10 +1,9 @@
-library(dplyr)
-index <- "g2_dbas_v4_ogimo"
-config_path <- "~/projects/config.yml"
-ec <- config::get("elastic_connect", file = config_path)
-escon <- elastic::connect(host = '10.140.73.204', user=ec$user, pwd=ec$pwd)
 
-db <- DBI::dbConnect(RSQLite::SQLite(), "~/sqlite_local/MS2_db_v7.db")
+# Script to add foldchange information to ogimo data (Moselle longitudinal)
+
+
+index <- "g2_dbas_ogimo"
+source("~/connect-ntsp.R")
 
 all_kms <- elastic::Search(
   escon,
@@ -17,7 +16,7 @@ all_kms <- elastic::Search(
         {
           "term": {
             "river": {
-              "value": "Mosel"
+              "value": "mosel"
             }
           }
         }
@@ -41,7 +40,7 @@ akms <- sapply(all_kms$aggregations$kms$buckets, function(x) x$key)
 dfkm <- data.frame(km = akms)
 
 # make pos fc table
-fc_table <- function(polarity, cardinality) {
+fc_table <- function(polarity) {
   # 126 is name cardinality pos
   res <- elastic::Search(
     escon, 
@@ -55,7 +54,7 @@ fc_table <- function(polarity, cardinality) {
           {
             "term": {
               "river": {
-                "value": "Mosel"
+                "value": "mosel"
               }
             }
           },
@@ -72,7 +71,7 @@ fc_table <- function(polarity, cardinality) {
       "comps": {
         "terms": {
           "field": "name",
-          "size": %i  
+          "size": 10000 
         },
         "aggs": {
           "kms": {
@@ -92,7 +91,7 @@ fc_table <- function(polarity, cardinality) {
       }
     }
   }
-    ', polarity, cardinality)
+    ', polarity)
   )
   
   dfl <- lapply(res$aggregations$comps$buckets, function(y) {
@@ -117,15 +116,15 @@ fc_table <- function(polarity, cardinality) {
   fcResult <- Reduce(rbind, dfl)
   fcResult[fcResult$fc4, ]
 }
-posres <- fc_table("pos", 126L)
+posres <- fc_table("pos")
 posres$pol <- "pos"
-negres <- fc_table("neg", 29L)
+negres <- fc_table("neg")
 negres$pol <- "neg"
 endTab <- rbind(posres, negres)
 rownames(endTab) <- NULL
 # add this data to the elastic db
 
-for (i in seq_len(nrow(endTab))) { # i <- 50
+for (i in 1:nrow(endTab)) { # i <- 1
   
   elastic::docs_update_by_query(
     escon,
@@ -139,7 +138,7 @@ for (i in seq_len(nrow(endTab))) { # i <- 50
         {
           "term": {
             "river": {
-              "value": "Mosel"
+              "value": "mosel"
             }
           }
         },
@@ -173,9 +172,19 @@ for (i in seq_len(nrow(endTab))) { # i <- 50
     }
   ],
   "script": {
-    "source": "ctx._source.tag = params.entry",
+    "source": "
+     if (ctx._source[params.fieldToChange] == null) {
+        ctx._source[params.fieldToChange] = [params.newValue];
+      } else if (!(ctx._source[params.fieldToChange] instanceof List)) {
+        ctx._source[params.fieldToChange] = [ctx._source[params.fieldToChange]];
+        ctx._source[params.fieldToChange].add(params.newValue);
+      } else {
+        ctx._source[params.fieldToChange].add(params.newValue)
+      }
+    ",
     "params": {
-      "entry" : "mosel_prio_foldchange_factor4"
+      "fieldToChange": "tag",
+      "newValue" : "mosel_prio_foldchange_factor4"
     }, 
     "lang": "painless"
   }
