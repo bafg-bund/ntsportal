@@ -11,7 +11,9 @@ process_is_all(
   ingestpth,
   configfile,
   tmpPath = "/scratch/nts/tmp",
-  numCores = 10
+  numCores = 10,
+  rawfilesRootPath = "/scratch/nts/messdaten/",
+  numFilesToProcess = NULL
 )
 }
 \arguments{
@@ -28,6 +30,11 @@ process_is_all(
 \item{tmpPath}{}
 
 \item{numCores}{Number of cores for parallel processing}
+
+\item{rawfilesRootPath}{Path to where raw data is stored}
+
+\item{numFilesToProcess}{If NULL (default) all remaining files are processed,
+otherwise must be a positive integer.}
 }
 \description{
 Will enter the results into the isindex. Will only process files which

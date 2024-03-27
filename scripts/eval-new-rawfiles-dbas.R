@@ -48,7 +48,6 @@ source("~Jewell/connect-ntsp.R")
 
 log_info("--------- eval-new-rawfiles-dbas.R v{VERSION} -----------")
 
-
 # Overall checks ####
 stopifnot(file.exists(CONFG))
 stopifnot(CORES == 1 || CORESBATCH == 1)

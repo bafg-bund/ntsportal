@@ -422,7 +422,7 @@ check_field <- function(escon, rfindex, fieldName, onlyNonBlank = FALSE) {
 #'
 add_latest_eval <- function(escon, index, esid, fieldName = "dbas_last_eval") {
   stopifnot(fieldName %in% c("dbas_last_eval", "dbas_is_last_eval"))
-  timeText <- format(Sys.time(), "%Y-%m-%d %H:%M:%S")
+  timeText <- format(Sys.time(), "%Y-%m-%d %H:%M:%S", tz = "GMT")
   res <- elastic::docs_update(conn = escon, index = index, id = esid, body = sprintf('
   {
     "script" : "ctx._source.%s = \'%s\'"
@@ -1480,7 +1480,10 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
 #' @param ingestpth 
 #' @param configfile 
 #' @param tmpPath 
-#' @param numCores Number of cores for parallel processing 
+#' @param numCores Number of cores for parallel processing
+#' @param rawfilesRootPath Path to where raw data is stored
+#' @param numFilesToProcess If NULL (default) all remaining files are processed,
+#' otherwise must be a positive integer.
 #'
 #' @return
 #' @export
@@ -1489,15 +1492,25 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
 #' @import logger
 #' 
 process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile, 
-                           tmpPath = "/scratch/nts/tmp", numCores = 10) {
+                           tmpPath = "/scratch/nts/tmp", numCores = 10,
+                           rawfilesRootPath = "/scratch/nts/messdaten/",
+                           numFilesToProcess = NULL) {
   startTime <- lubridate::now()
   
   # run checks
-  cr <- ntsportal::check_integrity_msrawfiles(escon = escon, rfindex = rfindex)
+  stopifnot(is.null(numFilesToProcess) || is.numeric(numFilesToProcess))
+  cr <- ntsportal::check_integrity_msrawfiles(
+    escon = escon, 
+    rfindex = rfindex,
+    locationRf = rawfilesRootPath)
   if (cr)
     log_info("{rfindex} integrity checks complete")
   # Get files to process
   idsToProcess <- ntsportal::get_unevaluated(escon, rfindex, evalType = "dbas_is")
+  if (!is.null(numFilesToProcess)) {
+    idsToProcess <- idsToProcess[1:numFilesToProcess]
+  }
+  
   log_info("Processing {length(idsToProcess)} files")
   plan(multicore, workers = numCores)
   featsBySample <- furrr::future_map(idsToProcess, function(id) {
@@ -1507,14 +1520,26 @@ process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile,
   
   featsAll <- do.call("c", featsBySample)
   featsAll <- Filter(Negate(is.null), featsAll)
+  stopifnot(length(featsAll) > 0)
+  
   jpth <- file.path(tmpPath, "is_dbas_temp.json")
   log_info("Writing json")
   jsonlite::write_json(featsAll, jpth, pretty = T, digits = NA, auto_unbox = T)
   log_info("Ingesting")
-  system(
+  exitStatusIngest <- system(
     glue::glue("{ingestpth} {configfile} {isindex} {jpth}")
   )
-  
+  stopifnot(exitStatusIngest == 0)
+
+  # Get filenames of processed files and check that data has been entered
+  filenames <- vapply(featsAll, function(x) x$filename, character(1))
+  docsFoundIndex <- elastic::Search(
+    escon, isindex, 
+    body = list(query = list(terms = list(filename = filenames))),
+    size = 0
+  )$hits$total$value
+  stopifnot(docsFoundIndex > 0)
+
   # Add processing time to msrawfiles
   for (i in idsToProcess) {
     tryCatch(
@@ -1528,7 +1553,7 @@ process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile,
   
   endTime <- lubridate::now()
   hrs <- round(as.numeric(endTime - startTime, units = "hours"))
-  log_info("Processing IS (process_is_all) complete in {hrs} h")
+  log_info("Processing IS complete in {hrs} h")
   invisible(TRUE)
 }
 
