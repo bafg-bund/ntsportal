@@ -108,6 +108,7 @@ put_dbas_index <- function(eson, index) {
             }
           },
           "filename" : {"type" : "keyword"},
+          "path": {"type" : "keyword"},
           "station" : {"type" : "keyword"},
           "inchikey" : {"type" : "keyword"},
           "inchi" : {"type" : "keyword"},
