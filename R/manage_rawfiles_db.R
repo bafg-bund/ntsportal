@@ -232,6 +232,72 @@ change_msrawfile_path <- function(escon, rfindex, oldPath, newPath, checkType = 
   }
 }
 
+#' Change Filename in the rawfiles-db an the data-saving structure
+#'
+#' @param escon elastic connection object created by elastic::connect
+#' @param rfindex index name for rawfiles index
+#' @param oldName originally filename
+#' @param newName updated filename
+#' @param oldPath originally path
+#' @param newPath updated path
+#'
+#' @return log_info("File updated") if successful
+#' @export
+#'
+change_msrawfile_filename <- function(escon, rfindex, oldName, newName, oldPath, newPath) {
+  stopifnot(length(oldName) == 1, length(newName) == 1)
+  stopifnot(length(oldPath) == 1, length(newPath) == 1)
+  stopifnot(file.exists(oldPath))
+  res1 <- elastic::Search(escon, rfindex, body = sprintf('
+    {
+      "query": {
+        "term": {
+          "filename": {
+            "value": "%s"
+          }
+        }
+      },
+      "size": 1,
+      "_source": false
+    }
+    ', oldName)
+  )
+  if (res1$hits$total$value == 0) {
+    warning(oldName, " not found in ", rfindex, " index. No change made.")
+  } else if (res1$hits$total$value > 1) {
+    stop(oldName, " found more than once in ", rfindex, " index. Please correct.")
+  } else {
+    docId <- as.character(res1$hits$hits[[1]]["_id"])
+    res2 <- elastic::docs_update(escon, rfindex, id = docId, body = 
+                                   sprintf('
+      {
+        "script": {
+          "source": "ctx._source.path = params.newPath",
+          "params": {
+            "newPath": "%s"
+          }
+        }
+      }
+     ', newPath)                               
+    )
+    invisible(res2$result == "Path updated")
+    res3 <- elastic::docs_update(escon, rfindex, id = docId, body = 
+                                   sprintf('
+      {
+        "script": {
+          "source": "ctx._source.filename = params.newName",
+          "params": {
+            "newName": "%s"
+          }
+        }
+      }
+     ', newName)                               
+    )
+    invisible(res3$result == "Filename updated")
+    file.rename(from = oldPath, to = newPath)
+  }
+  logger::log_info("File updated")
+}
 
 
 
