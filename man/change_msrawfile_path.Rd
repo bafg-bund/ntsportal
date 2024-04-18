@@ -2,7 +2,7 @@
 % Please edit documentation in R/manage_rawfiles_db.R
 \name{change_msrawfile_path}
 \alias{change_msrawfile_path}
-\title{Change the path of one document in a rawfiles db}
+\title{Change the path of one document in msrawfiles}
 \usage{
 change_msrawfile_path(escon, rfindex, oldPath, newPath, checkType = "md5")
 }
@@ -21,7 +21,8 @@ change_msrawfile_path(escon, rfindex, oldPath, newPath, checkType = "md5")
 TRUE if change was successful (invisibly)
 }
 \description{
-Change the path of one document in a rawfiles db
+This is a secure method of changing the path of a doc in msrawfiles. 
+Filename is not changed and must remain the same.
 }
 \details{
 Both files must exist when making the change. The function takes some time 

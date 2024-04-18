@@ -1,4 +1,20 @@
 
+
+#' Variation of glue::glue for json input
+#'
+#' Works the same as glue but variables are delimited by '[[]]' and linebreaks
+#' are removed in the output.
+#'
+#' @param ... 
+#'
+#' @return glue object
+#' @export
+#'
+glue_json <- function(...) {
+  x <- glue::glue(..., .open = "[[", .close = "]]")
+  gsub("[\r\n]", "", x)
+}
+
 #' @export
 dist_make_parallel <- function(x, distance_fcn, numCores, ...) 
 { 

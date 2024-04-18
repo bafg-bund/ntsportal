@@ -165,7 +165,10 @@ move_dbas_alias <- function(escon, indexName, aliasName) {
   ok
 }
 
-#' Change the path of one document in a rawfiles db
+#' Change the path of one document in msrawfiles
+#' 
+#' This is a secure method of changing the path of a doc in msrawfiles. 
+#' Filename is not changed and must remain the same.
 #'
 #' @param escon elastic connection object created by elastic::connect
 #' @param rfindex index name for rawfiles index
@@ -232,22 +235,27 @@ change_msrawfile_path <- function(escon, rfindex, oldPath, newPath, checkType = 
   }
 }
 
-#' Change Filename in the rawfiles-db an the data-saving structure
-#'
+#' Change filename in the msrawfiles-db and on the filesystem
+#' 
+#' This function will change both filename and path of the doc.
+#' 
 #' @param escon elastic connection object created by elastic::connect
-#' @param rfindex index name for rawfiles index
-#' @param oldName originally filename
-#' @param newName updated filename
+#' @param rfindex index name for msrawfiles index
 #' @param oldPath originally path
 #' @param newPath updated path
 #'
-#' @return log_info("File updated") if successful
+#' @return True (invisibly) if successful
 #' @export
 #'
-change_msrawfile_filename <- function(escon, rfindex, oldName, newName, oldPath, newPath) {
-  stopifnot(length(oldName) == 1, length(newName) == 1)
+change_msrawfile_filename <- function(escon, rfindex, oldPath, newPath) {
   stopifnot(length(oldPath) == 1, length(newPath) == 1)
   stopifnot(file.exists(oldPath))
+  stopifnot(grepl("^ntsp_msrawfiles", rfindex))
+  
+  oldName <- basename(oldPath)
+  newName <- basename(newPath)
+  stopifnot(length(oldName) == 1, length(newName) == 1)
+ 
   res1 <- elastic::Search(escon, rfindex, body = sprintf('
     {
       "query": {
@@ -264,39 +272,33 @@ change_msrawfile_filename <- function(escon, rfindex, oldName, newName, oldPath,
   )
   if (res1$hits$total$value == 0) {
     warning(oldName, " not found in ", rfindex, " index. No change made.")
+    return(FALSE)
   } else if (res1$hits$total$value > 1) {
     stop(oldName, " found more than once in ", rfindex, " index. Please correct.")
   } else {
     docId <- as.character(res1$hits$hits[[1]]["_id"])
     res2 <- elastic::docs_update(escon, rfindex, id = docId, body = 
-                                   sprintf('
+      glue_json('
       {
         "script": {
-          "source": "ctx._source.path = params.newPath",
+          "source": "ctx._source.path = params.newPath; 
+                     ctx._source.filename = params.newName",
           "params": {
-            "newPath": "%s"
+            "newPath": "[[newPath]]",
+            "newName": "[[newName]]"
           }
         }
       }
-     ', newPath)                               
+     ')                               
     )
-    invisible(res2$result == "Path updated")
-    res3 <- elastic::docs_update(escon, rfindex, id = docId, body = 
-                                   sprintf('
-      {
-        "script": {
-          "source": "ctx._source.filename = params.newName",
-          "params": {
-            "newName": "%s"
-          }
-        }
-      }
-     ', newName)                               
-    )
-    invisible(res3$result == "Filename updated")
+    
+    res2 <- elastic::docs_update(escon, rfindex, id = docId, body = ns)
+    
+    # Change filename on filesystem
     file.rename(from = oldPath, to = newPath)
   }
-  logger::log_info("File updated")
+  logger::log_info("File {oldName} updated to {newName}")
+  invisible(TRUE)
 }
 
 

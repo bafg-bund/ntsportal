@@ -169,9 +169,9 @@ system("rm -f /scratch/nts/tmp/*")
 # Testing: Reduce batches to those with a small size for testing
 # table(sapply(allFlsIds, length))
 # which(sapply(allFlsIds, length) == 4)
-allFlsIndex <- allFlsIndex[which(sapply(allFlsIds, length) == 4)] 
-allFlsIds <- allFlsIds[which(sapply(allFlsIds, length) == 4)]
-allFlsNames <- allFlsNames[which(sapply(allFlsNames, length) == 4)]
+# allFlsIndex <- allFlsIndex[which(sapply(allFlsIds, length) == 4)] 
+# allFlsIds <- allFlsIds[which(sapply(allFlsIds, length) == 4)]
+# allFlsNames <- allFlsNames[which(sapply(allFlsNames, length) == 4)]
 
 #######################
 # Start processing ####

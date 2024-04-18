@@ -2,26 +2,22 @@
 % Please edit documentation in R/manage_rawfiles_db.R
 \name{change_msrawfile_filename}
 \alias{change_msrawfile_filename}
-\title{Change Filename in the rawfiles-db an the data-saving structure}
+\title{Change filename in the msrawfiles-db and on the filesystem}
 \usage{
-change_msrawfile_filename(escon, rfindex, oldName, newName, oldPath, newPath)
+change_msrawfile_filename(escon, rfindex, oldPath, newPath)
 }
 \arguments{
 \item{escon}{elastic connection object created by elastic::connect}
 
-\item{rfindex}{index name for rawfiles index}
-
-\item{oldName}{originally filename}
-
-\item{newName}{updated filename}
+\item{rfindex}{index name for msrawfiles index}
 
 \item{oldPath}{originally path}
 
 \item{newPath}{updated path}
 }
 \value{
-log_info("File updated") if successful
+True (invisibly) if successful
 }
 \description{
-Change Filename in the rawfiles-db an the data-saving structure
+This function will change both filename and path of the doc.
 }
