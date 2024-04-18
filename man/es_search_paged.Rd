@@ -15,11 +15,11 @@ es_search_paged(escon, index, searchBody = NULL, sort, totalSize = Inf, ...)
 
 \item{sort}{Sort argument passed onto elastic::Search. Defines which field 
 the results are sorted by (best if this is unique for all docs to avoid ties) 
-currently can only be one field.}
+currently can only be one field and may not be _id.}
 
 \item{totalSize}{}
 
-\item{...}{further arguments to elastic::Search}
+\item{...}{further arguments to elastic::Search, asdf argument does not work for now.}
 }
 \description{
 Get search results for more than 10000 docs by pagination.

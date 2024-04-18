@@ -23,15 +23,14 @@
 # ntsportal::reset_eval, which will remove the last processing date and
 # and therefore the file will be processed again
 
-VERSION <- "2024-04-12"
-
 # Variables ####
+VERSION <- "2024-04-18"
 RFINDEX <- "ntsp_msrawfiles"
 TEMPSAVE <- "/scratch/nts/tmp"
 CONFG <- "~/config.yml"
-INGESTPTH <- "/scratch/nts/ntsautoeval/ingest.sh"
-UPDATESPECDB <- "~/projects/ntsportal/scripts/update-spectral-library-ntsp.R"
-ADDANALYSIS <- "~/projects/ntsportal/scripts/compute-analysis-index.R"
+INGESTPTH <- "scripts/ingest.sh"
+UPDATESPECDB <- "scripts/update-spectral-library-ntsp.R"
+ADDANALYSIS <- "scripts/compute-analysis-index.R"
 ROOTDIR_RF <- "/scratch/nts/messdaten"
 SPECLIBPATH <- "/scratch/nts/MS2_db_v9.db"  # temporary: only for adding group and formula after processing
 CORES <- 1
@@ -50,7 +49,13 @@ source("~Jewell/connect-ntsp.R")
 log_info("--------- eval-new-rawfiles-dbas.R v{VERSION} -----------")
 
 # Overall checks ####
-stopifnot(file.exists(CONFG))
+stopifnot(
+  file.exists(CONFG),
+  file.exists(INGESTPTH),
+  file.exists(UPDATESPECDB),
+  file.exists(ADDANALYSIS),
+  file.exists(SPECLIBPATH)
+)
 stopifnot(CORES == 1 || CORESBATCH == 1)
 # debug(check_integrity_msrawfiles)
 check_integrity_msrawfiles(escon = escon, rfindex = RFINDEX, locationRf = ROOTDIR_RF)
@@ -120,7 +125,8 @@ allFlsIds <- lapply(allFlsSpl, function(x) x$id)
 # Check batches
 log_info("Checking batches for consistency")
 
-check_batches_eval(escon = escon, rfindex = RFINDEX, batches = allFlsIds)
+batchOK <- check_batches_eval(escon = escon, rfindex = RFINDEX, batches = allFlsIds)
+stopifnot(batchOK)
 log_info("Complete")
 
 log_info("currently {free_gb()} GB of memory available")
@@ -136,23 +142,36 @@ allFlsIndex <- vapply(
 
 # Test up to here
 
-log_info("Removing old files")
+# Create indices if they do not exist yet
+indices <- unique(allFlsIndex)
+indPres <- elastic::cat_indices(escon, index = "ntsp_index_dbas*", parse = T)[,3]
+indices <- indices[!is.element(indices, indPres)]
+for (i in indices) {
+  put_dbas_index(escon, i)
+}
 
-for (fn in allFlsNames) {
-  for (iName in allFlsIndex) {
-    ntsportal::es_remove_by_filename(escon, iName, fn)
-  }
-}
-# For some reason doing it again works, the first time always fails with a conflict
-for (fn in allFlsNames) {
-  for (iName in allFlsIndex) {
-    ntsportal::es_remove_by_filename(escon, iName, fn)
-  }
-}
+# Any old results files must be removed (to avoid duplications)
+# TODO It would be better to save a list of IDs for deletion and delete them
+# after the processing is complete.
+log_info("Removing old results in dbas indices")
+delRes <- mapply(
+  ntsportal::es_remove_by_filename, 
+  index = allFlsIndex, 
+  filenames = allFlsNames, 
+  MoreArgs = list(escon = escon),
+  SIMPLIFY = T
+)
 
 # Delete previous temp files
 
 system("rm -f /scratch/nts/tmp/*")
+
+# Testing: Reduce batches to those with a small size for testing
+# table(sapply(allFlsIds, length))
+# which(sapply(allFlsIds, length) == 4)
+allFlsIndex <- allFlsIndex[which(sapply(allFlsIds, length) == 4)] 
+allFlsIds <- allFlsIds[which(sapply(allFlsIds, length) == 4)]
+allFlsNames <- allFlsNames[which(sapply(allFlsNames, length) == 4)]
 
 #######################
 # Start processing ####
@@ -178,16 +197,16 @@ log_info("Average peaks found per batch: {mean(numPeaksBatch)}")
 log_info("currently {free_gb()} GB of memory available")
 
 # Add data to newly created docs ####
+# TODO this should be integrated into the original doc creation
 # Use filenames to find out which docs are new
 
 sdb <- con_sqlite(SPECLIBPATH)
-for (i in allFlsIndex) {
-  for (j in seq_along(allFlsNames)) {
-    es_add_comp_groups(escon, sdb, i, filenames = allFlsNames[[j]])
-    es_add_identifiers(escon, sdb, i, filenames = allFlsNames[[j]])
-  }
-}
+res1 <- mapply(es_add_comp_groups, index = allFlsIndex, filenames = allFlsNames, 
+       MoreArgs = list(escon = escon, sdb = sdb))
+res2 <- mapply(es_add_identifiers, index = allFlsIndex, filenames = allFlsNames, 
+               MoreArgs = list(escon = escon, sdb = sdb))
 DBI::dbDisconnect(sdb)
+
 # Add analysis index ####
 if (any(grepl("_upb", allFlsIndex)))
   system2("Rscript", ADDANALYSIS)

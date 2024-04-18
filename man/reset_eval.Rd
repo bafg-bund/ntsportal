@@ -13,7 +13,7 @@ reset_eval(escon, rfindex, queryBody, indexType = "dbas")
 
 \item{queryBody}{}
 
-\item{indexType}{}
+\item{indexType}{can either be "dbas" or "dbas_is"}
 }
 \description{
 If there are errors it may be necessary to reprocess files. This function

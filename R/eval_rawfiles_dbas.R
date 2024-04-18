@@ -472,8 +472,8 @@ add_sha256_spectral_library <- function(escon, rfindex, esid) {
 #' @export
 #'
 es_remove_by_filename <- function(escon, index, filenames) {
-  # must be a dbas index, not msrawfiles!
-  stopifnot(grepl("g2_dbas", index))
+  # Must be a dbas index, not msrawfiles, otherwise this function would be bad!
+  stopifnot(grepl("ntsp_index_dbas", index))
   stopifnot(is.character(filenames), length(filenames) > 0)
   qbod <- list(
     query = list(
@@ -483,8 +483,11 @@ es_remove_by_filename <- function(escon, index, filenames) {
     )
   )
   suc <- TRUE
-  if (elastic::Search(escon, index, body = qbod, size = 0)$hits$total$value == 0)
+  if (elastic::Search(escon, index, body = qbod, size = 0)$hits$total$value == 0) {
+    logger::log_info("No docs found in index {index}")
     return(invisible(FALSE))
+  }
+    
   
   tryCatch(
     res <- elastic::docs_delete_by_query(escon, index, body = qbod, refresh = "true"),
@@ -883,8 +886,6 @@ check_batches_eval <- function(escon, rfindex, batches) {
                rfindex = rfindex, logical(1)))
   }, logical(1))
   
-  if (!all(allSame))
-    stop("Batch similarity checks have failed")
   
   mustBeSameNonBlanks <- c(
     "dbas_build_averages",
@@ -896,7 +897,9 @@ check_batches_eval <- function(escon, rfindex, batches) {
                rfindex = rfindex, onlyNonBlanks = T, logical(1)))
   }, logical(1))
   
-  if (!all(allSame2))
+  # Need to stop here because the next function will not work if there is
+  # no consistency in dbas_blank_regex
+  if (!all(allSame) || !all(allSame2))
     stop("Batch similarity checks have failed")
   
   # Check that each batch contains at least one blank

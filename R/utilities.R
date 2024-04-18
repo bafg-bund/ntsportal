@@ -569,7 +569,7 @@ con_sqlite <- function(pth) {
 es_add_value <- function(escon, index, esid, fieldName, value) {
   
   elastic::docs_update(escon, index, esid, body = sprintf('
-                                                          {
+  {
   "script": {
     "source": "ctx._source.%s = \'%s\'",
     "lang": "painless"
