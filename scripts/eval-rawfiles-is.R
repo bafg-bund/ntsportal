@@ -7,7 +7,7 @@
 logger::log_info("Processing files for IS (process_is_all)")
 library(ntsportal)
 source("~/connect-ntsp.R")
-#debugonce(process_is_all)
+
 process_is_all(
   escon = escon, 
   rfindex = "g2_msrawfiles",

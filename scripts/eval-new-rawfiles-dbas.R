@@ -2,7 +2,8 @@
 
 # Script to process remaining files in msrawfiles, which have not been processed yet.
 
-# WARNING: Make a copy of this document for changes and testing, do not edit this script.
+# WARNING: Make a copy of this document for changes and testing, do not edit this script 
+# (or even better, create a branch)
 
 # The script will create batches from the new files by splitting the data by 
 # directory
@@ -22,10 +23,10 @@
 # ntsportal::reset_eval, which will remove the last processing date and
 # and therefore the file will be processed again
 
-VERSION <- "2024-02-26"
+VERSION <- "2024-04-12"
 
 # Variables ####
-RFINDEX <- "g2_msrawfiles"
+RFINDEX <- "ntsp_msrawfiles"
 TEMPSAVE <- "/scratch/nts/tmp"
 CONFG <- "~/config.yml"
 INGESTPTH <- "/scratch/nts/ntsautoeval/ingest.sh"

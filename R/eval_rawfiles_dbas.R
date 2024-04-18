@@ -41,7 +41,7 @@ build_es_query_for_ids <- function(ids, toShow) {
 #' @param escon 
 #' @param rfindex 
 #' @param queryBody 
-#' @param indexType 
+#' @param indexType can either be "dbas" or "dbas_is"
 #'
 #' @return
 #' @export
@@ -67,6 +67,9 @@ reset_eval <- function(escon, rfindex, queryBody, indexType = "dbas") {
         script = sprintf("ctx._source.remove('%s'); ctx._source.remove('%s')", field, field2)
       )
     )
+    
+    # TODO this function should also delete all associated results in dbas indices
+    
   } else {
     message("Nothing was changed")
   }
@@ -1497,12 +1500,13 @@ process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile,
                            numFilesToProcess = NULL) {
   startTime <- lubridate::now()
   
-  # run checks
+  # Run checks
   stopifnot(is.null(numFilesToProcess) || is.numeric(numFilesToProcess))
   cr <- ntsportal::check_integrity_msrawfiles(
     escon = escon, 
     rfindex = rfindex,
-    locationRf = rawfilesRootPath)
+    locationRf = rawfilesRootPath
+  )
   if (cr)
     log_info("{rfindex} integrity checks complete")
   # Get files to process

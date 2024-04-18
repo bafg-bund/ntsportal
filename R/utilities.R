@@ -597,9 +597,9 @@ free_gb <- function() {
 #' @param searchBody search body, if NULL, will return all docs
 #' @param sort Sort argument passed onto elastic::Search. Defines which field 
 #' the results are sorted by (best if this is unique for all docs to avoid ties) 
-#' currently can only be one field.
+#' currently can only be one field and may not be _id.
 #' @param totalSize 
-#' @param ... further arguments to elastic::Search
+#' @param ... further arguments to elastic::Search, asdf argument does not work for now.
 #'
 #' @return
 #' @export
