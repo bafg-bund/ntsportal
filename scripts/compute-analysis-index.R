@@ -5,16 +5,15 @@
 
 # collect data by compound and station
 
-INDEX <- "g2_dbas_upb"
-ANALYSIS_INDEX <- "g2_dbas_upb_analysis"
+INDEX <- "ntsp_dbas_upb"
+ANALYSIS_INDEX <- "ntsp_dbas_analysis_upb"
 SAVE_LOC <- "/scratch/nts/tmp"
-INGEST_SCRIPT <- "/scratch/nts/ntsautoeval/ingest.sh"
+INGEST_SCRIPT <- "scripts/ingest.sh"
 CONFIG_PATH <- "~/config.yml"
 source("~/connect-ntsp.R")
 library(logger)
 
-log_info("----- compute-analysis-index.R v2023-11-16 -----")
-
+log_info("----- compute-analysis-index.R v2024-04-18 -----")
 
 res <- elastic::Search(
   escon, INDEX, 
@@ -51,7 +50,7 @@ res <- elastic::Search(
                     "aggs": {
                       "average_norm_a": {
                         "avg": {
-                          "field": "norm_a"
+                          "field": "area_normalized"
                         }
                       }
                     }

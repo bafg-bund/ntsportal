@@ -1,5 +1,23 @@
 
 
+# Processing utilities common to dbas and nts processing
+
+
+#' Create a get_field function with some default values
+#'
+#' @param escon 
+#' @param index 
+#'
+#' @return
+#' @export
+#'
+get_field_builder <- function(escon, index) {
+  function(esids, fieldName, simplify = T, justone = F) {
+    ntsportal::get_field(escon = escon, indexName = index, esids = esids, 
+                         fieldName = fieldName, simplify = simplify, justone = justone)
+  }
+}
+
 #' Variation of glue::glue for json input
 #'
 #' Works the same as glue but variables are delimited by '[[]]' and linebreaks
