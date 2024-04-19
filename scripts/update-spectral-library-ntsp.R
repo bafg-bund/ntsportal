@@ -17,18 +17,19 @@ library(logger)
 
 source("~/connect-ntsp.R")
 
-VERSION <- "2023-10-10"
+# Variables to change ##################
+INDEX_NAME <- "ntsp_index_spectral_library_v240412"
 SDBPATH <- "/scratch/nts/MS2_db_v9.db"
-ALIAS <- "g2_spectral_library"
+ALIAS <- "ntsp_spectral_library"
+VERSION <- "2024-04-19"
 CONFIG <- "~/config.yml"
-INGESTPTH <- "~/projects/ntsautoeval/ingest.sh"
-
-jsonName <- glue::glue("~/sqlite_local/json/{basename(SDBPATH)}-{format(Sys.Date(), '%y%m%d')}.json")
-
+INGESTPTH <- "scripts/ingest.sh"
+# - ###########################################
 log_info("----- update-spectral-library-ntsp.R v{VERSION} -----")
 log_info("Converting sqlite spectral database at {SDBPATH} to json and updating {ALIAS} index")
 
-index <- paste0(ALIAS, "_v", format(Sys.Date(), '%y%m%d'))
+jsonName <- glue::glue("~/sqlite_local/json/{basename(SDBPATH)}-{format(Sys.Date(), '%y%m%d')}.json")
+
 
 sdb <- DBI::dbConnect(RSQLite::SQLite(), SDBPATH)
 
@@ -181,77 +182,15 @@ jsonlite::write_json(exps, jsonName, pretty = T, digits = NA, auto_unbox = T)
 DBI::dbDisconnect(sdb)
 
 # Create new index 
-# See https://gitlab.lan.bafg.de/nts/ntsportal/-/wikis/Create-or-Recreate-Index/Index-mapping-for-g2_spectral_library
 
-res <- elastic::index_create(escon, index, body = '
-{
-  "mappings": {
-    "dynamic": "strict",
-    "properties": {
-      "date_import" : {
-        "type" : "date",
-        "format" : "epoch_second"
-      },
-      "cas" : {"type" : "keyword"},
-      "name" : {"type" : "keyword"},
-      "ms2" : {
-        "type" : "nested",
-        "properties" : {
-          "int" : {
-            "type" : "float"
-          },
-          "mz" : {
-            "type" : "float"
-          }
-        }
-      },
-      "mz" : {"type" : "float"},
-      "tag": {"type": "keyword"},
-      "inchi" : {"type" : "keyword"},
-      "formula" : {"type" : "keyword"},
-      "smiles" : {"type" : "keyword"},
-      "comment": {"type": "text"},
-      "pol" : {"type" : "keyword"},
-      "isotopologue" : {"type" : "keyword"},
-      "adduct" : {"type" : "keyword"},
-      "rtt" : {
-        "type" : "nested",
-        "properties" : {
-          "method" : {
-            "type" : "keyword"
-          },
-          "doi" : {
-            "type" : "keyword"
-          },
-          "predicted" : {
-            "type" : "boolean"
-          },
-          "rt" : {
-            "type" : "float"
-          }
-        }
-      },
-      "inchikey" : {"type" : "keyword"},
-      "mw" : {"type" : "float"},
-      "ce" : {"type" : "float"},
-      "ces" : {"type" : "float"},
-      "instrument": {"type" : "keyword"},
-      "ionisation": {"type" : "keyword"},
-      "ce_unit": {"type" : "keyword"},
-      "frag_type": {"type" : "keyword"},
-      "comp_group": {"type" : "keyword"},
-      "data_source": {"type" : "keyword"}
-    }
-  }
-}
- ')
+res <- put_spectral_library_index(escon, INDEX_NAME)
 
 if (res$acknowledged) {
   log_info("Ingest new spectra using {INGESTPTH}")
-  system(glue::glue("{INGESTPTH} {CONFIG} {index} {jsonName}"))
+  system(glue::glue("{INGESTPTH} {CONFIG} {INDEX_NAME} {jsonName}"))
   
   # Change alias to new index
-  ntsportal::es_move_alias(escon, index, ALIAS)
+  ntsportal::es_move_alias(escon, INDEX_NAME, ALIAS)
   
 } else {
   stop("error in index creation")

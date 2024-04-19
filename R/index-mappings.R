@@ -1,10 +1,12 @@
 # Index creation methods
 # These are the mappings and they must remain synchronized with the mappings at
-# https://gitlab.lan.bafg.de/nts/ntsportal/-/wikis/Create-index
+# https://github.com/bafg-bund/ntsportal/wiki
 
 
 #' Send index creation request for dbas index
-#'
+#' 
+#' Must be kept in sync with: https://github.com/bafg-bund/ntsportal/wiki/Index-mapping-for-dbas-indices
+#' 
 #' @param eson elasticsearch connection object created with elastic::connect
 #' @param index Name of the index you wish to create
 #'
@@ -122,4 +124,78 @@ put_dbas_index <- function(eson, index) {
     }
     '
   )
+}
+
+#' Send index creation request for spectral library index
+#'
+#' @param escon 
+#' @param index 
+#'
+#' @return
+#' @export
+#'
+put_spectral_library_index <- function(escon, index) {
+  elastic::index_create(escon, index, body = '
+{
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "date_import" : {
+        "type" : "date",
+        "format" : "epoch_second"
+      },
+      "cas" : {"type" : "keyword"},
+      "name" : {"type" : "keyword"},
+      "ms2" : {
+        "type" : "nested",
+        "properties" : {
+          "int" : {
+            "type" : "float"
+          },
+          "mz" : {
+            "type" : "float"
+          }
+        }
+      },
+      "mz" : {"type" : "float"},
+      "tag": {"type": "keyword"},
+      "inchi" : {"type" : "keyword"},
+      "formula" : {"type" : "keyword"},
+      "smiles" : {"type" : "keyword"},
+      "comment": {"type": "text"},
+      "pol" : {"type" : "keyword"},
+      "isotopologue" : {"type" : "keyword"},
+      "adduct" : {"type" : "keyword"},
+      "rtt" : {
+        "type" : "nested",
+        "properties" : {
+          "method" : {
+            "type" : "keyword"
+          },
+          "doi" : {
+            "type" : "keyword"
+          },
+          "predicted" : {
+            "type" : "boolean"
+          },
+          "rt" : {
+            "type" : "float"
+          }
+        }
+      },
+      "inchikey" : {"type" : "keyword"},
+      "mw" : {"type" : "float"},
+      "ce" : {"type" : "float"},
+      "ces" : {"type" : "float"},
+      "instrument": {"type" : "keyword"},
+      "ionisation": {"type" : "keyword"},
+      "ce_unit": {"type" : "keyword"},
+      "frag_type": {"type" : "keyword"},
+      "comp_group": {"type" : "keyword"},
+      "data_source": {"type" : "keyword"},
+      "licence" : {"type" : "keyword"}
+    }
+  }
+}
+ ')
 }
