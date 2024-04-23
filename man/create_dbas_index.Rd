@@ -4,14 +4,16 @@
 \alias{create_dbas_index}
 \title{Create a new, empty dbas index}
 \usage{
-create_dbas_index(escon, aliasName, rfIndex)
+create_dbas_index(escon, rfindex, aliasName, dateNum = NULL)
 }
 \arguments{
 \item{escon}{elastic connection object created by elastic::connect}
 
+\item{rfindex}{index name for rawfiles index}
+
 \item{aliasName}{}
 
-\item{rfIndex}{index name for rawfiles index}
+\item{dateNum}{Provide a specific version code (YYMMDD), default is NULL (current date)}
 }
 \description{
 Will create a new index based on the alias with _v<date> appended after _dbas.

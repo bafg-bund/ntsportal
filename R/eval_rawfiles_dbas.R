@@ -68,7 +68,7 @@ reset_eval <- function(escon, rfindex, queryBody, indexType = "dbas") {
       )
     )
     
-    # TODO this function should also delete all associated results in dbas indices
+    # TODO this function should also delete all associated results in dbas indices (as an option)
     
   } else {
     message("Nothing was changed")
@@ -586,23 +586,31 @@ proc_esid <- function(escon, rfindex, esid, compsProcess = NULL) {
 #'
 #' @return
 #' @export
-#'
+#' @import logger
 proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile, 
                        coresBatch, noIngest = FALSE) {
   
-  # create a get_field function with some default parameters
-  get_field_builder <- function(escon, index) {
-    function(esids, fieldName, simplify = T, justone = F) {
-      ntsportal::get_field(escon = escon, indexName = index, esids = esids, 
-                           fieldName = fieldName, simplify = simplify, justone = justone)
-    }
-  }
+  # Define functions
+  # Create a get_field function with some default parameters
   get_field2 <- get_field_builder(escon = escon, index = rfindex)
   
+  # Define Variables
+  # These pollute the comp_group field and need to be removed
+  SPEC_SOURCES <- c("BfG", "LfU", "UBA")
+  
+  # Name for saving the files
+  # For saving RDS file
+  savename <- gsub("[/\\.]", "_", dirname(get_field2(esids, "path"))[1])
+  # Take everything after messdaten...
+  savename <- stringr::str_match(savename, "messdaten(.*)$")[,2]
+  savename <- paste0("dbas-batch--", savename, "--", format(Sys.time(), "%y%m%d"), ".report")
+  savename <- file.path(tempsavedir, savename)
+  
+  dbPath <- get_field2(esids, "dbas_spectral_library", justone = T)
+
   dr <- paste(unique(dirname(get_field2(esids, "path", justone = F))), collapse= ", ")
   log_info("Starting batch {dr}")
-  # generate name for saving the files
-  savename <- tempfile("batch-", tmpdir = tempsavedir, fileext = ".report")
+
   tryCatch({
     # Step 1 - Screening ####
     tryCatch(
@@ -620,7 +628,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       }
     )
     
-    #browser()
+    
     if (any(vapply(repLt, is.null, logical(1))) || 
         any(vapply(repLt, inherits, logical(1), what = "try-error"))) {
       errorEsids <- c(
@@ -677,7 +685,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     stopifnot(length(bregex) == 1)
     
     # load
-    dbas <- loadReport(F, savename)
+    dbas <- ntsworkflow::loadReport(F, savename)
     dbas$changeSettings("numcores", 1)
     
     log_info("Blank correction")
@@ -739,7 +747,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     rm(dbas)
     log_info("Step 2 complete, processed report file created for: {newsavename}")
     
-    dbas <- loadReport(F, newsavename)  
+    dbas <- ntsworkflow::loadReport(F, newsavename)  
     # Step 3 - Conversion ####
     log_info("Collecting data for json export")
     
@@ -754,7 +762,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     
     isData <- dbas$ISresults[dbas$ISresults$IS == bisn, c("samp", "int_a")]
     
-    # normalize intensities
+    # Normalize intensities
     dat <- merge(compData, isData, by = "samp", suffix = c("", "_IS"))
     # verify columns are numeric
     dat[, c("int_a", "int_a_IS")] <- lapply(dat[, c("int_a", "int_a_IS")], as.numeric)
@@ -822,13 +830,13 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       dat$reps <- NULL
     }
     
-    # round all int columns to 3 sig figs
+    # Round all int columns to 3 sig figs
     dat$int_a <- signif(dat$int_a, 3)
     dat$norm_a <- signif(dat$norm_a, 3)
     dat$area_normalized <- signif(dat$area_normalized, 3)
     dat$int_a_IS <- signif(dat$int_a_IS, 3)
     
-    # get start time for sample
+    # Get start time for sample
     idSamp <- data.frame(
       id = esids,
       samp = basename(get_field2(esids, "path")),
@@ -844,14 +852,9 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     cas <- dbas$peakList[, c("comp_CAS", "comp_name")]
     cas <- cas[!duplicated(cas),]
     dat <- merge(dat, cas, by = "comp_name", all.x = T)
-    # Adduct
-    tempPl <- dbas$peakList[, c("comp_name", "adduct")]
-    tempPl <- tempPl[!duplicated(tempPl),]
-    dat <- merge(dat, tempPl, by = "comp_name", all.x = TRUE)
     
     dat$date_import <- round(as.numeric(Sys.time()))  # epoch_seconds
     dat$duration <- get_field2(esids, "duration", justone = T)
-    #dat$station <- bstation
     
     dat$pol <- get_field2(esids, "pol", justone = T)
     dat$matrix <- get_field2(esids, "matrix", justone = T)
@@ -865,10 +868,37 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     colnames(dat) <- gsub("^int_a_IS$", "area_is", colnames(dat))
     colnames(dat) <- gsub("^comp_CAS$", "cas", colnames(dat))
     colnames(dat) <- gsub("^samp$", "filename", colnames(dat))
-    # make dat into list to allow for nested data structure
+    
+    # Make dat into list to allow for nested data structure
     rownames(dat) <- NULL
     datl <- split(dat, seq_len(nrow(dat))) 
     datl <- lapply(datl, as.list)
+    
+    # Add compound information 
+    sdb <- con_sqlite(dbPath)
+    comptab <- tbl(sdb, "compound") %>% collect()
+    grouptab <- tbl(sdb, "compound") %>% 
+      select(name, compound_id) %>% 
+      left_join(tbl(sdb, "compGroupComp"), by = "compound_id") %>% 
+      left_join(tbl(sdb, "compoundGroup"), by = "compoundGroup_id") %>% 
+      select(name.x, name.y) %>% 
+      rename(compname = name.x, groupname = name.y) %>% 
+      collect()
+    
+    # Using '$' will fail without an error because it implements greedy matching 
+    # (inchi and inchikey)
+    datl <- lapply(datl, function(doc) {
+      if(!is.na(doc$name)) {
+        doc[["inchi"]] <- filter(comptab, name == !!doc$name) %>% pull(inchi)
+        doc[["inchikey"]] <- filter(comptab, name == !!doc$name) %>% pull(inchikey)
+        doc[["formula"]] <- filter(comptab, name == !!doc$name) %>% pull(formula)
+        cg <- filter(grouptab, compname == !!doc$name) %>% pull(groupname)
+        cg <- cg[!is.element(cg, SPEC_SOURCES)]
+        doc[["comp_group"]] <- cg
+      }
+      doc
+    })
+    DBI::dbDisconnect(sdb)
     
     # Get coordinates, river km
     datl <- lapply(datl, function(doc) {
@@ -905,7 +935,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
         doc$comment <- paste(doc$comment, "isomers found")
       }
       
-      # mz
+      # Extract m/z value from peaklist
       mztemp <- subset(dbas$peakList, peakID == idtemp, real_mz, drop = T)
       if (length(mztemp) == 0)
         mztemp <-subset(dbas$integRes, comp_name == doc$name & samp == doc$filename, real_mz, drop = T)
@@ -962,8 +992,42 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       }
       doc
     })  
+   
     
-    # add tags if available
+    # Adduct and isotopologue
+    # Assume that for one compound, these have distinct nominal masses.
+    # Use the name and nominal mass to determine the isotope and adduct.
+    tempPl <- dbas$peakList[, c("comp_name", "adduct", "real_mz")]
+    tempPl$nom_mass <- round(tempPl$real_mz)
+    tempPl$real_mz <- NULL
+    tempPl <- tempPl[!duplicated(tempPl),]
+    
+    sdb <- con_sqlite(dbPath)
+    thispol <- get_field2(esids, "pol", justone = T)
+    comptab <- tbl(sdb, "experiment") %>% 
+      left_join(tbl(sdb, "parameter"), by = "parameter_id") %>%
+      filter(polarity == !!thispol) %>% 
+      left_join(tbl(sdb, "compound"), by = "compound_id") %>%
+      select(name, mz, adduct, isotope) %>% collect() %>% 
+      rename(comp_name = name) %>% 
+      mutate(nom_mass = round(mz)) %>%
+      select(-mz) %>% 
+      distinct()
+    tpl <- merge(tempPl, comptab, by = c("comp_name", "nom_mass", "adduct"), all.x = T)
+    DBI::dbDisconnect(sdb)
+    
+    datl <- lapply(datl, function(doc) { #doc <- datl[[1]]
+      tnom <- round(doc[["mz"]])
+      tname <- doc[["name"]]
+      tadduct <- tpl[tpl$comp_name == tname & tpl$nom_mass == tnom, "adduct"]
+      tiso <- tpl[tpl$comp_name == tname & tpl$nom_mass == tnom, "isotope"]
+      stopifnot(length(tadduct) == 1, length(tiso) == 1)
+      doc$adduct <- tadduct
+      doc$isotopologue <- tiso
+      doc
+    })
+    
+    # Add tags if available
     datl <- lapply(datl, function(doc) {
       doctag <- get_field2(doc$id, "tag", simplify = F)
       if (!is.null(doctag))

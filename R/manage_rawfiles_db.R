@@ -6,7 +6,7 @@
 #' The current date will be used in the index name
 #' 
 #' @param aliasName 
-#' @param dateNum 
+#' @param dateNum Provide a specific version code (YYMMDD), default is NULL (current date)
 #'
 #' @return
 #'
@@ -16,7 +16,7 @@ dbas_index_from_alias <- function(aliasName, dateNum = NULL) {
   } else {
     stopifnot(grepl("\\d{6}", dateNum))
   }
-  sub("^(g2_dbas_)", paste0("\\1v", dateNum, "_"), aliasName)
+  sub("^(ntsp_dbas_)", paste0("\\1v", dateNum, "_"), aliasName)
 }
 
 #' Create a new, empty dbas index 
@@ -25,24 +25,26 @@ dbas_index_from_alias <- function(aliasName, dateNum = NULL) {
 #' The new index name will be written to msrawfiles index.
 #' 
 #' @param escon elastic connection object created by elastic::connect
+#' @param rfindex index name for rawfiles index
 #' @param aliasName 
-#' @param rfIndex index name for rawfiles index
+#' @param dateNum Provide a specific version code (YYMMDD), default is NULL (current date)
 #'
 #' @return
 #' @export
 #'
-create_dbas_index <- function(escon, aliasName, rfIndex) {
+create_dbas_index <- function(escon, rfindex, aliasName, dateNum = NULL) {
   
   # Name of index for this alias
-  indNew <- dbas_index_from_alias(aliasName)
+  indNew <- dbas_index_from_alias(aliasName, dateNum)
   
+  # Create new index
   resCrea <- put_dbas_index(escon, indNew)
   if (resCrea$acknowledged)
     logger::log_info("Acknowledged index creation {indNew}") else stop("Index creation {indNew} failed")
   
-  # Add new index name to rfIndex
+  # Add new index name to rfindex
   resNameChange <- elastic::docs_update_by_query(
-    escon, rfIndex, body = 
+    escon, rfindex, body = 
       sprintf('
       {
       "query": {
@@ -70,6 +72,37 @@ create_dbas_index <- function(escon, aliasName, rfIndex) {
   }
   
   invisible(indNew)
+}
+
+#' Create new index for all documents
+#'
+#' @param escon 
+#' @param rfindex 
+#' @param dateNum Provide a specific version code (YYMMDD), default is NULL (current date)
+#' 
+#' @return
+#' @export
+#'
+create_dbas_index_all <- function(escon, rfindex, dateNum = NULL) {
+  # Get list of all aliases
+  res <- elastic::Search(
+    escon, rfindex, size = 0,
+    body = list(
+      aggs = list(
+        aliases = list(
+          terms = list(
+            field = "dbas_alias_name",
+            size = 100
+          )
+        )
+      )
+    )
+  )
+  a <- vapply(res$aggregations$aliases$buckets, "[[", i = "key", character(1))
+  for (i in a) {
+    create_dbas_index(escon, rfindex, aliasName = i, dateNum = dateNum)
+  }
+  invisible(TRUE)
 }
 
 
@@ -105,6 +138,57 @@ es_move_alias <- function(escon, indexName, aliasName, closeAfter = FALSE) {
     logger::log_info("Closed index {previousIndex}")
   }
   invisible(res$acknowledged)
+}
+
+#' Update alias names
+#'
+#' This function will update all the aliases in msrawfiles to use the current
+#' indices found in msrawfiles
+#' 
+#' @param escon 
+#' @param rfindex 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+update_alias_all <- function(escon, rfindex) {
+  # Get all index names and alias names
+  res <- elastic::Search(
+    escon, rfindex, size = 0,
+    body = list(
+      aggs = list(
+        aliases = list(
+          terms = list(
+            field = "dbas_alias_name",
+            size = 100
+          ),
+          aggs = list(
+            indices = list(
+              terms = list(
+                field = "dbas_index_name",
+                size = 100
+              )
+            )
+          )
+        )
+      )
+    ) 
+  )
+  l <- lapply(res$aggregations$aliases$buckets, function(aliases) {
+    if (length(aliases$indices$buckets) != 1) {
+      stop("There is not a 1:1 relationship between aliases and indices")
+    }
+    data.frame(alias = aliases$key, index = aliases$indices$buckets[[1]]$key)
+  })
+  df <- do.call("rbind", l)
+  
+  for (i in 1:nrow(df)) {
+    es_move_alias(escon, indexName = df[i, "index"], aliasName = df[i, "alias"],
+                  closeAfter = TRUE)
+  }
+  
+  invisible(TRUE)
 }
 
 #' Remove the old dbas index alias and create a new one

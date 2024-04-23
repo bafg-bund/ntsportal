@@ -6,7 +6,7 @@
 # json. The json is saved under ~/sqlite_local/json
 
 
-# nohup Rscript ~/projects/ntsportal/scripts/update-spectral-library-ntsp.R &> /scratch/nts/logs/$(date +%y%m%d)-speclib-update.log &
+# nohup Rscript scripts/update-spectral-library-ntsp.R &> /scratch/nts/logs/$(date +%y%m%d)-speclib-update.log &
 # see crontab -e for processing
 
 library(dplyr)
@@ -21,9 +21,9 @@ source("~/connect-ntsp.R")
 INDEX_NAME <- "ntsp_index_spectral_library_v240412"
 SDBPATH <- "/scratch/nts/MS2_db_v9.db"
 ALIAS <- "ntsp_spectral_library"
-VERSION <- "2024-04-19"
 CONFIG <- "~/config.yml"
 INGESTPTH <- "scripts/ingest.sh"
+VERSION <- "2024-04-19"  # of script
 # - ###########################################
 log_info("----- update-spectral-library-ntsp.R v{VERSION} -----")
 log_info("Converting sqlite spectral database at {SDBPATH} to json and updating {ALIAS} index")
