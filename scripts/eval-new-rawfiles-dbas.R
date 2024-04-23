@@ -196,17 +196,6 @@ log_info("Completed all batches")
 log_info("Average peaks found per batch: {mean(numPeaksBatch)}")
 log_info("currently {free_gb()} GB of memory available")
 
-# Add data to newly created docs ####
-# TODO this should be integrated into the original doc creation
-# Use filenames to find out which docs are new
-
-sdb <- con_sqlite(SPECLIBPATH)
-res1 <- mapply(es_add_comp_groups, index = allFlsIndex, filenames = allFlsNames, 
-       MoreArgs = list(escon = escon, sdb = sdb))
-res2 <- mapply(es_add_identifiers, index = allFlsIndex, filenames = allFlsNames, 
-               MoreArgs = list(escon = escon, sdb = sdb))
-DBI::dbDisconnect(sdb)
-
 # Add analysis index ####
 if (any(grepl("_upb", allFlsIndex)))
   system2("Rscript", ADDANALYSIS)
