@@ -628,14 +628,13 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       }
     )
     
-    
     if (any(vapply(repLt, is.null, logical(1))) || 
         any(vapply(repLt, inherits, logical(1), what = "try-error"))) {
       errorEsids <- c(
         esids[vapply(repLt, is.null, logical(1))],
         esids[vapply(repLt, inherits, logical(1), what = "try-error")]
       )
-      errorFiles <- allFls[allFls$id %in% errorEsids, "path"]
+      errorFiles <- get_field2(errorEsids, "path")
       errorFilesClps <- paste(errorFiles, collapse = "\n")
       log_warn("Error in files {errorFilesClps}")
     }
@@ -647,8 +646,8 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     nothingFound <- vapply(repLt, function(x) nrow(x$peakList) == 0, logical(1))
     
     if (any(nothingFound)) {
-      nothingEsids <- esids[nothingFound]
-      nothingFiles <- allFls[allFls$id %in% nothingEsids, "path"]
+      errorEsids <- esids[nothingFound]
+      nothingFiles <- get_field2(errorEsids, "path")
       message(sprintf("\nFiles\n%s\nhave no hits.", 
                       paste(nothingFiles, collapse = "\n")))
     }
