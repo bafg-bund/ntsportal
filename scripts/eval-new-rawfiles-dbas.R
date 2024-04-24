@@ -162,9 +162,6 @@ delRes <- mapply(
   SIMPLIFY = T
 )
 
-# Delete previous temp files
-
-system("rm -f /scratch/nts/tmp/*")
 
 # Testing: Reduce batches to those with a small size for testing
 # table(sapply(allFlsIds, length))

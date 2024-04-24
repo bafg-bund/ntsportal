@@ -274,7 +274,6 @@ get_field_builder <- function(escon, index) {
 #' @param min_freq 
 #'
 #' @return
-#'
 get_rare <- function(repo, min_freq) {
   pl <- repo$peakList
   finds <- by(pl, pl$comp_name, nrow)
@@ -597,7 +596,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
   # Define Variables
   # These pollute the comp_group field and need to be removed
   SPEC_SOURCES <- c("BfG", "LfU", "UBA")
-  
+  batchStartTime <- lubridate::now()
   # Name for saving the files
   # For saving RDS file
   savename <- gsub("[/\\.]", "_", dirname(get_field2(esids, "path"))[1])
@@ -922,7 +921,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     
     log_info("Collecting spectra")
     
-    datl <- lapply(datl, function(doc) {
+    datl <- lapply(datl, function(doc) { # doc <- datl[[1]]
       idtemp <- subset(dbas$peakList, comp_name == doc$name & samp == doc$filename, peakID, drop = T)
       if (!is.numeric(idtemp))
         stop("non numeric idtemp") 
@@ -950,14 +949,17 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       stopifnot(length(rttemp) == 1, is.numeric(rttemp), !is.na(rttemp))
       doc$rt <- round(rttemp, 2)
       
-      # if the id was not found, then the rest of the inputs are not needed
+      # If the peakID was not found, then this means there is no entry for this
+      # peak in the peaklist. The rest of the entries (eic, ms1, ms2) are skipped.
+      # TODO even for peaks that are not in the peaklist (no ms2) still have an
+      # eic and an ms1. This information could still be extracted. 
       if (!is.numeric(idtemp) || length(idtemp) == 0)
         return(doc)
       
       # int
       inttemp <- subset(dbas$peakList, peakID == idtemp, int_h, drop = T) 
-      # eic
       
+      # eic
       if (is.numeric(idtemp)) {
         eictemp <- subset(dbas$EIC, peakID == idtemp, c(time, int))
         if (nrow(eictemp) > 0) {
@@ -1044,6 +1046,14 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     
     # remove msrawfiles id
     datl <- lapply(datl, function(doc) {doc$id <- NULL; doc})
+    
+    # Add time for processing
+    batchEndTime <- lubridate::now()
+    avgMins <- round(
+      as.numeric(batchEndTime - batchStartTime, units = "mins") / length(esids),
+      digits = 2
+    )
+    datl <- lapply(datl, function(doc) {doc$dbas_proc_time <- avgMins; doc})
     
     # remove NA values (there is no such thing as NA, the value just does not exist)
     datl <- lapply(datl, remove_na_doc)
