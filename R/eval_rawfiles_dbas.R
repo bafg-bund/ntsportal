@@ -1049,6 +1049,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     datl <- lapply(datl, function(doc) {doc$id <- NULL; doc})
     
     # Add time for processing
+    # TODO move this to the end of the function and use es_add_field
     batchEndTime <- lubridate::now()
     avgMins <- round(
       as.numeric(batchEndTime - batchStartTime, units = "mins") / length(esids),
@@ -1061,7 +1062,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     
     log_info("Writing json file")
     
-    # Generate JSON ####
+    # Write JSON ####
     jsonPath <- sub("\\.report$", ".json", newsavename)  # jsonPath <- "tests/bimmen.json"
     
     jsonlite::write_json(datl, jsonPath, pretty = T, digits = NA, auto_unbox = T)

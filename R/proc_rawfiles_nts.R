@@ -47,7 +47,7 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
     "tag",
     "comment"
   )
-  startTime <- lubridate::now()
+  bStartTime <- lubridate::now()
   
   # Define internal functions ####
   gfield <- get_field_builder(escon = escon, index = rfindex)
@@ -696,12 +696,17 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
   alig7 <- unname(alig7)
   dataPath2 <- sub("\\.RDS$", ".json", savename)
   
+  # Write JSON ####
   log_info("Writing JSON file {dataPath2}")
   jsonlite::write_json(alig7, dataPath2, auto_unbox = T, pretty = T)
   
   log_info("Compressing json with gzip")
   system2("gzip", dataPath2)
-  # Add processingtime information to msrawfiles
-  endTime <- lubridate::now()
-  minutes <- round(as.numeric(endTime - startTime, units = "minutes"))
+  
+  # Add processingtime information to msrawfiles after all steps.
+  bEndTime <- lubridate::now()
+  mins <- round(as.numeric(bEndTime - bStartTime, units = "mins"))
+  res3 <- es_add_field(escon, rfindex, "nts_proc_time", 
+               queryBody = list(ids = list(values = esids)), value = mins)
+  
 }
