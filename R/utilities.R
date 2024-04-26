@@ -598,19 +598,7 @@ con_sqlite <- function(pth) {
   DBI::dbConnect(RSQLite::SQLite(), pth)
 }
 
-# TODO general function for adding a value to es
-# what to do with numbers and logicals?
-es_add_value <- function(escon, index, esid, fieldName, value) {
-  
-  elastic::docs_update(escon, index, esid, body = sprintf('
-  {
-  "script": {
-    "source": "ctx._source.%s = \'%s\'",
-    "lang": "painless"
-    }
-  }    
-  ', fieldName, value))
-}  
+
   
 #' Return the number of Gb of free memory on linux server
 #'

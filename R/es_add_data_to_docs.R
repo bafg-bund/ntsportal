@@ -1,5 +1,32 @@
 # Functions to add data to documents in NTSPortal
 
+#' Add a value to any field
+#' 
+#' Only works for length 1 values
+#'
+#' @param escon 
+#' @param esindex 
+#' @param field 
+#' @param queryBody query in list format
+#' @param value 
+#'
+#' @return
+#' @export
+es_add_field <- function(escon, esindex, field, queryBody, value) {
+  # TODO allow for multiple length variables
+  stopifnot(length(value) != 1)
+  newBody <- list(
+    query = queryBody,
+    script = list(
+      source = glue::glue("ctx._source.{field} = params.newValue"),
+      params = list(
+        newValue = value
+      )
+    )
+  )
+  elastic::docs_update_by_query(escon, esindex, body = newBody)
+}
+
 #' Add rtt field to all documents where this does not exist
 #'
 #'
@@ -218,6 +245,7 @@ es_get_comps <- function(escon, index, addQuery = NULL) {
 #' @export
 #' @import dplyr
 #' @import logger
+#' DEPRECATED 2024-04-24
 es_add_comp_groups <- function(escon, sdb, index, filenames = "all") {
   # allowed comp groups, as they are currently formated in spectral-lib
   # ntsp uses all lower case
@@ -379,6 +407,7 @@ es_add_comp_groups <- function(escon, sdb, index, filenames = "all") {
 #' @return
 #' @export
 #' @import dplyr
+#' DEPRECATED 2024-04-24
 es_add_identifiers <- function(escon, sdb, index, filenames = "all", compoundLimit = "all") {
   ctb <- tbl(sdb, "compound") %>%
     select(name, formula, inchi, inchikey, SMILES) %>%
