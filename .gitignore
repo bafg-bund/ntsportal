@@ -18,3 +18,4 @@ tests/ufid-note
 tests/addrawfiles_test
 tests/reference-shewhart
 tests/machine-learning
+tests/ole_temp
