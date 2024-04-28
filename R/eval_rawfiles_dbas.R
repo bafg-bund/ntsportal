@@ -593,6 +593,27 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
   # Create a get_field function with some default parameters
   get_field2 <- get_field_builder(escon = escon, index = rfindex)
   
+  record_end_processing <- function(escon, rfindex, esids, endMessage) {
+    log_info(endMessage)
+    for (i in esids) {
+      #browser()
+      tryCatch(
+        add_latest_eval(escon, rfindex, esid = i, fieldName = "dbas_last_eval"),
+        error = function(cnd) {
+          log_error("Could not add processing time to id {i}")
+          message(cnd)
+        }
+      )
+      tryCatch(
+        add_sha256_spectral_library(escon, rfindex, esid = i),
+        error = function(cnd) {
+          log_error("Could not add sha256 of spec lib to id {i}")
+          message(cnd)
+        }
+      )
+    }
+  }
+  
   # Define Variables
   # These pollute the comp_group field and need to be removed
   SPEC_SOURCES <- c("BfG", "LfU", "UBA")
@@ -641,6 +662,11 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     repLt <- Filter(Negate(is.null), repLt)
     repLt <- Filter(function(x) Negate(inherits)(x, what = "try-error"), repLt)
     
+    if (length(repLt) == 0) {
+      record_end_processing(escon, rfindex, esids, "No results for batch {get_field2(esids, 'path')[1]}")
+      return(0)
+    }
+    
     # remove reports with no peaks
     nothingFound <- vapply(repLt, function(x) nrow(x$peakList) == 0, logical(1))
     
@@ -652,6 +678,11 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     }
     
     repLt <- Filter(function(x) nrow(x$peakList) != 0, repLt)  
+    
+    if (length(repLt) == 0) {
+      record_end_processing(escon, rfindex, esids, "No results for batch {get_field2(esids, 'path')[1]}")
+      return(0)
+    }
     
     log_info("Merging reports")
     if (length(repLt) == 1) {

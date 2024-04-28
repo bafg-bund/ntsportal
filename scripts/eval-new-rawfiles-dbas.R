@@ -170,7 +170,6 @@ delRes <- mapply(
 # allFlsIds <- allFlsIds[which(sapply(allFlsIds, length) == 4)]
 # allFlsNames <- allFlsNames[which(sapply(allFlsNames, length) == 4)]
 
-#######################
 # Start processing ####
 log_info("Begin processing")
 
@@ -186,6 +185,7 @@ numPeaksBatch <- parallel::mclapply(
   mc.cores = CORES,
   mc.preschedule = FALSE
 )
+
 numPeaksBatch <- numPeaksBatch[sapply(numPeaksBatch, is.numeric)]
 numPeaksBatch <- as.numeric(numPeaksBatch)
 
