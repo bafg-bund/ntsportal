@@ -423,7 +423,7 @@ check_field <- function(escon, rfindex, fieldName, onlyNonBlank = FALSE) {
 #' @return true if successful
 #'
 add_latest_eval <- function(escon, index, esid, fieldName = "dbas_last_eval") {
-  stopifnot(fieldName %in% c("dbas_last_eval", "dbas_is_last_eval"))
+  stopifnot(fieldName %in% c("dbas_last_eval", "dbas_is_last_eval", "nts_last_eval"))
   timeText <- format(Sys.time(), "%Y-%m-%d %H:%M:%S", tz = "GMT")
   res <- elastic::docs_update(conn = escon, index = index, id = esid, body = sprintf('
   {
@@ -1073,11 +1073,11 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       system(
         glue::glue("{ingestpth} {configfile} {bindex} {jsonPath} &> /dev/null")
       )
-      log_info("Ingest complete")
+      log_info("Ingest complete, checking database for results")
       
-      # need to add a pause so that elastic return ingested docs
+      # Need to add a pause so that elastic returns ingested docs
       Sys.sleep(10)
-      # check that everything is in the database
+      # Check that everything is in the database
       checkFiles <- basename(get_field2(esids, "path"))
       
       resp5 <- elastic::Search(escon, bindex, body = sprintf('
@@ -1094,7 +1094,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       
       if (resp5$hits$total$value == length(datl)) {
         log_info("All docs imported into ElasticSearch")
-        # Add processing time and spectral library checksum to msrawfiles
+        # Add processing date and spectral library checksum to msrawfiles
         for (i in esids) {
           tryCatch(
             add_latest_eval(escon, rfindex, esid = i, fieldName = "dbas_last_eval"),

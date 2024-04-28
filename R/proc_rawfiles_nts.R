@@ -694,14 +694,61 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
     doc
   })
   alig7 <- unname(alig7)
-  dataPath2 <- sub("\\.RDS$", ".json", savename)
+  jsonPath <- sub("\\.RDS$", ".json", savename)
   
   # Write JSON ####
   log_info("Writing JSON file {dataPath2}")
   jsonlite::write_json(alig7, dataPath2, auto_unbox = T, pretty = T)
   
+  
+  
+  if (!noIngest) {
+    bindex <- gfield(esids, "dbas_index_name", justone = T)
+    log_info("Ingest starting")
+    
+    system(
+      glue::glue("{ingestpth} {configfile} {bindex} {jsonPath} &> /dev/null")
+    )
+    
+    log_info("Ingest step finished, checking db")
+    
+    # Need to add a pause so that elastic returns ingested docs
+    Sys.sleep(10)
+    # Check that everything is in the database
+    checkFiles <- gfield(esids, "filename")
+    
+    resp5 <- elastic::Search(
+      escon, bindex, size = 0, 
+      body = list(query = list(terms = list(filename = checkFiles)))
+    )
+    
+    if (resp5$hits$total$value == length(alig7)) {
+      log_info("All docs imported into ElasticSearch")
+      # Add processing date and spectral library checksum to msrawfiles
+      for (i in esids) {
+        tryCatch(
+          add_latest_eval(escon, rfindex, esid = i, fieldName = "nts_last_eval"),
+          error = function(cnd) {
+            log_error("Could not add processing time to id {i}")
+            message(cnd)
+          }
+        )
+        tryCatch(
+          add_sha256_spectral_library(escon, rfindex, esid = i),
+          error = function(cnd) {
+            log_error("Could not add sha256 of spec lib to id {i}")
+            message(cnd)
+          }
+        )
+      }
+    } else {
+      #browser()
+      log_warn("Ingested data not found in batch starting with id {esids[1]}")
+    }
+  }
+  
   log_info("Compressing json with gzip")
-  system2("gzip", dataPath2)
+  system2("gzip", jsonPath)
   
   # Add processingtime information to msrawfiles after all steps.
   bEndTime <- lubridate::now()
