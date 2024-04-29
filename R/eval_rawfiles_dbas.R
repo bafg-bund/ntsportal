@@ -622,7 +622,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
   # For saving RDS file
   savename <- gsub("[/\\.]", "_", dirname(get_field2(esids, "path"))[1])
   # Take everything after messdaten...
-  savename <- stringr::str_match(savename, "messdaten(.*)$")[,2]
+  # savename <- stringr::str_match(savename, "[Mm]essdaten(.*)$")[,2]
   savename <- paste0("dbas-batch--", savename, "--", format(Sys.time(), "%y%m%d"), ".report")
   savename <- file.path(tempsavedir, savename)
   
@@ -643,7 +643,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
         mc.preschedule = F
       ),
       error = function(cnd) {
-        log_warn("Error in screening for batch with id {esid[1]}")
+        log_warn("Error in screening for batch with id {esids[1]}")
         message(cnd)
       }
     )
@@ -1085,7 +1085,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       as.numeric(batchEndTime - batchStartTime, units = "mins") / length(esids),
       digits = 2
     )
-    datl <- lapply(datl, function(doc) {doc$dbas_proc_time <- avgMins; doc})
+    # datl <- lapply(datl, function(doc) {doc$dbas_proc_time <- avgMins; doc})  # KJ correct
     
     # remove NA values (there is no such thing as NA, the value just does not exist)
     datl <- lapply(datl, remove_na_doc)
@@ -1103,6 +1103,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       log_info("Ingest starting")
       system(
         glue::glue("{ingestpth} {configfile} {bindex} {jsonPath} &> /dev/null")
+        # glue::glue("{ingestpth} {configfile} {bindex} {jsonPath}")
       )
       log_info("Ingest complete")
       
