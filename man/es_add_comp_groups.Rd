@@ -16,5 +16,6 @@ If 'all' (default) all dbas documents are updated.}
 True (invisibly)
 }
 \description{
-The dbas index will be updated with
+The dbas index will be updated with 
+DEPRECATED 2024-04-24
 }

@@ -11,9 +11,9 @@ change_msrawfile_path(escon, rfindex, oldPath, newPath, checkType = "md5")
 
 \item{rfindex}{index name for rawfiles index}
 
-\item{oldPath}{Current path in rawfiles index, file must exist}
+\item{oldPath}{Current path in rawfiles index, file must exist (1 file)}
 
-\item{newPath}{New path, file must exist}
+\item{newPath}{New path, file must exist (1 file)}
 
 \item{checkType}{Method to check that files are the same, either "md5" (default) or "filesize"}
 }
@@ -28,4 +28,18 @@ Filename is not changed and must remain the same.
 Both files must exist when making the change. The function takes some time 
 if it compares md5-checksums of the two files. For large numbers of files use the
 filesize check.
+}
+\examples{
+\dontrun{
+source("~/connect-ntsp.R")
+rfindex <- "ntsp_index_msrawfiles_unit_tests"
+res <- elastic::Search(escon, rfindex, source = "path")
+opths <- sapply(res$hits$hits, function(x) x[["_source"]]$path)
+fn <- basename(opths)
+npths <- list.files("/scratch/nts/ntsportal_unit_tests/meas_files", f = T)
+npths <- nps[sapply(fn, grep, x = opths)]
+purrr::walk2(opths, npths, change_msrawfile_path, escon = escon, rfindex = rfindex)
+}
+
+
 }
