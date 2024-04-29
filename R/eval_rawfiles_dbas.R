@@ -974,6 +974,8 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
           samp == doc$filename &
           adduct == doc$adduct &
           isotopologue == doc$isotopologue, peakID, drop = T)
+      # If the peakID was not found, then this means there is no entry for this
+      # peak in the peaklist. The rest of the entries (eic, ms1, ms2) are skipped.
       if ( length(idtemp) == 0 || !is.numeric(idtemp))
         return(doc) 
   
@@ -1018,71 +1020,10 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
           }
         }
       }
-      
-      # # Extract m/z value from peaklist
-      # mztemp <- subset(dbas$peakList, peakID == idtemp, real_mz, drop = T)
-      # if (length(mztemp) == 0)
-      #   mztemp <-subset(dbas$integRes, comp_name == doc$name & samp == doc$filename, real_mz, drop = T)
-      # stopifnot(length(mztemp) == 1, is.numeric(mztemp), !is.na(mztemp))
-      # doc$mz <- round(mztemp, 4)
-      # 
-      # # rt
-      # rttemp <- subset(dbas$peakList, peakID == idtemp, real_rt_min, drop = T)
-      # if (length(rttemp) == 1 && is.na(rttemp))
-      #   rttemp <- subset(dbas$peakList, peakID == idtemp, rt_min, drop = T)
-      # if (length(rttemp) == 0)
-      #   rttemp <- subset(dbas$integRes, comp_name == doc$name & samp == doc$filename, real_rt_min, drop = T)
-      # stopifnot(length(rttemp) == 1, is.numeric(rttemp), !is.na(rttemp))
-      # doc$rt <- round(rttemp, 2)
-      
-      # If the peakID was not found, then this means there is no entry for this
-      # peak in the peaklist. The rest of the entries (eic, ms1, ms2) are skipped.
       # TODO even for peaks that are not in the peaklist (no ms2) still have an
       # eic and an ms1. This information could still be extracted. 
-     
-      
-      # int
-   
       doc
     })  
-   
-    
-    # Adduct and isotopologue
-    # Assume that for one compound, these have distinct nominal masses.
-    # Use the name and nominal mass to determine the isotope and adduct.
-    #browser()
-    # tempPl <- dbas$peakList[, c("comp_name", "adduct", "real_mz")]
-    # tempPl$nom_mass <- round(tempPl$real_mz)
-    # tempPl$real_mz <- NULL
-    # tempPl <- tempPl[!duplicated(tempPl),]
-    # 
-    # sdb <- con_sqlite(dbPath)
-    # thispol <- get_field2(esids, "pol", justone = T)
-    # comptab <- tbl(sdb, "experiment") %>% 
-    #   left_join(tbl(sdb, "parameter"), by = "parameter_id") %>%
-    #   filter(polarity == !!thispol) %>% 
-    #   left_join(tbl(sdb, "compound"), by = "compound_id") %>%
-    #   select(name, mz, adduct, isotope) %>% collect() %>% 
-    #   rename(comp_name = name) %>% 
-    #   mutate(nom_mass = round(mz)) %>%
-    #   select(-mz) %>% 
-    #   distinct()
-    # tpl <- merge(tempPl, comptab, by = c("comp_name", "nom_mass", "adduct"), all.x = T)
-    # DBI::dbDisconnect(sdb)
-    # 
-    # datl <- lapply(datl, function(doc) { #doc <- datl[[1]]
-    #   tnom <- round(doc[["mz"]])
-    #   tname <- doc[["name"]]
-    #   tadduct <- tpl[tpl$comp_name == tname & tpl$nom_mass == tnom, "adduct"]
-    #   tiso <- tpl[tpl$comp_name == tname & tpl$nom_mass == tnom, "isotope"]
-    #   tiso <- tiso[!is.na(tiso)]
-    #   tadduct <- tadduct[!is.na(tadduct)]
-    #   #browser(expr = length(tadduct) != 1)
-    #   #stopifnot(length(tadduct) == 1, length(tiso) == 1)    # this is causing a problem
-    #   doc$adduct <- tadduct
-    #   doc$isotopologue <- tiso
-    #   doc
-    # })
     
     # Add tags if available
     datl <- lapply(datl, function(doc) {
