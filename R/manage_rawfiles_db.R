@@ -16,7 +16,7 @@ dbas_index_from_alias <- function(aliasName, dateNum = NULL) {
   } else {
     stopifnot(grepl("\\d{6}", dateNum))
   }
-  sub("^(ntsp_dbas_)", paste0("\\1v", dateNum, "_"), aliasName)
+  sub("^(ntsp_)dbas_", paste0("\\1index_dbas_v", dateNum, "_"), aliasName)
 }
 
 #' Create a new, empty dbas index 
