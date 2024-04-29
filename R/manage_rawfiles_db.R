@@ -256,8 +256,8 @@ move_dbas_alias <- function(escon, indexName, aliasName) {
 #'
 #' @param escon elastic connection object created by elastic::connect
 #' @param rfindex index name for rawfiles index
-#' @param oldPath Current path in rawfiles index, file must exist
-#' @param newPath New path, file must exist
+#' @param oldPath Current path in rawfiles index, file must exist (1 file)
+#' @param newPath New path, file must exist (1 file)
 #' @param checkType Method to check that files are the same, either "md5" (default) or "filesize"
 #' 
 #' @details
@@ -267,6 +267,19 @@ move_dbas_alias <- function(escon, indexName, aliasName) {
 #' 
 #' @return TRUE if change was successful (invisibly)
 #' @export
+#' 
+#' @examples
+#' \dontrun{
+#' source("~/connect-ntsp.R")
+#' rfindex <- "ntsp_index_msrawfiles_unit_tests"
+#' res <- elastic::Search(escon, rfindex, source = "path")
+#' opths <- sapply(res$hits$hits, function(x) x[["_source"]]$path)
+#' fn <- basename(opths)
+#' npths <- list.files("/scratch/nts/ntsportal_unit_tests/meas_files", f = T)
+#' npths <- nps[sapply(fn, grep, x = opths)]
+#' purrr::walk2(opths, npths, change_msrawfile_path, escon = escon, rfindex = rfindex)
+#' }
+#' 
 #'
 change_msrawfile_path <- function(escon, rfindex, oldPath, newPath, checkType = "md5") {
   stopifnot(length(oldPath) == 1, length(newPath) == 1)

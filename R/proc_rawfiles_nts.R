@@ -19,6 +19,7 @@
 #' @export
 #' @import dplyr
 #' @import logger
+#' @import future
 #'
 #' @examples
 proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile, 
@@ -135,8 +136,6 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
   # For saving RDS file
   savename <- gsub("/", "_", dirname(gfield(esids, "path"))[1])
   savename <- gsub("\\.", "_", savename)
-  # Take everything after messdaten...
-  savename <- stringr::str_match(savename, "messdaten(.*)$")[,2]
   savename <- paste0("nts-batch--", savename, "--", format(Sys.time(), "%y%m%d"), ".RDS")
   savename <- file.path(tempsavedir, savename)
   
@@ -163,15 +162,19 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
   log_info("Starting peak-picking and componentization")
   
   # Peak-picking ####
-  
-  protopeaklist <- parallel::mclapply(
+  # Multisession for RStudio, multicore for processing (multicore uses less memory)
+  if (rstudioapi::isAvailable()) {
+    plan(multisession, workers = coresBatch)  
+  } else {
+    plan(multicore, workers = coresBatch)
+  }
+  protopeaklist <- furrr::future_map(
     esids, 
     proc_esid_pp, 
     escon = escon,
-    rfindex = rfindex,
-    mc.preschedule = FALSE,
-    mc.cores = coresBatch
+    rfindex = rfindex
   )
+  plan(sequential)
   
   # Check results
   if (!all(vapply(protopeaklist, function(x) all(c("pl", "rf", "set") %in% names(x)), logical(1))))
@@ -210,7 +213,8 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
   aligRowsUncorrected <- nrow(grouped)
   
   # Second stage componentization ####
-  log_info("Second stage componentization on batch size {length(esids)}")
+  log_info("Second stage componentization skipped")
+  # log_info("Second stage componentization on batch size {length(esids)}")
   # Update column "Gruppe" with new information
   # Commented out for now because it takes too long
   # grouped <- ntsworkflow::alig_componentisation(
@@ -260,6 +264,7 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
   aligRowsAfterFilter <- nrow(grouped)
   
   # Annotation ####
+  # TEST: WHY NO PEAKS FOUND ####
   log_info("Starting annotation")
   chromMethod <- ifelse(
     gfield(esids, "chrom_method", justone = T) == "bfg_nts_rp1",
@@ -268,6 +273,7 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
   ) 
   
   # TODO change ntsworkflow: instrument: default settings should be to include everything
+  # TODO change ntsworkflow: add parallelization to annotate_grouped
   annotationTable <- ntsworkflow::annotate_grouped(  
     sampleListLocal = sampleList,
     peakListList = peaklist,
@@ -435,7 +441,11 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
     name_is = is
   )
   # Fill NAs with averages
+  # We assume an error in the peak-picking has occurred and there is no IS peak
+  # TODO This needs to be considered again, what is the point of IS if you are
+  # just going to ignore a missing IS peak?
   if (any(is.na(is_alig$intensity_is)) || any(is.na(is_alig$area_is))) {
+    log_warn("Ignoring missing IS and taking the average intensity of the other files")
     i <- mean(is_alig$intensity_is, na.rm = T)
     a <- mean(is_alig$area_is, na.rm = T)
     is_alig[is.na(is_alig$intensity_is), "intensity_is"] <- i
@@ -453,6 +463,8 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
   alig3[fpRow, c("name", "cas", "formula", "smiles", "adduct")] <- NA
   
   # Add component information
+  # A component is identified by ID, the number is made of Unix time stamp,
+  # sample number in the batch and combined group number from alig
   numGr <- table(alig3$Gruppe, alig3$sample)
   batchId <- round(as.numeric(Sys.time()))  # use unix time as id for batch
   alig3$component <- vapply(seq_len(nrow(alig3)), function(i) {
@@ -461,7 +473,7 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
     if (gr == 0 || numGr[as.character(gr), as.character(sp)] <= 1) {
       return(NA)
     } else {
-      return(as.numeric(paste0(batchId, gr)))
+      return(as.numeric(paste0(batchId, sp, gr)))
     }
   }, numeric(1))
   
@@ -477,7 +489,8 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
   # Isotopologue
   # Assume that for one compound, these have distinct nominal masses.
   # Use the name, nominal mass and adduct to determine the isotope.
-  # TODO this should be incorporated into ntsworkflow
+  # TODO this should be incorporated into ntsworkflow add isotopolgue info
+  # should be annotated in annotate_grouped
   alig3$nom_mass <- round(alig3$mz)
   
   sdb <- con_sqlite(dbPath)
@@ -568,11 +581,18 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
   
   # Clean up environment ####
   rm(list = ls()[!is.element(ls(), c(
-    "alig6", "alig3b", "pl", "savename", "gfield", "coresBatch", "samp", "rfindex", "eicExtraction"))])
+    "alig6", "alig3b", "pl", "savename", "gfield", "ingestpth", "configfile",
+    "coresBatch", "samp", "rfindex", "eicExtraction", "esids"))])
   
   # Collect EIC, MS1 and MS2 ####
   bySamp <- split(alig6, sapply(alig6, function(doc) doc$sample))
-  bySamp2 <- parallel::mclapply(bySamp, function(aligSamp) {  # aligSamp <- bySamp[[1]]
+  if (rstudioapi::isAvailable()) {
+    plan(multisession, workers = coresBatch)  
+  } else {
+    plan(multicore, workers = coresBatch)
+  }
+ 
+  bySamp2 <- furrr::future_map(bySamp, function(aligSamp) {  # aligSamp <- bySamp[[1]]
     stopifnot(length(unique(sapply(aligSamp, function(doc) doc$filename))) == 1)
     doc1 <- aligSamp[[1]]
     filePath <- samp[samp$ID == doc1$sample, "File", drop = T]
@@ -613,8 +633,9 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
       colnames(ms1) <- c("mz", "int")
 
       # Focus only on area of spec around mz of feature
+      # TODO This is here set to +5 Da but needs adjustment!!!
       stopifnot(length(doc$mz) == 1, is.numeric(doc$mz))
-      ms1 <- ms1[ms1$mz > doc$mz - 1 & ms1$mz < doc$mz + 40, , drop = F]
+      ms1 <- ms1[ms1$mz > doc$mz - 1 & ms1$mz < doc$mz + 5, , drop = F]
 
       # Remove noise
       # 1) remove anything below baseline intensity
@@ -680,9 +701,10 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
     rf@env$msnIntensity <- NULL
     rf@env$msnMz <- NULL
     aligSampNew
-  }, mc.preschedule = FALSE, mc.cores = coresBatch)
+  })
+  plan(sequential)
   alig7 <- do.call("c", bySamp2)
-  
+  rm(bySamp, bySamp2, alig6, alig3b)
   
   alig7 <- lapply(alig7, function(doc) doc[names(which(!is.na(doc)))])
   
@@ -697,13 +719,13 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
   jsonPath <- sub("\\.RDS$", ".json", savename)
   
   # Write JSON ####
-  log_info("Writing JSON file {dataPath2}")
-  jsonlite::write_json(alig7, dataPath2, auto_unbox = T, pretty = T)
+  log_info("Writing JSON file {jsonPath}")
+  jsonlite::write_json(alig7, jsonPath, auto_unbox = T, pretty = T)
   
   
-  
+  # Ingest ####
   if (!noIngest) {
-    bindex <- gfield(esids, "dbas_index_name", justone = T)
+    bindex <- gfield(esids, "nts_index_name", justone = T)
     log_info("Ingest starting")
     
     system(
