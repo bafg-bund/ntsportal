@@ -1,5 +1,4 @@
 
-
 # Script to add spectral database to NTSPortal for data viewing
 
 # Creates json of all entries, deletes current index of entries and replaces it with the current
@@ -7,7 +6,7 @@
 
 
 # nohup Rscript scripts/update-spectral-library-ntsp.R &> /scratch/nts/logs/$(date +%y%m%d)-speclib-update.log &
-# see crontab -e for processing
+
 
 library(dplyr)
 library(lubridate)
