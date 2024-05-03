@@ -17,20 +17,20 @@ library(logger)
 source("~/connect-ntsp.R")
 
 # Variables to change ##################
-INDEX_NAME <- "ntsp_index_spectral_library_v240412"
-SDBPATH <- "/scratch/nts/MS2_db_v9.db"
+INDEX_NAME <- "ntsp_index_spectral_library_v240503"
+SPECLIBPATH <- "/scratch/nts/MS2_db_v9.db"
 ALIAS <- "ntsp_spectral_library"
 CONFIG <- "~/config.yml"
 INGESTPTH <- "scripts/ingest.sh"
-VERSION <- "2024-04-19"  # of script
+VERSION <- "2024-05-03"  # of script
 # - ###########################################
 log_info("----- update-spectral-library-ntsp.R v{VERSION} -----")
-log_info("Converting sqlite spectral database at {SDBPATH} to json and updating {ALIAS} index")
+log_info("Converting sqlite spectral database at {SPECLIBPATH} to json and updating {ALIAS} index")
 
-jsonName <- glue::glue("~/sqlite_local/json/{basename(SDBPATH)}-{format(Sys.Date(), '%y%m%d')}.json")
+jsonName <- glue::glue("/scratch/nts/json/{basename(SPECLIBPATH)}-{format(Sys.Date(), '%y%m%d')}.json")
 
 
-sdb <- DBI::dbConnect(RSQLite::SQLite(), SDBPATH)
+sdb <- DBI::dbConnect(RSQLite::SQLite(), SPECLIBPATH)
 
 exps <- tbl(sdb, "experiment") %>%
   left_join(tbl(sdb, "compound"), by = "compound_id") %>%
@@ -182,7 +182,7 @@ DBI::dbDisconnect(sdb)
 
 # Create new index 
 
-res <- put_spectral_library_index(escon, INDEX_NAME)
+res <- ntsportal::put_spectral_library_index(escon, INDEX_NAME)
 
 if (res$acknowledged) {
   log_info("Ingest new spectra using {INGESTPTH}")
