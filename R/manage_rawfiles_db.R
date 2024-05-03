@@ -129,7 +129,7 @@ es_move_alias <- function(escon, indexName, aliasName, closeAfter = FALSE) {
   res <- elastic::alias_create(escon, indexName, aliasName)
   ok <- res$acknowledged
   if (ok) {
-    logger::log_error("Success creating alias {aliasName} on index {indexName}")
+    logger::log_info("Success creating alias {aliasName} on index {indexName}")
   } else {
     logger::log_error("Error creating alias {aliasName} on index {indexName}")
   }
