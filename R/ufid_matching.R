@@ -2,6 +2,7 @@
 
 # private functions ####
 
+# TODO This needs to be combined with the functions in eval_dbas
 #' @export
 norm_ms1 <- function(x, precursorMz, noiselevel = 0.01) {
   precursorInt <- x$int[which.min(abs(x$mz - precursorMz))]
@@ -26,14 +27,17 @@ norm_ms2 <- function(x, precursorMz, noiselevel = 0.01) {
 
 #' Aggregate MS2 Spectra 
 #' 
-#' Goes through the a data.frame of fragments starting with the most intense fragments and combines
+#' @description Takes a series of MS2 spectra and combines these into one averaged spectrium based on binning fragment intensities.
+#' 
+#' @param x `data.frame` containing the m/z and intensity of all fragments to be combined (spectra are row binded together)
+#' 
+#' @details Goes through the a data.frame of fragments starting with the most intense fragments and combines
 #' fragments which are within the mztolerance into one centroid with the average m/z. Potential
 #' problem with this is that instruments with radically different response factors and noise levels
 #' can not be aggregated together in this way. A more generalized approach is needed in the future
 #' based on the density distribution of spectra.
 #' 
-#' @param x data.frame containing the m/z and intensity of all fragments to be combined
-#' 
+#' @returns Spectrum as a `data.frame` with the same column names as the input table
 #' @export
 clean_spectrum <- function(x, mztol = 0.005, msLevel = "ms1", precursorMz = NULL) {
   stopifnot(is.data.frame(x), ncol(x) == 2, colnames(x)[1] == "mz")
@@ -63,6 +67,7 @@ clean_spectrum <- function(x, mztol = 0.005, msLevel = "ms1", precursorMz = NULL
   newSpec
 }
 
+# TODO This may need to be combined with eval_dbas
 #' @export
 calc_ndp_fit <- function(d_spec, db_spec, ndp_m = 2, ndp_n = 1, mztolu_ = 0.015) {
   ar <- which(abs(outer(d_spec[, 1], db_spec[, 1], "-")) <= mztolu_,
@@ -109,21 +114,21 @@ calc_ndp_fit <- function(d_spec, db_spec, ndp_m = 2, ndp_n = 1, mztolu_ = 0.015)
 
 #' Find ufid for feature
 #'
-#' Recieves a feature and returns its ufid_assignment object based on
+#' @description Recieves a feature and returns its ufid_assignment object based on
 #' information in the ufid database. Currently, the feature must have m/z,
-#' rt and ms2. Tables are precollected as tibbles to increase speed and allow parallelizatation
+#' rt and ms2. Tables are precollected from the SQLite ufid library as tibbles to increase speed and allow parallelizatation
 #'
-#' @param ftt precollected feature table from ufid-db
-#' @param rtt precollected retention_time table from ufid-db
-#' @param ms2t precollected ms2 table from ufid-db
+#' @param ftt Precollected feature table from ufid-db
+#' @param rtt Precollected retention_time table from ufid-db
+#' @param ms2t Precollected ms2 table from ufid-db
 #' @param ft
-#' @param mztol
-#' @param rttol
-#' @param ms2dpThresh
+#' @param mztol m/z tolerance in Da
+#' @param rttol Retention time tolerance
+#' @param ms2dpThresh Threshold for dot-product comparison
 #'
-#' @return ufid_assignment object (ufid and level) Currently only level 1 is
+#' @returns ntsportal::ufid_assignment object (ufid and level) Currently only level 1 is
 #' possible. Returns ufid_assignment of 0, level 0 if no match is found.
-#' @import dplyr
+#'
 #' @export
 udb_feature_match <- function(ftt, rtt, ms2t, ft, mztol = 0.007, rttol = 1, ms2dpThresh = 50) {
   ft <- validate_feature(ft)
@@ -215,7 +220,7 @@ udb_feature_match <- function(ftt, rtt, ms2t, ft, mztol = 0.007, rttol = 1, ms2d
     rt_score = vapply(inter_ufid, function(y) ifelse(y %in% detrt$ufid, 1, 0), numeric(1)),
     ms2_score = vapply(inter_ufid, extract_values, numeric(1), msXscores = ms2scores)
   )
-  #browser()
+
   # At the time this assignment is just for level 1 case
   ufid_scores$sum <- apply(ufid_scores[, 2:4], 1, sum)
   ufid_scores <- subset(ufid_scores, sum == 3)
