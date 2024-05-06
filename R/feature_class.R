@@ -1,4 +1,6 @@
-#' Create feature
+#' Create feature object
+#' 
+#' @description Creates a feature object which holds the information needed to define one feature
 #'
 #' @param pol polarity of the feature
 #' @param mz mass of the feature
@@ -7,10 +9,10 @@
 #' @param chrom_method which method was used to measure
 #' @param ...
 #'
-#' @return
+#' @details A feature is a list with the same fields as the schema defined in the NTSPortal DBAS or NTS databases. 
+#' @returns object of class ntsportal::feature
 #' @export
 #'
-#' @examples
 new_feature <- function(pol = character(), mz = double(), rt = double(),
                         es_id = character(), chrom_method = character(), ...) {
   stopifnot(
@@ -34,24 +36,23 @@ new_feature <- function(pol = character(), mz = double(), rt = double(),
   structure(x, class = "feature")
 }
 
-#' Check
+#' Check feature 
 #'
-#' @param x
-#'
-#' @return
+#' @param x Feature object
+#' 
+#' @details This function will through an error if checks fail.
+#' @returns Unchanged feature object if checks have passed
 #' @export
 #'
-#' @examples
 validate_feature <- function(x) {
   if (is.null(x$mz) || is.na(x$mz) || length(x$mz) == 0) {
     stop("Must have an mz")
   }
-  if ("ufid" %in% names(x)) {
-    stopifnot(is_ufid_assignment(x$ufid))
-  }
   stopifnot(length(x$pol) == 1, x$pol %in% c("pos", "neg"))
   x
 }
+
+# Methods for feature class ####
 
 #' @export
 print.feature <- function(feat) {
