@@ -14,7 +14,7 @@
 #' @export
 es_add_field <- function(escon, esindex, field, queryBody, value) {
   # TODO allow for multiple length variables
-  stopifnot(length(value) != 1)
+  stopifnot(length(value) == 1)
   newBody <- list(
     query = queryBody,
     script = list(
@@ -234,7 +234,8 @@ es_get_comps <- function(escon, index, addQuery = NULL) {
 #' Add compound classification data from spectral library to ntsp dbas index
 #'
 #' The dbas index will be updated with 
-#'
+#' DEPRECATED 2024-04-24
+#' 
 #' @param escon
 #' @param sdb connection to spec lib
 #' @param index
@@ -245,7 +246,7 @@ es_get_comps <- function(escon, index, addQuery = NULL) {
 #' @export
 #' @import dplyr
 #' @import logger
-#' DEPRECATED 2024-04-24
+#' 
 es_add_comp_groups <- function(escon, sdb, index, filenames = "all") {
   # allowed comp groups, as they are currently formated in spectral-lib
   # ntsp uses all lower case
@@ -395,7 +396,9 @@ es_add_comp_groups <- function(escon, sdb, index, filenames = "all") {
 }
 
 #' Add formula, inchi and inchikey to docs in ntsp
-#'
+#' 
+#' DEPRECATED 2024-04-24
+#' 
 #' @param escon
 #' @param sdb
 #' @param index
@@ -407,7 +410,6 @@ es_add_comp_groups <- function(escon, sdb, index, filenames = "all") {
 #' @return
 #' @export
 #' @import dplyr
-#' DEPRECATED 2024-04-24
 es_add_identifiers <- function(escon, sdb, index, filenames = "all", compoundLimit = "all") {
   ctb <- tbl(sdb, "compound") %>%
     select(name, formula, inchi, inchikey, SMILES) %>%

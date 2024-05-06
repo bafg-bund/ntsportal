@@ -586,6 +586,7 @@ proc_esid <- function(escon, rfindex, esid, compsProcess = NULL) {
 #' @return
 #' @export
 #' @import logger
+#' @import future
 proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile, 
                        coresBatch, noIngest = FALSE) {
   
@@ -633,15 +634,20 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
 
   tryCatch({
     # Step 1 - Screening ####
-    tryCatch(
-      repLt <- parallel::mclapply(
-        esids, 
-        proc_esid, 
-        escon = escon, 
-        rfindex = rfindex,
-        mc.cores = coresBatch,
-        mc.preschedule = F
-      ),
+    tryCatch({
+        if (rstudioapi::isAvailable()) {
+          plan(multisession, workers = coresBatch)  
+        } else {
+          plan(multicore, workers = coresBatch)
+        }
+        repLt <- furrr::future_map(
+          esids, 
+          proc_esid, 
+          escon = escon, 
+          rfindex = rfindex
+        )
+        plan(sequential)
+      },
       error = function(cnd) {
         log_warn("Error in screening for batch with id {esids[1]}")
         message(cnd)
@@ -777,10 +783,11 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     log_info("Step 2 complete, processed report file created for: {newsavename}")
     
     dbas <- ntsworkflow::loadReport(F, newsavename)  
+    #dbas <- ntsworkflow::loadReport(F, "tests/dbas-eval/temp-files/dbas-batch--_srv_cifs-mounts_g2_G_G2_HRMS_Messdaten_koblenz_wasser_2019_201904_pos--240429_i.report")  
     # Step 3 - Conversion ####
     log_info("Collecting data for json export")
     
-    compData <- dbas$integRes[, c("samp", "comp_name", "int_a")]
+    compData <- dbas$integRes[, c("samp", "comp_name", "adduct", "isotopologue", "int_a", "real_mz", "real_rt_min")]
     compData$samp <- basename(compData$samp)
     
     bist <- unique(get_field2(esids, "dbas_is_table"))
@@ -819,6 +826,8 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       dat$reps <- stringr::str_replace(dat$samp, brepr, "\\1")
       averages <- by(dat, list(dat$reps, dat$comp_name), function(part) {
         comp1 <- part$comp_name[1]
+        ad1 <- part$adduct[1]
+        isot1 <- part$isotopologue[1]
         samp1 <- part$samp[1]
         average_int_a <- mean(part$int_a, na.rm = T)
         average_norm_a <- mean(part$norm_a, na.rm = T)
@@ -826,7 +835,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
         rsd_norm_a <- standard_deviation_norm_a/average_norm_a
         average_int_a_IS <- mean(part$int_a_IS, na.rm = T)
         data.frame(
-          samp = samp1, comp_name = comp1, int_a = average_int_a,
+          samp = samp1, comp_name = comp1, adduct = ad1, isotopologue = isot1, int_a = average_int_a,
           int_a_IS = average_int_a_IS, norm_a = average_norm_a, 
           sd_norm_a = standard_deviation_norm_a, rsd_norm_a = rsd_norm_a
         )
@@ -865,6 +874,9 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     dat$area_normalized <- signif(dat$area_normalized, 3)
     dat$int_a_IS <- signif(dat$int_a_IS, 3)
     
+    # Round mz
+    dat$real_mz <- round(dat$real_mz, 4)
+    
     # Get start time for sample
     idSamp <- data.frame(
       id = esids,
@@ -897,6 +909,8 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     colnames(dat) <- gsub("^int_a_IS$", "area_is", colnames(dat))
     colnames(dat) <- gsub("^comp_CAS$", "cas", colnames(dat))
     colnames(dat) <- gsub("^samp$", "filename", colnames(dat))
+    colnames(dat) <- gsub("^real_mz$", "mz", colnames(dat))
+    colnames(dat) <- gsub("^real_rt_min$", "rt", colnames(dat))
     
     # Make dat into list to allow for nested data structure
     rownames(dat) <- NULL
@@ -953,111 +967,63 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     log_info("Collecting spectra")
     
     datl <- lapply(datl, function(doc) { # doc <- datl[[1]]
-      idtemp <- subset(dbas$peakList, comp_name == doc$name & samp == doc$filename, peakID, drop = T)
-      if (!is.numeric(idtemp))
-        stop("non numeric idtemp") 
+      #browser(expr = doc$name == "10-Hydroxycarbamazepine")
+      idtemp <- subset(
+        dbas$peakList, 
+        comp_name == doc$name & 
+          samp == doc$filename &
+          adduct == doc$adduct &
+          isotopologue == doc$isotopologue, peakID, drop = T)
+      # If the peakID was not found, then this means there is no entry for this
+      # peak in the peaklist. The rest of the entries (eic, ms1, ms2) are skipped.
+      if ( length(idtemp) == 0 || !is.numeric(idtemp))
+        return(doc) 
+  
       # if more than one peak matches (isomers), which should be marked by peak A, B etc, 
       # choose the peak with the highest intensity
       if (length(idtemp) > 1) { 
         best <- which.max(subset(dbas$peakList, peakID %in% idtemp, int_a, drop = T))
         idtemp <- subset(dbas$peakList, peakID %in% idtemp, peakID, drop = T)[best]
         doc$comment <- paste(doc$comment, "isomers found")
+      } else {
+        inttemp <- subset(dbas$peakList, peakID == idtemp, int_h, drop = T) 
+        # eic
+        if (is.numeric(idtemp)) {
+          eictemp <- subset(dbas$EIC, peakID == idtemp, c(time, int))
+          if (nrow(eictemp) > 0) {
+            eictemp$time <- round(eictemp$time)  # in seconds
+            eictemp$int <- round(eictemp$int, 4)
+            rownames(eictemp) <- NULL
+            doc$eic <- eictemp
+          }
+          # ms1
+          ms1temp <- subset(dbas$MS1, peakID == idtemp, c(mz, int))
+          if (nrow(ms1temp) > 0 && is.numeric(inttemp)) {
+            ms1temp <- norm_ms1(ms1temp, doc$mz, inttemp)
+            if (!is.null(ms1temp)) {
+              ms1temp$mz <- round(ms1temp$mz, 4)
+              ms1temp$int <- round(ms1temp$int, 4)
+              rownames(ms1temp) <- NULL
+              doc$ms1 <- ms1temp
+            }
+          }
+          # ms2
+          ms2temp <- subset(dbas$MS2, peakID == idtemp, c(mz, int))
+          if (nrow(ms2temp) > 0) {
+            ms2temp <- norm_ms2(ms2temp, doc$mz)
+            if (!is.null(ms2temp)) {
+              ms2temp$mz <- round(ms2temp$mz, 4)
+              ms2temp$int <- round(ms2temp$int, 4)
+              rownames(ms2temp) <- NULL
+              doc$ms2 <- ms2temp
+            }
+          }
+        }
       }
-      
-      # Extract m/z value from peaklist
-      mztemp <- subset(dbas$peakList, peakID == idtemp, real_mz, drop = T)
-      if (length(mztemp) == 0)
-        mztemp <-subset(dbas$integRes, comp_name == doc$name & samp == doc$filename, real_mz, drop = T)
-      stopifnot(length(mztemp) == 1, is.numeric(mztemp), !is.na(mztemp))
-      doc$mz <- round(mztemp, 4)
-      
-      # rt
-      rttemp <- subset(dbas$peakList, peakID == idtemp, real_rt_min, drop = T)
-      if (length(rttemp) == 1 && is.na(rttemp))
-        rttemp <- subset(dbas$peakList, peakID == idtemp, rt_min, drop = T)
-      if (length(rttemp) == 0)
-        rttemp <- subset(dbas$integRes, comp_name == doc$name & samp == doc$filename, real_rt_min, drop = T)
-      stopifnot(length(rttemp) == 1, is.numeric(rttemp), !is.na(rttemp))
-      doc$rt <- round(rttemp, 2)
-      
-      # If the peakID was not found, then this means there is no entry for this
-      # peak in the peaklist. The rest of the entries (eic, ms1, ms2) are skipped.
       # TODO even for peaks that are not in the peaklist (no ms2) still have an
       # eic and an ms1. This information could still be extracted. 
-      if (!is.numeric(idtemp) || length(idtemp) == 0)
-        return(doc)
-      
-      # int
-      inttemp <- subset(dbas$peakList, peakID == idtemp, int_h, drop = T) 
-      
-      # eic
-      if (is.numeric(idtemp)) {
-        eictemp <- subset(dbas$EIC, peakID == idtemp, c(time, int))
-        if (nrow(eictemp) > 0) {
-          eictemp$time <- round(eictemp$time)  # in seconds
-          eictemp$int <- round(eictemp$int, 4)
-          rownames(eictemp) <- NULL
-          doc$eic <- eictemp
-        }
-        # ms1
-        ms1temp <- subset(dbas$MS1, peakID == idtemp, c(mz, int))
-        if (nrow(ms1temp) > 0 && is.numeric(inttemp)) {
-          ms1temp <- norm_ms1(ms1temp, mztemp, inttemp)
-          if (!is.null(ms1temp)) {
-            ms1temp$mz <- round(ms1temp$mz, 4)
-            ms1temp$int <- round(ms1temp$int, 4)
-            rownames(ms1temp) <- NULL
-            doc$ms1 <- ms1temp
-          }
-        }
-        # ms2
-        ms2temp <- subset(dbas$MS2, peakID == idtemp, c(mz, int))
-        if (nrow(ms2temp) > 0) {
-          ms2temp <- norm_ms2(ms2temp, mztemp)
-          if (!is.null(ms2temp)) {
-            ms2temp$mz <- round(ms2temp$mz, 4)
-            ms2temp$int <- round(ms2temp$int, 4)
-            rownames(ms2temp) <- NULL
-            doc$ms2 <- ms2temp
-          }
-        }
-      }
       doc
     })  
-   
-    
-    # Adduct and isotopologue
-    # Assume that for one compound, these have distinct nominal masses.
-    # Use the name and nominal mass to determine the isotope and adduct.
-    tempPl <- dbas$peakList[, c("comp_name", "adduct", "real_mz")]
-    tempPl$nom_mass <- round(tempPl$real_mz)
-    tempPl$real_mz <- NULL
-    tempPl <- tempPl[!duplicated(tempPl),]
-    
-    sdb <- con_sqlite(dbPath)
-    thispol <- get_field2(esids, "pol", justone = T)
-    comptab <- tbl(sdb, "experiment") %>% 
-      left_join(tbl(sdb, "parameter"), by = "parameter_id") %>%
-      filter(polarity == !!thispol) %>% 
-      left_join(tbl(sdb, "compound"), by = "compound_id") %>%
-      select(name, mz, adduct, isotope) %>% collect() %>% 
-      rename(comp_name = name) %>% 
-      mutate(nom_mass = round(mz)) %>%
-      select(-mz) %>% 
-      distinct()
-    tpl <- merge(tempPl, comptab, by = c("comp_name", "nom_mass", "adduct"), all.x = T)
-    DBI::dbDisconnect(sdb)
-    
-    datl <- lapply(datl, function(doc) { #doc <- datl[[1]]
-      tnom <- round(doc[["mz"]])
-      tname <- doc[["name"]]
-      tadduct <- tpl[tpl$comp_name == tname & tpl$nom_mass == tnom, "adduct"]
-      tiso <- tpl[tpl$comp_name == tname & tpl$nom_mass == tnom, "isotope"]
-      stopifnot(length(tadduct) == 1, length(tiso) == 1)
-      doc$adduct <- tadduct
-      doc$isotopologue <- tiso
-      doc
-    })
     
     # Add tags if available
     datl <- lapply(datl, function(doc) {
@@ -1078,15 +1044,6 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     # remove msrawfiles id
     datl <- lapply(datl, function(doc) {doc$id <- NULL; doc})
     
-    # Add time for processing
-    # TODO move this to the end of the function and use es_add_field
-    batchEndTime <- lubridate::now()
-    avgMins <- round(
-      as.numeric(batchEndTime - batchStartTime, units = "mins") / length(esids),
-      digits = 2
-    )
-    # datl <- lapply(datl, function(doc) {doc$dbas_proc_time <- avgMins; doc})  # KJ correct
-    
     # remove NA values (there is no such thing as NA, the value just does not exist)
     datl <- lapply(datl, remove_na_doc)
     
@@ -1101,10 +1058,13 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     if (!noIngest) {
       bindex <- get_field2(esids, "dbas_index_name", justone = T)
       log_info("Ingest starting")
-      system(
-        glue::glue("{ingestpth} {configfile} {bindex} {jsonPath} &> /dev/null")
-        # glue::glue("{ingestpth} {configfile} {bindex} {jsonPath}")
-      )
+      if (rstudioapi::isAvailable()) {
+        system(glue::glue("{ingestpth} {configfile} {bindex} {jsonPath}"))
+      } else {
+        system(
+          glue::glue("{ingestpth} {configfile} {bindex} {jsonPath} &> /dev/null")
+        )
+      }
       log_info("Ingest complete, checking database for results")
       
       # Need to add a pause so that elastic returns ingested docs
@@ -1143,17 +1103,20 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
             }
           )
         }
+        
+        # Add processing time to msrawfiles
+        batchEndTime <- lubridate::now()
+        avgMins <- round(
+          as.numeric(batchEndTime - batchStartTime, units = "mins") / length(esids),
+          digits = 2
+        )
+        res6 <- es_add_field(escon, rfindex, field = "dbas_proc_time", 
+                     queryBody = list(ids = list(values = esids)), value = avgMins)
+        stopifnot(res6$updated == length(esids))
+        log_info("Completed batch starting with id {esids[1]}, file {checkFiles[1]}")
       } else {
-        #browser()
-        log_warn("Ingested data not found in batch starting with id {esids[1]}")
+        log_error("Ingested data not found in batch starting with id {esids[1]}")
       }
-      
-      # Remove files
-      resRemove <- file.remove(jsonPath, savename, newsavename)
-      if (all(resRemove))
-        log_info("Temporary files removed") else stop("Files not removed in batch", checkFiles[1])
-      
-      log_info("Completed batch starting with id {esids[1]}, file {checkFiles[1]}")
     }
   },
   error = function(cnd) {

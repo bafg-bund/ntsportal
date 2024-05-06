@@ -14,5 +14,5 @@ If 'all' (default) all dbas documents are updated.}
 (default) all compounds are updated.}
 }
 \description{
-Add formula, inchi and inchikey to docs in ntsp
+DEPRECATED 2024-04-24
 }
