@@ -1,0 +1,57 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# ntsportal
+
+The goal of ntsportal is to store large volumes of non-target LC/GC-HRMS data
+of river analysis in a 
+database and make this available through Dashboards and APIs data. It uses 
+Elasticsearch and SQLite as database management systems.
+
+## License
+
+Copyright 2016-2024 Bundesanstalt für Gewässerkunde (Federal Institute of Hydrology)
+
+ntsportal is free software: you can redistribute it and/or modify it under the 
+terms of the GNU General Public License as published by the Free Software 
+Foundation, either version 3 of the License, or (at your option) any 
+later version.
+
+ntsportal is distributed in the hope that it will be useful, but WITHOUT ANY 
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along 
+with ntsworkflow. If not, see <https://www.gnu.org/licenses/>.
+
+If you use the package or any derivative thereof, please cite the work.
+To cite this work please use the following citation or run `citation("ntsportal")`.
+
+> Kevin S. Jewell, Franziska Thron, Arne Wick and Thomas A. Ternes (2024). 
+> ntsportal: A Non-Target Screening Database Evaluation Tool. R package version 0.2.2.
+
+## Project financing
+
+- UBA REFOPLAN research projects 
+  + "Online Portal: Non-Target-Screening für die Umweltüberwachung der Zukunft"
+  + "Weiterentwicklung des Online Portals für die Umweltbeobactung der Zukunft"
+- Federal Ministry of Environment and Consumer Protection (BMUV Maßnahme 7)
+
+
+
+
+
+
+
