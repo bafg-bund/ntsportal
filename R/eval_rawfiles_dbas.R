@@ -619,16 +619,16 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
   # These pollute the comp_group field and need to be removed
   SPEC_SOURCES <- c("BfG", "LfU", "UBA")
   batchStartTime <- lubridate::now()
-  # Name for saving the files
-  # For saving RDS file
+  
+  # Create path for saving report files
   savename <- gsub("[/\\.]", "_", dirname(get_field2(esids, "path"))[1])
-  # Take everything after messdaten...
-  # savename <- stringr::str_match(savename, "[Mm]essdaten(.*)$")[,2]
   savename <- paste0("dbas-batch--", savename, "--", format(Sys.time(), "%y%m%d"), ".report")
   savename <- file.path(tempsavedir, savename)
   
+  # Get path to collective spectral library (CSL)
   dbPath <- get_field2(esids, "dbas_spectral_library", justone = T)
 
+  # Get path to batch (measurement files)
   dr <- paste(unique(dirname(get_field2(esids, "path", justone = F))), collapse= ", ")
   log_info("Starting batch {dr}")
 
@@ -729,15 +729,16 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       dbas$deleteBackground(grep(bregex, dbas$rawFiles, invert = T), 
                             grep(bregex, dbas$rawFiles))
       dbas$remRawFiles(grep(bregex, dbas$rawFiles))
+      esids_blank <- esids[get_field2(esids, "blank", simplify = T)]
       esids <- esids[!get_field2(esids, "blank", simplify = T)]
     } else {
+      esids_blank <- NULL
       log_info("No blanks found in {dr}")
     }
     
     log_info("Remove false positives")
     
-    # get list of false positives (will just add all of the fps)
-    
+    # Get list of false positives (will just add all of the fps)
     bfps <- get_field2(esids, "dbas_fp", simplify = F)
     # TODO in the future, delete fps on a by-sample basis
     # for now, just add them all together into a big list
@@ -1087,7 +1088,8 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       if (resp5$hits$total$value == length(datl)) {
         log_info("All docs imported into ElasticSearch")
         # Add processing date and spectral library checksum to msrawfiles
-        for (i in esids) {
+        esids_all <- c(esids, esids_blank)
+        for (i in esids_all) {
           tryCatch(
             add_latest_eval(escon, rfindex, esid = i, fieldName = "dbas_last_eval"),
             error = function(cnd) {
@@ -1107,12 +1109,12 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
         # Add processing time to msrawfiles
         batchEndTime <- lubridate::now()
         avgMins <- round(
-          as.numeric(batchEndTime - batchStartTime, units = "mins") / length(esids),
+          as.numeric(batchEndTime - batchStartTime, units = "mins") / length(esids_all),
           digits = 2
         )
         res6 <- es_add_field(escon, rfindex, field = "dbas_proc_time", 
-                     queryBody = list(ids = list(values = esids)), value = avgMins)
-        stopifnot(res6$updated == length(esids))
+                     queryBody = list(ids = list(values = esids_all)), value = avgMins)
+        stopifnot(res6$updated == length(esids_all))
         log_info("Completed batch starting with id {esids[1]}, file {checkFiles[1]}")
       } else {
         log_error("Ingested data not found in batch starting with id {esids[1]}")
