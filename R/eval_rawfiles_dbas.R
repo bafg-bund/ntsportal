@@ -1116,7 +1116,6 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
                      queryBody = list(ids = list(values = esids_all)), value = avgMins)
         stopifnot(res6$updated == length(esids_all))
         log_info("Completed batch starting with id {esids[1]}, file {checkFiles[1]}")
-        log_info("test!")
       } else {
         log_error("Ingested data not found in batch starting with id {esids[1]}")
       }
