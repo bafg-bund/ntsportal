@@ -102,7 +102,7 @@ check_dbas_blank_regex <- function(escon, rfindex) {
   )
   if (!all(patFound)) {
     pths <- paste(df[!patFound, "_source.path"], collapse = "\n")
-    logger::log_error("dbas_blank_regex not found in the following files:\n{pths}")
+    logger::log_error("Value of the field dbas_blank_regex not found in the filename of the following files:\n{pths}")
     build_es_query_for_ids(
       ids = df[!patFound, "_id"], 
       toShow = c("blank", "dbas_blank_regex", "filename")
