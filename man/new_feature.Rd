@@ -2,7 +2,7 @@
 % Please edit documentation in R/feature_class.R
 \name{new_feature}
 \alias{new_feature}
-\title{Create feature}
+\title{Create feature object}
 \usage{
 new_feature(
   pol = character(),
@@ -24,6 +24,12 @@ new_feature(
 
 \item{...}{}
 }
+\value{
+object of class ntsportal::feature
+}
 \description{
-Create feature
+Creates a feature object which holds the information needed to define one feature
+}
+\details{
+A feature is a list with the same fields as the schema defined in the NTSPortal DBAS or NTS databases.
 }

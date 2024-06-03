@@ -2,13 +2,19 @@
 % Please edit documentation in R/feature_class.R
 \name{validate_feature}
 \alias{validate_feature}
-\title{Check}
+\title{Check feature}
 \usage{
 validate_feature(x)
 }
 \arguments{
-\item{x}{}
+\item{x}{Feature object}
+}
+\value{
+Unchanged feature object if checks have passed
 }
 \description{
-Check
+Check feature
+}
+\details{
+This function will through an error if checks fail.
 }

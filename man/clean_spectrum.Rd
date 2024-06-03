@@ -7,9 +7,15 @@
 clean_spectrum(x, mztol = 0.005, msLevel = "ms1", precursorMz = NULL)
 }
 \arguments{
-\item{x}{data.frame containing the m/z and intensity of all fragments to be combined}
+\item{x}{`data.frame` containing the m/z and intensity of all fragments to be combined (spectra are row binded together)}
+}
+\value{
+Spectrum as a `data.frame` with the same column names as the input table
 }
 \description{
+Takes a series of MS2 spectra and combines these into one averaged spectrium based on binning fragment intensities.
+}
+\details{
 Goes through the a data.frame of fragments starting with the most intense fragments and combines
 fragments which are within the mztolerance into one centroid with the average m/z. Potential
 problem with this is that instruments with radically different response factors and noise levels

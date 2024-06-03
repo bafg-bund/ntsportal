@@ -15,20 +15,24 @@ udb_feature_match(
 )
 }
 \arguments{
-\item{ftt}{precollected feature table from ufid-db}
+\item{ftt}{Precollected feature table from ufid-db}
 
-\item{rtt}{precollected retention_time table from ufid-db}
+\item{rtt}{Precollected retention_time table from ufid-db}
 
-\item{ms2t}{precollected ms2 table from ufid-db}
+\item{ms2t}{Precollected ms2 table from ufid-db}
 
-\item{ms2dpThresh}{}
+\item{mztol}{m/z tolerance in Da}
+
+\item{rttol}{Retention time tolerance}
+
+\item{ms2dpThresh}{Threshold for dot-product comparison}
 }
 \value{
-ufid_assignment object (ufid and level) Currently only level 1 is
+ntsportal::ufid_assignment object (ufid and level) Currently only level 1 is
 possible. Returns ufid_assignment of 0, level 0 if no match is found.
 }
 \description{
 Recieves a feature and returns its ufid_assignment object based on
 information in the ufid database. Currently, the feature must have m/z,
-rt and ms2. Tables are precollected as tibbles to increase speed and allow parallelizatation
+rt and ms2. Tables are precollected from the SQLite ufid library as tibbles to increase speed and allow parallelizatation
 }
