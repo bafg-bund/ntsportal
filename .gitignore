@@ -21,3 +21,11 @@ tests/machine-learning
 tests/ole_temp
 tests/nts-proc-testing
 tests/archive
+tests/add_data2
+tests/addrawfiles_test2
+tests/analysis_index2
+tests/data_export2
+tests/envimass-ingest2
+tests/summary_scripts2
+tests/ufid_alignment2
+tests/data-export2
