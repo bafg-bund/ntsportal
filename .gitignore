@@ -13,7 +13,7 @@ tests/stats-report
 tests/Iris_add_rawfiles
 tests/dbas-eval
 logs
-tests/plots
+tests/plots2
 tests/ufid-note
 tests/addrawfiles_test
 tests/reference-shewhart
