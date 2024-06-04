@@ -20,3 +20,4 @@ tests/reference-shewhart
 tests/machine-learning
 tests/ole_temp
 tests/nts-proc-testing
+tests/archive

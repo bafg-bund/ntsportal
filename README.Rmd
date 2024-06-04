@@ -28,16 +28,6 @@ The project was initiated by a research funding grant by the Federal Environment
 ## License
 
 Copyright 2019-2024 Bundesanstalt für Gewässerkunde (Federal Institute of Hydrology)
-=======
-The goal of ntsportal is to store large volumes of non-target LC/GC-HRMS data
-of river analysis in a 
-database and make this available through Dashboards and APIs data. It uses 
-Elasticsearch and SQLite as database management systems.
-
-## License
-
-Copyright 2016-2024 Bundesanstalt für Gewässerkunde (Federal Institute of Hydrology)
->>>>>>> github/master
 
 ntsportal is free software: you can redistribute it and/or modify it under the 
 terms of the GNU General Public License as published by the Free Software 
@@ -49,7 +39,7 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along 
-with ntsworkflow. If not, see <https://www.gnu.org/licenses/>.
+with ntsportal. If not, see <https://www.gnu.org/licenses/>.
 
 If you use the package or any derivative thereof, please cite the work.
 To cite this work please use the following citation or run `citation("ntsportal")`.

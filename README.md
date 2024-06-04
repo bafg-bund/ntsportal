@@ -27,9 +27,12 @@ environmental data.
 ## Project Funding
 
 The project was initiated by a research funding grant by the Federal
-Environment Agency (UBA, REFOPLAN 3720222010) and continued funding is
-provided the research grant REFOPLAN 3723222020. Additional funding is
-provided by the Federal Ministry of Digital and Transport.
+Environment Agency (UBA, “Online Portal: Non-Target-Screening für die
+Umweltüberwachung der Zukunft” REFOPLAN 3720222010) and continued
+funding is provided the research grant REFOPLAN 3723222020
+(“Weiterentwicklung des Online Portals für die Umweltbeobactung der
+Zukunft”). Additional funding is provided by the Federal Ministry of
+Digital and Transport.
 
 ## License
 
@@ -47,7 +50,7 @@ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 more details.
 
 You should have received a copy of the GNU General Public License along
-with ntsworkflow. If not, see <https://www.gnu.org/licenses/>.
+with ntsportal. If not, see <https://www.gnu.org/licenses/>.
 
 If you use the package or any derivative thereof, please cite the work.
 To cite this work please use the following citation or run
