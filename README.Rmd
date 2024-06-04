@@ -16,17 +16,28 @@ knitr::opts_chunk$set(
 
 # ntsportal
 
+
 The goal of ntsportal is to provide a database and online dashboard for non-target-screening (based on LC/GC-HRMS measurements) of surface waters. The system is designed to archive processed data and to carry out simple data analysis in online dashboards. For detailed statistical analysis, the API can be used for accessing the data in scripts. The system currently uses [Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html) as the DBMS. This R-package is used for processing data and building the database. The included scripts for automated data processing use [ntsworkflow](https://github.com/bafg-bund/ntsworkflow). Other processing software can be used and data is harmonized into the ntsportal format (see Wiki, Section "Database Structure"). Latest information on the structure and internal design of ntsportal is found in the wiki.
 
 For German government agencies, access to the internally managed NTSPortal database is available. Please contact the authors or the Federal Institute of Hydrology. This repository includes the back-end code for open-source development purposes but does not include the environmental data.
 
 ## Project Funding
 
-The project was initiated by a research funding grant by the Federal Environment Agency (UBA, REFOPLAN 3720222010) and continued funding is provided the research grant REFOPLAN 3723222020. Additional funding is provided by the Federal Ministry of Digital and Transport. 
+The project was initiated by a research funding grant by the Federal Environment Agency (UBA, "Online Portal: Non-Target-Screening für die Umweltüberwachung der Zukunft" REFOPLAN 3720222010) and continued funding is provided the research grant REFOPLAN 3723222020 ("Weiterentwicklung des Online Portals für die Umweltbeobactung der Zukunft"). Additional funding is provided by the Federal Ministry of Digital and Transport. 
 
 ## License
 
 Copyright 2019-2024 Bundesanstalt für Gewässerkunde (Federal Institute of Hydrology)
+=======
+The goal of ntsportal is to store large volumes of non-target LC/GC-HRMS data
+of river analysis in a 
+database and make this available through Dashboards and APIs data. It uses 
+Elasticsearch and SQLite as database management systems.
+
+## License
+
+Copyright 2016-2024 Bundesanstalt für Gewässerkunde (Federal Institute of Hydrology)
+>>>>>>> github/master
 
 ntsportal is free software: you can redistribute it and/or modify it under the 
 terms of the GNU General Public License as published by the Free Software 
@@ -45,5 +56,7 @@ To cite this work please use the following citation or run `citation("ntsportal"
 
 > Kevin S. Jewell, Ole Lessmann, Franziska Thron, Jonas Skottnik, Iris Tuchscherer, Arne Wick and Thomas A. Ternes (2024). 
 > ntsportal: A Non-Target Screening Data Archive and Distribution Tool. R package version 0.1.0.
+
+
 
 
