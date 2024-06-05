@@ -4,11 +4,11 @@
 #' 
 #' Only works for length 1 values
 #'
-#' @param escon 
-#' @param esindex 
-#' @param field 
+#' @param escon Elasticsearch connection object created by `elastic::connect`
+#' @param esindex Index name or index-pattern 
+#' @param field Field name to which value is added, field must already exist.
 #' @param queryBody query in list format
-#' @param value 
+#' @param value Value to add (must be length 1)
 #'
 #' @return
 #' @export
@@ -31,8 +31,8 @@ es_add_field <- function(escon, esindex, field, queryBody, value) {
 #'
 #'
 #'
-#' @param escon connection to ElasticSearch
-#' @param esindex Index or index-pattern to update
+#' @param escon Elasticsearch connection object created by `elastic::connect`
+#' @param esindex Index name or index-pattern 
 #'
 #' @return Number of updated docs (invisibly)
 #' @export
@@ -129,7 +129,7 @@ es_add_rtt <- function(escon, esindex) {
 
 #' Add rt_clustering field to es index pattern
 #'
-#' @param escon connection to ElasticSearch
+#' @param escon Elasticsearch connection object created by `elastic::connect`
 #' @param esindex Index or index-pattern to update
 #'
 #' @return NULL
@@ -193,8 +193,8 @@ es_add_rt_cluster <- function(escon, esindex) {
 #' Get list of all compounds in an ntsp index
 #'
 #' Option to add a query to limit the documents
-#' @param escon 
-#' @param index 
+#' @param escon Elasticsearch connection object created by `elastic::connect`
+#' @param index Index name or index-pattern 
 #' @param addQuery query content in the form of a list.
 #'
 #' @return
@@ -236,9 +236,9 @@ es_get_comps <- function(escon, index, addQuery = NULL) {
 #' The dbas index will be updated with 
 #' DEPRECATED 2024-04-24
 #' 
-#' @param escon
-#' @param sdb connection to spec lib
-#' @param index
+#' @param escon Elasticsearch connection object created by `elastic::connect`
+#' @param sdb Connection to spectral library using `DBI::dbConnect`
+#' @param indexIndex name or index-pattern 
 #' @param filenames Limit the update to results documents from specific files defined by 'filename' field.
 #' If 'all' (default) all dbas documents are updated. 
 #'
@@ -399,9 +399,9 @@ es_add_comp_groups <- function(escon, sdb, index, filenames = "all") {
 #' 
 #' DEPRECATED 2024-04-24
 #' 
-#' @param escon
-#' @param sdb
-#' @param index
+#' @param escon Elasticsearch connection object created by `elastic::connect`
+#' @param sdbConnection to spectral library using `DBI::dbConnect`
+#' @param index Index name or index-pattern 
 #' @param filenames Limit the update to results documents from specific files defined by 'filename' field.
 #' If 'all' (default) all dbas documents are updated. 
 #' @param compoundLimit Limit the update to particular compounds, if 'all', 
