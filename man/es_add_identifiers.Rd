@@ -7,11 +7,17 @@
 es_add_identifiers(escon, sdb, index, filenames = "all", compoundLimit = "all")
 }
 \arguments{
+\item{escon}{Elasticsearch connection object created by `elastic::connect`}
+
+\item{index}{Index name or index-pattern}
+
 \item{filenames}{Limit the update to results documents from specific files defined by 'filename' field.
 If 'all' (default) all dbas documents are updated.}
 
 \item{compoundLimit}{Limit the update to particular compounds, if 'all', 
 (default) all compounds are updated.}
+
+\item{sdbConnection}{to spectral library using `DBI::dbConnect`}
 }
 \description{
 DEPRECATED 2024-04-24

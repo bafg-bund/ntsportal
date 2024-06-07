@@ -7,7 +7,7 @@
 es_remove_by_filename(escon, index, filenames)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Elasticsearch connection object created by `elastic::connect`}
 
 \item{index}{}
 

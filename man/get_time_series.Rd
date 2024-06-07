@@ -15,19 +15,19 @@ get_time_series(
 )
 }
 \arguments{
-\item{escon}{connection objected created with elastic::connect}
+\item{escon}{Connection objected created with elastic::connect}
 
-\item{index}{name of index must be one of "g2_nts_expn", "g2_nts_bfg"}
+\item{index}{Name of index must be one of "g2_nts_expn", "g2_nts_bfg"}
 
-\item{station}{can be one of "KOMO", "FAN", "WIN", "rhein_ko_l"}
+\item{station}{Can be one of "KOMO", "FAN", "WIN", "rhein_ko_l"}
 
-\item{startRange}{2 element character vector with date range e.g. c("2021-01-01", "2022-01-01")}
+\item{startRange}{Two element character vector with date range e.g. c("2021-01-01", "2022-01-01")}
 
-\item{responseField}{can be one of "intensity", "intensity_normalized", "area", "area_normalized"}
+\item{responseField}{Can be one of "intensity", "intensity_normalized", "area", "area_normalized"}
 
-\item{ufidLevel}{can be 1 or 2. Level 1: mz+rt+ms2, level 2: mz+rt}
+\item{ufidLevel}{Can be 1 or 2. Level 1: mz+rt+ms2, level 2: mz+rt}
 
-\item{form}{format of output table, can be one of "long", "wide"}
+\item{form}{Format of output table, can be one of "long", "wide"}
 }
 \value{
 data.frame

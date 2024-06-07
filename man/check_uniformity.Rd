@@ -7,11 +7,11 @@
 check_uniformity(escon, rfindex, esids, fieldName, onlyNonBlanks = F)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Elasticsearch connection object created by `elastic::connect`}
 
-\item{rfindex}{}
+\item{rfindex}{Name of rawfiles index}
 
-\item{esids}{}
+\item{esids}{ElasticSearch document IDs (character)}
 
 \item{fieldName}{}
 

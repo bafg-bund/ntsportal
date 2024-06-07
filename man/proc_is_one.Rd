@@ -7,9 +7,9 @@
 proc_is_one(escon, rfindex, esid)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Elasticsearch connection object created by `elastic::connect`}
 
-\item{rfindex}{index name (msrawfiles index)}
+\item{rfindex}{Name of rawfiles index}
 
 \item{esid}{ID of document in rfindex}
 }

@@ -7,7 +7,7 @@
 add_latest_eval(escon, index, esid, fieldName = "dbas_last_eval")
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Elasticsearch connection object created by `elastic::connect`}
 
 \item{index}{must be an msrawfiles index}
 

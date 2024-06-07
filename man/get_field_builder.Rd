@@ -13,7 +13,7 @@ get_field_builder(escon, index)
 
 \item{index}{}
 
-\item{esids}{}
+\item{esids}{ElasticSearch document IDs (character)}
 
 \item{fieldName}{}
 

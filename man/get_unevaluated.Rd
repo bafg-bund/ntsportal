@@ -7,7 +7,9 @@
 get_unevaluated(escon, rfindex, evalType = "dbas")
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Elasticsearch connection object created by `elastic::connect`}
+
+\item{rfindex}{Name of rawfiles index}
 
 \item{evalType}{either dbas or dbas_is}
 }

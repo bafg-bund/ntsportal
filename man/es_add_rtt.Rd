@@ -7,9 +7,9 @@
 es_add_rtt(escon, esindex)
 }
 \arguments{
-\item{escon}{connection to ElasticSearch}
+\item{escon}{Elasticsearch connection object created by `elastic::connect`}
 
-\item{esindex}{Index or index-pattern to update}
+\item{esindex}{Index name or index-pattern}
 }
 \value{
 Number of updated docs (invisibly)

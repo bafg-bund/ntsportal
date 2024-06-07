@@ -7,9 +7,9 @@
 add_sha256_spectral_library(escon, rfindex, esid)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Elasticsearch connection object created by `elastic::connect`}
 
-\item{rfindex}{}
+\item{rfindex}{Name of rawfiles index}
 
 \item{esid}{}
 }

@@ -17,17 +17,17 @@ process_is_all(
 )
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Elasticsearch connection object created by `elastic::connect`}
 
-\item{rfindex}{}
+\item{rfindex}{Name of rawfiles index}
 
 \item{isindex}{}
 
-\item{ingestpth}{}
+\item{ingestpth}{Path where the ingest.sh script is found}
 
-\item{configfile}{}
+\item{configfile}{Config file where the credentials for signing into elasticsearch are found}
 
-\item{tmpPath}{}
+\item{tmpPath}{Temporary save location}
 
 \item{numCores}{Number of cores for parallel processing}
 

@@ -15,19 +15,19 @@ get_time_series_known(
 )
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Elastic connection opject}
 
-\item{index}{}
+\item{index}{Index name}
 
-\item{compound}{}
+\item{compound}{Compound name to filter data by (see ntsportal for correct spelling)}
 
-\item{station}{}
+\item{station}{Station name to filter data by (see available station codes in the ntsportal wiki)}
 
-\item{pol}{}
+\item{pol}{Polarity to filter data by (either "pos" or "neg")}
 
-\item{matrix}{}
+\item{matrix}{Matrix code to filter data by (see available matrix codes in the ntsportal wiki)}
 
-\item{calendarInterval}{}
+\item{calendarInterval}{Calendar internval, see available options in elasticsearch documentations for `date_histogram`}
 }
 \description{
 Function should be expanded to allow user to choose date range and get data

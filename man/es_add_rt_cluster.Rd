@@ -7,7 +7,7 @@
 es_add_rt_cluster(escon, esindex)
 }
 \arguments{
-\item{escon}{connection to ElasticSearch}
+\item{escon}{Elasticsearch connection object created by `elastic::connect`}
 
 \item{esindex}{Index or index-pattern to update}
 }

@@ -7,9 +7,9 @@
 es_get_comps(escon, index, addQuery = NULL)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Elasticsearch connection object created by `elastic::connect`}
 
-\item{index}{}
+\item{index}{Index name or index-pattern}
 
 \item{addQuery}{query content in the form of a list.}
 }

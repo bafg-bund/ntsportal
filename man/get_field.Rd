@@ -7,7 +7,7 @@
 get_field(escon, indexName, esids, fieldName, simplify = T, justone = F)
 }
 \arguments{
-\item{escon}{Elasticsearch connection object}
+\item{escon}{Elasticsearch connection object created by `elastic::connect`}
 
 \item{indexName}{}
 

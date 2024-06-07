@@ -7,15 +7,15 @@
 es_add_field(escon, esindex, field, queryBody, value)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Elasticsearch connection object created by `elastic::connect`}
 
-\item{esindex}{}
+\item{esindex}{Index name or index-pattern}
 
-\item{field}{}
+\item{field}{Field name to which value is added, field must already exist.}
 
 \item{queryBody}{query in list format}
 
-\item{value}{}
+\item{value}{Value to add (must be length 1)}
 }
 \description{
 Only works for length 1 values

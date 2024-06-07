@@ -7,9 +7,9 @@
 check_field(escon, rfindex, fieldName, onlyNonBlank = FALSE)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Elasticsearch connection object created by `elastic::connect`}
 
-\item{rfindex}{}
+\item{rfindex}{Name of rawfiles index}
 
 \item{fieldName}{}
 

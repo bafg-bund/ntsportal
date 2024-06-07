@@ -7,10 +7,14 @@
 es_add_comp_groups(escon, sdb, index, filenames = "all")
 }
 \arguments{
-\item{sdb}{connection to spec lib}
+\item{escon}{Elasticsearch connection object created by `elastic::connect`}
+
+\item{sdb}{Connection to spectral library using `DBI::dbConnect`}
 
 \item{filenames}{Limit the update to results documents from specific files defined by 'filename' field.
 If 'all' (default) all dbas documents are updated.}
+
+\item{indexIndex}{name or index-pattern}
 }
 \value{
 True (invisibly)
