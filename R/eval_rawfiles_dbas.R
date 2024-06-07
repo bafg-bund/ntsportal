@@ -798,7 +798,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     stopifnot(length(bisn) == 1)
     
     isData <- dbas$ISresults[dbas$ISresults$IS == bisn, c("samp", "int_a")]
-    
+    browser()
     # Normalize intensities
     dat <- merge(compData, isData, by = "samp", suffix = c("", "_IS"))
     # verify columns are numeric

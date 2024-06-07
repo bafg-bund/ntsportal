@@ -20,7 +20,9 @@ find_templateid(
 
 \item{isBlank}{boolean default is FALSE}
 
-\item{polarity}{}
+\item{polarity}{Either "pos" or "neg"}
+
+\item{station}{Station ID name}
 
 \item{matrix}{character default is "spm"}
 }

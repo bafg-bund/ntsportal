@@ -11,9 +11,9 @@ station_from_code(escon, rfindex, filename, stationRegex)
 
 \item{rfindex}{index name for rawfiles index}
 
-\item{filename}{}
+\item{filename}{File from which to extract the station code, this code is then used to find other files}
 
-\item{stationRegex}{Must have brackets for stringr::str_match}
+\item{stationRegex}{Regex to extract the station code. It must have brackets since it uses stringr::str_match}
 }
 \value{
 list with geolocation and station name

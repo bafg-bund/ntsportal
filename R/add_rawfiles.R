@@ -94,8 +94,8 @@ norm_rf_paths <- function(escon, rfindex) {
 #' 
 #' @param escon elastic connection object created by elastic::connect
 #' @param rfindex index name for rawfiles index
-#' @param filename 
-#' @param stationRegex Must have brackets for stringr::str_match 
+#' @param filename File from which to extract the station code, this code is then used to find other files
+#' @param stationRegex Regex to extract the station code. It must have brackets since it uses stringr::str_match 
 #'
 #' @return list with geolocation and station name
 station_from_code <- function(escon, rfindex, filename, stationRegex) {
@@ -471,8 +471,8 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
 #' @param escon elastic connection object created by elastic::connect
 #' @param rfindex index name for rawfiles index 
 #' @param isBlank boolean default is FALSE
-#' @param polarity 
-#' @param station
+#' @param polarity Either "pos" or "neg"
+#' @param station Station ID name 
 #' @param matrix character default is "spm"
 #'
 #' @return string templateID
