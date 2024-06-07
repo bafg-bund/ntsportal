@@ -1,12 +1,12 @@
 #' Get data from elastic
 #'
-#' @param escon connection objected created with elastic::connect
-#' @param index name of index must be one of "g2_nts_expn", "g2_nts_bfg"
-#' @param station can be one of "KOMO", "FAN", "WIN", "rhein_ko_l"
-#' @param startRange 2 element character vector with date range e.g. c("2021-01-01", "2022-01-01")
-#' @param responseField can be one of "intensity", "intensity_normalized", "area", "area_normalized"
-#' @param ufidLevel can be 1 or 2. Level 1: mz+rt+ms2, level 2: mz+rt
-#' @param form format of output table, can be one of "long", "wide"
+#' @param escon Connection objected created with elastic::connect
+#' @param index Name of index must be one of "g2_nts_expn", "g2_nts_bfg"
+#' @param station Can be one of "KOMO", "FAN", "WIN", "rhein_ko_l"
+#' @param startRange Two element character vector with date range e.g. c("2021-01-01", "2022-01-01")
+#' @param responseField Can be one of "intensity", "intensity_normalized", "area", "area_normalized"
+#' @param ufidLevel Can be 1 or 2. Level 1: mz+rt+ms2, level 2: mz+rt
+#' @param form Format of output table, can be one of "long", "wide"
 #'
 #' @return data.frame
 #' @export
@@ -272,13 +272,13 @@ get_time_series <- function(
 #' Function should be expanded to allow user to choose date range and get data
 #' from more than one compound, more than one station.
 #'
-#' @param escon 
-#' @param index 
-#' @param compound 
-#' @param station 
-#' @param pol 
-#' @param matrix 
-#' @param calendarInterval 
+#' @param escon Elastic connection opject
+#' @param index Index name
+#' @param compound Compound name to filter data by (see ntsportal for correct spelling)
+#' @param station Station name to filter data by (see available station codes in the ntsportal wiki)
+#' @param pol Polarity to filter data by (either "pos" or "neg")
+#' @param matrix Matrix code to filter data by (see available matrix codes in the ntsportal wiki)
+#' @param calendarInterval Calendar internval, see available options in elasticsearch documentations for `date_histogram`
 #'
 #' @return
 #' @export

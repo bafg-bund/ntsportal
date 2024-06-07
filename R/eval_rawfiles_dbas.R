@@ -1,5 +1,20 @@
 
-# Functions for eval-rawfiles-dbas.R ####
+# Copyright 2016-2024 Bundesanstalt für Gewässerkunde
+# This file is part of ntsportal
+# ntsportal is free software: you can redistribute it and/or modify it under the 
+# terms of the GNU General Public License as published by the Free Software 
+# Foundation, either version 3 of the License, or (at your option) any 
+# later version.
+# 
+# ntsportal is distributed in the hope that it will be useful, but WITHOUT ANY 
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along 
+# with ntsportal. If not, see <https://www.gnu.org/licenses/>.
+
+
+# Functions for the eval-rawfiles-dbas.R script ####
 
 
 # Utility and local functions ####
@@ -38,9 +53,9 @@ build_es_query_for_ids <- function(ids, toShow) {
 #' will remove the fields "dbas_last_eval" and "dbas_spectral_library_sha256"
 #' so that during the next processing, the files will be processed again.
 #'
-#' @param escon 
-#' @param rfindex 
-#' @param queryBody 
+#' @param escon Elasticsearch connection object created by `elastic::connect`
+#' @param rfindex Name of rawfiles index
+#' @param queryBody The Query DSL code to use to select the docs in msrawfiles which need to be reset (as a `list`).
 #' @param indexType can either be "dbas" or "dbas_is"
 #'
 #' @return
@@ -83,8 +98,8 @@ reset_eval <- function(escon, rfindex, queryBody, indexType = "dbas") {
 #' A processed file will have a time stamp. This function will return the ids
 #' of all files without a time stamp for the given evaluation type.
 #' 
-#' @param escon 
-#' @param rfindex
+#' @param escon Elasticsearch connection object created by `elastic::connect`
+#' @param rfindex Name of rawfiles index
 #' @param evalType either dbas or dbas_is
 #'
 #' @return character vector of ids of documents
@@ -121,9 +136,9 @@ get_unevaluated <- function(escon, rfindex, evalType = "dbas") {
 
 #' Check that fields are the same for a set of documents
 #'
-#' @param escon 
-#' @param rfindex 
-#' @param esids 
+#' @param escon Elasticsearch connection object created by `elastic::connect`
+#' @param rfindex Name of rawfiles index
+#' @param esids ElasticSearch document IDs (character)
 #' @param fieldName 
 #' @param onlyNonBlanks 
 #'
@@ -206,7 +221,7 @@ res_field <- function(res, field, value = character(1)) {
 
 #' Get a field for a set of documents defined by id
 #'
-#' @param escon Elasticsearch connection object
+#' @param escon Elasticsearch connection object created by `elastic::connect`
 #' @param indexName 
 #' @param esids Document IDs in the named index
 #' @param fieldName field to extract
@@ -253,7 +268,7 @@ get_field <- function(escon, indexName, esids, fieldName, simplify = T, justone 
 
 #' Function factory just to avoid typing escon and index every time
 #'
-#' @param esids 
+#' @param esids ElasticSearch document IDs (character)
 #' @param fieldName 
 #' @param simplify 
 #' @param justone 
@@ -355,8 +370,8 @@ remove_na_doc <- function(doc) {
 
 #' Check that a field exists in all documents in rawfiles index
 #'
-#' @param escon 
-#' @param rfindex 
+#' @param escon Elasticsearch connection object created by `elastic::connect`
+#' @param rfindex Name of rawfiles index
 #' @param fieldName 
 #' @param onlyNonBlank logical, default FALSE, if TRUE, blanks will be ignored
 #'
@@ -415,7 +430,7 @@ check_field <- function(escon, rfindex, fieldName, onlyNonBlank = FALSE) {
 
 #' Add eval time to msrawfiles
 #'
-#' @param escon 
+#' @param escon Elasticsearch connection object created by `elastic::connect`
 #' @param index must be an msrawfiles index
 #' @param esid elasicsearch id doc to be updated
 #' @param fieldName field name to be updated, must be either dbas_last_eval or dbas_is_last_eval
@@ -438,8 +453,8 @@ add_latest_eval <- function(escon, index, esid, fieldName = "dbas_last_eval") {
 #' 
 #' This is used to see with which spectral library the last evaluation was done with.
 #'
-#' @param escon 
-#' @param rfindex 
+#' @param escon Elasticsearch connection object created by `elastic::connect`
+#' @param rfindex Name of rawfiles index
 #' @param esid 
 #'
 #' @return
@@ -463,7 +478,7 @@ add_sha256_spectral_library <- function(escon, rfindex, esid) {
 
 #' Removal of documents from dbas documents based on filename
 #'
-#' @param escon 
+#' @param escon Elasticsearch connection object created by `elastic::connect`
 #' @param index 
 #' @param filenames 
 #'
@@ -514,8 +529,8 @@ es_remove_by_filename <- function(escon, index, filenames) {
 #' 
 #' Takes an esid from the rawfiles index and carries out dbas processing for that file
 #' 
-#' @param escon 
-#' @param rfindex 
+#' @param escon Elasticsearch connection object created by `elastic::connect`
+#' @param rfindex Name of rawfiles index
 #' @param esid 
 #'
 #' @return an object of class ntsworkflow::Report
@@ -574,14 +589,14 @@ proc_esid <- function(escon, rfindex, esid, compsProcess = NULL) {
 #' evaluated using the settings in the msrawfiles index. Results are ingested to
 #' the indicated dbas results index
 #' 
-#' @param escon 
-#' @param rfindex 
-#' @param esids 
-#' @param tempsavedir 
-#' @param ingestpth 
-#' @param configfile 
-#' @param coresBatch 
-#' @param noIngest logical, for testing purposes, no upload, just create json.
+#' @param escon Elasticsearch connection object created by `elastic::connect`
+#' @param rfindex Name of rawfiles index
+#' @param esids ElasticSearch document IDs (character)
+#' @param tempsavedir Temporary save location
+#' @param ingestpth Path where the ingest.sh script is found
+#' @param configfile Config file where the credentials for signing into elasticsearch are found
+#' @param coresBatch Number of cores to use in a signal batch
+#' @param noIngest Logical, for testing purposes, no upload, just create json.
 #'
 #' @return
 #' @export
@@ -1139,12 +1154,12 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
 #' Will enter the results into the isindex. Will only process files which
 #' are not included in isindex.
 #'
-#' @param escon 
-#' @param rfindex 
+#' @param escon Elasticsearch connection object created by `elastic::connect`
+#' @param rfindex Name of rawfiles index
 #' @param isindex 
-#' @param ingestpth 
-#' @param configfile 
-#' @param tmpPath 
+#' @param ingestpth Path where the ingest.sh script is found
+#' @param configfile Config file where the credentials for signing into elasticsearch are found
+#' @param tmpPath Temporary save location
 #' @param numCores Number of cores for parallel processing
 #' @param rawfilesRootPath Path to where raw data is stored
 #' @param numFilesToProcess If NULL (default) all remaining files are processed,
@@ -1226,8 +1241,8 @@ process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile,
 
 #' Process IS in one file
 #'
-#' @param escon 
-#' @param rfindex index name (msrawfiles index)
+#' @param escon Elasticsearch connection object created by `elastic::connect`
+#' @param rfindex Name of rawfiles index
 #' @param esid ID of document in rfindex
 #'
 #' @return
@@ -1379,4 +1394,4 @@ proc_is_one <- function(escon, rfindex, esid) {
 # FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License along 
-# with ntsworkflow. If not, see <https://www.gnu.org/licenses/>.
+# with ntsportal. If not, see <https://www.gnu.org/licenses/>.
