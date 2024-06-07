@@ -37,10 +37,10 @@ get_all_ids <- function(escon, rfindex) {
 
 #' Check if any files are missing
 #'
-#' @param escon elastic connection object created by elastic::connect
+#' @param escon ElasticSearch connection object created by `elastic::connect`
 #' @param rfindex index name for rawfiles index 
 #'
-#' @return
+#' @return Return paths of files that do not exist
 rawfiles_missing <- function(escon, rfindex) {
   allIds <- get_all_ids(escon, rfindex)
   allPths <- get_field(allIds, "path")

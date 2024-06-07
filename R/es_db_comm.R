@@ -17,7 +17,7 @@
 
 #' Return one non-aligned feature (without a ufid)
 #' 
-#' @param escon Elasticsearch connection object created by elastic::connect
+#' @param escon Elasticsearch connection object created by `elastic::connect`
 #' @param index Elasticsearch index name
 #'
 #' @return returns a ntsportal::feature object
@@ -233,16 +233,17 @@ es_feat_from_ids <- function(escon, index, esids) {
 
 
 
-#' Check feature 
+#' Check feature
+#'
+#' @description Checks that feature has mz.
 #'
 #' @param escon Elasticsearch connection object created by elastic::connect
 #' @param index Elasticsearch index name
 #' @param id character ID length 1
 #'
-#' @return
+#' @return TRUE if feature ok
 #' @export
 #'
-#' @examples
 es_check_feat <- function(escon, index, id) {
   res <- elastic::Search(escon, index, body = sprintf('
                                                       {
@@ -260,18 +261,18 @@ es_check_feat <- function(escon, index, id) {
   "_source": "mz"
 }
 ', id))
-  mzTest <- res$hits$hits[[1]][["_source"]]$mz
-  is.numeric(mzTest) && length(mzTest) == 1
+  mztest <- res$hits$hits[[1]][["_source"]]$mz
+  is.numeric(mztest) && length(mztest) == 1
 }
 
-#' Update doc in ntsportal with ufid
+#' update doc in ntsportal with ufid
 #'
-#' All the information needed is
+#' all the information needed is
 #' contained within the feature object
 #' 
 #' @param feat ntsporta::feature object
-#' @param escon Elasticsearch connection object created by elastic::connect
-#' @param index Elasticsearch index name
+#' @param escon elasticsearch connection object created by elastic::connect
+#' @param index elasticsearch index name
 #'
 #' @return TRUE if update successful
 #' @export
@@ -300,11 +301,11 @@ es_add_ufid <- function(feat, escon, index) {
 
 #' Delete all ufid entries for a ufid
 #'
-#' @param escon 
-#' @param index 
-#' @param ufidToDelete 
+#' @param escon Elasticsearch connection object created by `elastic::connect`
+#' @param index Elasticsearch index name
+#' @param ufidToDelete ID of ufid to delete
 #'
-#' @return
+#' @return TRUE invisibly
 #' @export
 #'
 es_remove_ufid <- function(escon, index, ufidToDelete) {
@@ -324,6 +325,7 @@ es_remove_ufid <- function(escon, index, ufidToDelete) {
     }
   ', ufidToDelete)) 
   logger::log_info("Successful removal of ufid {ufidToDelete}")
+  invisible(TRUE)
 }
 
 #' Add ufid entry to a list of features in elasticsearch

@@ -1,14 +1,31 @@
 
+
+# Copyright 2016-2024 Bundesanstalt für Gewässerkunde
+# This file is part of ntsportal
+# ntsportal is free software: you can redistribute it and/or modify it under the 
+# terms of the GNU General Public License as published by the Free Software 
+# Foundation, either version 3 of the License, or (at your option) any 
+# later version.
+# 
+# ntsportal is distributed in the hope that it will be useful, but WITHOUT ANY 
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along 
+# with ntsportal. If not, see <https://www.gnu.org/licenses/>.
+
+
+
 # Rawfiles-Index management functions ####
 
 #' Get current index name based on the alias
 #' 
 #' The current date will be used in the index name
 #' 
-#' @param aliasName 
+#' @param aliasName Name of alias used in elasticsearch
 #' @param dateNum Provide a specific version code (YYMMDD), default is NULL (current date)
 #'
-#' @return
+#' @return Index name used in ElasticSearch
 #'
 dbas_index_from_alias <- function(aliasName, dateNum = NULL) {
   if (is.null(dateNum)) {
@@ -26,10 +43,10 @@ dbas_index_from_alias <- function(aliasName, dateNum = NULL) {
 #' 
 #' @param escon elastic connection object created by elastic::connect
 #' @param rfindex index name for rawfiles index
-#' @param aliasName 
+#' @param aliasName Name of alias used in elasticsearch
 #' @param dateNum Provide a specific version code (YYMMDD), default is NULL (current date)
 #'
-#' @return
+#' @return Invisibly returns index name of the created index
 #' @export
 #'
 create_dbas_index <- function(escon, rfindex, aliasName, dateNum = NULL) {
@@ -76,11 +93,11 @@ create_dbas_index <- function(escon, rfindex, aliasName, dateNum = NULL) {
 
 #' Create new index for all documents
 #'
-#' @param escon 
-#' @param rfindex 
+#' @param escon ElasticSearch connection object created by `elastic::connect`
+#' @param rfindex Index name of msrawfiles index
 #' @param dateNum Provide a specific version code (YYMMDD), default is NULL (current date)
 #' 
-#' @return
+#' @return True (invisibly) when successful
 #' @export
 #'
 create_dbas_index_all <- function(escon, rfindex, dateNum = NULL) {
@@ -108,15 +125,15 @@ create_dbas_index_all <- function(escon, rfindex, dateNum = NULL) {
 
 #' Change alias of an index to a new index.
 #' 
-#' Will delete the previous alias
+#' @description Will delete the previous alias
 #'
 #' @param escon elastic connection object created by elastic::connect
-#' @param indexName 
-#' @param aliasName
+#' @param indexName Name of index
+#' @param aliasName Name of alias
 #' @param closeAfter logical, should the previous index, to which the alias 
 #' linked to prior to the change, be closed? 
 #'
-#' @return
+#' @return Passes on response from ES (acknowledged field, TRUE or FALSE), invisibly
 #' @export
 #'
 es_move_alias <- function(escon, indexName, aliasName, closeAfter = FALSE) {
@@ -145,10 +162,10 @@ es_move_alias <- function(escon, indexName, aliasName, closeAfter = FALSE) {
 #' This function will update all the aliases in msrawfiles to use the current
 #' indices found in msrawfiles
 #' 
-#' @param escon 
-#' @param rfindex 
+#' @param escon ElasticSearch connection object created by `elastic::connect`
+#' @param rfindex Index name of msrawfiles index
 #'
-#' @return
+#' @return TRUE, invisibly, when successful
 #' @export
 #'
 #' @examples
@@ -199,11 +216,11 @@ update_alias_all <- function(escon, rfindex) {
 #' 
 #' This function will also close the old index after creation of the new alias
 #'
-#' @param escon elastic connection object created by elastic::connect
-#' @param indexName 
-#' @param aliasName 
+#' @param escon ElasticSearch connection object created by `elastic::connect`
+#' @param indexName Name of index
+#' @param aliasName Name of alias
 #'
-#' @return
+#' @return TRUE if successful
 #'
 move_dbas_alias <- function(escon, indexName, aliasName) {
   stop("deprecated 2024-01-02")
@@ -254,7 +271,7 @@ move_dbas_alias <- function(escon, indexName, aliasName) {
 #' This is a secure method of changing the path of a doc in msrawfiles. 
 #' Filename is not changed and must remain the same.
 #'
-#' @param escon elastic connection object created by elastic::connect
+#' @param escon ElasticSearch connection object created by `elastic::connect`
 #' @param rfindex index name for rawfiles index
 #' @param oldPath Current path in rawfiles index, file must exist (1 file)
 #' @param newPath New path, file must exist (1 file)
@@ -336,9 +353,9 @@ change_msrawfile_path <- function(escon, rfindex, oldPath, newPath, checkType = 
 #' 
 #' This function will change both filename and path of the doc.
 #' 
-#' @param escon elastic connection object created by elastic::connect
+#' @param escon ElasticSearch connection object created by `elastic::connect`
 #' @param rfindex index name for msrawfiles index
-#' @param oldPath originally path
+#' @param oldPath original path
 #' @param newPath updated path
 #'
 #' @return True (invisibly) if successful
