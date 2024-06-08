@@ -265,12 +265,12 @@ es_check_feat <- function(escon, index, id) {
   is.numeric(mztest) && length(mztest) == 1
 }
 
-#' update doc in ntsportal with ufid
+#' Update doc in ntsportal with ufid
 #'
 #' all the information needed is
 #' contained within the feature object
 #' 
-#' @param feat ntsporta::feature object
+#' @param feat ntsportal::feature object
 #' @param escon elasticsearch connection object created by elastic::connect
 #' @param index elasticsearch index name
 #'

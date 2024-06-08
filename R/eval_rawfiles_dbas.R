@@ -61,7 +61,6 @@ build_es_query_for_ids <- function(ids, toShow) {
 #' @return
 #' @export
 #'
-#' @examples
 reset_eval <- function(escon, rfindex, queryBody, indexType = "dbas") {
   if (indexType == "dbas") {
     field <- "dbas_last_eval"

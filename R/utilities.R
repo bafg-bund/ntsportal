@@ -563,8 +563,7 @@ es_error_handler <- function(thisCnd) {
 #' @param escon Connection object created with `elastic::connect`
 #' @param index Elasticsearch index name 
 #'
-#' @return length one integer
-#' @import dplyr
+#' @return length one integer of next ufid
 #' @export
 #'
 get_next_ufid <- function(udb, escon, index) {
