@@ -16,10 +16,10 @@
 
 #' Remove a ufid from the ufid library
 #'
-#' @param udb 
-#' @param ufid 
+#' @param udb Connection to ufid db, created by `DBI::dbConnect`
+#' @param ufid ID of ufid (numeric)
 #'
-#' @return
+#' @return TRUE (invisibly) when successful
 #' @export
 #'
 udb_remove_ufid <- function(udb, ufid) {
@@ -31,12 +31,11 @@ udb_remove_ufid <- function(udb, ufid) {
 
 #' Clean spectra within ufid db
 #'
-#' @param udb
-#' @param ufid
-#' @param msLevel
+#' @param udb Connection to ufid db, created by `DBI::dbConnect`
+#' @param ufid ID of ufid (numeric)
+#' @param msLevel Which spectral type (either 'ms1' or 'ms2')
 #'
-#' @return
-#' @import dplyr
+#' @return TRUE (invisibly) when successful
 #' @export
 udb_clean_spectra <- function(udb, ufid, msLevel) {
 
@@ -63,7 +62,7 @@ udb_clean_spectra <- function(udb, ufid, msLevel) {
 
   changes <- DBI::dbAppendTable(udb, msLevel, spec_clean)
   message(changes, " rows were changed")
-  TRUE
+  invisible(TRUE)
 }
 
 
@@ -73,7 +72,7 @@ udb_clean_spectra <- function(udb, ufid, msLevel) {
 #' for now only for the case where ms1 and ms2 are present
 #'
 #' @param feat
-#' @param udb
+#' @param udb Connection to ufid db, created by `DBI::dbConnect`
 #'
 #' @return
 #' @import dplyr
@@ -126,8 +125,8 @@ udb_add_feature <- function(feat, udb) {
 #' Update the entire ufid library
 #'
 #' @param udb ufid-library connection object produced with DBI::dbConnect
-#' @param escon 
-#' @param index 
+#' @param escon Connection object created with `elastic::connect`
+#' @param index Elasticsearch index name 
 #'
 #' @return
 #' @export
@@ -155,16 +154,13 @@ udb_update_all <- function(udb, escon, index) {
 #' standard"
 #' Index to be used should be index-pattern to include all available indexes.
 #'
-#' @param udb ufid-library connection object produced with DBI::dbConnect
-#' @param escon
-#' @param index
-#' @param ufid
+#' @param udb ufid-library connection object produced with `DBI::dbConnect`
+#' @param escon Connection object created with `elastic::connect`
+#' @param index Elasticsearch index name 
+#' @param ufid Universal feature ID
 #'
 #' @return
 #' @export
-#'
-#' @examples
-#' @import dplyr
 udb_update <- function(udb, escon, index, ufid_to_update) {
   
   stopifnot(is.integer(ufid_to_update), !is.na(ufid_to_update))

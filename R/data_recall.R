@@ -1,6 +1,6 @@
 #' Get data from elastic
 #'
-#' @param escon Connection objected created with elastic::connect
+#' @param escon Connection object created with `elastic::connect`
 #' @param index Name of index must be one of "g2_nts_expn", "g2_nts_bfg"
 #' @param station Can be one of "KOMO", "FAN", "WIN", "rhein_ko_l"
 #' @param startRange Two element character vector with date range e.g. c("2021-01-01", "2022-01-01")

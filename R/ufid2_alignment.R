@@ -18,7 +18,7 @@
 #'
 #' Function will assign ufid2 to features
 #'
-#' @param escon
+#' @param escon Connection object created with `elastic::connect` 
 #' @param index default is "g2_nts*"
 #' @param rtTol retentiontime tolerance in minutes - default is 0.3min
 #' @param mzTolmDa mass tolerance in mDa - default is 5mDa

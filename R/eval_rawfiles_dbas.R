@@ -56,7 +56,7 @@ build_es_query_for_ids <- function(ids, toShow) {
 #' @param escon Elasticsearch connection object created by `elastic::connect`
 #' @param rfindex Name of rawfiles index
 #' @param queryBody The Query DSL code to use to select the docs in msrawfiles which need to be reset (as a `list`).
-#' @param indexType can either be "dbas" or "dbas_is"
+#' @param indexType Elasticsearch index, indicating the type of data stored in the index, can either be "dbas" or "dbas_is"
 #'
 #' @return
 #' @export
@@ -222,13 +222,13 @@ res_field <- function(res, field, value = character(1)) {
 #' Get a field for a set of documents defined by id
 #'
 #' @param escon Elasticsearch connection object created by `elastic::connect`
-#' @param indexName 
+#' @param index Name Elasticsearch index name 
 #' @param esids Document IDs in the named index
 #' @param fieldName field to extract
-#' @param simplify 
-#' @param justone 
+#' @param simplify Boolean, true will try to create a vector from the results
+#' @param justone Boolean. If set to true, function will return only one result and will hang if cardinality > 1
 #'
-#' @return
+#' @return Vector or list of the field entries
 #' @export
 #'
 get_field <- function(escon, indexName, esids, fieldName, simplify = T, justone = F) {
@@ -268,12 +268,10 @@ get_field <- function(escon, indexName, esids, fieldName, simplify = T, justone 
 
 #' Function factory just to avoid typing escon and index every time
 #'
-#' @param esids ElasticSearch document IDs (character)
-#' @param fieldName 
-#' @param simplify 
-#' @param justone 
+#' @param escon Connection object created with `elastic::connect` 
+#' @param index Elasticsearch index name 
 #'
-#' @return
+#' @return get_field function with escon and index arguments set as default
 get_field_builder <- function(escon, index) {
   function(esids, fieldName, simplify = T, justone = F) {
     get_field(escon = escon, indexName = index, esids = esids, 
@@ -285,10 +283,10 @@ get_field_builder <- function(escon, index) {
 #' 
 #' Get the compounds which are found fewer than min_freq
 #' 
-#' @param repo 
-#' @param min_freq 
+#' @param repo ntsworkflow::Report class object
+#' @param min_freq Minimum number of detections
 #'
-#' @return
+#' @return Names of compounds with FEWER than the min_freq of detections
 get_rare <- function(repo, min_freq) {
   pl <- repo$peakList
   finds <- by(pl, pl$comp_name, nrow)
@@ -298,12 +296,12 @@ get_rare <- function(repo, min_freq) {
 
 #' Normalize ms2 spectrum to the maximum intensity
 #'
-#' @param x 
-#' @param precursormz 
-#' @param mztol 
-#' @param noiselevel 
+#' @param x Spectrum as a data.frame with columns mz and int 
+#' @param precursormz Molecular ion precursor m/z
+#' @param mztol Tolerance of m/z 
+#' @param noiselevel Intensity level to set as noise 
 #'
-#' @return
+#' @return Normalized spectrum as a data.frame
 #'
 norm_ms2 <- function(x, precursormz, mztol = 0.02, noiselevel = 0.1) {
   # remove precursor and noise
@@ -316,12 +314,12 @@ norm_ms2 <- function(x, precursormz, mztol = 0.02, noiselevel = 0.1) {
 
 #' Normalize ms1 spectrum to the maximum intensity
 #'
-#' @param x 
-#' @param precursormz 
-#' @param precursorInt 
-#' @param noiselevel 
+#' @param x Spectrum as a data.frame with columns mz and int 
+#' @param precursormz Molecular ion precursor m/z
+#' @param precursorInt Molecular ion precursor intensity 
+#' @param noiselevel Intensity level to set as noise 
 #'
-#' @return
+#' @return Normalized spectrum as a data.frame
 norm_ms1 <- function(x, precursormz, precursorInt, noiselevel = 0.1) {
   # remove noise
   x <- x[x$int >= noiselevel, ]
@@ -431,7 +429,7 @@ check_field <- function(escon, rfindex, fieldName, onlyNonBlank = FALSE) {
 #' Add eval time to msrawfiles
 #'
 #' @param escon Elasticsearch connection object created by `elastic::connect`
-#' @param index must be an msrawfiles index
+#' @param index Elasticsearch index name, must be an msrawfiles index
 #' @param esid elasicsearch id doc to be updated
 #' @param fieldName field name to be updated, must be either dbas_last_eval or dbas_is_last_eval
 #'
@@ -455,7 +453,7 @@ add_latest_eval <- function(escon, index, esid, fieldName = "dbas_last_eval") {
 #'
 #' @param escon Elasticsearch connection object created by `elastic::connect`
 #' @param rfindex Name of rawfiles index
-#' @param esid 
+#' @param esid ElasticSearch document IDs (character)
 #'
 #' @return
 #'
@@ -479,7 +477,7 @@ add_sha256_spectral_library <- function(escon, rfindex, esid) {
 #' Removal of documents from dbas documents based on filename
 #'
 #' @param escon Elasticsearch connection object created by `elastic::connect`
-#' @param index 
+#' @param index Elasticsearch index name 
 #' @param filenames 
 #'
 #' @return
@@ -531,7 +529,7 @@ es_remove_by_filename <- function(escon, index, filenames) {
 #' 
 #' @param escon Elasticsearch connection object created by `elastic::connect`
 #' @param rfindex Name of rawfiles index
-#' @param esid 
+#' @param esid ElasticSearch document IDs (character)
 #'
 #' @return an object of class ntsworkflow::Report
 #' @export
@@ -1167,9 +1165,6 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
 #'
 #' @return
 #' @export
-#' @import dplyr
-#' @import future
-#' @import logger
 #' 
 process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile, 
                            tmpPath = "/scratch/nts/tmp", numCores = 10,

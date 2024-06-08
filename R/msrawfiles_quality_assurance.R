@@ -131,8 +131,8 @@ check_dbas_blank_regex <- function(escon, rfindex) {
 #' 
 #' Must be done before any processing operation
 #'
-#' @param escon 
-#' @param rfindex
+#' @param escon Connection object created with `elastic::connect`
+#' @param rfindex Elasticsearch index name for msrawfiles index
 #' @param locationRf Root directory for all rawfiles
 #'
 #' @return TRUE if successful (invisibly)
@@ -364,8 +364,8 @@ check_integrity_msrawfiles <- function(escon, rfindex, locationRf) {
 #' Evaluation is run in batches and certain settings must be the same
 #' for all files in the batch.
 #'
-#' @param escon 
-#' @param rfindex 
+#' @param escon Connection object created with `elastic::connect`
+#' @param rfindex Elasticsearch index name for msrawfiles index 
 #' @param batches a list of batches, where each batch is character vector of 
 #' elasticsearch document ids
 #'

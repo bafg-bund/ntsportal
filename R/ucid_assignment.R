@@ -24,7 +24,7 @@
 #' each element of the matrix says how often the two ufids
 #' are in the same component per batch.
 #'
-#' @param escon
+#' @param escon Connection object created with `elastic::connect`
 #' @param index should be all indices together otherwise ucids won't match across indices
 #' @param rtlim pre-eliminate ufids from consideration which have rt difference higher than this
 #' @param ufidLevel numeric length 1, 1 or 2

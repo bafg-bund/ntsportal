@@ -19,9 +19,9 @@
 
 #' Process a batch of files using ntsworkflow
 #'
-#' @param escon 
-#' @param rfindex 
-#' @param esids 
+#' @param escon Connection object created with `elastic::connect`
+#' @param rfindex Elasticsearch index name for msrawfiles index 
+#' @param esids ElasticSearch document IDs (character)
 #' @param tempsavedir 
 #' @param ingestpth 
 #' @param configfile 
@@ -30,11 +30,7 @@
 #'
 #' @return
 #' @export
-#' @import dplyr
-#' @import logger
-#' @import future
 #'
-#' @examples
 proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile, 
                             coresBatch, noIngest = FALSE) {
   # These are spec sources which pollute the comp_group field and need to be removed

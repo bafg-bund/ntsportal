@@ -19,8 +19,8 @@
 
 #' Compute silhouette score for all ufids in the index
 #'
-#' @param escon 
-#' @param testIndex 
+#' @param escon Connection object created with `elastic::connect`
+#' @param testIndex Elasticsearch index name 
 #' @param ufidType Either "ufid" or "ufid2"
 #'
 #' @return dataframe with the scores for each feature
@@ -223,8 +223,8 @@ silhouette_score <- function(escon, testIndex, ufidType = "ufid") {
 #'
 #' Used for testing purposes.
 #'
-#' @param escon
-#' @param index
+#' @param escon Connection object created with `elastic::connect`
+#' @param index Elasticsearch index name 
 #' @param includeUfid2 include ufid2 stats
 #' @param includeUcid include ucid stats
 #'
@@ -830,7 +830,7 @@ es_test_fpfn <- function(escon, index, includeUfid2 = FALSE, includeUcid = FALSE
 
 #' Produce plots showing mz, rt stats of ufids in an index
 #'
-#' @param escon 
+#' @param escon Connection object created with `elastic::connect`
 #' @param testIndex
 #' @param ufidType Either "ufid" or "ufid2"
 #'

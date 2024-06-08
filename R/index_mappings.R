@@ -145,8 +145,8 @@ put_dbas_index <- function(eson, index) {
 
 #' Send index creation request for spectral library index
 #'
-#' @param escon 
-#' @param index 
+#' @param escon Connection object created with `elastic::connect`
+#' @param index Elasticsearch index name 
 #'
 #' @return
 #' @export

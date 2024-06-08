@@ -18,8 +18,8 @@
 
 #' Create a get_field function with some default values
 #'
-#' @param escon 
-#' @param index 
+#' @param escon Connection object created with `elastic::connect`
+#' @param index Elasticsearch index name 
 #'
 #' @return
 #' @export
@@ -123,8 +123,8 @@ test_config <- function() {
 #' is done within 5% accuracy since the cardinality computation is fuzzy
 #' (HyperLogLog++ algorithm). The question here is, is it worth it.
 #'
-#' @param escon
-#' @param index
+#' @param escon Connection object created with `elastic::connect`
+#' @param index Elasticsearch index name 
 #'
 #' @return TRUE if no duplicates found.
 #' @export
@@ -168,7 +168,7 @@ es_no_duplicates <- function(escon, index) {
 #' bfg method (bfg_nts_rp1) in the rtt table, either experimental or predicted. They must also have
 #' the rt_clustering field which copies this rt to the top level 
 #'
-#' @param escon Connection to ntsp
+#' @param escon Connection object created with `elastic::connect`
 #' @param index Index name
 #' @param methodName Name of method which must be provided
 #'
@@ -434,7 +434,7 @@ create_ufid_lib <- function(pth) {
 
 #' Remove all ufid from NTSPortal-DB and a ufid library
 #'
-#' @param escon elastic::connect connection object
+#' @param escon Connection object created with `elastic::connect`
 #' @param es_index index name or pattern
 #' @param ufidLibPath path to ufid-lib
 #'
@@ -559,9 +559,9 @@ es_error_handler <- function(thisCnd) {
 #' The next ufid number is returned, for creating a new cluster. Will double
 #' check that this number is not already present.
 #' 
-#' @param udb 
-#' @param escon 
-#' @param index 
+#' @param udb ufid-library connection object produced with `DBI::dbConnect`
+#' @param escon Connection object created with `elastic::connect`
+#' @param index Elasticsearch index name 
 #'
 #' @return length one integer
 #' @import dplyr
