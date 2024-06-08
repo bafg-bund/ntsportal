@@ -7,9 +7,9 @@
 silhouette_score(escon, testIndex, ufidType = "ufid")
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Connection object created with `elastic::connect`}
 
-\item{testIndex}{}
+\item{testIndex}{Elasticsearch index name}
 
 \item{ufidType}{Either "ufid" or "ufid2"}
 }

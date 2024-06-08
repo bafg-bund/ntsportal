@@ -7,7 +7,9 @@
 es_no_duplicates(escon, index)
 }
 \arguments{
-\item{index}{}
+\item{escon}{Connection object created with `elastic::connect`}
+
+\item{index}{Elasticsearch index name}
 }
 \value{
 TRUE if no duplicates found.

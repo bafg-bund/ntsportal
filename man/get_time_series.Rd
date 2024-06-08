@@ -15,7 +15,7 @@ get_time_series(
 )
 }
 \arguments{
-\item{escon}{Connection objected created with elastic::connect}
+\item{escon}{Connection object created with `elastic::connect`}
 
 \item{index}{Name of index must be one of "g2_nts_expn", "g2_nts_bfg"}
 

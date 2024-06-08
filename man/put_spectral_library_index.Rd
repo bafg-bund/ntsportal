@@ -7,9 +7,9 @@
 put_spectral_library_index(escon, index)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Connection object created with `elastic::connect`}
 
-\item{index}{}
+\item{index}{Elasticsearch index name}
 }
 \description{
 Send index creation request for spectral library index

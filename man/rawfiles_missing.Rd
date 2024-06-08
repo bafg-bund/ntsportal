@@ -7,9 +7,12 @@
 rawfiles_missing(escon, rfindex)
 }
 \arguments{
-\item{escon}{elastic connection object created by elastic::connect}
+\item{escon}{ElasticSearch connection object created by `elastic::connect`}
 
 \item{rfindex}{index name for rawfiles index}
+}
+\value{
+Return paths of files that do not exist
 }
 \description{
 Check if any files are missing

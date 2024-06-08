@@ -11,9 +11,12 @@ create_dbas_index(escon, rfindex, aliasName, dateNum = NULL)
 
 \item{rfindex}{index name for rawfiles index}
 
-\item{aliasName}{}
+\item{aliasName}{Name of alias used in elasticsearch}
 
 \item{dateNum}{Provide a specific version code (YYMMDD), default is NULL (current date)}
+}
+\value{
+Invisibly returns index name of the created index
 }
 \description{
 Will create a new index based on the alias with _v<date> appended after _dbas.

@@ -7,9 +7,12 @@
 update_alias_all(escon, rfindex)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{ElasticSearch connection object created by `elastic::connect`}
 
-\item{rfindex}{}
+\item{rfindex}{Index name of msrawfiles index}
+}
+\value{
+TRUE, invisibly, when successful
 }
 \description{
 This function will update all the aliases in msrawfiles to use the current

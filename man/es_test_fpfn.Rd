@@ -7,6 +7,10 @@
 es_test_fpfn(escon, index, includeUfid2 = FALSE, includeUcid = FALSE)
 }
 \arguments{
+\item{escon}{Connection object created with `elastic::connect`}
+
+\item{index}{Elasticsearch index name}
+
 \item{includeUfid2}{include ufid2 stats}
 
 \item{includeUcid}{include ucid stats}

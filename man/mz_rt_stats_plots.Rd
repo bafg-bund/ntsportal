@@ -7,7 +7,7 @@
 mz_rt_stats_plots(escon, testIndex, hideTitleX = FALSE, ufidType = "ufid")
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Connection object created with `elastic::connect`}
 
 \item{ufidType}{Either "ufid" or "ufid2"}
 }

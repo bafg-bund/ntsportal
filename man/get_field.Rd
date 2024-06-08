@@ -9,15 +9,18 @@ get_field(escon, indexName, esids, fieldName, simplify = T, justone = F)
 \arguments{
 \item{escon}{Elasticsearch connection object created by `elastic::connect`}
 
-\item{indexName}{}
-
 \item{esids}{Document IDs in the named index}
 
 \item{fieldName}{field to extract}
 
-\item{simplify}{}
+\item{simplify}{Boolean, true will try to create a vector from the results}
 
-\item{justone}{}
+\item{justone}{Boolean. If set to true, function will return only one result and will hang if cardinality > 1}
+
+\item{index}{Name Elasticsearch index name}
+}
+\value{
+Vector or list of the field entries
 }
 \description{
 Get a field for a set of documents defined by id

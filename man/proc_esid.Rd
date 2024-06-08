@@ -11,7 +11,7 @@ proc_esid(escon, rfindex, esid, compsProcess = NULL)
 
 \item{rfindex}{Name of rawfiles index}
 
-\item{esid}{}
+\item{esid}{ElasticSearch document IDs (character)}
 }
 \value{
 an object of class ntsworkflow::Report

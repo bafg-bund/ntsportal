@@ -16,11 +16,11 @@ proc_batch_nts(
 )
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Connection object created with `elastic::connect`}
 
-\item{rfindex}{}
+\item{rfindex}{Elasticsearch index name for msrawfiles index}
 
-\item{esids}{}
+\item{esids}{ElasticSearch document IDs (character)}
 
 \item{tempsavedir}{}
 

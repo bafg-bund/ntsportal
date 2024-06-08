@@ -7,14 +7,14 @@
 get_next_ufid(udb, escon, index)
 }
 \arguments{
-\item{udb}{}
+\item{udb}{ufid-library connection object produced with `DBI::dbConnect`}
 
-\item{escon}{}
+\item{escon}{Connection object created with `elastic::connect`}
 
-\item{index}{}
+\item{index}{Elasticsearch index name}
 }
 \value{
-length one integer
+length one integer of next ufid
 }
 \description{
 The next ufid number is returned, for creating a new cluster. Will double

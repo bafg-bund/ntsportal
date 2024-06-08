@@ -7,9 +7,13 @@
 udb_update(udb, escon, index, ufid_to_update)
 }
 \arguments{
-\item{udb}{ufid-library connection object produced with DBI::dbConnect}
+\item{udb}{ufid-library connection object produced with `DBI::dbConnect`}
 
-\item{ufid}{}
+\item{escon}{Connection object created with `elastic::connect`}
+
+\item{index}{Elasticsearch index name}
+
+\item{ufid}{Universal feature ID}
 }
 \description{
 The ufid database is updated at the end of a session to

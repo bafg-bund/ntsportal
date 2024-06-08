@@ -7,7 +7,7 @@
 es_check_docs_fields(escon, index, methodName = "bfg_nts_rp1")
 }
 \arguments{
-\item{escon}{Connection to ntsp}
+\item{escon}{Connection object created with `elastic::connect`}
 
 \item{index}{Index name}
 

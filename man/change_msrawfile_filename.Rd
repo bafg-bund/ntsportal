@@ -7,11 +7,11 @@
 change_msrawfile_filename(escon, rfindex, oldPath, newPath)
 }
 \arguments{
-\item{escon}{elastic connection object created by elastic::connect}
+\item{escon}{ElasticSearch connection object created by `elastic::connect`}
 
 \item{rfindex}{index name for msrawfiles index}
 
-\item{oldPath}{originally path}
+\item{oldPath}{original path}
 
 \item{newPath}{updated path}
 }

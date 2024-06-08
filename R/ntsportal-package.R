@@ -19,7 +19,6 @@
 #'
 #'
 #' @name ntsportal
-#' @useDynLib ntsportal, .registration=TRUE
 #' @import dplyr
 #' @import logger
 #' @import future

@@ -7,7 +7,7 @@
 reset_alignment(escon, es_index, ufidLibPath)
 }
 \arguments{
-\item{escon}{elastic::connect connection object}
+\item{escon}{Connection object created with `elastic::connect`}
 
 \item{es_index}{index name or pattern}
 

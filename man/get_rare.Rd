@@ -7,9 +7,12 @@
 get_rare(repo, min_freq)
 }
 \arguments{
-\item{repo}{}
+\item{repo}{ntsworkflow::Report class object}
 
-\item{min_freq}{}
+\item{min_freq}{Minimum number of detections}
+}
+\value{
+Names of compounds with FEWER than the min_freq of detections
 }
 \description{
 Get the compounds which are found fewer than min_freq

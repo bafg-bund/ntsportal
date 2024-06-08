@@ -7,9 +7,9 @@
 check_batches_eval(escon, rfindex, batches)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Connection object created with `elastic::connect`}
 
-\item{rfindex}{}
+\item{rfindex}{Elasticsearch index name for msrawfiles index}
 
 \item{batches}{a list of batches, where each batch is character vector of 
 elasticsearch document ids}

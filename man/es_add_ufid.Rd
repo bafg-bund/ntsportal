@@ -7,16 +7,16 @@
 es_add_ufid(feat, escon, index)
 }
 \arguments{
-\item{feat}{ntsporta::feature object}
+\item{feat}{ntsportal::feature object}
 
-\item{escon}{Elasticsearch connection object created by elastic::connect}
+\item{escon}{elasticsearch connection object created by elastic::connect}
 
-\item{index}{Elasticsearch index name}
+\item{index}{elasticsearch index name}
 }
 \value{
 TRUE if update successful
 }
 \description{
-All the information needed is
+all the information needed is
 contained within the feature object
 }

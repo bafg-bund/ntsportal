@@ -7,9 +7,12 @@
 dbas_index_from_alias(aliasName, dateNum = NULL)
 }
 \arguments{
-\item{aliasName}{}
+\item{aliasName}{Name of alias used in elasticsearch}
 
 \item{dateNum}{Provide a specific version code (YYMMDD), default is NULL (current date)}
+}
+\value{
+Index name used in ElasticSearch
 }
 \description{
 The current date will be used in the index name

@@ -7,13 +7,16 @@
 norm_ms2(x, precursorMz, noiselevel = 0.01)
 }
 \arguments{
-\item{x}{}
+\item{x}{Spectrum as a data.frame with columns mz and int}
 
-\item{noiselevel}{}
+\item{noiselevel}{Intensity level to set as noise}
 
-\item{precursormz}{}
+\item{precursormz}{Molecular ion precursor m/z}
 
-\item{mztol}{}
+\item{mztol}{Tolerance of m/z}
+}
+\value{
+Normalized spectrum as a data.frame
 }
 \description{
 Normalize ms2 spectrum to the maximum intensity

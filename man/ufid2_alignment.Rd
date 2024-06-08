@@ -16,6 +16,8 @@ ufid2_alignment(
 )
 }
 \arguments{
+\item{escon}{Connection object created with `elastic::connect`}
+
 \item{index}{default is "g2_nts*"}
 
 \item{rtTol}{retentiontime tolerance in minutes - default is 0.3min}

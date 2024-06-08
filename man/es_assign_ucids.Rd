@@ -7,6 +7,8 @@
 es_assign_ucids(escon, index = "g2_nts*", rtlim = 0.2, ufidLevel = 1)
 }
 \arguments{
+\item{escon}{Connection object created with `elastic::connect`}
+
 \item{index}{should be all indices together otherwise ucids won't match across indices}
 
 \item{rtlim}{pre-eliminate ufids from consideration which have rt difference higher than this}

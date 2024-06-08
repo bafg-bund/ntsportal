@@ -7,11 +7,14 @@
 move_dbas_alias(escon, indexName, aliasName)
 }
 \arguments{
-\item{escon}{elastic connection object created by elastic::connect}
+\item{escon}{ElasticSearch connection object created by `elastic::connect`}
 
-\item{indexName}{}
+\item{indexName}{Name of index}
 
-\item{aliasName}{}
+\item{aliasName}{Name of alias}
+}
+\value{
+TRUE if successful
 }
 \description{
 This is specific for dbas aliases because of the need for v4 alias names for 

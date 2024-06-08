@@ -7,11 +7,14 @@
 es_remove_ufid(escon, index, ufidToDelete)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Elasticsearch connection object created by `elastic::connect`}
 
-\item{index}{}
+\item{index}{Elasticsearch index name}
 
-\item{ufidToDelete}{}
+\item{ufidToDelete}{ID of ufid to delete}
+}
+\value{
+TRUE invisibly
 }
 \description{
 Delete all ufid entries for a ufid

@@ -7,9 +7,12 @@
 udb_remove_ufid(udb, ufid)
 }
 \arguments{
-\item{udb}{}
+\item{udb}{Connection to ufid db, created by `DBI::dbConnect`}
 
-\item{ufid}{}
+\item{ufid}{ID of ufid (numeric)}
+}
+\value{
+TRUE (invisibly) when successful
 }
 \description{
 Remove a ufid from the ufid library

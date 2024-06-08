@@ -7,7 +7,9 @@
 check_integrity_msrawfiles(escon, rfindex, locationRf)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Connection object created with `elastic::connect`}
+
+\item{rfindex}{Elasticsearch index name for msrawfiles index}
 
 \item{locationRf}{Root directory for all rawfiles}
 }

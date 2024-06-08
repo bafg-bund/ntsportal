@@ -7,11 +7,14 @@
 create_dbas_index_all(escon, rfindex, dateNum = NULL)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{ElasticSearch connection object created by `elastic::connect`}
 
-\item{rfindex}{}
+\item{rfindex}{Index name of msrawfiles index}
 
 \item{dateNum}{Provide a specific version code (YYMMDD), default is NULL (current date)}
+}
+\value{
+True (invisibly) when successful
 }
 \description{
 Create new index for all documents

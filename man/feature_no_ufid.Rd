@@ -7,7 +7,7 @@
 feature_no_ufid(escon, index)
 }
 \arguments{
-\item{escon}{Elasticsearch connection object created by elastic::connect}
+\item{escon}{Elasticsearch connection object created by `elastic::connect`}
 
 \item{index}{Elasticsearch index name}
 }

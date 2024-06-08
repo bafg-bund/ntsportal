@@ -9,9 +9,9 @@ udb_update_all(udb, escon, index)
 \arguments{
 \item{udb}{ufid-library connection object produced with DBI::dbConnect}
 
-\item{escon}{}
+\item{escon}{Connection object created with `elastic::connect`}
 
-\item{index}{}
+\item{index}{Elasticsearch index name}
 }
 \description{
 Update the entire ufid library

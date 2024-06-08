@@ -7,7 +7,14 @@
 udb_clean_spectra(udb, ufid, msLevel)
 }
 \arguments{
-\item{msLevel}{}
+\item{udb}{Connection to ufid db, created by `DBI::dbConnect`}
+
+\item{ufid}{ID of ufid (numeric)}
+
+\item{msLevel}{Which spectral type (either 'ms1' or 'ms2')}
+}
+\value{
+TRUE (invisibly) when successful
 }
 \description{
 Clean spectra within ufid db

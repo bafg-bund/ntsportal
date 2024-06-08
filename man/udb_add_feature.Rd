@@ -7,7 +7,7 @@
 udb_add_feature(feat, udb)
 }
 \arguments{
-\item{udb}{}
+\item{udb}{Connection to ufid db, created by `DBI::dbConnect`}
 }
 \description{
 if this is not found in the database

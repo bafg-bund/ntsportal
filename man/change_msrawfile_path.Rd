@@ -7,7 +7,7 @@
 change_msrawfile_path(escon, rfindex, oldPath, newPath, checkType = "md5")
 }
 \arguments{
-\item{escon}{elastic connection object created by elastic::connect}
+\item{escon}{ElasticSearch connection object created by `elastic::connect`}
 
 \item{rfindex}{index name for rawfiles index}
 

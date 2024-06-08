@@ -9,17 +9,12 @@ get_field_builder(escon, index)
 get_field_builder(escon, index)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Connection object created with `elastic::connect`}
 
-\item{index}{}
-
-\item{esids}{ElasticSearch document IDs (character)}
-
-\item{fieldName}{}
-
-\item{simplify}{}
-
-\item{justone}{}
+\item{index}{Elasticsearch index name}
+}
+\value{
+get_field function with escon and index arguments set as default
 }
 \description{
 Function factory just to avoid typing escon and index every time

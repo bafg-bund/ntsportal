@@ -13,7 +13,7 @@ reset_eval(escon, rfindex, queryBody, indexType = "dbas")
 
 \item{queryBody}{The Query DSL code to use to select the docs in msrawfiles which need to be reset (as a `list`).}
 
-\item{indexType}{can either be "dbas" or "dbas_is"}
+\item{indexType}{Elasticsearch index, indicating the type of data stored in the index, can either be "dbas" or "dbas_is"}
 }
 \description{
 If there are errors it may be necessary to reprocess files. This function

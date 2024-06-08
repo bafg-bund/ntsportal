@@ -13,6 +13,9 @@ es_check_feat(escon, index, id)
 
 \item{id}{character ID length 1}
 }
+\value{
+TRUE if feature ok
+}
 \description{
-Check feature
+Checks that feature has mz.
 }
