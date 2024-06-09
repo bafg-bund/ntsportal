@@ -168,7 +168,6 @@ es_move_alias <- function(escon, indexName, aliasName, closeAfter = FALSE) {
 #' @return TRUE, invisibly, when successful
 #' @export
 #'
-#' @examples
 update_alias_all <- function(escon, rfindex) {
   # Get all index names and alias names
   res <- elastic::Search(

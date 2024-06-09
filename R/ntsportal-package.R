@@ -22,4 +22,5 @@
 #' @import dplyr
 #' @import logger
 #' @import future
+#' @import ntsworkflow
 NULL

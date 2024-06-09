@@ -58,7 +58,6 @@ build_es_query_for_ids <- function(ids, toShow) {
 #' @param queryBody The Query DSL code to use to select the docs in msrawfiles which need to be reset (as a `list`).
 #' @param indexType Elasticsearch index, indicating the type of data stored in the index, can either be "dbas" or "dbas_is"
 #'
-#' @return
 #' @export
 #'
 reset_eval <- function(escon, rfindex, queryBody, indexType = "dbas") {
@@ -141,7 +140,7 @@ get_unevaluated <- function(escon, rfindex, evalType = "dbas") {
 #' @param fieldName 
 #' @param onlyNonBlanks 
 #'
-#' @return
+#' @return TRUE if the field is uniform accross the docs, false otherwise
 #'
 check_uniformity <- function(escon, rfindex, esids, fieldName, onlyNonBlanks = F) {
   bodyAll <- sprintf(
@@ -331,7 +330,7 @@ norm_ms1 <- function(x, precursormz, precursorInt, noiselevel = 0.1) {
 
 #' Remove fields in a doc that are or contain NAs
 #'
-#' @param doc 
+#' @param doc A single document (of a NT feature) in the form of a list
 #'
 #' @return list document with NAs removed
 #' @export
@@ -432,7 +431,7 @@ check_field <- function(escon, rfindex, fieldName, onlyNonBlank = FALSE) {
 #' @param esid elasicsearch id doc to be updated
 #' @param fieldName field name to be updated, must be either dbas_last_eval or dbas_is_last_eval
 #'
-#' @return true if successful
+#' @return TRUE if successful
 #'
 add_latest_eval <- function(escon, index, esid, fieldName = "dbas_last_eval") {
   stopifnot(fieldName %in% c("dbas_last_eval", "dbas_is_last_eval", "nts_last_eval"))
@@ -454,7 +453,7 @@ add_latest_eval <- function(escon, index, esid, fieldName = "dbas_last_eval") {
 #' @param rfindex Name of rawfiles index
 #' @param esid ElasticSearch document IDs (character)
 #'
-#' @return
+#' @return Returns TRUE if successful
 #'
 add_sha256_spectral_library <- function(escon, rfindex, esid) {
   path <- elastic::docs_get(
@@ -477,9 +476,9 @@ add_sha256_spectral_library <- function(escon, rfindex, esid) {
 #'
 #' @param escon Elasticsearch connection object created by `elastic::connect`
 #' @param index Elasticsearch index name 
-#' @param filenames 
+#' @param filenames Vector of filenames to delete
 #'
-#' @return
+#' @return TRUE if successful
 #' @export
 #'
 es_remove_by_filename <- function(escon, index, filenames) {
@@ -521,7 +520,7 @@ es_remove_by_filename <- function(escon, index, filenames) {
 # will go through all stages dbas1-3+ingest for all files in the 
 # batch
 
-# 
+
 #' Process an MS measurement file
 #' 
 #' Takes an esid from the rawfiles index and carries out dbas processing for that file
@@ -532,7 +531,6 @@ es_remove_by_filename <- function(escon, index, filenames) {
 #'
 #' @return an object of class ntsworkflow::Report
 #' @export
-#' @import ntsworkflow
 proc_esid <- function(escon, rfindex, esid, compsProcess = NULL) { 
   #browser()
   stopifnot(length(esid) == 1)

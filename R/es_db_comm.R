@@ -324,7 +324,7 @@ es_remove_ufid <- function(escon, index, ufidToDelete) {
       }
     }
   ', ufidToDelete)) 
-  logger::log_info("Successful removal of ufid {ufidToDelete}")
+  log_info("Successful removal of ufid {ufidToDelete}")
   invisible(TRUE)
 }
 
