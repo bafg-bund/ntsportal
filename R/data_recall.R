@@ -280,10 +280,9 @@ get_time_series <- function(
 #' @param matrix Matrix code to filter data by (see available matrix codes in the ntsportal wiki)
 #' @param calendarInterval Calendar internval, see available options in elasticsearch documentations for `date_histogram`
 #'
-#' @return
+#' @return data.frame of time series with columns start, norm_a
 #' @export
 #'
-#' @examples
 get_time_series_known <- function(escon, index = "g2_dbas_bfg", 
                          compound = "Carbamazepine", 
                          station = "rhein_ko_l", 

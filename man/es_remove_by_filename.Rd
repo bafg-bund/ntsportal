@@ -11,7 +11,10 @@ es_remove_by_filename(escon, index, filenames)
 
 \item{index}{Elasticsearch index name}
 
-\item{filenames}{}
+\item{filenames}{Vector of filenames to delete}
+}
+\value{
+TRUE if successful
 }
 \description{
 Removal of documents from dbas documents based on filename

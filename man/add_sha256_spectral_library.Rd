@@ -13,6 +13,9 @@ add_sha256_spectral_library(escon, rfindex, esid)
 
 \item{esid}{ElasticSearch document IDs (character)}
 }
+\value{
+Returns TRUE if successful
+}
 \description{
 This is used to see with which spectral library the last evaluation was done with.
 }

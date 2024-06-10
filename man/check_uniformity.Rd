@@ -17,6 +17,9 @@ check_uniformity(escon, rfindex, esids, fieldName, onlyNonBlanks = F)
 
 \item{onlyNonBlanks}{}
 }
+\value{
+TRUE if the field is uniform accross the docs, false otherwise
+}
 \description{
 Check that fields are the same for a set of documents
 }

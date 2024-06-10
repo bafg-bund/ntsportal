@@ -7,7 +7,7 @@
 remove_na_doc(doc)
 }
 \arguments{
-\item{doc}{}
+\item{doc}{A single document (of a NT feature) in the form of a list}
 }
 \value{
 list document with NAs removed

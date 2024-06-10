@@ -16,7 +16,7 @@ add_latest_eval(escon, index, esid, fieldName = "dbas_last_eval")
 \item{fieldName}{field name to be updated, must be either dbas_last_eval or dbas_is_last_eval}
 }
 \value{
-true if successful
+TRUE if successful
 }
 \description{
 Add eval time to msrawfiles

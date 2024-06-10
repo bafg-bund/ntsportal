@@ -14,6 +14,34 @@
 #' @export
 es_add_field <- function(escon, esindex, field, queryBody, value) {
   # TODO allow for multiple length variables
+  stop("es_add_field name has changed to es_add_value")
+  stopifnot(length(value) == 1)
+  newBody <- list(
+    query = queryBody,
+    script = list(
+      source = glue::glue("ctx._source.{field} = params.newValue"),
+      params = list(
+        newValue = value
+      )
+    )
+  )
+  elastic::docs_update_by_query(escon, esindex, body = newBody)
+}
+
+#' Add a value to any field in ES index
+#' 
+#' Only works for length 1 values
+#'
+#' @param escon Elasticsearch connection object created by `elastic::connect`
+#' @param esindex Index name or index-pattern 
+#' @param field Field name to which value is added, field must already exist.
+#' @param queryBody query in list format
+#' @param value Value to add (must be length 1)
+#'
+#' @return API response (list)
+#' @export
+es_add_value <- function(escon, esindex, field, queryBody, value) {
+  # TODO allow for multiple length variables
   stopifnot(length(value) == 1)
   newBody <- list(
     query = queryBody,
@@ -28,7 +56,6 @@ es_add_field <- function(escon, esindex, field, queryBody, value) {
 }
 
 #' Add rtt field to all documents where this does not exist
-#'
 #'
 #'
 #' @param escon Elasticsearch connection object created by `elastic::connect`
