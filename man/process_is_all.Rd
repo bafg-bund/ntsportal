@@ -36,6 +36,9 @@ process_is_all(
 \item{numFilesToProcess}{If NULL (default) all remaining files are processed,
 otherwise must be a positive integer.}
 }
+\value{
+Returns TRUE, invisbly, if successful
+}
 \description{
 Will enter the results into the isindex. Will only process files which
 are not included in isindex.

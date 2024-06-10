@@ -21,7 +21,7 @@
 #' @param escon Connection object created with `elastic::connect`
 #' @param index Elasticsearch index name 
 #'
-#' @return
+#' @return get_field function with default ca
 #' @export
 #'
 get_field_builder <- function(escon, index) {
@@ -175,7 +175,6 @@ es_no_duplicates <- function(escon, index) {
 #' @return FALSE if not all consistency checks successful. TRUE otherwise.
 #' @export
 #'
-#' @examples
 es_check_docs_fields <- function(escon, index, methodName = "bfg_nts_rp1") {
   # check that start is present
   res <- elastic::Search(escon, index, size = 0, body = '
@@ -317,11 +316,9 @@ es_check_docs_fields <- function(escon, index, methodName = "bfg_nts_rp1") {
 #'
 #' @param ms2Spec data.frame with columns mz and int
 #'
-#' @return
+#' @return ggplot2 plot object
 #' @export
 #'
-#' @examples
-#' @import ggplot2
 plot_ms2 <- function(ms2Spec) {
   # change name of int field
   if (!is.element("int", colnames(ms2Spec))) {
@@ -626,8 +623,8 @@ free_gb <- function() {
 
 #' Get search results for more than 10000 docs by pagination.
 #'
-#' @param escon 
-#' @param index 
+#' @param escon Elasticsearch connection object created by `elastic::connect`
+#' @param index Name of ElasticSearch index
 #' @param searchBody search body, if NULL, will return all docs
 #' @param sort Sort argument passed onto elastic::Search. Defines which field 
 #' the results are sorted by (best if this is unique for all docs to avoid ties) 
@@ -635,12 +632,11 @@ free_gb <- function() {
 #' @param totalSize 
 #' @param ... further arguments to elastic::Search, asdf argument does not work for now.
 #'
-#' @return
+#' @return ElasticSearch API response as a list
 #' @export
 #'
 es_search_paged <- function(escon, index, searchBody = NULL, sort, totalSize = Inf, ...) {
   # initial request
-  #browser()
   if (is.null(searchBody)) {
     searchBody <- list(query = list(match_all = list()))
     names(searchBody$query$match_all) <- character()

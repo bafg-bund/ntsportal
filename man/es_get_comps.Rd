@@ -11,7 +11,10 @@ es_get_comps(escon, index, addQuery = NULL)
 
 \item{index}{Index name or index-pattern}
 
-\item{addQuery}{query content in the form of a list.}
+\item{addQuery}{query content in the form of a list (optional).}
+}
+\value{
+Character vector of compound names
 }
 \description{
 Option to add a query to limit the documents

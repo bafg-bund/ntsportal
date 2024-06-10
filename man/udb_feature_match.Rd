@@ -21,6 +21,8 @@ udb_feature_match(
 
 \item{ms2t}{Precollected ms2 table from ufid-db}
 
+\item{ft}{`feature` object}
+
 \item{mztol}{m/z tolerance in Da}
 
 \item{rttol}{Retention time tolerance}

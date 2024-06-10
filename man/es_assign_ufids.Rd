@@ -20,6 +20,8 @@ es_assign_ufids(
 
 \item{index}{Elasticsearch index name}
 
+\item{polarity}{Measurement polarity}
+
 \item{ufids}{if ufids is NULL (default), then all ufids will be processed}
 
 \item{chromMethod}{name of chromatographic method to use, at the moment only "bfg_nts_rp1" possible}

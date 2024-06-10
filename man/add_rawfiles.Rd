@@ -36,6 +36,9 @@ and loc values. See details.}
 \item{rootMeasDir}{Root directory where measurement files are located. The function
 will look for original (vendor) files in this directory or below. Must end with "/".}
 }
+\value{
+Returns TRUE, invisibly.
+}
 \description{
 Add new MS measurement files to msrawfiles index
 }

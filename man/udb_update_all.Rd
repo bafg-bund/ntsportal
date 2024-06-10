@@ -13,6 +13,9 @@ udb_update_all(udb, escon, index)
 
 \item{index}{Elasticsearch index name}
 }
+\value{
+TRUE if successful
+}
 \description{
 Update the entire ufid library
 }

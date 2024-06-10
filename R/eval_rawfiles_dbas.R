@@ -593,10 +593,8 @@ proc_esid <- function(escon, rfindex, esid, compsProcess = NULL) {
 #' @param coresBatch Number of cores to use in a signal batch
 #' @param noIngest Logical, for testing purposes, no upload, just create json.
 #'
-#' @return
+#' @return Function is run for side-effects but returns number of documents uploaded
 #' @export
-#' @import logger
-#' @import future
 proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile, 
                        coresBatch, noIngest = FALSE) {
   
@@ -1160,7 +1158,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
 #' @param numFilesToProcess If NULL (default) all remaining files are processed,
 #' otherwise must be a positive integer.
 #'
-#' @return
+#' @return Returns TRUE, invisbly, if successful
 #' @export
 #' 
 process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile, 
@@ -1237,9 +1235,8 @@ process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile,
 #' @param rfindex Name of rawfiles index
 #' @param esid ID of document in rfindex
 #'
-#' @return
+#' @return An ElasticSearch document (dbas-index-mapping) as a list
 #' @export
-#' @import ntsworkflow
 proc_is_one <- function(escon, rfindex, esid) {
   
   # Get list of IS

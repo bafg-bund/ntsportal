@@ -1,3 +1,20 @@
+
+
+# Copyright 2016-2024 Bundesanstalt für Gewässerkunde
+# This file is part of ntsportal
+# ntsportal is free software: you can redistribute it and/or modify it under the 
+# terms of the GNU General Public License as published by the Free Software 
+# Foundation, either version 3 of the License, or (at your option) any 
+# later version.
+# 
+# ntsportal is distributed in the hope that it will be useful, but WITHOUT ANY 
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along 
+# with ntsportal. If not, see <https://www.gnu.org/licenses/>.
+
+
 # Functions to add data to documents in NTSPortal
 
 #' Add a value to any field
@@ -10,7 +27,7 @@
 #' @param queryBody query in list format
 #' @param value Value to add (must be length 1)
 #'
-#' @return
+#' @return ElasticSearch response object after update (as list)
 #' @export
 es_add_field <- function(escon, esindex, field, queryBody, value) {
   # TODO allow for multiple length variables
@@ -159,10 +176,9 @@ es_add_rtt <- function(escon, esindex) {
 #' @param escon Elasticsearch connection object created by `elastic::connect`
 #' @param esindex Index or index-pattern to update
 #'
-#' @return NULL
+#' @return Returns the number of documents updated, invisibly
 #' @export
 #'
-#' @import logger
 es_add_rt_cluster <- function(escon, esindex) {
   # get all features without rt_clustering
   totUpdated <- 0
@@ -220,11 +236,12 @@ es_add_rt_cluster <- function(escon, esindex) {
 #' Get list of all compounds in an ntsp index
 #'
 #' Option to add a query to limit the documents
+#' 
 #' @param escon Elasticsearch connection object created by `elastic::connect`
 #' @param index Index name or index-pattern 
-#' @param addQuery query content in the form of a list.
+#' @param addQuery query content in the form of a list (optional).
 #'
-#' @return
+#' @return Character vector of compound names
 #'
 #' @examples 
 #' \dontrun{
@@ -434,9 +451,7 @@ es_add_comp_groups <- function(escon, sdb, index, filenames = "all") {
 #' @param compoundLimit Limit the update to particular compounds, if 'all', 
 #' (default) all compounds are updated.
 #'
-#' @return
 #' @export
-#' @import dplyr
 es_add_identifiers <- function(escon, sdb, index, filenames = "all", compoundLimit = "all") {
   ctb <- tbl(sdb, "compound") %>%
     select(name, formula, inchi, inchikey, SMILES) %>%
@@ -532,17 +547,5 @@ es_add_identifiers <- function(escon, sdb, index, filenames = "all", compoundLim
   invisible(TRUE)
 }
 
-# Copyright 2016-2024 Bundesanstalt für Gewässerkunde
-# This file is part of ntsportal
-# ntsportal is free software: you can redistribute it and/or modify it under the 
-# terms of the GNU General Public License as published by the Free Software 
-# Foundation, either version 3 of the License, or (at your option) any 
-# later version.
-# 
-# ntsportal is distributed in the hope that it will be useful, but WITHOUT ANY 
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License along 
-# with ntsportal. If not, see <https://www.gnu.org/licenses/>.
+
 

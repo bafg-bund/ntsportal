@@ -7,7 +7,12 @@
 new_ufid_assignment(x = integer(), level = integer())
 }
 \arguments{
-\item{level}{}
+\item{x}{ID for ufid}
+
+\item{level}{ufid level}
+}
+\value{
+ufid_assignment object
 }
 \description{
 New ufid

@@ -13,6 +13,9 @@ proc_is_one(escon, rfindex, esid)
 
 \item{esid}{ID of document in rfindex}
 }
+\value{
+An ElasticSearch document (dbas-index-mapping) as a list
+}
 \description{
 Process IS in one file
 }

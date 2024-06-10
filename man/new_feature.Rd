@@ -20,6 +20,8 @@ new_feature(
 
 \item{rt}{retentiontime of the feature}
 
+\item{es_id}{ElasticSearch document ID}
+
 \item{chrom_method}{which method was used to measure}
 
 \item{...}{}

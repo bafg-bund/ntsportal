@@ -11,6 +11,9 @@ es_add_rt_cluster(escon, esindex)
 
 \item{esindex}{Index or index-pattern to update}
 }
+\value{
+Returns the number of documents updated, invisibly
+}
 \description{
 Add rt_clustering field to es index pattern
 }

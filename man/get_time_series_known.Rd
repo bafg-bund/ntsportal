@@ -29,6 +29,9 @@ get_time_series_known(
 
 \item{calendarInterval}{Calendar internval, see available options in elasticsearch documentations for `date_histogram`}
 }
+\value{
+data.frame of time series with columns start, norm_a
+}
 \description{
 Function should be expanded to allow user to choose date range and get data
 from more than one compound, more than one station.

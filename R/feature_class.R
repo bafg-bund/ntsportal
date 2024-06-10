@@ -21,7 +21,7 @@
 #' @param pol polarity of the feature
 #' @param mz mass of the feature
 #' @param rt retentiontime of the feature
-#' @param es_id
+#' @param es_id ElasticSearch document ID
 #' @param chrom_method which method was used to measure
 #' @param ...
 #'

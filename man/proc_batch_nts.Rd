@@ -22,16 +22,16 @@ proc_batch_nts(
 
 \item{esids}{ElasticSearch document IDs (character)}
 
-\item{tempsavedir}{}
+\item{tempsavedir}{Temporary save location}
 
-\item{ingestpth}{}
+\item{ingestpth}{Path where the ingest.sh script is found}
 
-\item{configfile}{}
+\item{configfile}{Config file where the credentials for signing into elasticsearch are found}
 
-\item{coresBatch}{}
+\item{coresBatch}{Number of cores to use in a signal batch}
 
-\item{noIngest}{}
+\item{noIngest}{Logical, for testing purposes, no upload, just create json.}
 }
 \description{
-Process a batch of files using ntsworkflow
+Still in development
 }

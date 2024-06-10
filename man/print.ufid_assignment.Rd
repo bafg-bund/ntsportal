@@ -7,7 +7,7 @@
 \method{print}{ufid_assignment}(x)
 }
 \arguments{
-\item{x}{}
+\item{x}{ufid_assignment object}
 }
 \description{
 Print ufid

@@ -831,12 +831,11 @@ es_test_fpfn <- function(escon, index, includeUfid2 = FALSE, includeUcid = FALSE
 #' Produce plots showing mz, rt stats of ufids in an index
 #'
 #' @param escon Connection object created with `elastic::connect`
-#' @param testIndex
+#' @param testIndex Index name
 #' @param ufidType Either "ufid" or "ufid2"
 #'
-#' @return
+#' @return Plots of m/z, retention time and sillouhette score.
 #' @export
-#' @import ggplot2
 mz_rt_stats_plots <- function(escon, testIndex, hideTitleX = FALSE, ufidType = "ufid") {
   
   # Collect aggregation data

@@ -23,4 +23,5 @@
 #' @import logger
 #' @import future
 #' @import ntsworkflow
+#' @import ggplot2
 NULL

@@ -11,6 +11,9 @@ put_spectral_library_index(escon, index)
 
 \item{index}{Elasticsearch index name}
 }
+\value{
+Response from ElasticSearch as a list.
+}
 \description{
 Send index creation request for spectral library index
 }

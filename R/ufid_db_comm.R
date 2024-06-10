@@ -13,6 +13,11 @@
 # You should have received a copy of the GNU General Public License along 
 # with ntsportal. If not, see <https://www.gnu.org/licenses/>.
 
+# use con_sqlite #cleanup
+udb_connect <- function(pth) {
+  DBI::dbConnect(RSQLite::SQLite(), pth)
+}
+
 
 #' Remove a ufid from the ufid library
 #'
@@ -71,11 +76,10 @@ udb_clean_spectra <- function(udb, ufid, msLevel) {
 #' if this is not found in the database
 #' for now only for the case where ms1 and ms2 are present
 #'
-#' @param feat
+#' @param feat `feature` object
 #' @param udb Connection to ufid db, created by `DBI::dbConnect`
 #'
-#' @return
-#' @import dplyr
+#' @return Function has side effects, returns ufid of newly added feature
 #' @export
 udb_add_feature <- function(feat, udb) {
 
@@ -128,7 +132,7 @@ udb_add_feature <- function(feat, udb) {
 #' @param escon Connection object created with `elastic::connect`
 #' @param index Elasticsearch index name 
 #'
-#' @return
+#' @return TRUE if successful
 #' @export
 #'
 udb_update_all <- function(udb, escon, index) {
@@ -143,6 +147,8 @@ udb_update_all <- function(udb, escon, index) {
   hrs <- round(as.numeric(endTime - startTime, units = "hours"))
   
   logger::log_info("Completed updating entire ufid library in {hrs} h")
+  
+  invisible(TRUE)
 }
 
 
@@ -159,7 +165,7 @@ udb_update_all <- function(udb, escon, index) {
 #' @param index Elasticsearch index name 
 #' @param ufid Universal feature ID
 #'
-#' @return
+#' @return TRUE if successful
 #' @export
 udb_update <- function(udb, escon, index, ufid_to_update) {
   
@@ -391,6 +397,3 @@ udb_update <- function(udb, escon, index, ufid_to_update) {
   invisible(TRUE)
 }
 
-udb_connect <- function(pth) {
-  DBI::dbConnect(RSQLite::SQLite(), pth)
-}

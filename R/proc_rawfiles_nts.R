@@ -18,17 +18,17 @@
 
 
 #' Process a batch of files using ntsworkflow
+#' @description Still in development
 #'
 #' @param escon Connection object created with `elastic::connect`
 #' @param rfindex Elasticsearch index name for msrawfiles index 
 #' @param esids ElasticSearch document IDs (character)
-#' @param tempsavedir 
-#' @param ingestpth 
-#' @param configfile 
-#' @param coresBatch 
-#' @param noIngest 
+#' @param tempsavedir Temporary save location
+#' @param ingestpth Path where the ingest.sh script is found
+#' @param configfile Config file where the credentials for signing into elasticsearch are found
+#' @param coresBatch Number of cores to use in a signal batch
+#' @param noIngest Logical, for testing purposes, no upload, just create json.
 #'
-#' @return
 #' @export
 #'
 proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile, 

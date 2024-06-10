@@ -7,7 +7,12 @@
 udb_add_feature(feat, udb)
 }
 \arguments{
+\item{feat}{`feature` object}
+
 \item{udb}{Connection to ufid db, created by `DBI::dbConnect`}
+}
+\value{
+Function has side effects, returns ufid of newly added feature
 }
 \description{
 if this is not found in the database
