@@ -9,7 +9,12 @@ mz_rt_stats_plots(escon, testIndex, hideTitleX = FALSE, ufidType = "ufid")
 \arguments{
 \item{escon}{Connection object created with `elastic::connect`}
 
+\item{testIndex}{Index name}
+
 \item{ufidType}{Either "ufid" or "ufid2"}
+}
+\value{
+Plots of m/z, retention time and sillouhette score.
 }
 \description{
 Produce plots showing mz, rt stats of ufids in an index

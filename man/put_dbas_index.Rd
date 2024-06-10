@@ -11,6 +11,9 @@ put_dbas_index(eson, index)
 
 \item{index}{Name of the index you wish to create}
 }
+\value{
+response from ElasticSearch API as a list
+}
 \description{
 Must be kept in sync with: https://github.com/bafg-bund/ntsportal/wiki/Index-mapping-for-dbas-indices
 }

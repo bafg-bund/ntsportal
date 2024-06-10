@@ -20,10 +20,32 @@ udb_feature_to_ufid_match(
 )
 }
 \arguments{
+\item{ft}{`feature` object}
+
+\item{ftt}{precollected feature table from ufid-db}
+
+\item{rtt}{precollected retention time table from ufid-db}
+
+\item{ms2t}{precollected ms2 table from ufid-db}
+
+\item{ufid_to_match}{Universal feature ID which is to be tested}
+
+\item{mztol}{m/z tolerance}
+
+\item{rttol}{retention time tolerance}
+
+\item{ms2dpThresh}{MS2 comparison threshold}
+
+\item{ndp_m}{Normalized dot product variable m}
+
+\item{ndp_n}{Normalized dot product variable n}
+
+\item{mztolms2}{MS2 m/z tolerance}
+
 \item{chromMethod}{Chromatographic method to extract retention time}
 }
 \value{
-true if matching
+TRUE if matching
 }
 \description{
 Find if feature and specified ufid entry are a match

@@ -15,6 +15,8 @@ get_field_builder(escon, index)
 }
 \value{
 get_field function with escon and index arguments set as default
+
+get_field function with default ca
 }
 \description{
 Function factory just to avoid typing escon and index every time

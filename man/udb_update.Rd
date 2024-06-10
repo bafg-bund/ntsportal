@@ -15,6 +15,9 @@ udb_update(udb, escon, index, ufid_to_update)
 
 \item{ufid}{Universal feature ID}
 }
+\value{
+TRUE if successful
+}
 \description{
 The ufid database is updated at the end of a session to
 improve it based on statistical averaging of previous data.

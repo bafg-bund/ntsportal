@@ -9,6 +9,9 @@ plot_ms2(ms2Spec)
 \arguments{
 \item{ms2Spec}{data.frame with columns mz and int}
 }
+\value{
+ggplot2 plot object
+}
 \description{
 Plot an ms2 spectrum for viewing
 }

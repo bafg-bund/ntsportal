@@ -7,9 +7,9 @@
 es_search_paged(escon, index, searchBody = NULL, sort, totalSize = Inf, ...)
 }
 \arguments{
-\item{escon}{}
+\item{escon}{Elasticsearch connection object created by `elastic::connect`}
 
-\item{index}{}
+\item{index}{Name of ElasticSearch index}
 
 \item{searchBody}{search body, if NULL, will return all docs}
 
@@ -20,6 +20,9 @@ currently can only be one field and may not be _id.}
 \item{totalSize}{}
 
 \item{...}{further arguments to elastic::Search, asdf argument does not work for now.}
+}
+\value{
+ElasticSearch API response as a list
 }
 \description{
 Get search results for more than 10000 docs by pagination.

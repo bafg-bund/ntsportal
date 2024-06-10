@@ -18,13 +18,17 @@ es_ufid_gap_fill(
 
 \item{index}{Elasticsearch index name}
 
+\item{ufid_to_fill}{Universal feature ID}
+
 \item{min_number}{minimum number of MS2 ufids needed in the cluster to assign
 ufid to other features in that cluster}
 
-\item{rttol_gap_fill_min}{}
+\item{mztol_gap_fill_mda}{m/z tolerance in mDa}
+
+\item{rttol_gap_fill_min}{Retention time tolerance in minutes}
 }
 \value{
-Integer. Number of features assigned (0 for no assignment)
+Run for side-effects. Returns number of features assigned (0 for no assignment)
 }
 \description{
 For a given ufid, will look for features of the same batch with similar

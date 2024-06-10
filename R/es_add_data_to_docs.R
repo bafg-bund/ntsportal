@@ -236,11 +236,12 @@ es_add_rt_cluster <- function(escon, esindex) {
 #' Get list of all compounds in an ntsp index
 #'
 #' Option to add a query to limit the documents
+#' 
 #' @param escon Elasticsearch connection object created by `elastic::connect`
 #' @param index Index name or index-pattern 
-#' @param addQuery query content in the form of a list.
+#' @param addQuery query content in the form of a list (optional).
 #'
-#' @return
+#' @return Character vector of compound names
 #'
 #' @examples 
 #' \dontrun{
