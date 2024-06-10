@@ -26,7 +26,7 @@
 #' @param eson elasticsearch connection object created with elastic::connect
 #' @param index Name of the index you wish to create
 #'
-#' @return
+#' @return 
 #' @export
 put_dbas_index <- function(eson, index) {
   elastic::index_create(
@@ -148,7 +148,7 @@ put_dbas_index <- function(eson, index) {
 #' @param escon Connection object created with `elastic::connect`
 #' @param index Elasticsearch index name 
 #'
-#' @return
+#' @return Response from ElasticSearch as a list.
 #' @export
 #'
 put_spectral_library_index <- function(escon, index) {

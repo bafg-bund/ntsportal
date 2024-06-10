@@ -15,43 +15,29 @@
 
 # ufid_assignment class functions ####
 
+
+# TODO should be removed because it is unnecessary  #cleanup
+
 #' New ufid
+#' 
+#' @param x ID for ufid
+#' @param level ufid level
 #'
-#' @param x
-#' @param level
-#'
-#' @return
+#' @return ufid_assignment object
 #' @export
 #'
-#' @examples
 new_ufid_assignment <- function(x = integer(), level = integer()) {
   stopifnot(is.integer(x), is.integer(level))
   structure(x, class = "ufid_assignment", level = level)
 }
 
 
-#' Check ufid
-#'
-#' @param feat
-#'
-#' @return
-#' @export
-#'
-#' @examples
-is_ufid_assignment <- function(feat) {
-  all("level" %in% names(attributes(feat)),
-      is.integer(feat),
-      is.integer(attr(feat, "level")))
-}
 
 #' Print ufid
 #'
-#' @param x
+#' @param x ufid_assignment object
 #'
-#' @return
 #' @export
-#'
-#' @examples
 print.ufid_assignment <- function(x) {
   cat("ufid=", unclass(x), " level=", attr(x, "level"))
 }

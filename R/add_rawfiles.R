@@ -211,7 +211,7 @@ station_from_code <- function(escon, rfindex, filename, stationRegex) {
 #' town or km is known, use the convention <river_description> where description
 #' is some indication of the location. 
 #' 
-#' @return
+#' @return Returns TRUE, invisibly.
 #' @export
 #'
 add_rawfiles <- function(escon, rfindex, templateId, newPaths, 
@@ -463,7 +463,7 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
   } else {
     message("Function completed, all files in index ", rfindex)  
   }
-  
+  invisible(TRUE)
 }
 
 #' Get ID based on search parameters

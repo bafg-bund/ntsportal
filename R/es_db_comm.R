@@ -478,13 +478,13 @@ es_res_feat_list <- function(res, fields = c("mz", "pol", "rt", "chrom_method"))
 #'
 #' @param escon Elasticsearch connection object created by elastic::connect
 #' @param index Elasticsearch index name
-#' @param ufid_to_fill
+#' @param ufid_to_fill Universal feature ID
 #' @param min_number minimum number of MS2 ufids needed in the cluster to assign
 #' ufid to other features in that cluster
-#' @param mztol_gap_fill_mda
-#' @param rttol_gap_fill_min
+#' @param mztol_gap_fill_mda m/z tolerance in mDa
+#' @param rttol_gap_fill_min Retention time tolerance in minutes
 #'
-#' @return Integer. Number of features assigned (0 for no assignment)
+#' @return Run for side-effects. Returns number of features assigned (0 for no assignment)
 #' @export
 es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
                               mztol_gap_fill_mda = 5,
@@ -858,7 +858,7 @@ es_ufid_gap_fill <- function(escon, index, ufid_to_fill, min_number = 2,
 #' @param escon Elasticsearch connection object created by elastic::connect
 #' @param udb Ufid library connection object created by DBI::dbConnect
 #' @param index Elasticsearch index name
-#' @param polarity
+#' @param polarity Measurement polarity
 #' @param ufids if ufids is NULL (default), then all ufids will be processed
 #' @param chromMethod name of chromatographic method to use, at the moment only "bfg_nts_rp1" possible
 #'
@@ -1165,8 +1165,6 @@ es_assign_ufids <- function(
 #'
 #' @return Integer. Number of docs updated (0 for no assignment)
 #' @export
-#'
-#' @examples
 es_add_tag_to_ids <- function(escon, index, ids, tagToAdd) {
   id_string <-  paste(shQuote(ids, type = "cmd"), collapse = ", ")
   res_update <- elastic::docs_update_by_query(

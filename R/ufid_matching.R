@@ -15,7 +15,7 @@
 
 # private functions ####
 
-# TODO This needs to be combined with the functions in eval_dbas
+# TODO This needs to be combined with the functions in eval_dbas #cleanup
 #' @export
 norm_ms1 <- function(x, precursorMz, noiselevel = 0.01) {
   precursorInt <- x$int[which.min(abs(x$mz - precursorMz))]
@@ -134,7 +134,7 @@ calc_ndp_fit <- function(d_spec, db_spec, ndp_m = 2, ndp_n = 1, mztolu_ = 0.015)
 #' @param ftt Precollected feature table from ufid-db
 #' @param rtt Precollected retention_time table from ufid-db
 #' @param ms2t Precollected ms2 table from ufid-db
-#' @param ft
+#' @param ft `feature` object
 #' @param mztol m/z tolerance in Da
 #' @param rttol Retention time tolerance
 #' @param ms2dpThresh Threshold for dot-product comparison
@@ -247,20 +247,20 @@ udb_feature_match <- function(ftt, rtt, ms2t, ft, mztol = 0.007, rttol = 1, ms2d
 
 #' Find if feature and specified ufid entry are a match
 #'
-#' @param ft
-#' @param ftt
-#' @param rtt
-#' @param ms2t
-#' @param ufid_to_match
-#' @param mztol
-#' @param rttol
-#' @param ms2dpThresh
-#' @param ndp_m
-#' @param ndp_n
-#' @param mztolms2
+#' @param ft `feature` object
+#' @param ftt precollected feature table from ufid-db
+#' @param rtt precollected retention time table from ufid-db
+#' @param ms2t precollected ms2 table from ufid-db
+#' @param ufid_to_match Universal feature ID which is to be tested
+#' @param mztol m/z tolerance
+#' @param rttol retention time tolerance
+#' @param ms2dpThresh MS2 comparison threshold
+#' @param ndp_m Normalized dot product variable m
+#' @param ndp_n Normalized dot product variable n
+#' @param mztolms2 MS2 m/z tolerance
 #' @param chromMethod Chromatographic method to extract retention time
 #'
-#' @return true if matching
+#' @return TRUE if matching
 #' @export
 udb_feature_to_ufid_match <- function(
     ft, ftt, rtt, ms2t, ufid_to_match, mztol = 0.007, rttol = 1, ms2dpThresh = 50, 
