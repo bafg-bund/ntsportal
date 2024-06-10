@@ -24,7 +24,7 @@
 # and therefore the file will be processed again
 
 # Variables ####
-VERSION <- "2024-04-18"
+VERSION <- "2024-06-10"
 RFINDEX <- "ntsp_msrawfiles"
 TEMPSAVE <- "/scratch/nts/tmp"
 CONFG <- "~/config.yml"
@@ -32,7 +32,7 @@ INGESTPTH <- "scripts/ingest.sh"
 UPDATESPECDB <- "scripts/update-spectral-library-ntsp.R"
 ADDANALYSIS <- "scripts/compute-analysis-index.R"
 ROOTDIR_RF <- "/scratch/nts/messdaten"
-SPECLIBPATH <- "/scratch/nts/MS2_db_v9.db"  # temporary: only for adding group and formula after processing
+SPECLIBPATH <- "/scratch/nts/MS2_db_v11.db"  # temporary: only for adding group and formula after processing
 CORES <- 1
 CORESBATCH <- 6
 
