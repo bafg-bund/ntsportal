@@ -1120,7 +1120,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
           as.numeric(batchEndTime - batchStartTime, units = "mins") / length(esids_all),
           digits = 2
         )
-        res6 <- es_add_field(escon, rfindex, field = "dbas_proc_time", 
+        res6 <- es_add_value(escon, rfindex, field = "dbas_proc_time", 
                      queryBody = list(ids = list(values = esids_all)), value = avgMins)
         stopifnot(res6$updated == length(esids_all))
         log_info("Completed batch starting with id {esids[1]}, file {checkFiles[1]}")

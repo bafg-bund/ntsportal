@@ -784,7 +784,7 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
   # Add processingtime information to msrawfiles after all steps.
   bEndTime <- lubridate::now()
   mins <- round(as.numeric(bEndTime - bStartTime, units = "mins"))
-  res3 <- es_add_field(escon, rfindex, "nts_proc_time", 
+  res3 <- es_add_value(escon, rfindex, "nts_proc_time", 
                queryBody = list(ids = list(values = esids)), value = mins)
   
 }
