@@ -758,6 +758,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     if (bmindet > 1)
       bfps <- append(bfps, get_rare(dbas, bmindet))
     
+    # TODO Append FPs resulting from Replicate filter
     
     if (length(bfps) > 0)
       for (fpname in bfps) dbas$deleteFP(fpname) 
@@ -806,7 +807,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     stopifnot(length(bisn) == 1)
     
     isData <- dbas$ISresults[dbas$ISresults$IS == bisn, c("samp", "int_a")]
-    browser()
+    #browser()
     # Normalize intensities
     dat <- merge(compData, isData, by = "samp", suffix = c("", "_IS"))
     # verify columns are numeric
@@ -871,7 +872,6 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
         log_info("Problematic detections:")
         for (i in seq_along(probleme)) 
           message(probleme[i], " in sample ", problemeProben[i])
-        log_warn("Check results")
       }
       
       dat$reps <- NULL
