@@ -565,7 +565,7 @@ proc_esid <- function(escon, rfindex, esid, compsProcess = NULL) {
   tryCatch(
     suppressMessages(dbas$process_all(comp_names = compsProcess)), 
     error = function(cnd) {
-      log_warn("Processing error in file ", dc$path)
+      log_error("Processing error in file with id {esid}. File path: ", dc$path)
       crash <<- TRUE
       message(cnd)
     }
@@ -807,7 +807,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     stopifnot(length(bisn) == 1)
     
     isData <- dbas$ISresults[dbas$ISresults$IS == bisn, c("samp", "int_a")]
-    #browser()
+
     # Normalize intensities
     dat <- merge(compData, isData, by = "samp", suffix = c("", "_IS"))
     # verify columns are numeric
