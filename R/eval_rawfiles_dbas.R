@@ -856,7 +856,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     # verify columns are numeric
     dat[, c("int_a", "int_a_IS")] <- lapply(dat[, c("int_a", "int_a_IS")], as.numeric)
     dat$norm_a <- round(dat$int_a / dat$int_a_IS, 4)
-    dat$area_normalized <- dat$norm_a
+    dat$area_normalized <- dat$norm_a  # norm_a and area_normalized are exactly the same within this script. keep both?
     
     if (length(dat$int_a_IS) == 0)
       stop("IS not found in docs ", paste(esids, collapse = ", "))
