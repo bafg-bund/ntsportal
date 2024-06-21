@@ -30,7 +30,7 @@ proc_batch(
 
 \item{coresBatch}{Number of cores to use in a signal batch}
 
-\item{noIngest}{Logical, for testing purposes, no upload, just create json.}
+\item{noIngest}{Logical, for testing purposes, no upload, just create json. Will also return JSON (invisibly)}
 }
 \value{
 Function is run for side-effects but returns number of documents uploaded

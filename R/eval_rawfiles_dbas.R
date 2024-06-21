@@ -57,20 +57,30 @@ build_es_query_for_ids <- function(ids, toShow) {
 #' @param rfindex Name of rawfiles index
 #' @param queryBody The Query DSL code to use to select the docs in msrawfiles which need to be reset (as a `list`).
 #' @param indexType Elasticsearch index, indicating the type of data stored in the index, can either be "dbas" or "dbas_is"
+#' @param confirm logical, if True, will ask user to confirm the reset
 #'
 #' @export
 #'
-reset_eval <- function(escon, rfindex, queryBody, indexType = "dbas") {
+reset_eval <- function(escon, rfindex, queryBody, indexType = "dbas", confirm = TRUE) {
+  field2 <- "dbas_spectral_library_sha256"
+  
   if (indexType == "dbas") {
     field <- "dbas_last_eval"
+  } else if (indexType == "dbas_is") {
+    field <- "dbas_is_last_eval"
   } else {
     stop("no other option yet")
   }
-  toChange <- elastic::Search(escon, rfindex, body = list(query = queryBody), 
-                              size = 0)$hits$total$value
-  message(toChange, " docs will be changed.")
-  okToGo <- readline("Proceed? (y/n)")
-  field2 <- "dbas_spectral_library_sha256"
+  
+  if (confirm) {
+    toChange <- elastic::Search(escon, rfindex, body = list(query = queryBody), 
+                                size = 0)$hits$total$value
+    message(toChange, " docs will be changed")
+    okToGo <- readline("Proceed? (y/n)")
+  } else {
+    okToGo <- "y"
+  }
+  
   if (okToGo == "y") {
     elastic::docs_update_by_query(
       escon,
@@ -277,20 +287,7 @@ get_field_builder <- function(escon, index) {
   }
 }
 
-#' Get rare compounds from a Report
-#' 
-#' Get the compounds which are found fewer than min_freq
-#' 
-#' @param repo ntsworkflow::Report class object
-#' @param min_freq Minimum number of detections
-#'
-#' @return Names of compounds with FEWER than the min_freq of detections
-get_rare <- function(repo, min_freq) {
-  pl <- repo$peakList
-  finds <- by(pl, pl$comp_name, nrow)
-  rare <- which(finds < min_freq)
-  names(rare)
-}
+
 
 #' Normalize ms2 spectrum to the maximum intensity
 #'
@@ -591,7 +588,7 @@ proc_esid <- function(escon, rfindex, esid, compsProcess = NULL) {
 #' @param ingestpth Path where the ingest.sh script is found
 #' @param configfile Config file where the credentials for signing into elasticsearch are found
 #' @param coresBatch Number of cores to use in a signal batch
-#' @param noIngest Logical, for testing purposes, no upload, just create json.
+#' @param noIngest Logical, for testing purposes, no upload, just create json. Will also return JSON (invisibly)
 #'
 #' @return Function is run for side-effects but returns number of documents uploaded
 #' @export
@@ -755,10 +752,52 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     bmindet <- unique(get_field2(esids, "dbas_minimum_detections"))
     stopifnot(length(bmindet) == 1, is.integer(bmindet))
     
+    # Get rare compounds from a Report
+    # Get the compounds which are found fewer than min_freq
+    # repo ntsworkflow::Report class object
+    # min_freq Minimum number of detections
+    # return Names of compounds with FEWER than the min_freq of detections
+    get_rare <- function(repo, min_freq) {
+      pl <- repo$peakList
+      finds <- by(pl, pl$comp_name, nrow)
+      rare <- which(finds < min_freq)
+      names(rare)
+    }
+    
     if (bmindet > 1)
       bfps <- append(bfps, get_rare(dbas, bmindet))
     
-    # TODO Append FPs resulting from Replicate filter
+    # Append compounds which are not found in at least x out of y replicates
+    # where x is dbas_minimum_detections
+    # dbas_minimum_detections therefore refers to the whole batch as well as
+    # one set of replicates (see previous filter).
+    # The total number of replicates for each sample is irrelevant
+    brepr <- unlist(unique(get_field2(esids, "dbas_replicate_regex")))
+    
+    if (!is.null(brepr) && !is.na(brepr)) {
+      pl <- dbas$peakList
+      pl$orig <- stringr::str_replace(pl$samp, brepr, "\\1")
+      
+      # Get the total number of replicates for each sample
+      # repTotal <- data.frame(
+      #   orig = unique(pl$orig),
+      #   number = tapply(pl$samp, pl$orig, function(p) length(unique(p)))
+      # )
+      
+      repCount <- by(pl, list(pl$comp_name, pl$orig), nrow)
+      repCount <- array2DF(repCount)
+      repCount <- repCount[!is.na(repCount$Value), ]
+      
+      # We take the average number of times a compound is found in y replicates,
+      # that way, if in one set of reps it doesn't get the required number of 
+      # detections, it still doesn't count as an FP
+      compCount <- data.frame(
+        comp_name = unique(repCount$Var1),
+        count = round(tapply(repCount$Value, repCount$Var1, mean))
+      )
+      repFps <- compCount[compCount$count < bmindet, "comp_name"]
+      bfps <- append(bfps, repFps)
+    }
     
     if (length(bfps) > 0)
       for (fpname in bfps) dbas$deleteFP(fpname) 
@@ -776,7 +815,8 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     dbas$peakList <- dbas$peakList[dbas$peakList$peak == "A" , ]
     
     log_info("Reintegration")
-    # at this stage you could increase the cores of the report so that
+    
+    # At this stage you could increase the cores of the report so that
     # the reintegration is faster
     dbas$changeSettings("numcores", 6)
     tryCatch(
@@ -794,10 +834,13 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     
     dbas <- ntsworkflow::loadReport(F, newsavename)  
     #dbas <- ntsworkflow::loadReport(F, "tests/dbas-eval/temp-files/dbas-batch--_srv_cifs-mounts_g2_G_G2_HRMS_Messdaten_koblenz_wasser_2019_201904_pos--240429_i.report")  
+    
+    
     # Step 3 - Conversion ####
     log_info("Collecting data for json export")
     
-    compData <- dbas$integRes[, c("samp", "comp_name", "adduct", "isotopologue", "int_a", "real_mz", "real_rt_min")]
+    compData <- dbas$integRes[, c("samp", "comp_name", "adduct", "isotopologue",
+                                  "int_a", "real_mz", "real_rt_min")]
     compData$samp <- basename(compData$samp)
     
     bist <- unique(get_field2(esids, "dbas_is_table"))
@@ -826,9 +869,8 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
         log_warn("Die Standardabweichung des internen Standards ist über Grenzwert von 10%")
     }
     
-    brepr <- unlist(unique(get_field2(esids, "dbas_replicate_regex")))
-  
-    # build average area from replicates
+    # Build average area from replicates
+    # brepr is the batch replicate regex which was defined for the replicate filter
     if (!is.null(brepr) && !is.na(brepr)) {
       log_info("Building replicate averages for testing")
       # using the regex, give all replicate samples the same name 
@@ -845,8 +887,8 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
         rsd_norm_a <- standard_deviation_norm_a/average_norm_a
         average_int_a_IS <- mean(part$int_a_IS, na.rm = T)
         data.frame(
-          samp = samp1, comp_name = comp1, adduct = ad1, isotopologue = isot1, int_a = average_int_a,
-          int_a_IS = average_int_a_IS, norm_a = average_norm_a, 
+          samp = samp1, comp_name = comp1, adduct = ad1, isotopologue = isot1, 
+          int_a = average_int_a, int_a_IS = average_int_a_IS, norm_a = average_norm_a, 
           sd_norm_a = standard_deviation_norm_a, rsd_norm_a = rsd_norm_a
         )
       }, simplify = F)
@@ -1077,7 +1119,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       log_info("Ingest complete, checking database for results")
       
       # Need to add a pause so that elastic returns ingested docs
-      Sys.sleep(10)
+      Sys.sleep(1)
       # Check that everything is in the database
       checkFiles <- basename(get_field2(esids, "path"))
       
@@ -1127,6 +1169,8 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       } else {
         log_error("Ingested data not found in batch starting with id {esids[1]}")
       }
+    } else {
+      return(invisible(datl))
     }
   },
   error = function(cnd) {
@@ -1183,7 +1227,7 @@ process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile,
   }
   
   log_info("Processing {length(idsToProcess)} files")
-  plan(multicore, workers = numCores)
+  plan(multisession, workers = numCores)
   featsBySample <- furrr::future_map(idsToProcess, function(id) {
     proc_is_one(escon = escon, rfindex = rfindex, esid = id)
   })
@@ -1201,7 +1245,8 @@ process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile,
     glue::glue("{ingestpth} {configfile} {isindex} {jpth}")
   )
   stopifnot(exitStatusIngest == 0)
-
+  
+  Sys.sleep(1)
   # Get filenames of processed files and check that data has been entered
   filenames <- vapply(featsAll, function(x) x$filename, character(1))
   docsFoundIndex <- elastic::Search(

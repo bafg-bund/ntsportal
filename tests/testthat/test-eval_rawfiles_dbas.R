@@ -1,46 +1,171 @@
-test_that("Test file KO_06_1_pos.mzXML can be processed for CBZ", {
+
+test_that("Test file Des_07_01_pos.mzXML can be processed for Bisoprolol", {
+  
   logger::with_log_threshold(
     source("~/connect-ntsp.R"),
     threshold = "OFF"
   )
+  rfindex <- "ntsp_index_msrawfiles_unit_tests"
+  rfloc <- "/scratch/nts/ntsportal_unit_tests/meas_files/"
+  
+  t1 <- check_integrity_msrawfiles(escon, rfindex = rfindex, locationRf = rfloc)
+  expect_true(t1)
+  
+  res1 <- elastic::Search(
+    escon, rfindex, 
+    body = list(query = list(term = list(filename = "Des_07_01_pos.mzXML"))), 
+    source = "_id")
+  
+  e <- res1$hits$hits[[1]][["_id"]]
   
   re <- proc_esid(
     escon = escon,
-    rfindex = "ntsp_index_msrawfiles_unit_tests",
-    esid = "dd8ohI4BbGGk3ENz_S5y",
-    compsProcess = "Carbamazepine"
+    rfindex = rfindex,
+    esid = e,
+    compsProcess = "Bisoprolol"
   )
-  expect_contains(re$peakList$comp_name, "Carbamazepine")
+  expect_equal(re$peakList$comp_name, "Bisoprolol")
 })
 
-test_that("Test file KO_06_1_pos.mzXML can be processed for IS", {
+
+test_that("Test file BW1_Dessau_pos.mzXML can be processed for IS Olmesartan-d6", {
   logger::with_log_threshold(
     source("~/connect-ntsp.R"),
     threshold = "OFF"
   )
+  rfindex <- "ntsp_index_msrawfiles_unit_tests"
+  res1 <- elastic::Search(
+    escon, rfindex, 
+    body = list(query = list(term = list(filename = "BW1_Dessau_pos.mzXML"))), 
+    source = "_id")
   
+  e <- res1$hits$hits[[1]][["_id"]]
+
   re <- proc_is_one(
     escon = escon,
-    rfindex = "ntsp_index_msrawfiles_unit_tests",
-    esid = "dd8ohI4BbGGk3ENz_S5y"
+    rfindex = rfindex,
+    esid = e
   )
   expect_equal(re[[1]]$name, "Olmesartan-d6")
 })
 
-# test_that("Test file KO_06_1_pos.mzXML can be processed for IS", {
-#   logger::with_log_threshold(
-#     source("~/connect-ntsp.R"),
-#     threshold = "OFF"
-#   )
-#   
-#   process_is_all(
-#     escon = escon, 
-#     rfindex = "ntsp_msrawfiles_unit_tests",
-#     isindex = "ntsp_alias_is_dbas_bfg",
-#     ingestpth = "scripts/ingest.sh",
-#     configfile = "~/config.yml",
-#     tmpPath = "/scratch/nts/tmp", 
-#     numCores = 10
-#   )
-#   expect_equal(re[[1]]$name, "Olmesartan-d6")
-# })
+test_that("Test multiple files can be processed for IS", {
+  logger::with_log_threshold(
+    source("~/connect-ntsp.R"),
+    threshold = "OFF"
+  )
+  isInd <- "ntsp_is_dbas_unit_tests"
+  rfInd <- "ntsp_index_msrawfiles_unit_tests"
+  ingestP <- "/home/Jewell/projects/ntsportal/scripts/ingest.sh"
+  tempsavedir <- withr::local_tempdir()
+  configfile <- "~/config.yml"
+  
+  res3 <- elastic::Search(
+    escon, rfInd, size = 100, 
+    body = list(
+      query = list(term = list(matrix = "water")),
+      sort = list(
+        list(
+          start = "asc"
+        )
+      )
+    ), source = F)
+  esids <- sapply(res3$hits$hits, function(x) x[["_id"]])
+  
+  # Clear old docs
+  elastic::docs_delete_by_query(escon, isInd, body = '{"query": {"match_all": {}}}')
+  
+  # Reset eval
+  reset_eval(
+    escon, rfInd, 
+    queryBody = list(ids = list(values = esids)), 
+    indexType = "dbas_is", confirm = F
+  )
+  
+  # Should only process 2 docs, if this is more, then the test will fail.
+  process_is_all(
+    escon = escon,
+    rfindex = rfInd,
+    isindex = isInd,
+    ingestpth = ingestP,
+    configfile = configfile,
+    tmpPath = tempsavedir,
+    numCores = 1
+  )
+  expect_equal(length(list.files(tempsavedir)), 1)
+  numDocs <- elastic::Search(escon, isInd, body = '{"query": {"match_all": {}}}', 
+                  size = 0)$hits$total$value
+  expect_equal(numDocs, 2)
+  file.remove(list.files(tempsavedir, full.names = T))
+})
+
+
+test_that("Test triplicate batch can be processed", {
+  source("~/connect-ntsp.R")
+  rfindex <- "ntsp_index_msrawfiles_unit_tests"
+  tempsavedir <- withr::local_tempdir()
+  coresBatch <- 4
+  ingestpth <- "/home/Jewell/projects/ntsportal/scripts/ingest.sh"
+  configfile <- "~/config.yml"
+  
+  res3 <- elastic::Search(
+    escon, rfindex, size = 100, 
+    body = list(
+      query = list(
+        regexp = list(
+          path = ".*bisoprolol.*"
+        )
+      ),
+      sort = list(
+        list(
+          start = "asc"
+        )
+      )
+    ), source = F)
+  esids <- sapply(res3$hits$hits, function(x) x[["_id"]])
+  
+  # Delete old index
+  oldIndex <- get_field(escon, rfindex, esids, "dbas_index_name", j = T)
+  if (elastic::index_exists(escon, oldIndex))
+    res6 <- elastic::index_delete(escon, oldIndex, verbose = F)
+  
+  # Create new index
+  Sys.sleep(1)
+  res1 <- create_dbas_index_all(escon = escon, rfindex = rfindex)
+  
+  expect_true(res1)
+  Sys.sleep(1)
+  # Reset eval
+  reset_eval(
+    escon, rfindex, 
+    queryBody = list(ids = list(values = esids)), 
+    indexType = "dbas", confirm = F
+  )
+  
+  # Run processing
+  
+  numDocs <- proc_batch(escon, rfindex, esids, tempsavedir, ingestpth, configfile, coresBatch, noIngest = F)
+  expect_equal(length(list.files(tempsavedir)), 3)
+  expect_equal(numDocs, 29)
+  
+  # Update the alias
+  res5 <- update_alias_all(escon = escon, rfindex = rfindex)
+  expect_true(res5)
+  # Check that the results are in Elastic
+  res7 <- elastic::Search(
+    escon, "ntsp_dbas_units_tests", 
+    body = '{"query": {"match_all": {}}}', size = 0
+  )
+  expect_equal(res7$hits$total$value, 29)
+  
+  # Check that Nortilidin is not in the results, since this was only found in one replicate
+  
+  res3 <- elastic::Search(
+    escon, "ntsp_dbas_units_tests", 
+    body = list(query = list(term = list(name = "Nortilidin"))), size = 0
+  )
+  expect_equal(res3$hits$total$value, 0)
+  
+  file.remove(list.files(tempsavedir, full.names = T))
+})
+

@@ -4,7 +4,7 @@
 \alias{reset_eval}
 \title{Reset files in msrawfiles, so that they will be processed again.}
 \usage{
-reset_eval(escon, rfindex, queryBody, indexType = "dbas")
+reset_eval(escon, rfindex, queryBody, indexType = "dbas", confirm = TRUE)
 }
 \arguments{
 \item{escon}{Elasticsearch connection object created by `elastic::connect`}
@@ -14,6 +14,8 @@ reset_eval(escon, rfindex, queryBody, indexType = "dbas")
 \item{queryBody}{The Query DSL code to use to select the docs in msrawfiles which need to be reset (as a `list`).}
 
 \item{indexType}{Elasticsearch index, indicating the type of data stored in the index, can either be "dbas" or "dbas_is"}
+
+\item{confirm}{logical, if True, will ask user to confirm the reset}
 }
 \description{
 If there are errors it may be necessary to reprocess files. This function

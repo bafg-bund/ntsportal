@@ -23,6 +23,7 @@
 
 # Define constants
 VERSION="2022-10-25"
+# TODO find a new home for the python file as part of the R package
 SPATH="/home/Jewell/projects/ntsportal/scripts/nts_upload.py"
 
 
