@@ -17,12 +17,12 @@ library(logger)
 source("~/connect-ntsp.R")
 
 # Variables to change ##################
-INDEX_NAME <- "ntsp_index_spectral_library_v240610"
+INDEX_NAME <- "ntsp_index_spectral_library_v240620"
 SPECLIBPATH <- "/scratch/nts/MS2_db_v11.db"
 ALIAS <- "ntsp_spectral_library"
 CONFIG <- "~/config.yml"
 INGESTPTH <- "scripts/ingest.sh"
-VERSION <- "2024-06-10"  # of script
+VERSION <- "2024-06-20"  # of script
 # - ###########################################
 log_info("----- update-spectral-library-ntsp.R v{VERSION} -----")
 log_info("Converting sqlite spectral database at {SPECLIBPATH} to json and updating {ALIAS} index")
