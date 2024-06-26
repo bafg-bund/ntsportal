@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+.Rprofile
 ntsportal.Rproj
 ntsportal_github
 tests/msrawfiles/
@@ -29,3 +30,4 @@ tests/envimass-ingest2
 tests/summary_scripts2
 tests/ufid_alignment2
 tests/data-export2
+connect.R
