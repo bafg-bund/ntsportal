@@ -23,12 +23,12 @@
 #' 
 #' Must be kept in sync with: https://github.com/bafg-bund/ntsportal/wiki/Index-mapping-for-dbas-indices
 #' 
-#' @param eson elasticsearch connection object created with elastic::connect
+#' @param escon elasticsearch connection object created with elastic::connect
 #' @param index Name of the index you wish to create
 #'
 #' @return response from ElasticSearch API as a list
 #' @export
-put_dbas_index <- function(eson, index) {
+put_dbas_index <- function(escon, index) {
   elastic::index_create(
     escon, index,
     body =

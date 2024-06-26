@@ -91,7 +91,7 @@ create_dbas_index <- function(escon, rfindex, aliasName, dateNum = NULL) {
   invisible(indNew)
 }
 
-#' Create new index for all documents
+#' Create new index for DBAS results documents
 #'
 #' @param escon ElasticSearch connection object created by `elastic::connect`
 #' @param rfindex Index name of msrawfiles index

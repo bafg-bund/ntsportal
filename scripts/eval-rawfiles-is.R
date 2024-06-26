@@ -11,7 +11,7 @@ source("~/connect-ntsp.R")
 process_is_all(
   escon = escon, 
   rfindex = "ntsp_msrawfiles",
-  isindex = "ntsp_alias_is_dbas_bfg",
+  isindex = "ntsp_is_dbas_bfg",
   ingestpth = "scripts/ingest.sh",
   configfile = "~/config.yml",
   tmpPath = "/scratch/nts/tmp", 
