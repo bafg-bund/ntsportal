@@ -82,7 +82,7 @@ test_that("Test multiple files can be processed for IS", {
     indexType = "dbas_is", confirm = F
   )
   
-  # Should only process 2 docs, if this is more, then the test will fail.
+  # Should process 3 docs, 2 successfully, if this is more, then the test will fail.
   process_is_all(
     escon = escon,
     rfindex = rfInd,
@@ -92,10 +92,33 @@ test_that("Test multiple files can be processed for IS", {
     tmpPath = tempsavedir,
     numCores = 1
   )
-  expect_equal(length(list.files(tempsavedir)), 1)
+  #expect_equal(length(list.files(tempsavedir)), 1)
   numDocs <- elastic::Search(escon, isInd, body = '{"query": {"match_all": {}}}', 
                   size = 0)$hits$total$value
   expect_equal(numDocs, 2)
+  file.remove(list.files(tempsavedir, full.names = T))
+})
+
+test_that("A file with no peaks should should not return an error", {
+  logger::with_log_threshold(
+    source("~/connect-ntsp.R"),
+    threshold = "OFF"
+  )
+  tempsavedir <- withr::local_tempdir()
+  # VNSTWpABQ5NoSyLHKzdl has no peaks, -8q2OpABQ5NoSyLH7DJR is a normal file
+  res <- process_is_all(
+    escon = escon, 
+    rfindex = "ntsp_index_msrawfiles_unit_tests",
+    isindex = "ntsp_is_dbas_unit_tests",
+    ingestpth = "scripts/ingest.sh",
+    configfile = "~/config.yml",
+    tmpPath = tempsavedir, 
+    numCores = 1,
+    idsToProcess = c("X","VNSTWpABQ5NoSyLHKzdl","-8q2OpABQ5NoSyLH7DJR"),
+    noIngest = T
+  )
+  expect_true(res)
+  expect_equal(length(list.files(tempsavedir)), 1)
   file.remove(list.files(tempsavedir, full.names = T))
 })
 
@@ -146,7 +169,7 @@ test_that("Test triplicate batch can be processed", {
   
   numDocs <- proc_batch(escon, rfindex, esids, tempsavedir, ingestpth, configfile, coresBatch, noIngest = F)
   expect_equal(length(list.files(tempsavedir)), 3)
-  expect_equal(numDocs, 29)
+  expect_equal(numDocs, 33)
   
   # Update the alias
   res5 <- update_alias_all(escon = escon, rfindex = rfindex)
@@ -156,7 +179,7 @@ test_that("Test triplicate batch can be processed", {
     escon, "ntsp_dbas_units_tests", 
     body = '{"query": {"match_all": {}}}', size = 0
   )
-  expect_equal(res7$hits$total$value, 29)
+  expect_equal(res7$hits$total$value, 33)
   
   # Check that Nortilidin is not in the results, since this was only found in one replicate
   

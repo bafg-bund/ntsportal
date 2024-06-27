@@ -520,7 +520,8 @@ es_remove_by_filename <- function(escon, index, filenames) {
 
 #' Process an MS measurement file
 #' 
-#' Takes an esid from the rawfiles index and carries out dbas processing for that file
+#' Takes an esid from the rawfiles index and carries out dbas processing for 
+#' that file
 #' 
 #' @param escon Elasticsearch connection object created by `elastic::connect`
 #' @param rfindex Name of rawfiles index
@@ -530,6 +531,7 @@ es_remove_by_filename <- function(escon, index, filenames) {
 #' @export
 proc_esid <- function(escon, rfindex, esid, compsProcess = NULL) { 
   #browser()
+  
   stopifnot(length(esid) == 1)
   dc <- elastic::docs_get(escon, rfindex, esid, verbose = F)
   dc <- dc$`_source`
@@ -562,9 +564,9 @@ proc_esid <- function(escon, rfindex, esid, compsProcess = NULL) {
   tryCatch(
     suppressMessages(dbas$process_all(comp_names = compsProcess)), 
     error = function(cnd) {
-      log_error("Processing error in file with id {esid}. File path: ", dc$path)
+      log_error("Processing error in file with id {esid}. File path: {dc$path},
+                error message: {conditionMessage(cnd)}")
       crash <<- TRUE
-      message(cnd)
     }
   )
   if (crash)
@@ -1201,6 +1203,9 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
 #' @param rawfilesRootPath Path to where raw data is stored
 #' @param numFilesToProcess If NULL (default) all remaining files are processed,
 #' otherwise must be a positive integer.
+#' @param idsToProcess If NULL (default) all remaining files are processed,
+#' otherwise must be a character vector.
+#' @param noIngest Logical, for testing purposes, no upload, just create json.
 #'
 #' @return Returns TRUE, invisbly, if successful
 #' @export
@@ -1208,63 +1213,79 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
 process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile, 
                            tmpPath = "/scratch/nts/tmp", numCores = 10,
                            rawfilesRootPath = "/scratch/nts/messdaten/",
-                           numFilesToProcess = NULL) {
+                           numFilesToProcess = NULL,
+                           idsToProcess = NULL, noIngest = FALSE) {
   startTime <- lubridate::now()
   
   # Run checks
   stopifnot(is.null(numFilesToProcess) || is.numeric(numFilesToProcess))
+  stopifnot(is.null(idsToProcess) || is.character(idsToProcess))
   cr <- ntsportal::check_integrity_msrawfiles(
-    escon = escon, 
+    escon = escon,
     rfindex = rfindex,
     locationRf = rawfilesRootPath
   )
   if (cr)
     log_info("{rfindex} integrity checks complete")
+  
   # Get files to process
-  idsToProcess <- ntsportal::get_unevaluated(escon, rfindex, evalType = "dbas_is")
-  if (!is.null(numFilesToProcess)) {
+  if (is.null(idsToProcess))
+    idsToProcess <- ntsportal::get_unevaluated(escon, rfindex, evalType = "dbas_is")
+  
+  if (!is.null(numFilesToProcess)) 
     idsToProcess <- idsToProcess[1:numFilesToProcess]
-  }
   
   log_info("Processing {length(idsToProcess)} files")
-  plan(multisession, workers = numCores)
-  featsBySample <- furrr::future_map(idsToProcess, function(id) {
-    proc_is_one(escon = escon, rfindex = rfindex, esid = id)
-  })
-  plan(sequential)
-  
-  featsAll <- do.call("c", featsBySample)
-  featsAll <- Filter(Negate(is.null), featsAll)
-  stopifnot(length(featsAll) > 0)
+  if (length(idsToProcess) == 1) {
+    featsBySample <- proc_is_one(escon = escon, rfindex = rfindex, esid = idsToProcess)
+    if (is.null(featsBySample)) {
+      return(FALSE)
+    }
+  } else {
+    plan(multisession, workers = numCores)
+    featsBySample <- furrr::future_map(idsToProcess, function(idx) {
+      proc_is_one(escon = escon, rfindex = rfindex, esid = idx)
+    })
+    plan(sequential)
+    
+    featsAll <- do.call("c", featsBySample)
+    if (is.null(featsAll)) {
+      return(FALSE)
+    }
+    featsAll <- Filter(Negate(is.null), featsAll)
+    stopifnot(length(featsAll) > 0)
+  }
   
   jpth <- file.path(tmpPath, "is_dbas_temp.json")
   log_info("Writing json")
   jsonlite::write_json(featsAll, jpth, pretty = T, digits = NA, auto_unbox = T)
-  log_info("Ingesting")
-  exitStatusIngest <- system(
-    glue::glue("{ingestpth} {configfile} {isindex} {jpth}")
-  )
-  stopifnot(exitStatusIngest == 0)
-  
-  Sys.sleep(1)
-  # Get filenames of processed files and check that data has been entered
-  filenames <- vapply(featsAll, function(x) x$filename, character(1))
-  docsFoundIndex <- elastic::Search(
-    escon, isindex, 
-    body = list(query = list(terms = list(filename = filenames))),
-    size = 0
-  )$hits$total$value
-  stopifnot(docsFoundIndex > 0)
-
-  # Add processing time to msrawfiles
-  for (i in idsToProcess) {
-    tryCatch(
-      add_latest_eval(escon, rfindex, esid = i, fieldName = "dbas_is_last_eval"),
-      error = function(cnd) {
-        log_error("Could not add processing time to id {i}")
-        message(cnd)
-      }
+  if (!noIngest) {
+    log_info("Ingesting")
+    exitStatusIngest <- system(
+      glue::glue("{ingestpth} {configfile} {isindex} {jpth}")
     )
+    stopifnot(exitStatusIngest == 0)
+    
+    Sys.sleep(1)
+    # Get filenames of processed files and check that data has been entered
+    filenames <- vapply(featsAll, function(x) x$filename, character(1))
+    docsFoundIndex <- elastic::Search(
+      escon, isindex, 
+      body = list(query = list(terms = list(filename = filenames))),
+      size = 0
+    )$hits$total$value
+    stopifnot(docsFoundIndex > 0)
+    
+    # Add processing time to msrawfiles
+    for (i in idsToProcess) {
+      tryCatch(
+        add_latest_eval(escon, rfindex, esid = i, fieldName = "dbas_is_last_eval"),
+        error = function(cnd) {
+          log_error("Could not add processing time to id {i}")
+          message(cnd)
+        }
+      )
+    }
   }
   
   endTime <- lubridate::now()
@@ -1284,23 +1305,24 @@ process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile,
 #' @export
 proc_is_one <- function(escon, rfindex, esid) {
   
-  # Get list of IS
-  
   get_field2 <- get_field_builder(escon = escon, index = rfindex)
+  
+  # Check that esid is present
+  checkId <- elastic::Search(
+    escon, rfindex, source = F, 
+    body = list(query = list(ids = list(values = list(esid))))
+  )$hits$hits
+  if (length(checkId) != 1)
+    return(NULL)
+  
   isTab <- get_field2(esid, "dbas_is_table")
   stopifnot(length(isTab) == 1)
   ises <- read.csv(isTab)$name
-  # run dbas processing
-  crash <- FALSE
-  tryCatch(
-    repo <- proc_esid(escon, rfindex, esid, compsProcess = ises),
-    error = function(cnd) {
-      log_error("IS screening id {esid[1]} failed at dbas proc_esid")
-      crash <<- TRUE
-      message(cnd)
-    }
-  )
-  if (!exists("repo") || is.null(repo) || crash || nrow(repo$ISresults) == 0) {
+  
+  # Run dbas processing
+  repo <- proc_esid(escon, rfindex, esid, compsProcess = ises)
+  
+  if (!exists("repo") || is.null(repo) || nrow(repo$ISresults) == 0) {
     pth <- get_field(escon, rfindex, esid[1], fieldName = "path")
     log_warn("No results found for {esid[1]}, {pth}")
     return(NULL)
