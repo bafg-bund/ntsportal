@@ -708,9 +708,9 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     }
     
     log_info("Saving report file at {savename}")
-    resM$clearAndSave(F, savename)
+    resM$clearAndSave(F, savename, clearData = F)
     numPeaks <- nrow(resM$peakList)
-    rm(repLt, resM)
+    rm(repLt)
     log_info("Completed step 1 with {numPeaks} peaks")
     if (!file.exists(savename))
       return(NULL)
@@ -726,8 +726,8 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     bregex <- unique(bregex)
     stopifnot(length(bregex) == 1)
     
-    # load
-    dbas <- ntsworkflow::loadReport(F, savename)
+    # Rename Report
+    dbas <- resM
     dbas$changeSettings("numcores", 1)
     
     log_info("Blank correction")
@@ -818,9 +818,6 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     
     log_info("Reintegration")
     
-    # At this stage you could increase the cores of the report so that
-    # the reintegration is faster
-    dbas$changeSettings("numcores", 6)
     tryCatch(
       suppressMessages(dbas$reIntegrate()),
       error = function(cnd) {
