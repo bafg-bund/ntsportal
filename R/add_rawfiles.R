@@ -478,7 +478,7 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
 #' @return string templateID
 #' @export
 #'
-find_templateid <- function(escon, rfindex, isBlank = FALSE, polarity, station, matrix = "spm") {
+find_templateid <- function(escon, rfindex, isBlank = FALSE, polarity, station, matrix = "spm", duration) {
     tempID <- elastic::Search(
       escon, rfindex, body = 
       sprintf('
@@ -513,6 +513,13 @@ find_templateid <- function(escon, rfindex, isBlank = FALSE, polarity, station, 
                       "value": %s
                     }
                   }
+                },
+                {
+                  "term": {
+                    "duration": {
+                      "value": %s
+                    }
+                  }
                 }
               ]
             }
@@ -521,7 +528,7 @@ find_templateid <- function(escon, rfindex, isBlank = FALSE, polarity, station, 
           "size": 1
         }
         ', 
-        station, polarity, matrix, ifelse(isBlank, "true", "false")
+        station, polarity, matrix, ifelse(isBlank, "true", "false"), duration
       )
   )
   if (tempID$hits$total$value == 0) {
