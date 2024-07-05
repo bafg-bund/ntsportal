@@ -6,7 +6,7 @@
 # collect data by compound and station
 
 INDEX <- "ntsp_dbas_upb"
-ANALYSIS_INDEX <- "ntsp_dbas_analysis_upb"
+ANALYSIS_INDEX <- "ntsp_analysis_dbas_upb"
 SAVE_LOC <- "/scratch/nts/tmp"
 INGEST_SCRIPT <- "scripts/ingest.sh"
 CONFIG_PATH <- "~/config.yml"
