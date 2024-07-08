@@ -136,6 +136,34 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
     list(pl = plTemp2, rf = rawFile, set = settings)
   }
   
+  record_end_processing <- function(escon, rfindex, idsEs, pathDb, timeStart) {
+    timeText <- format(Sys.time(), "%Y-%m-%d %H:%M:%S", tz = "GMT")
+    cslHash <- system2("sha256sum", pathDb, stdout = TRUE)
+    timeEnd <- lubridate::now()
+    avgMins <- round(
+      as.numeric(timeEnd - timeStart, units = "mins") / length(idEs),
+      digits = 2
+    )
+    tryCatch(
+      res <- es_add_value(
+        escon, rfindex, 
+        queryBody = list(ids = list(values = idsEs)),
+        nts_last_eval = timeText,
+        nts_spectral_library_sha256 = cslHash,
+        nts_proc_time = avgMins
+      ),
+      error = function(cnd) {
+        glue("Error recording processing date: {conditionMessage(cnd)}")
+      }
+    )
+    
+    if (exists(res)) {
+      return(invisible(res$result == "updated"))
+    } else {
+      return(invisible(FALSE))
+    }
+  }
+  
   # Define variables ####
   
   is <- gfield(esids, "dbas_is_name", justone = T)
@@ -156,6 +184,8 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
   DBI::dbDisconnect(sdb)
   # TODO change annotate_grouped so that the instruments and sources do not need
   # to be explicitly passed. Just have NULL or all which will include all of them.
+  
+  
   
   # Start processing ####
   # Create sampleList
@@ -756,22 +786,8 @@ proc_batch_nts <- function(escon, rfindex, esids, tempsavedir, ingestpth, config
     if (resp5$hits$total$value == length(alig7)) {
       log_info("All docs imported into ElasticSearch")
       # Add processing date and spectral library checksum to msrawfiles
-      for (i in esids) {
-        tryCatch(
-          add_latest_eval(escon, rfindex, esid = i, fieldName = "nts_last_eval"),
-          error = function(cnd) {
-            log_error("Could not add processing time to id {i}")
-            message(cnd)
-          }
-        )
-        tryCatch(
-          add_sha256_spectral_library(escon, rfindex, esid = i),
-          error = function(cnd) {
-            log_error("Could not add sha256 of spec lib to id {i}")
-            message(cnd)
-          }
-        )
-      }
+      record_end_processing(escon, rfindex, esids, dbPath, bStartTime)
+      
     } else {
       #browser()
       log_warn("Ingested data not found in batch starting with id {esids[1]}")

@@ -421,54 +421,6 @@ check_field <- function(escon, rfindex, fieldName, onlyNonBlank = FALSE) {
 }
 
 
-#' Add eval time to msrawfiles
-#'
-#' @param escon Elasticsearch connection object created by `elastic::connect`
-#' @param index Elasticsearch index name, must be an msrawfiles index
-#' @param esid elasicsearch id doc to be updated
-#' @param fieldName field name to be updated, must be either dbas_last_eval or dbas_is_last_eval
-#'
-#' @return TRUE if successful
-#'
-add_latest_eval <- function(escon, index, esid, fieldName = "dbas_last_eval") {
-  stopifnot(fieldName %in% c("dbas_last_eval", "dbas_is_last_eval", "nts_last_eval"))
-  timeText <- format(Sys.time(), "%Y-%m-%d %H:%M:%S", tz = "GMT")
-  res <- elastic::docs_update(conn = escon, index = index, id = esid, body = sprintf('
-  {
-    "script" : "ctx._source.%s = \'%s\'"
-  }
-  ', fieldName, timeText))
-  
-  invisible(res$result == "updated")
-}
-
-#' Add hash of spectral library in current state to msrawfiles
-#' 
-#' This is used to see with which spectral library the last evaluation was done with.
-#'
-#' @param escon Elasticsearch connection object created by `elastic::connect`
-#' @param rfindex Name of rawfiles index
-#' @param esid ElasticSearch document IDs (character)
-#'
-#' @return Returns TRUE if successful
-#'
-add_sha256_spectral_library <- function(escon, rfindex, esid) {
-  path <- elastic::docs_get(
-    escon, rfindex, esid, verbose = F)[["_source"]][["dbas_spectral_library"]]
-  if (!is.null(path) && file.exists(path)) {
-    cs <- system2("sha256sum", path, stdout = TRUE)
-    cs <- stringr::str_split_i(cs, " ", 1)
-    res <- elastic::docs_update(conn = escon, index = rfindex, id = esid, body = sprintf('
-      {
-        "script" : "ctx._source.dbas_spectral_library_sha256 = \'%s\'"
-      }
-      ', cs))
-    invisible(res$result == "updated")
-  } else {
-    FALSE 
-  }
-}
-
 #' Removal of documents from dbas documents based on filename
 #'
 #' @param escon Elasticsearch connection object created by `elastic::connect`
@@ -601,26 +553,6 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
   # Create a get_field function with some default parameters
   get_field2 <- get_field_builder(escon = escon, index = rfindex)
   
-  record_end_processing <- function(escon, rfindex, esids, endMessage) {
-    log_info(endMessage)
-    for (i in esids) {
-      #browser()
-      tryCatch(
-        add_latest_eval(escon, rfindex, esid = i, fieldName = "dbas_last_eval"),
-        error = function(cnd) {
-          log_error("Could not add processing time to id {i}")
-          message(cnd)
-        }
-      )
-      tryCatch(
-        add_sha256_spectral_library(escon, rfindex, esid = i),
-        error = function(cnd) {
-          log_error("Could not add sha256 of spec lib to id {i}")
-          message(cnd)
-        }
-      )
-    }
-  }
   
   # Define Variables
   # These pollute the comp_group field and need to be removed
@@ -637,6 +569,36 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
 
   # Get path to batch (measurement files)
   dr <- paste(unique(dirname(get_field2(esids, "path", justone = F))), collapse= ", ")
+  
+  record_end_processing <- function(escon, rfindex, idsEs, pathDb, timeStart) {
+    timeText <- format(Sys.time(), "%Y-%m-%d %H:%M:%S", tz = "GMT")
+    cslHash <- system2("sha256sum", pathDb, stdout = TRUE)
+    timeEnd <- lubridate::now()
+    avgMins <- round(
+      as.numeric(timeEnd - timeStart, units = "mins") / length(idsEs),
+      digits = 2
+    )
+    tryCatch(
+      res <- es_add_value(
+        escon, rfindex, 
+        queryBody = list(ids = list(values = idsEs)),
+        dbas_last_eval = timeText,
+        dbas_spectral_library_sha256 = cslHash,
+        dbas_proc_time = avgMins
+      ),
+      error = function(cnd) {
+        glue("Error recording processing date: {conditionMessage(cnd)}")
+      }
+    )
+    
+    if (exists("res")) {
+      return(invisible(res$updated > 0))
+    } else {
+      return(invisible(FALSE))
+    }
+  }
+  
+  
   log_info("Starting batch {dr}")
 
   tryCatch({
@@ -676,11 +638,12 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     repLt <- Filter(function(x) Negate(inherits)(x, what = "try-error"), repLt)
     
     if (length(repLt) == 0) {
-      record_end_processing(escon, rfindex, esids, "No results for batch {get_field2(esids, 'path')[1]}")
+      log_warn("No results for batch starting with file {get_field2(esids, 'path')[1]}")
+      record_end_processing(escon, rfindex, esids, dbPath, batchStartTime)
       return(0)
     }
     
-    # remove reports with no peaks
+    # Remove reports with no peaks
     nothingFound <- vapply(repLt, function(x) nrow(x$peakList) == 0, logical(1))
     
     if (any(nothingFound)) {
@@ -693,7 +656,8 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
     repLt <- Filter(function(x) nrow(x$peakList) != 0, repLt)  
     
     if (length(repLt) == 0) {
-      record_end_processing(escon, rfindex, esids, "No results for batch {get_field2(esids, 'path')[1]}")
+      log_warn("No results for batch starting with file {get_field2(esids, 'path')[1]}")
+      record_end_processing(escon, rfindex, esids, dbPath, batchStartTime)
       return(0)
     }
     
@@ -1135,36 +1099,9 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
       )
       
       if (resp5$hits$total$value == length(datl)) {
-        log_info("All docs imported into ElasticSearch")
-        # Add processing date and spectral library checksum to msrawfiles
-        esids_all <- c(esids, esids_blank)
-        for (i in esids_all) {
-          tryCatch(
-            add_latest_eval(escon, rfindex, esid = i, fieldName = "dbas_last_eval"),
-            error = function(cnd) {
-              log_error("Could not add processing time to id {i}")
-              message(cnd)
-            }
-          )
-          tryCatch(
-            add_sha256_spectral_library(escon, rfindex, esid = i),
-            error = function(cnd) {
-              log_error("Could not add sha256 of spec lib to id {i}")
-              message(cnd)
-            }
-          )
-        }
-        
-        # Add processing time to msrawfiles
-        batchEndTime <- lubridate::now()
-        avgMins <- round(
-          as.numeric(batchEndTime - batchStartTime, units = "mins") / length(esids_all),
-          digits = 2
-        )
-        res6 <- es_add_value(escon, rfindex, field = "dbas_proc_time", 
-                     queryBody = list(ids = list(values = esids_all)), value = avgMins)
-        stopifnot(res6$updated == length(esids_all))
-        log_info("Completed batch starting with id {esids[1]}, file {checkFiles[1]}")
+        esidsAll <- c(esids, esids_blank)
+        record_end_processing(escon, rfindex, esidsAll, dbPath, batchStartTime)
+        log_info("Completed batch starting with id {esidsAll[1]}, file {checkFiles[1]}")
       } else {
         log_error("Ingested data not found in batch starting with id {esids[1]}")
       }
@@ -1273,16 +1210,12 @@ process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile,
     )$hits$total$value
     stopifnot(docsFoundIndex > 0)
     
-    # Add processing time to msrawfiles
-    for (i in idsToProcess) {
-      tryCatch(
-        add_latest_eval(escon, rfindex, esid = i, fieldName = "dbas_is_last_eval"),
-        error = function(cnd) {
-          log_error("Could not add processing time to id {i}")
-          message(cnd)
-        }
-      )
-    }
+    # Add processing date to msrawfiles
+    timeText <- format(Sys.time(), "%Y-%m-%d %H:%M:%S", tz = "GMT")
+    res <- es_add_value(
+      escon, rfindex, list(ids = list(values = idsToProcess)),
+      dbas_is_last_eval = timeText
+    )
   }
   
   endTime <- lubridate::now()

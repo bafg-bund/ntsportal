@@ -17,5 +17,6 @@ proc_esid(escon, rfindex, esid, compsProcess = NULL)
 an object of class ntsworkflow::Report
 }
 \description{
-Takes an esid from the rawfiles index and carries out dbas processing for that file
+Takes an esid from the rawfiles index and carries out dbas processing for 
+that file
 }

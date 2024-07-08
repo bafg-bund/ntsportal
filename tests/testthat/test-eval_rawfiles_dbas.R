@@ -189,6 +189,20 @@ test_that("Test triplicate batch can be processed", {
   )
   expect_equal(res3$hits$total$value, 0)
   
+  # Check for dbas_last_eval field and make sure the date entered is not more than 1000 s in the past
+  Sys.sleep(1)
+  res8 <- elastic::Search(
+    escon, rfindex, size = 0, 
+    body = list(
+      query = list(ids = list(values = esids)), 
+      aggs = list(
+        maxTime = list(max = list(field = "dbas_last_eval"))
+      )
+    )
+  )
+  
+  expect_true(round(as.numeric(Sys.time()) - res8$aggregations$maxTime$value / 1000) < 1000)
+  
   file.remove(list.files(tempsavedir, full.names = T))
 })
 

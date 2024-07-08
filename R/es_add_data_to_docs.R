@@ -17,56 +17,37 @@
 
 # Functions to add data to documents in NTSPortal
 
-#' Add a value to any field
-#' 
-#' Only works for length 1 values
-#'
-#' @param escon Elasticsearch connection object created by `elastic::connect`
-#' @param esindex Index name or index-pattern 
-#' @param field Field name to which value is added, field must already exist.
-#' @param queryBody query in list format
-#' @param value Value to add (must be length 1)
-#'
-#' @return ElasticSearch response object after update (as list)
-#' @export
-es_add_field <- function(escon, esindex, field, queryBody, value) {
-  # TODO allow for multiple length variables
-  stop("es_add_field name has changed to es_add_value")
-  stopifnot(length(value) == 1)
-  newBody <- list(
-    query = queryBody,
-    script = list(
-      source = glue::glue("ctx._source.{field} = params.newValue"),
-      params = list(
-        newValue = value
-      )
-    )
-  )
-  elastic::docs_update_by_query(escon, esindex, body = newBody)
-}
 
 #' Add a value to any field in ES index
 #' 
-#' Only works for length 1 values
+#' @description Will add data to docs. At the moment only works for length 1 
+#' values and will overwrite any current value or values in the field.#'   
 #'
 #' @param escon Elasticsearch connection object created by `elastic::connect`
 #' @param esindex Index name or index-pattern 
-#' @param field Field name to which value is added, field must already exist.
 #' @param queryBody query in list format
-#' @param value Value to add (must be length 1)
+#' @param ... Name of field and values to add (each must be length 1). Field 
+#' must already exist in the index
+#' 
+#' @details
+#' This function cannot yet deal with appending data. Values will replace the
+#' current content of the field. 
 #'
 #' @return API response (list)
-#' @export
-es_add_value <- function(escon, esindex, field, queryBody, value) {
+es_add_value <- function(escon, esindex, queryBody, ...) {
   # TODO allow for multiple length variables
-  stopifnot(length(value) == 1)
+  x <- list(...)
+  stopifnot(all(vapply(x, length, numeric(1)) == 1))
+  
+  fields <- names(x)
+  y <- paste(glue::glue("ctx._source.{fields} = params.{fields}"))
+  z <- paste(y, collapse = "; ")
+  z <- paste0(z, ";")
   newBody <- list(
     query = queryBody,
     script = list(
-      source = glue::glue("ctx._source.{field} = params.newValue"),
-      params = list(
-        newValue = value
-      )
+      source = z,
+      params = x
     )
   )
   elastic::docs_update_by_query(escon, esindex, body = newBody)

@@ -4,22 +4,26 @@
 \alias{es_add_value}
 \title{Add a value to any field in ES index}
 \usage{
-es_add_value(escon, esindex, field, queryBody, value)
+es_add_value(escon, esindex, queryBody, ...)
 }
 \arguments{
 \item{escon}{Elasticsearch connection object created by `elastic::connect`}
 
 \item{esindex}{Index name or index-pattern}
 
-\item{field}{Field name to which value is added, field must already exist.}
-
 \item{queryBody}{query in list format}
 
-\item{value}{Value to add (must be length 1)}
+\item{...}{Name of field and values to add (each must be length 1). Field 
+must already exist in the index}
 }
 \value{
 API response (list)
 }
 \description{
-Only works for length 1 values
+Will add data to docs. At the moment only works for length 1 
+values and will overwrite any current value or values in the field.#'
+}
+\details{
+This function cannot yet deal with appending data. Values will replace the
+current content of the field.
 }

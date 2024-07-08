@@ -2,7 +2,7 @@
 % Please edit documentation in R/manage_rawfiles_db.R
 \name{create_dbas_index_all}
 \alias{create_dbas_index_all}
-\title{Create new index for all documents}
+\title{Create new index for DBAS results documents}
 \usage{
 create_dbas_index_all(escon, rfindex, dateNum = NULL)
 }
@@ -17,5 +17,5 @@ create_dbas_index_all(escon, rfindex, dateNum = NULL)
 True (invisibly) when successful
 }
 \description{
-Create new index for all documents
+Create new index for DBAS results documents
 }

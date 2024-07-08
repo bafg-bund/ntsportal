@@ -4,10 +4,10 @@
 \alias{put_dbas_index}
 \title{Send index creation request for dbas index}
 \usage{
-put_dbas_index(eson, index)
+put_dbas_index(escon, index)
 }
 \arguments{
-\item{eson}{elasticsearch connection object created with elastic::connect}
+\item{escon}{elasticsearch connection object created with elastic::connect}
 
 \item{index}{Name of the index you wish to create}
 }

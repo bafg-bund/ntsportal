@@ -13,7 +13,9 @@ process_is_all(
   tmpPath = "/scratch/nts/tmp",
   numCores = 10,
   rawfilesRootPath = "/scratch/nts/messdaten/",
-  numFilesToProcess = NULL
+  numFilesToProcess = NULL,
+  idsToProcess = NULL,
+  noIngest = FALSE
 )
 }
 \arguments{
@@ -35,6 +37,11 @@ process_is_all(
 
 \item{numFilesToProcess}{If NULL (default) all remaining files are processed,
 otherwise must be a positive integer.}
+
+\item{idsToProcess}{If NULL (default) all remaining files are processed,
+otherwise must be a character vector.}
+
+\item{noIngest}{Logical, for testing purposes, no upload, just create json.}
 }
 \value{
 Returns TRUE, invisbly, if successful
