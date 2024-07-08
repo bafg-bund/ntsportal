@@ -307,7 +307,7 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
   
   filestoupload <- basename(newPaths)
   message("The files\n", paste(filestoupload, collapse = "\n"), 
-          "\nare will be added")
+          "\n will be added")
   
   # Copy template and change some values
   newDocs <- lapply(newPaths, function(pth) {
