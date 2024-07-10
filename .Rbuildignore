@@ -8,3 +8,4 @@
 ^elastic$
 ^scripts$
 ^logs$
+^kibana$
