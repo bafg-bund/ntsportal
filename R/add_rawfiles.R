@@ -211,6 +211,23 @@ station_from_code <- function(escon, rfindex, filename, stationRegex) {
 #' town or km is known, use the convention <river_description> where description
 #' is some indication of the location. 
 #' 
+#' \strong{dbas_date_regex and dbas_date_format}
+#' 
+#' The field `dbas_date_regex` is used to find the date of the sample from the file name. It works
+#' in conjunction with `dbas_date_format`. `dbas_date_regex` extracts the text, while `dbas_date_format`
+#' tells R how to interpret the text. For example, the file name `RH_pos_20170101.mzXML`
+#' uses the date_regex `"([20]*\\d{6})"` and date_format `"ymd"`. The `dbas_date_regex`
+#' uses the tidyverse regular expression syntax and the `stringr::str_match` 
+#' function to extract the text referring to the date. The brackets indicate the
+#' text to extract and these can be surrounded by anchors. It is also possible to
+#' have multiple brackets, the text in multiple brackets will be combined before
+#' parsing. For example the file `UEBMS_2024_002_Main_Kahl_Jan_pos_DDA.mzXML` can
+#' be parsed with date_regex `_(20\\d{2})_.*_(\\w{3})_pos` and date_format `ym`. 
+#' 
+#' `dbas_date_format` may be one of `"ymd"`, `"dmy"`, `"ym"` for year-month and `"yy"` 
+#' for just year. The date parsing is done by `lubridate`.
+#' 
+#' 
 #' @return Returns TRUE, invisibly.
 #' @export
 #'
@@ -331,7 +348,7 @@ add_rawfiles <- function(escon, rfindex, templateId, newPaths,
     # work for ymd_hms datetimes.
     if (newStart == "filename") {
       #browser()
-      dateString <- stringr::str_match(doc$filename, doc$dbas_date_regex)[,2]
+      dateString <- paste(stringr::str_match(doc$filename, doc$dbas_date_regex)[,-1], collapse = "_")
       dateFormat <- doc$dbas_date_format
       if (!is.element(dateFormat, c("ymd", "dmy", "yy", "ym"))) {
         stop("Unknown dbas_date_format ", dateFormat, " in ", doc$filename)
