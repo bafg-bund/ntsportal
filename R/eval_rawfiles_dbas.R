@@ -62,15 +62,21 @@ build_es_query_for_ids <- function(ids, toShow) {
 #' @export
 #'
 reset_eval <- function(escon, rfindex, queryBody, indexType = "dbas", confirm = TRUE) {
-  field2 <- "dbas_spectral_library_sha256"
   
-  if (indexType == "dbas") {
-    field <- "dbas_last_eval"
-  } else if (indexType == "dbas_is") {
-    field <- "dbas_is_last_eval"
-  } else {
-    stop("no other option yet")
-  }
+  switch(
+    indexType, 
+    dbas = {
+      field <- "dbas_last_eval"
+      field2 <- "dbas_spectral_library_sha256"
+    },
+    dbas_is = {
+      field <- "dbas_is_last_eval"
+      field2 <- "dbas_spectral_library_sha256"
+    },
+    nts = {
+      field <- "nts_last_eval"
+      field2 <- "nts_spectral_library_sha256"
+    })
   
   if (confirm) {
     toChange <- elastic::Search(escon, rfindex, body = list(query = queryBody), 
@@ -231,15 +237,23 @@ res_field <- function(res, field, value = character(1)) {
 #'
 #' @param escon Elasticsearch connection object created by `elastic::connect`
 #' @param index Name Elasticsearch index name 
-#' @param esids Document IDs in the named index
+#' @param esids Document IDs in the named index, must provide either esids or query
+#' @param query Query to get docs in the form of a list, must provide either esids or query
 #' @param fieldName field to extract
 #' @param simplify Boolean, true will try to create a vector from the results
 #' @param justone Boolean. If set to true, function will return only one result and will hang if cardinality > 1
 #'
-#' @return Vector or list of the field entries
+#' @return Vector or list of the field entries, returns NA is nothing found
 #' @export
 #'
-get_field <- function(escon, indexName, esids, fieldName, simplify = T, justone = F) {
+get_field <- function(escon, indexName, esids = NULL, query = NULL, fieldName, simplify = T, justone = F) {
+  if (!is.null(query)) {
+    stopifnot(is.null(esids))
+    idsL <- elastic::Search(escon, indexName, source = FALSE, body = query)$hits$hits
+    esids <- vapply(idsL, "[[", i = "_id", character(1))
+    if (length(esids) == 0)
+      return(NA)
+  }
   if (length(esids) == 1) {
     res <- elastic::docs_get(
       escon, indexName, id = esids, source = fieldName, verbose = F
@@ -273,6 +287,7 @@ get_field <- function(escon, indexName, esids, fieldName, simplify = T, justone 
   }
   ret
 }
+
 
 #' Function factory just to avoid typing escon and index every time
 #'

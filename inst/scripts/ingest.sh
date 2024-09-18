@@ -24,7 +24,7 @@
 # Define constants
 VERSION="2022-10-25"
 # TODO find a new home for the python file as part of the R package
-SPATH="/home/Jewell/projects/ntsportal/scripts/nts_upload.py"
+SPATH="/home/Jewell/projects/gitlab/ntsportal/inst/scripts/nts_upload.py"
 
 
 echo "----------- ingest.sh v$VERSION ----------------"
@@ -34,7 +34,7 @@ echo "Submitted on $(date)"
 
 
 if (($# < 3)); then
-  echo "You must provide a config yaml file with username and password, an index name and at least\
+  echo "You must provide a config yaml file containing username and password, an index name and at least\
   one json file"
   exit 1
 fi
@@ -58,7 +58,7 @@ fi
 
 shift
 
-# load python virtual environment
+# Load python virtual environment, this is set for the Linux server
 source ~Jewell/venv/bin/activate
 
 # loop through json files 

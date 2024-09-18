@@ -4,7 +4,7 @@
 \alias{es_add_value}
 \title{Add a value to any field in ES index}
 \usage{
-es_add_value(escon, esindex, queryBody, ...)
+es_add_value(escon, esindex, queryBody, listToAdd = NULL, ...)
 }
 \arguments{
 \item{escon}{Elasticsearch connection object created by `elastic::connect`}
@@ -13,15 +13,18 @@ es_add_value(escon, esindex, queryBody, ...)
 
 \item{queryBody}{query in list format}
 
+\item{listToAdd}{List of values to add, (each must be length 1). Field 
+must already exist in the index. Add values as a list or as ... arguments (not both)}
+
 \item{...}{Name of field and values to add (each must be length 1). Field 
-must already exist in the index}
+must already exist in the index. Add values as a list or as ... arguments (not both)}
 }
 \value{
 API response (list)
 }
 \description{
 Will add data to docs. At the moment only works for length 1 
-values and will overwrite any current value or values in the field.#'
+values and will overwrite any current value or values in the field.
 }
 \details{
 This function cannot yet deal with appending data. Values will replace the

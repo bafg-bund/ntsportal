@@ -21,22 +21,34 @@
 #' Add a value to any field in ES index
 #' 
 #' @description Will add data to docs. At the moment only works for length 1 
-#' values and will overwrite any current value or values in the field.#'   
+#' values and will overwrite any current value or values in the field.
 #'
 #' @param escon Elasticsearch connection object created by `elastic::connect`
 #' @param esindex Index name or index-pattern 
 #' @param queryBody query in list format
+#' @param listToAdd List of values to add, (each must be length 1). Field 
+#' must already exist in the index. Add values as a list or as ... arguments (not both)
 #' @param ... Name of field and values to add (each must be length 1). Field 
-#' must already exist in the index
+#' must already exist in the index. Add values as a list or as ... arguments (not both)
 #' 
 #' @details
 #' This function cannot yet deal with appending data. Values will replace the
 #' current content of the field. 
-#'
+#' 
+#' @export
+#' 
 #' @return API response (list)
-es_add_value <- function(escon, esindex, queryBody, ...) {
+#' 
+es_add_value <- function(escon, esindex, queryBody, listToAdd = NULL, ...) {
+  if (is.list(listToAdd)) {
+    x <- listToAdd
+  } else if (is.null(listToAdd)) {
+    x <- list(...)
+  } else {
+    stop("Either listToAdd is null or a list of values to add")
+  }
+  
   # TODO allow for multiple length variables
-  x <- list(...)
   stopifnot(all(vapply(x, length, numeric(1)) == 1))
   
   fields <- names(x)

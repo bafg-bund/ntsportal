@@ -19,6 +19,23 @@
 # https://github.com/bafg-bund/ntsportal/wiki
 
 
+
+
+#' Create an nts type index
+#' 
+#' The index mappings are saved under inst/extdata as json files.
+#' 
+#' @param escon elasticsearch connection object created with elastic::connect
+#' @param index Name of the index you wish to create
+#'
+#' @export
+#'
+put_nts_index <- function(escon, index) {
+  f <- fs::path_package("ntsportal", "extdata", "nts_index_mappings.json")
+  mappings <- jsonlite::read_json(f)
+  elastic::index_create(escon, index, body = mappings)
+}
+
 #' Send index creation request for dbas index
 #' 
 #' Must be kept in sync with: https://github.com/bafg-bund/ntsportal/wiki/Index-mapping-for-dbas-indices

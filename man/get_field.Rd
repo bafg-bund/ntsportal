@@ -4,12 +4,22 @@
 \alias{get_field}
 \title{Get a field for a set of documents defined by id}
 \usage{
-get_field(escon, indexName, esids, fieldName, simplify = T, justone = F)
+get_field(
+  escon,
+  indexName,
+  esids = NULL,
+  query = NULL,
+  fieldName,
+  simplify = T,
+  justone = F
+)
 }
 \arguments{
 \item{escon}{Elasticsearch connection object created by `elastic::connect`}
 
-\item{esids}{Document IDs in the named index}
+\item{esids}{Document IDs in the named index, must provide either esids or query}
+
+\item{query}{Query to get docs in the form of a list, must provide either esids or query}
 
 \item{fieldName}{field to extract}
 
@@ -20,7 +30,7 @@ get_field(escon, indexName, esids, fieldName, simplify = T, justone = F)
 \item{index}{Name Elasticsearch index name}
 }
 \value{
-Vector or list of the field entries
+Vector or list of the field entries, returns NA is nothing found
 }
 \description{
 Get a field for a set of documents defined by id

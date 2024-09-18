@@ -1,0 +1,2 @@
+/beegfs/home/Jewell/projects/gitlab/ntsportal/tests/kevin/devel_nts_proc/nts-batch--inda-ntsp_nts_unit_tests-indn-ntsp_index_nts_v20240510_unit_tests-bi-_srv_cifs-mounts_g2_G_G2_3-Arbeitsgruppen_G2_3_5-NTS-Gruppe_db_ntsp_unit_tests_meas_files--240904.json.gz
+/beegfs/home/Jewell/projects/gitlab/ntsportal/tests/kevin/devel_nts_proc/nts-batch--inda-ntsp_nts_unit_tests-indn-ntsp_index_nts_v20240510_unit_tests-bi-_srv_cifs-mounts_g2_G_G2_3-Arbeitsgruppen_G2_3_5-NTS-Gruppe_db_ntsp_unit_tests_meas_files_olmesartan-d6-bisoprolol--240904.json.gz

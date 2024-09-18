@@ -10,7 +10,8 @@ find_templateid(
   isBlank = FALSE,
   polarity,
   station,
-  matrix = "spm"
+  matrix = "spm",
+  duration
 )
 }
 \arguments{

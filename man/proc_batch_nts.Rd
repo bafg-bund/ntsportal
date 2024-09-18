@@ -4,34 +4,23 @@
 \alias{proc_batch_nts}
 \title{Process a batch of files using ntsworkflow}
 \usage{
-proc_batch_nts(
-  escon,
-  rfindex,
-  esids,
-  tempsavedir,
-  ingestpth,
-  configfile,
-  coresBatch,
-  noIngest = FALSE
-)
+proc_batch_nts(docsList, coresBatch)
 }
 \arguments{
-\item{escon}{Connection object created with `elastic::connect`}
-
-\item{rfindex}{Elasticsearch index name for msrawfiles index}
-
-\item{esids}{ElasticSearch document IDs (character)}
-
-\item{tempsavedir}{Temporary save location}
-
-\item{ingestpth}{Path where the ingest.sh script is found}
-
-\item{configfile}{Config file where the credentials for signing into elasticsearch are found}
+\item{docsList}{list of documents as returned by elasticSearch API (hits.hits array)}
 
 \item{coresBatch}{Number of cores to use in a signal batch}
-
-\item{noIngest}{Logical, for testing purposes, no upload, just create json.}
+}
+\value{
+A proc_output list with 6 elements:
 }
 \description{
-Still in development
+Will take a list of documents and process samples in them for 
+peak-picking, alignment, blank correction, annotation
+}
+\details{
+# Filtering the alignment table 
+## Consecutive filter 
+The order of the samples is important for the
+consecutive filter, these must be sorted by start time.
 }

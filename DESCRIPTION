@@ -23,10 +23,10 @@ Description: This is a collection of functions to be used for building and manag
 License: GNU GPL-3.0 (comes with ABSOLUTELY NO WARRANTY)
 LazyData: TRUE
 Imports:
-    elastic
+    dplyr, logger, future, ntsworkflow, ggplot2, rlang
 RoxygenNote: 7.3.2
 Suggests:
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0), elastic, zoo, fs
 Encoding: UTF-8
 VignetteBuilder: knitr
 Config/testthat/edition: 3

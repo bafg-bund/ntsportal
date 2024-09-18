@@ -1,0 +1,108 @@
+{
+    "mappings" : {
+    "dynamic": "strict",
+    "properties" : {
+      "ufid" : {"type" : "long"},
+      "ufid2" : {"type" : "long"},
+      "ucid" : {"type" : "long"},
+      "ucid2" : {"type" : "long"},
+      "area" : {"type" : "float"},
+      "area_is" : {"type" : "float"},
+      "area_normalized" : {"type" : "float"},
+      "intensity" : {"type" : "float"},
+      "intensity_is" : {"type" : "float"},
+      "intensity_normalized" : {"type" : "float"},
+      "conc": {"type" : "float"},
+      "cas" : {"type" : "keyword"},
+      "comment" : {"type" : "text"},
+      "comp_group": {"type" : "keyword"},
+      "tag": {"type": "keyword"},
+      "data_source" : {"type" : "keyword"},
+      "sample_source" : {"type" : "keyword"},
+      "licence" : {"type" : "keyword"},
+      "start" : {
+        "type" : "date",
+        "format" : "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd"
+      },
+      "km": { "type" : "float" },
+      "gkz" : { "type" : "integer" },
+      "river" : { "type" : "keyword" },
+      "duration" : {"type" : "float"},
+      "date_import" : {
+        "type" : "date",
+        "format" : "epoch_second"
+      },
+      "date_measurement" : {
+        "type" : "date",
+        "format" : "yyyy-MM-dd HH:mm:ss"
+      },
+      "eic" : {
+        "type" : "nested",
+        "properties" : {
+          "int" : {
+            "type" : "float"
+          },
+          "time" : {
+            "type" : "float"
+          }
+        }
+      },
+      "chrom_method" : {"type" : "keyword"},
+      "instrument": { "type" : "text"},
+      "loc" : {"type" : "geo_point"},
+      "matrix" : {"type" : "keyword"},
+      "ms1" : {                           
+        "type" : "nested",                
+        "properties" : {
+          "int" : {
+            "type" : "float"
+          },
+          "mz" : {
+            "type" : "float"
+          }
+        }
+      },
+      "ms2" : {
+        "type" : "nested",
+        "properties" : {
+          "int" : {
+            "type" : "float"
+          },
+          "mz" : {
+            "type" : "float"
+          }
+        }
+      },
+      "mz" : {"type" : "float"},
+      "name" : {"type" : "keyword"},
+      "name_is" : {"type" : "keyword"},
+      "formula" : {"type" : "keyword"},
+      "smiles" : {"type" : "keyword"},
+      "adduct" : {"type" : "keyword"},
+      "isotopologue" : {"type" : "keyword"},
+      "pol" : {"type" : "keyword"},
+      "rt" : {"type" : "float"},
+      "rt_clustering" : {"type" : "float"},
+      "rtt" : {
+        "type" : "nested",
+        "properties" : {
+          "method" : {
+            "type" : "keyword"
+          },
+          "predicted" : {
+            "type" : "boolean"
+          },
+          "rt" : {
+            "type" : "float"
+          }
+        }
+      },
+      "filename" : {"type" : "keyword"},
+      "station" : {"type" : "keyword"},
+      "inchi": {"type" : "keyword"},
+      "inchikey": {"type" : "keyword"},
+      "component": {"type" : "long"},
+      "path": {"type" : "keyword"}
+    }
+  }
+}

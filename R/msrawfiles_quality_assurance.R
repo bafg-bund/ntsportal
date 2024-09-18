@@ -124,6 +124,84 @@ check_dbas_blank_regex <- function(escon, rfindex) {
   invisible(T)
 }
 
+#rfindex <- "ntsp_index_msrawfiles_unit_tests"
+#rfindex <- "ntsp_msrawfiles"
+
+
+#' Check consistency of msrawfiles for nts data
+#' 
+#' @description
+#' The function will throw an exception if an error is found. It is designed to
+#' be run after uploading data and before processing.
+#' 
+#' @param msrawfilesDocsList msrawfiles_docs_list object (from Elasticsearch API) 
+#'
+#' @return TRUE if completed successfully 
+#' @export
+#'
+check_integrity_msrawfiles_nts <- function(msrawfilesDocsList) {
+  
+  dl <- msrawfilesDocsList
+  ds <- lapply(dl, "[[", i = "_source")
+  # takes too long
+  #df <- data.table::rbindlist(lapply(ds, as.data.frame), fill = T)
+  
+  # Check that nts_mz_min is always lower than nts_mz_max
+  
+  mzCheck <- all(
+    as.numeric(
+      purrr::compact(
+        sapply(ds, "[[", i = "nts_mz_min")
+        )
+      ) < 
+      as.numeric(
+        purrr::compact(
+          sapply(ds, "[[", i = "nts_mz_max")
+        )
+      )
+  )
+  if (!mzCheck) {
+    stop("nts_mz_min is not always lower than nts_mz_max")
+  }
+  
+  # Split ds into batches
+  dsBatches <- split(ds, dirname(vapply(ds, "[[", i = "path", character(1))))
+  
+  # Check that certain values are the same across the whole batch
+  fieldsSameNoBlanks <- c(
+    "dbas_replicate_regex", "nts_alig_filter_min_features", "nts_alig_filter_type"
+  )
+  check_same_in_batch <- function(bInd, field, allB, blanks) {
+    dsBatch <- allB[[bInd]]
+    # Remove blanks
+    if (!blanks) {
+      dsBatch <- dsBatch[!gf(dsBatch, "blank", logical(1))]
+    }
+    batchValues <- sapply(dsBatch, "[[", i  = field)  
+                        
+    if (length(unique(batchValues)) != 1) {
+      batchName <- unique(dirname(gf(dsBatch, "path", character(1))))
+      stop("Field ", field, " not consistent in batch ", batchName)
+    }
+  }
+  # Get all combinations of batches and fields
+  combi <- tidyr::expand_grid(bi = seq_along(dsBatches), f = fieldsSameNoBlanks)
+  purrr::walk2(combi$bi, combi$f, check_same_in_batch, allB = dsBatches, blank = F)
+  
+  check_batch_nts <- function(dsBatch) {
+    #dsBatch <- dsBatches[[3]]
+    # Check that the number of min features does not exceed the number of
+    # samples in the batch
+    batchName <- dirname(gf(dsBatch, "path", character(1)))[1]
+    minFeat <- gf(dsBatch, "nts_alig_filter_min_features", numeric(1), justone = T)
+    if (minFeat > length(dsBatch))
+      stop("nts_alig_filter_min_features is larger than number of files in batch ", batchName)
+  } 
+  purrr::walk(dsBatches, check_batch_nts)
+  
+  invisible(TRUE)
+}
+
 
 
 
@@ -136,7 +214,6 @@ check_dbas_blank_regex <- function(escon, rfindex) {
 #' @param locationRf Root directory for all rawfiles
 #'
 #' @return TRUE if successful (invisibly)
-#' @import logger
 #' @export
 #'
 check_integrity_msrawfiles <- function(escon, rfindex, locationRf) {

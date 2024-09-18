@@ -24,4 +24,5 @@
 #' @import future
 #' @import ntsworkflow
 #' @import ggplot2
+#' @import rlang
 NULL

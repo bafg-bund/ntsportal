@@ -6,7 +6,7 @@ test_that("Test file Des_07_01_pos.mzXML can be processed for Bisoprolol", {
     threshold = "OFF"
   )
   rfindex <- "ntsp_index_msrawfiles_unit_tests"
-  rfloc <- "/scratch/nts/ntsportal_unit_tests/meas_files/"
+  rfloc <- "/srv/cifs-mounts/g2/G/G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files/"
   
   t1 <- check_integrity_msrawfiles(escon, rfindex = rfindex, locationRf = rfloc)
   expect_true(t1)
@@ -14,7 +14,8 @@ test_that("Test file Des_07_01_pos.mzXML can be processed for Bisoprolol", {
   res1 <- elastic::Search(
     escon, rfindex, 
     body = list(query = list(term = list(filename = "Des_07_01_pos.mzXML"))), 
-    source = "_id")
+    source = "_id"
+  )
   
   e <- res1$hits$hits[[1]][["_id"]]
   
@@ -56,7 +57,7 @@ test_that("Test multiple files can be processed for IS", {
   )
   isInd <- "ntsp_is_dbas_unit_tests"
   rfInd <- "ntsp_index_msrawfiles_unit_tests"
-  ingestP <- "/home/Jewell/projects/ntsportal/scripts/ingest.sh"
+  ingestP <- test_path("fixtures", "ingest.sh")
   tempsavedir <- withr::local_tempdir()
   configfile <- "~/config.yml"
   
@@ -110,7 +111,7 @@ test_that("A file with no peaks should should not return an error", {
     escon = escon, 
     rfindex = "ntsp_index_msrawfiles_unit_tests",
     isindex = "ntsp_is_dbas_unit_tests",
-    ingestpth = "scripts/ingest.sh",
+    ingestpth = test_path("fixtures", "ingest.sh"),
     configfile = "~/config.yml",
     tmpPath = tempsavedir, 
     numCores = 1,
@@ -128,7 +129,7 @@ test_that("Test triplicate batch can be processed", {
   rfindex <- "ntsp_index_msrawfiles_unit_tests"
   tempsavedir <- withr::local_tempdir()
   coresBatch <- 4
-  ingestpth <- "/home/Jewell/projects/ntsportal/scripts/ingest.sh"
+  ingestpth <- test_path("fixtures", "ingest.sh")
   configfile <- "~/config.yml"
   
   res3 <- elastic::Search(
