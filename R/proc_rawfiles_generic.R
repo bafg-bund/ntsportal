@@ -115,7 +115,8 @@ ingest_ntspl <- function(escon, ntsplJsonPath, configPath, ingestScriptPath, pau
 #' @param configPath Credentials for ntsportal
 #' @param ingestScriptPath Path where the ingest.sh script is found
 #' @param type type of processing done, 'nts' or 'dbas'
-#' @param pauseTime how much time to wait between uploading and checking, make sure you give it a lot of pause time for large uploads with many batches
+#' @param pauseTime how much time to wait between uploading and checking, make 
+#' sure you give it a lot of pause time for large uploads with many batches
 #'
 #' @return Successfully uploaded file paths
 #' @export

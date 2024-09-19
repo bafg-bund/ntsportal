@@ -135,7 +135,6 @@ proc_nts_new <- function(msrawfiles, saveDir, coresTotal = 1) {
 #' @return a list with 3 elements, named pl (peaklist), rf (rawfile), 
 #' and set (settings)
 #'
-#' @examples
 proc_doc_pp <- function(dsrc) {  # esid <- esids[1]
   failed <- FALSE
   tryCatch(
@@ -586,19 +585,27 @@ extract_spec_file <- function(docsOneFile, peakListLong, eicExtractWidth) {
       )
       if (length(eic) > 0) {
         eic$time <- round(rawfile@scantime[eic$scan], 4)  # eic.time is in seconds!
+        
         # reduce number of rows by calculating average intensities
         # want to have max 50 data points per peak
         reduction <- floor(length(eic$time) / 100)
+        
         if (reduction < 1)  # if this is the case no need for reduction
           reduction <- 1
-        oo <- zoo::zoo(cbind(eic$time, eic$int), eic$scan)
-        oor <- zoo::rollapply(oo, reduction, mean, by = reduction)
-        eicdf <- data.frame(time = oor[,1], int = oor[,2])
-        # make sure there are no values below 0
-        eicdf <- eicdf[eicdf$int > 0, ]
-        eicdf$int <- signif(eicdf$int, 5)
-        eicl <- split(eicdf, seq_len(nrow(eicdf)))
+        if (reduction > 1) {
+          oo <- zoo::zoo(cbind(eic$time, eic$int), eic$scan)
+          oor <- zoo::rollapply(oo, reduction, mean, by = reduction)
+          eicm <- cbind(time = as.numeric(oor[,1]), int = as.numeric(oor[,2]))  
+        } else {
+          eicm <- cbind(time = eic$time, int = eic$int)
+        }
+        
+        # Make sure there are no values below 0
+        eicm <- eicm[eicm[, "int"] > 0, ]
+        eicm[, "int"] <- signif(eicm[, "int"], 5)
+        eicl <- split(eicm, seq_len(nrow(eicm)))
         eicl <- lapply(eicl, as.list)
+        
         doc[["eic"]] <- unname(eicl)
       }
     },
@@ -1010,10 +1017,13 @@ make_ntspl.proco_nts <- function(proco, coresBatch = 1) {
   
 
 #' @export
-save_ntspl.ntspl_nts <- function(ntspList, saveDir, maxSizeGb = 12) {
+save_ntspl.ntspl_nts <- function(ntspList, saveDir, maxSizeGb = 10) {
   
   # If ntsplList is too large, cannot write this to json (exceeds R's string
   # object limit)
+  # It is estimated that an ntspl object of >10 will create a string that is
+  # too large for R to hold.
+  
   # Get the memory size in GB
   ntsplSize <- round(as.numeric(object.size(ntspList)) / 1000000000)
   
@@ -1078,8 +1088,15 @@ save_ntspl.ntspl_nts <- function(ntspList, saveDir, maxSizeGb = 12) {
   log_info("Writing JSON file {savename}")
   #jsonlite::write_json(ntspList, savename, auto_unbox = T, pretty = T)
   # rjson seems much faster that jsonlite
-  jsonString <- rjson::toJSON(ntspList, indent = 2)
-  writeLines(jsonString, savename)
+  tryCatch({
+    jsonString <- rjson::toJSON(ntspList, indent = 2)
+    writeLines(jsonString, savename)
+  },
+  error = function(cnd) {
+    log_error("In writing json {savename} returned: {conditionMessage(cnd)}")
+    stop()
+  })
+  
   log_info("Completed JSON file {savename}")
   savename
 } 

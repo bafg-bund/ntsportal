@@ -2,7 +2,7 @@
 % Please edit documentation in R/proc_rawfiles_generic.R
 \name{ingest_all_batches}
 \alias{ingest_all_batches}
-\title{Title}
+\title{Ingest a series of ntsportal json files}
 \usage{
 ingest_all_batches(
   escon,
@@ -27,11 +27,12 @@ ingest_all_batches(
 
 \item{type}{type of processing done, 'nts' or 'dbas'}
 
-\item{pauseTime}{how much time to wait between uploading and checking, make sure you give it a lot of pause time for large uploads with many batches}
+\item{pauseTime}{how much time to wait between uploading and checking, make 
+sure you give it a lot of pause time for large uploads with many batches}
 }
 \value{
-Successfully uploaded files
+Successfully uploaded file paths
 }
 \description{
-Title
+Ingest a series of ntsportal json files
 }

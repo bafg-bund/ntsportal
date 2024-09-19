@@ -2,7 +2,7 @@
 % Please edit documentation in R/proc_rawfiles_generic.R
 \name{ingest_ntspl}
 \alias{ingest_ntspl}
-\title{Title}
+\title{Ingest an ntsportal json file}
 \usage{
 ingest_ntspl(escon, ntsplJsonPath, configPath, ingestScriptPath, pauseTime = 2)
 }
@@ -19,6 +19,9 @@ elasticSearch are found, see ntsportal-wiki}
 
 \item{pauseTime}{}
 }
+\value{
+Will return true if all data has been ingested successfully, false otherwise
+}
 \description{
-Title
+Ingest an ntsportal json file
 }

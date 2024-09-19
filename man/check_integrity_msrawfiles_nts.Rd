@@ -7,8 +7,12 @@
 check_integrity_msrawfiles_nts(msrawfilesDocsList)
 }
 \arguments{
-\item{msrawfilesDocsList}{content of entire msrawfiles as a docslist list as returned by elasticsearch API}
+\item{msrawfilesDocsList}{msrawfiles_docs_list object (from Elasticsearch API)}
+}
+\value{
+TRUE if completed successfully
 }
 \description{
-Check consistency of msrawfiles for nts data
+The function will throw an exception if an error is found. It is designed to
+be run after uploading data and before processing.
 }
