@@ -146,7 +146,8 @@ test_that("A batch does not find the IS", {
   po <- proc_batch_nts(
     docsList = dl,
     coresBatch = 1
-  )  
+  )
+  expect_true(all(po$sampleList$normalizePeakID == 0))
 })
 
 

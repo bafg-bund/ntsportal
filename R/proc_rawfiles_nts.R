@@ -486,14 +486,26 @@ proc_batch_nts <- function(docsList, coresBatch) {
                        c(grep("Int_", colnames(grouped)), grep("alignmentID", colnames(grouped))), drop = F]
     intColsSum <- apply(intCols[, grep("Int_", colnames(intCols)), drop = F], 1, sum)
     aligIdIs <- intCols[which.max(intColsSum), "alignmentID"]
+  } 
+  else if (length(aligIdIs)<1) {
+    # 
+    log_warn("No IS detected")
+    aligIdIs = 0
   }
-  stopifnot(is.numeric(aligIdIs), length(aligIdIs) == 1)
-  print('d')
-  isPids <- grouped[
-    grouped[, "alignmentID"] == aligIdIs, 
-    grep("PeakID", colnames(grouped)),
-    drop = TRUE
-  ]
+  
+  stopifnot(is.numeric(aligIdIs))
+
+  # Extract IS peak ids from grouped table
+  if (aligIdIs != 0) {
+    isPids <- grouped[
+      grouped[, "alignmentID"] == aligIdIs, 
+      grep("PeakID", colnames(grouped)),
+      drop = TRUE
+    ]
+  } else {
+    isPids = 0
+  }  
+  
   # Sometimes IS peak is not found in all samples, for whatever reason the
   # peak isn't picked. In this case you need to estimate the intensity by
   # interpolation (see section Extract IS intensities and areas).
