@@ -257,6 +257,12 @@ test_that("A ntspl_nts can be generated from a proco_nts", {
   # saveRDS(ntsplOb, test_path("fixtures", "proc_rawfiles_nts","ntspl_nts-des-batch-w-blank.RDS"))
 })
 
+test_that("make_ntsp even when no IS found", {
+  procoOb <- readRDS(test_path("fixtures", "proc_rawfiles_nts", "proco_no_is_found.RDS"))
+  x <- make_ntspl.proco_nts(procoOb, coresBatch = 1)
+  expect_null(x[[1]]$area_normalized)
+})
+
 
 test_that("A ntspl_nts can be written to disk", {
   # This file has been created in the test "A ntspl_nts can be generated from a proco_nts

@@ -750,6 +750,7 @@ extract_spec_file <- function(docsOneFile, peakListLong, eicExtractWidth) {
 
 #' @export
 make_ntspl.proco_nts <- function(proco, coresBatch = 1) { 
+  
   log_info("Building ntspl object")
   # Create list form of proc_output for saving as json ####
   # this is a test
@@ -786,7 +787,7 @@ make_ntspl.proco_nts <- function(proco, coresBatch = 1) {
   pl <- do.call("rbind", pll)
   docsSrc <- proco$docsSource
   rm(proco, pll)
-  
+  batchName <- dirname(samp$File[1])
   # Merge annotation and alig tables
   annot2 <- annot[, c("alignmentID", "name", "CAS", "formula", "SMILES", "adduct")]
   alig <- merge(alig, annot2, by = "alignmentID", all.x = T)
@@ -841,18 +842,24 @@ make_ntspl.proco_nts <- function(proco, coresBatch = 1) {
     name_is = gf(docsSrc, "dbas_is_name", character(1), justone = T)
   )
   
+  # If all are NAs then no IS peak was found in the entire batch. We
+  # cannot compute normalized areas for this batch
+  if (all(is.na(is_alig$intensity_is)) || all(is.na(is_alig$area_is))) {
+    log_warn("No IS found in batch {batchName}")
+    is_alig$intensity_is <- 0
+    is_alig$area_is <- 0  
   # Fill NAs with averages
   # We assume an error in the peak-picking has occurred and there is no IS peak
   # TODO This needs to be considered again, what is the point of IS if you are
   # just going to ignore a missing IS peak?
-  if (any(is.na(is_alig$intensity_is)) || any(is.na(is_alig$area_is))) {
-    log_warn("Ignoring missing IS and taking the average intensity of the other files")
+  } else if (any(is.na(is_alig$intensity_is)) || any(is.na(is_alig$area_is))) {
+    log_warn("Ignoring missing IS in batch {batchName} and taking the average intensity of the other files")
     i <- mean(is_alig$intensity_is, na.rm = T)
     a <- mean(is_alig$area_is, na.rm = T)
     is_alig[is.na(is_alig$intensity_is), "intensity_is"] <- i
     is_alig[is.na(is_alig$area_is), "area_is"] <- a
   }
-  
+
   alig3 <- merge(alig2, is_alig, by = "sample")
   
   # Remove FP annotations ####
@@ -880,10 +887,15 @@ make_ntspl.proco_nts <- function(proco, coresBatch = 1) {
   alig3$Gruppe <- NULL
   
   # Compute normalized intensity and area ####
-  if (all(c("intensity", "intensity_is") %in% colnames(alig3)) && all(alig3$intensity_is != 0))
+  if (all(c("intensity", "intensity_is") %in% colnames(alig3)) && 
+      all(alig3$intensity_is != 0)){
     alig3$intensity_normalized <- alig3$intensity / alig3$intensity_is
-  if (all(c("area", "area_is") %in% colnames(alig3)) && all(alig3$area_is != 0))
+    alig3$intensity_normalized <- signif(alig3$intensity_normalized, 5)
+    }
+  if (all(c("area", "area_is") %in% colnames(alig3)) && all(alig3$area_is != 0)) {
     alig3$area_normalized <- alig3$area / alig3$area_is
+    alig3$area_normalized <- signif(alig3$area_normalized, 5)
+  }
   
   alig3$intensity_from_alig <- NULL
   alig3$sample <- as.numeric(alig3$sample)
@@ -919,8 +931,8 @@ make_ntspl.proco_nts <- function(proco, coresBatch = 1) {
   alig3b$intensity <- signif(alig3b$intensity, 5)
   alig3b$intensity_is <- signif(alig3b$intensity_is, 5)
   alig3b$area_is <- signif(alig3b$area_is, 5)
-  alig3b$intensity_normalized <- signif(alig3b$intensity_normalized, 5)
-  alig3b$area_normalized <- signif(alig3b$area_normalized, 5)
+  
+  
   alig3b$area_is <- signif(alig3b$area_is, 5)
   
   
