@@ -13,7 +13,7 @@
 # with ntsportal. If not, see <https://www.gnu.org/licenses/>.
 
 
-# private functions ####
+# Internal functions ####
 
 # TODO This needs to be combined with the functions in eval_dbas #cleanup
 #' @export
@@ -129,7 +129,8 @@ calc_ndp_fit <- function(d_spec, db_spec, ndp_m = 2, ndp_n = 1, mztolu_ = 0.015)
 #'
 #' @description Recieves a feature and returns its ufid_assignment object based on
 #' information in the ufid database. Currently, the feature must have m/z,
-#' rt and ms2. Tables are precollected from the SQLite ufid library as tibbles to increase speed and allow parallelizatation
+#' rt and ms2. Tables are precollected from the SQLite ufid library as tibbles 
+#' to increase speed and allow parallelizatation
 #'
 #' @param ftt Precollected feature table from ufid-db
 #' @param rtt Precollected retention_time table from ufid-db

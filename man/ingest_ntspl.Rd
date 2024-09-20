@@ -4,7 +4,14 @@
 \alias{ingest_ntspl}
 \title{Ingest an ntsportal json file}
 \usage{
-ingest_ntspl(escon, ntsplJsonPath, configPath, ingestScriptPath, pauseTime = 2)
+ingest_ntspl(
+  escon,
+  ntsplJsonPath,
+  configPath,
+  ingestScriptPath,
+  pauseTime = 2,
+  verbose = F
+)
 }
 \arguments{
 \item{escon}{Connection object created with `elastic::connect`}
@@ -17,7 +24,9 @@ elasticSearch are found, see ntsportal-wiki}
 
 \item{ingestScriptPath}{Path where the ingest.sh script is found}
 
-\item{pauseTime}{}
+\item{pauseTime}{number of seconds to wait before uploading (useful if running a loop)}
+
+\item{verbose}{Print messages from ingest}
 }
 \value{
 Will return true if all data has been ingested successfully, false otherwise

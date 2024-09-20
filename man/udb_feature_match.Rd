@@ -36,5 +36,6 @@ possible. Returns ufid_assignment of 0, level 0 if no match is found.
 \description{
 Recieves a feature and returns its ufid_assignment object based on
 information in the ufid database. Currently, the feature must have m/z,
-rt and ms2. Tables are precollected from the SQLite ufid library as tibbles to increase speed and allow parallelizatation
+rt and ms2. Tables are precollected from the SQLite ufid library as tibbles 
+to increase speed and allow parallelizatation
 }

@@ -258,55 +258,16 @@ test_that("A ntspl_nts can be written to disk", {
   # rstudioapi::documentOpen(savePath)
   #expect_true(file.size(savePath) == 1442107)
   
-  # Code to save the results for the next test
-  #file.copy(savePath, test_path("fixtures", "proc_rawfiles_nts", basename(savePath)))
-  # file.remove(paste0(test_path("fixtures", basename(savePath)), ".gz"))
-  #system2("gzip", test_path("fixtures", "proc_rawfiles_nts", basename(savePath)))
-  
+  # Code to save the results for the next test "A json file can be ingested into a test index"
+  # file.copy(savePath, test_path("fixtures", "proc_rawfiles_generic", basename(savePath)))
+  # file.remove(paste0(test_path("fixtures", "proc_rawfiles_generic", basename(savePath)), ".gz"))
+  # system2("gzip", test_path("fixtures", "proc_rawfiles_generic", basename(savePath)))
+
   file.remove(savePath)
   file.remove(tempSaveDir)
 })
 
-test_that("A json file can be ingested into a test index", {
-  
-  source("~/connect-ntsp.R")
-  
-  jf <- list.files(test_path("fixtures", "proc_rawfiles_nts"), pattern = "^nts-batch--inda-ntsp_nts_unit_tests-indn-.*-bi-.*olmesartan-d6-bisoprolol.*\\.json.gz$", full.names = T)
-  tempSaveDir <- withr::local_tempdir()
-  njf <- file.path(tempSaveDir, basename(jf))
-  file.copy(jf, njf)
-  system2("gunzip", njf)
-  njf <- stringr::str_match(njf, "(.*)\\.gz")[,2]
-  
-  # Create test index
-  indexName <- stringr::str_match(njf, "-indn-(ntsp_index_nts.*)-bi-")[,2]
-  aliasName <- stringr::str_match(njf, "-inda-(ntsp_nts.*)-indn-")[,2]
-  put_nts_index(escon, indexName)
-  es_move_alias(escon, indexName, aliasName)
-  success <- FALSE
-  tryCatch(
-    success <- ingest_ntspl(
-      escon, 
-      ntsplJsonPath = njf, 
-      configPath = "~/config.yml", 
-      ingestScriptPath = fs::path_package("ntsportal", "scripts", "ingest.sh"),
-      pauseTime = 2
-    ),
-    error = function(cnd) {
-      log_info("error at ingest: {conditionMessage(cnd)}")
-    },
-    finally = {
-      elastic::alias_delete(escon, indexName, aliasName)
-      elastic::index_delete(escon, indexName)
-      file.remove(list.files(tempSaveDir, full.names = T))
-      file.remove(tempSaveDir)
-    }
-  )
-  expect_true(success)
-  expect_false(elastic::index_exists(escon, aliasName))
-  expect_false(elastic::index_exists(escon, indexName))
-  expect_false(dir.exists(tempSaveDir))
-})
+
 
 test_that("Add processing time for nts data to msrawfiles", {
 

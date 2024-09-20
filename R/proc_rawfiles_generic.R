@@ -74,20 +74,23 @@ gf <- function(docsSrc, fieldName, value, justone = F) {
 #' @param configPath Config file where the credentials for signing into 
 #'   elasticSearch are found, see ntsportal-wiki
 #' @param ingestScriptPath Path where the ingest.sh script is found
-#' @param pauseTime
+#' @param pauseTime number of seconds to wait before uploading (useful if running a loop)
+#' @param verbose Print messages from ingest
 #'
 #' @return Will return true if all data has been ingested successfully, false otherwise
 #' @export
 #'
-ingest_ntspl <- function(escon, ntsplJsonPath, configPath, ingestScriptPath, pauseTime = 2) {
+ingest_ntspl <- function(escon, ntsplJsonPath, configPath, ingestScriptPath, pauseTime = 2, verbose = F) {
   
   aliasName <- stringr::str_match(ntsplJsonPath, "--inda-(.*)-indn")[,2]
   stopifnot(is.character(aliasName), nchar(aliasName) > 8)
   stopifnot(elastic::index_exists(escon, aliasName))
+  # Build command
+  command <- glue::glue("{ingestScriptPath} {configPath} {aliasName} {ntsplJsonPath}")
+  if (!verbose) 
+    command <- paste0(command, " &> /dev/null")
   log_info("Ingest starting")
-  system(
-    glue::glue("{ingestScriptPath} {configPath} {aliasName} {ntsplJsonPath} &> /dev/null")
-  )
+  system(command)
   log_info("Ingest complete, checking db")
   
   # Need to add a pause so that elastic returns ingested docs
@@ -157,8 +160,12 @@ ingest_all_batches <- function(escon, rfindex, resDir,
     error = function(cnd) {
       log_warn("Error in uploading batch {fn2} with message: {conditionMessage(cnd)}")
       Sys.sleep(60)
-      log_info("Removing any uploaded docs")
-      res <- elastic::docs_delete_by_query(escon, aliasName, body = list(query = list(terms = list(path = paths))))
+      if (elastic::index_exists(escon, aliasName)) {
+        log_info("Removing any uploaded docs")
+        res <- elastic::docs_delete_by_query(
+          escon, aliasName, body = list(query = list(terms = list(path = paths))))
+        
+      }
       message(res)
       Sys.sleep(120)
     },

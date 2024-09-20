@@ -252,13 +252,14 @@ proc_doc_pp <- function(dsrc) {  # esid <- esids[1]
 #' # Filtering the alignment table 
 #' ## Consecutive filter 
 #' The order of the samples is important for the
-#' consecutive filter, these must be sorted by start time.
+#' consecutive filter, these must be sorted by start time prior to starting
+#' this processing.
 #' 
 #' @return A proc_output list with 6 elements:  
 #' @export
 #'
 proc_batch_nts <- function(docsList, coresBatch) {
-  
+
   # Define variables ####
   
   # Extract just the source of the array
@@ -289,6 +290,7 @@ proc_batch_nts <- function(docsList, coresBatch) {
   }
   sampleList <- create_sampleList(docsList, docsSrc)
   batchName <- dirname(docsSrc[[1]]$path)
+  
   log_info("Starting peak-picking and componentization on batch {batchName}")
   
   # Peak-picking ####
@@ -377,17 +379,23 @@ proc_batch_nts <- function(docsList, coresBatch) {
   # Alignment filter ####  
   # Consecutive, triplicate injection or minimum features filter
   # You have created a new sampleList after culling the peaklist and before
-  # alignement. Therefore the sampleList$ID column, the alignment table
+  # alignment. Therefore the sampleList$ID column, the alignment table
   # column headers and the index of docsSrc should match at this stage
-  ftype <- gf(docsSrc, "nts_alig_filter_type", character(1), justone = T)
+  
+  # The filtering only applies to non-blanks ("unknowns" in ntsworkflow)
+  # (expect for min_features, this applies to all samples)
+  sc <- sampleList[sampleList$sampleType == "Unknown", "ID"]
+  ftype <- gf(docsSrc[sc], "nts_alig_filter_type", character(1), justone = T)
   log_info("Alignment table filter of type {ftype}")
   switch(
     ftype,
     consecutive = {
       # For this to work the samples must be ordered by start (sample time).
+      # This would be super hard to change at this stage though so it needs
+      # to be checked before we start
       grouped <- ntsworkflow::keepConsecutive(
         alignment = grouped, 
-        samples = sampleList[sampleList$sampleType == "Unknown", "ID"],
+        samples = sc,
         consecutive = gf(docsSrc, "nts_alig_filter_num_consecutive", numeric(1), justone = T)  
       )
     },
@@ -395,10 +403,14 @@ proc_batch_nts <- function(docsList, coresBatch) {
       # Uses regexp to collect replicate groups. If min_features is larger than
       # number of replicates (e.g. failed meas. files), min_features will be 
       # automatically reduced.
-      sc <- sampleList[sampleList$sampleType == "Unknown", "ID"]
+      # This is a round-about way of doing this. To save the regex in the
+      # database and then use this in the code is risky. It would be better to
+      # save the replicate groups directly in the index (analogously to the 
+      # way this is done for blanks)
+      
       rgx <- gf(docsSrc[sc], "dbas_replicate_regex", character(1), justone = T)
       mf <- gf(docsSrc[sc], "nts_alig_filter_min_features", numeric(1), justone = T)
-      grouped <-ntsworkflow::keep_reps_regex(
+      grouped <- ntsworkflow::keep_reps_regex(
         alignment = grouped,
         samples = sc,
         sampleList = sampleList,
@@ -601,16 +613,21 @@ extract_spec_file <- function(docsOneFile, peakListLong, eicExtractWidth) {
         }
         
         # Make sure there are no values below 0
-        eicm <- eicm[eicm[, "int"] > 0, ]
-        eicm[, "int"] <- signif(eicm[, "int"], 5)
-        eicl <- split(eicm, seq_len(nrow(eicm)))
-        eicl <- lapply(eicl, as.list)
-        
-        doc[["eic"]] <- unname(eicl)
+        eicm <- eicm[eicm[, "int"] > 0, , drop = FALSE]
+        # Only add if you have at least 5 datapoints
+        if (nrow(eicm) > 4) {
+          eicm[, "int"] <- signif(eicm[, "int"], 5)
+          
+          # Convert to list
+          eicl <- split(eicm, seq_len(nrow(eicm)))
+          eicl <- lapply(eicl, as.list)
+          eicl <- lapply(eicl, function(x) {names(x) <- c("time", "int"); x})
+          doc[["eic"]] <- unname(eicl)
+        }
       }
     },
     error = function(cnd) {
-      log_warning("Error in EIC extraction in file: {doc$path}, PeakID: 
+      log_warn("Error in EIC extraction in file: {doc$path}, PeakID: 
                   {doc$PeakID}. message: {conditionMessage(cnd)}")
     })
     
@@ -653,7 +670,7 @@ extract_spec_file <- function(docsOneFile, peakListLong, eicExtractWidth) {
       }
     },
     error = function(cnd) {
-      log_warning("Error in MS1 extraction in file: {doc$path}, PeakID: 
+      log_warn("Error in MS1 extraction in file: {doc$path}, PeakID: 
                     {doc$PeakID}. message: {conditionMessage(cnd)}")
     })
     
@@ -694,7 +711,7 @@ extract_spec_file <- function(docsOneFile, peakListLong, eicExtractWidth) {
       doc[["ms2"]] <- unname(ms2)
     },
     error = function(cnd) {
-      log_warning("Error in MS2 extraction in file: {doc$path}, PeakID: 
+      log_warn("Error in MS2 extraction in file: {doc$path}, PeakID: 
                     {doc$PeakID}. message: {conditionMessage(cnd)}")
     })
     
@@ -984,7 +1001,18 @@ make_ntspl.proco_nts <- function(proco, coresBatch = 1) {
   
   # Clean up environment ####
   rm(list = ls()[!is.element(ls(), c(
-    "alig6", "alig3b", "pl", "coresBatch", "samp", "rfindex", "eicExtraction", "docsSrc"))])
+    "alig6", "pl", "coresBatch", "samp", "rfindex", "eicExtraction", "docsSrc"))])
+  
+  # Add rtt (retention time table)
+  alig6 <- lapply(alig6, function(doc) {
+    newEntry <- list(
+      method = doc$chrom_method,
+      predicted = FALSE,
+      rt = doc$rt
+    )
+    doc$rtt <- list(newEntry)
+    doc
+  })
   
   # Collect EIC, MS1 and MS2 ####
   log_info("Collecting chromatograms and spectra")
@@ -992,7 +1020,7 @@ make_ntspl.proco_nts <- function(proco, coresBatch = 1) {
   eicExtraction <- gf(docsSrc, "nts_eic_extraction_width", numeric(1), justone = T) / 1000
   bySamp2 <- lapply(bySamp, extract_spec_file, peakListLong = pl, eicExtractWidth = eicExtraction)
   alig7 <- do.call("c", bySamp2)
-  rm(bySamp, bySamp2, alig6, alig3b)
+  rm(bySamp, bySamp2, alig6)
   
   # Remove NAs
   alig7 <- lapply(alig7, function(doc) doc[names(which(!is.na(doc)))])

@@ -164,66 +164,7 @@ es_add_rtt <- function(escon, esindex) {
 }
 
 
-#' Add rt_clustering field to es index pattern
-#'
-#' @param escon Elasticsearch connection object created by `elastic::connect`
-#' @param esindex Index or index-pattern to update
-#'
-#' @return Returns the number of documents updated, invisibly
-#' @export
-#'
-es_add_rt_cluster <- function(escon, esindex) {
-  # get all features without rt_clustering
-  totUpdated <- 0
-  repeat {
-    res <- elastic::Search(escon, index, body = '
-     {
-      "query": {
-        "bool": {
-          "must_not": [
-            {
-              "exists": {
-                "field": "rt_clustering"
-              }
-            }
-          ]
-        }
-      },
-      "_source": ["rtt"],
-      "size": 10000
-    }
 
-                       ')
-    if (res$hits$total$value == 0) {
-      break
-    }
-
-    log_info("There are {res$hits$total$value} left to process")
-
-    fts <- res$hits$hits
-    for (ft in fts) {
-      # get rt
-      doc <- ft[["_source"]]
-      esid <- ft[["_id"]]
-      esind <- ft[["_index"]]
-      rtToCopy <- doc$rtt[[which(sapply(doc$rtt, function(x) x$method == "bfg_nts_rp1"))]]$rt
-      elastic::docs_update(escon, esind, esid, body = sprintf('
-    {
-      "script" : {
-        "source": "ctx._source.rt_clustering = params.rtToCopy;",
-        "params": {
-          "rtToCopy": %.2f
-        }
-      }
-    }
-    ', rtToCopy))
-    }
-    totUpdated <- sum(totUpdated, res$hits$total$value)
-  }
-
-  log_info("Completed all features")
-  invisible(totUpdated)
-}
 
 
 #' Get list of all compounds in an ntsp index
