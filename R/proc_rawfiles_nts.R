@@ -488,6 +488,7 @@ proc_batch_nts <- function(docsList, coresBatch) {
     aligIdIs <- intCols[which.max(intColsSum), "alignmentID"]
   }
   stopifnot(is.numeric(aligIdIs), length(aligIdIs) == 1)
+  print('d')
   isPids <- grouped[
     grouped[, "alignmentID"] == aligIdIs, 
     grep("PeakID", colnames(grouped)),
