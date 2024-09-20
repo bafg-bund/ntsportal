@@ -138,6 +138,18 @@ test_that("A batch (3 samples), with no blanks is processed to proc_output and
 
 })
 
+test_that("A batch does not find the IS", {
+  dl <- readRDS(
+    test_path("fixtures", "proc_rawfiles_nts", "doclist_no_is.RDS")
+  )
+  
+  po <- proc_batch_nts(
+    docsList = dl,
+    coresBatch = 1
+  )  
+})
+
+
 test_that("A batch with blanks has compound annotations", {
   
   dl <- jsonlite::read_json(
