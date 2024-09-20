@@ -70,7 +70,7 @@ gf <- function(docsSrc, fieldName, value, justone = F) {
 #'
 #' @param escon Connection object created with `elastic::connect`
 #' @param ntsplJsonPath Path to json file, the filename must contain the alias into which
-#'   the data must be ingested using the delimiters '-inda-' and '-indn-'
+#'   the data must be ingested using the delimiters '-indn-' and '-bi-'
 #' @param configPath Config file where the credentials for signing into 
 #'   elasticSearch are found, see ntsportal-wiki
 #' @param ingestScriptPath Path where the ingest.sh script is found
@@ -82,11 +82,11 @@ gf <- function(docsSrc, fieldName, value, justone = F) {
 #'
 ingest_ntspl <- function(escon, ntsplJsonPath, configPath, ingestScriptPath, pauseTime = 2, verbose = F) {
   
-  aliasName <- stringr::str_match(ntsplJsonPath, "--inda-(.*)-indn")[,2]
-  stopifnot(is.character(aliasName), nchar(aliasName) > 8)
-  stopifnot(elastic::index_exists(escon, aliasName))
+  indexName <- stringr::str_match(ntsplJsonPath, "-indn-(.*)-bi-")[,2]
+  stopifnot(is.character(indexName), nchar(indexName) > 8)
+  stopifnot(elastic::index_exists(escon, indexName))
   # Build command
-  command <- glue::glue("{ingestScriptPath} {configPath} {aliasName} {ntsplJsonPath}")
+  command <- glue::glue("{ingestScriptPath} {configPath} {indexName} {ntsplJsonPath}")
   if (!verbose) 
     command <- paste0(command, " &> /dev/null")
   log_info("Ingest starting")
@@ -98,7 +98,7 @@ ingest_ntspl <- function(escon, ntsplJsonPath, configPath, ingestScriptPath, pau
   ntspList <- jsonlite::read_json(ntsplJsonPath)
   checkFiles <- unique(vapply(ntspList, "[[", character(1), i = "filename"))
   resp <- elastic::Search(
-    escon, aliasName, size = 0, 
+    escon, indexName, size = 0, 
     body = list(query = list(terms = list(filename = checkFiles)))
   )
   if (resp$hits$total$value == length(ntspList)) {
@@ -146,10 +146,10 @@ ingest_all_batches <- function(escon, rfindex, resDir,
       paths <- unique(gf(docs, "path", character(1)))
       
       # To be able to delete these files in case of error need to have 
-      # alias name. This is unfortunatly repeated in the ingest_ntspl function.
-      aliasName <- stringr::str_match(fn2, "--inda-(.*)-indn")[,2]
-      stopifnot(is.character(aliasName), nchar(aliasName) > 8)
-      stopifnot(elastic::index_exists(escon, aliasName))
+      # index name. This is unfortunately repeated in the ingest_ntspl function.
+      indexName <- stringr::str_match(fn2, "--inda-(.*)-indn")[,2]
+      stopifnot(is.character(indexName), nchar(indexName) > 8)
+      stopifnot(elastic::index_exists(escon, indexName))
       
       done <- ingest_ntspl(escon, fn2, configPath, ingestScriptPath, pauseTime)
       
@@ -160,10 +160,10 @@ ingest_all_batches <- function(escon, rfindex, resDir,
     error = function(cnd) {
       log_warn("Error in uploading batch {fn2} with message: {conditionMessage(cnd)}")
       Sys.sleep(60)
-      if (elastic::index_exists(escon, aliasName)) {
+      if (elastic::index_exists(escon, indexName)) {
         log_info("Removing any uploaded docs")
         res <- elastic::docs_delete_by_query(
-          escon, aliasName, body = list(query = list(terms = list(path = paths))))
+          escon, indexName, body = list(query = list(terms = list(path = paths))))
         
       }
       message(res)
