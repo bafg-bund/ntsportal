@@ -739,7 +739,7 @@ extract_spec_file <- function(docsOneFile, peakListLong, eicExtractWidth) {
 make_ntspl.proco_nts <- function(proco, coresBatch = 1) { 
   log_info("Building ntspl object")
   # Create list form of proc_output for saving as json ####
-  
+  # this is a test
   # These are spec sources which pollute the comp_group field and need to be removed
   # TODO change structure of CSL so that data sources are not mixed with compound groups
   SPEC_SOURCES <- c("BfG", "LfU", "UBA")

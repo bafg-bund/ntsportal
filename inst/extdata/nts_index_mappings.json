@@ -11,6 +11,7 @@
       "area_normalized" : {"type" : "float"},
       "intensity" : {"type" : "float"},
       "intensity_is" : {"type" : "float"},
+      
       "intensity_normalized" : {"type" : "float"},
       "conc": {"type" : "float"},
       "cas" : {"type" : "keyword"},
@@ -102,7 +103,21 @@
       "inchi": {"type" : "keyword"},
       "inchikey": {"type" : "keyword"},
       "component": {"type" : "long"},
-      "path": {"type" : "keyword"}
+      "path": {"type" : "keyword"},
+      "internal_std" : {
+        "type" : "nested",
+        "properties" : {
+          "name" : {
+            "type" : "keyword"
+          },
+          "area" : {
+            "type" : "float"
+          },
+          "intensity" : {
+            "type" : "float"
+          }
+        }
+      }
     }
   }
 }
