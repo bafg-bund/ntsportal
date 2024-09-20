@@ -112,6 +112,12 @@ ingest_ntspl <- function(escon, ntsplJsonPath, configPath, ingestScriptPath, pau
 
 #' Ingest a series of ntsportal json files
 #'
+#'
+#' @description
+#' given a folder of compressed json files, and a connection to elasticSearch,
+#' this function will ingest all the json files sequentially
+#' 
+#'
 #' @param escon Connection object created with `elastic::connect`
 #' @param rfindex msrawfiles index name
 #' @param resDir Where are the jsons found (must be compressed as json.gz)
