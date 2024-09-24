@@ -146,6 +146,7 @@ check_integrity_msrawfiles_nts <- function(msrawfilesDocsList) {
   # takes too long
   #df <- data.table::rbindlist(lapply(ds, as.data.frame), fill = T)
   
+
   # Fields that must be present in all docs
   fieldsPresentAll <- c(
     "nts_mz_step",
@@ -157,8 +158,7 @@ check_integrity_msrawfiles_nts <- function(msrawfilesDocsList) {
         stop("Field ", x, " not found in doc ", doc$path)
     })
   })
-  
-  
+
   # Check that files exist
   pth1 <- unique(gf(ds, "nts_spectral_library", character(1)))
   pth2 <- gf(ds, "path", character(1))
