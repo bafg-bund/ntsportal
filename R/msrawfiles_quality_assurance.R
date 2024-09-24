@@ -146,6 +146,12 @@ check_integrity_msrawfiles_nts <- function(msrawfilesDocsList) {
   # takes too long
   #df <- data.table::rbindlist(lapply(ds, as.data.frame), fill = T)
   
+  # Check that files exist
+  pth1 <- unique(gf(ds, "nts_spectral_library", character(1)))
+  pth2 <- gf(ds, "path", character(1))
+  if (!all(file.exists(pth1, pth2)))
+    stop("Not all files found")
+  
   # Check that nts_mz_min is always lower than nts_mz_max
   
   mzCheck <- all(
@@ -171,6 +177,9 @@ check_integrity_msrawfiles_nts <- function(msrawfilesDocsList) {
   fieldsSameNoBlanks <- c(
     "dbas_replicate_regex", "nts_alig_filter_min_features", "nts_alig_filter_type"
   )
+  fieldsSameBlanks <- c(
+    "nts_spectral_library"
+  )
   check_same_in_batch <- function(bInd, field, allB, blanks) {
     dsBatch <- allB[[bInd]]
     # Remove blanks
@@ -187,6 +196,9 @@ check_integrity_msrawfiles_nts <- function(msrawfilesDocsList) {
   # Get all combinations of batches and fields
   combi <- tidyr::expand_grid(bi = seq_along(dsBatches), f = fieldsSameNoBlanks)
   purrr::walk2(combi$bi, combi$f, check_same_in_batch, allB = dsBatches, blank = F)
+  
+  combi <- tidyr::expand_grid(bi = seq_along(dsBatches), f = fieldsSameBlanks)
+  purrr::walk2(combi$bi, combi$f, check_same_in_batch, allB = dsBatches, blank = T)
   
   check_batch_nts <- function(dsBatch) {
     #dsBatch <- dsBatches[[3]]
