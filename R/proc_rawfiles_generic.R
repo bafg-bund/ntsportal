@@ -126,13 +126,15 @@ ingest_ntspl <- function(escon, ntsplJsonPath, configPath, ingestScriptPath, pau
 #' @param type type of processing done, 'nts' or 'dbas'
 #' @param pauseTime how much time to wait between uploading and checking, make 
 #' sure you give it a lot of pause time for large uploads with many batches
+#' @param verbose logical, should output of ingest.sh be printed
 #'
 #' @return Successfully uploaded file paths
 #' @export
 #'
 ingest_all_batches <- function(escon, rfindex, resDir, 
-                               configPath = "~/config.yml", ingestScriptPath, 
-                               type, pauseTime = 2) {
+                               configPath = "~/config.yml", 
+                               ingestScriptPath, 
+                               type, pauseTime = 2, verbose = F) {
   
   fns <- list.files(resDir, pattern = ".json.gz$", full.names = T)
   stopifnot(length(fns) > 0)
@@ -153,11 +155,17 @@ ingest_all_batches <- function(escon, rfindex, resDir,
       
       # To be able to delete these files in case of error need to have 
       # index name. This is unfortunately repeated in the ingest_ntspl function.
-      indexName <- stringr::str_match(fn2, "--inda-(.*)-indn")[,2]
+      indexName <- stringr::str_match(fn2, "-indn-(.*)-bi")[,2]
       stopifnot(is.character(indexName), nchar(indexName) > 8)
-      stopifnot(elastic::index_exists(escon, indexName))
       
-      done <- ingest_ntspl(escon, fn2, configPath, ingestScriptPath, pauseTime)
+      # Create index if not already present
+      procType <- stringr::str_match(fn2, "^(.*)-batch")[,2]
+      if (!elastic::index_exists(escon, indexName)) {
+        put_ntsp_index(escon, procType, indexName)
+      }
+      
+      done <- ingest_ntspl(escon, fn2, configPath, ingestScriptPath, pauseTime, 
+                           verbose = verbose)
       
       record_proc(escon, rfindex, paths, type)
       
@@ -170,13 +178,12 @@ ingest_all_batches <- function(escon, rfindex, resDir,
         log_info("Removing any uploaded docs")
         res <- elastic::docs_delete_by_query(
           escon, indexName, body = list(query = list(terms = list(path = paths))))
-        
+        message(res)
       }
-      message(res)
-      Sys.sleep(120)
+      Sys.sleep(5)
     },
     finally = {
-      # recompress
+      # Recompress
       system2("gzip", fn2)
     })
     
@@ -378,7 +385,8 @@ create_new_index <- function(escon, rfindex, aliasName, dateNum = NULL) {
   resNameChange <- es_add_value(
     escon, rfindex, 
     queryBody = list(term = list2(!!aliasNameType := aliasName)), 
-    listToAdd = list2(!!indexNameType := indNew))
+    listToAdd = list2(!!indexNameType := indNew)
+  )
   
   if (resCrea$acknowledged && length(resNameChange$failures) == 0) {
     logger::log_info("Added index name to msrawfiles")

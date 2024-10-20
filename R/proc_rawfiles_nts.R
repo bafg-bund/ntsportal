@@ -130,7 +130,7 @@ proc_nts_new <- function(msrawfiles, saveDir, coresTotal = 1) {
 #' 
 #' The settings used is a document source of the msrawfiles index
 #' 
-#' @param dsrc document source
+#' @param dsrc document source ntsp_docs_source
 #'
 #' @return a list with 3 elements, named pl (peaklist), rf (rawfile), 
 #' and set (settings)
@@ -245,7 +245,7 @@ proc_doc_pp <- function(dsrc) {  # esid <- esids[1]
 #' @description Will take a list of documents and process samples in them for 
 #' peak-picking, alignment, blank correction, annotation
 #'
-#' @param docsList list of documents as returned by elasticSearch API (hits.hits array) 
+#' @param docsList ntsp_docs_list list of documents as returned by elasticSearch API (hits.hits array) 
 #' @param coresBatch Number of cores to use in a signal batch
 #' 
 #' @details
@@ -255,7 +255,7 @@ proc_doc_pp <- function(dsrc) {  # esid <- esids[1]
 #' consecutive filter, these must be sorted by start time prior to starting
 #' this processing.
 #' 
-#' @return A proc_output list with 6 elements:  
+#' @return Output of processing. An object of class proco_nts  
 #' @export
 #'
 proc_batch_nts <- function(docsList, coresBatch) {

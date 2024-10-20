@@ -487,22 +487,32 @@ es_remove_by_filename <- function(escon, index, filenames) {
 
 #' Process an MS measurement file
 #' 
-#' Takes an esid from the rawfiles index and carries out dbas processing for 
-#' that file
+#' @description
+#' Takes an esid from the rawfiles index and carries out dbas processing (see details) for 
+#' that file, returns ntsworkflow::Report class object with results.
 #' 
 #' @param escon Elasticsearch connection object created by `elastic::connect`
 #' @param rfindex Name of rawfiles index
-#' @param esid ElasticSearch document IDs (character)
-#'
+#' @param esid ElasticSearch document IDs in the rawfiles index (character)
+#' 
+#' @details
+#' # dbas processing
+#' dbas processing means to take mzXML measurement file and analyse for compounds found
+#' in the spectral library, peaks are integrated and spectra are extracted and saved
+#' in the Report object.
+#' 
+#' 
 #' @return an object of class ntsworkflow::Report
 #' @export
 proc_esid <- function(escon, rfindex, esid, compsProcess = NULL) { 
-  #browser()
-  
+
+  # Connect to ES to retrieve doc source, extract source from API response
   stopifnot(length(esid) == 1)
   dc <- elastic::docs_get(escon, rfindex, esid, verbose = F)
   dc <- dc$`_source`
   
+  # Start ntsworkflow::Report object to do the processing of this file
+  # Transfer settings from doc source to Report object
   dbas <- Report$new()
   dbas$addRawFiles(F, dc$path)
   dbas$addIS(F, dc$dbas_is_table)
@@ -520,12 +530,16 @@ proc_esid <- function(escon, rfindex, esid, compsProcess = NULL) {
   dbas$changeSettings("instr", unlist(dc$dbas_instr))
   dbas$changeSettings("pol", dc$pol)  
   
-  # for the bfg method we are still using the old naming scheme (doi as name)
-  if (dc$chrom_method == "bfg_nts_rp1") {
-    dbas$changeSettings("chromatography", "dx.doi.org/10.1016/j.chroma.2015.11.014")
+  # Inconsistency in naming of chromatographic method between NTSPortal and CSL
+  # Corrects the naming so that it works for CSL
+  # TODO Change CSL to give bfg retention times the new name "bfg_nts_rp1"
+  if (dc$chrom_method == "bfg_nts_rp1") {  # new name
+    dbas$changeSettings("chromatography", "dx.doi.org/10.1016/j.chroma.2015.11.014")  # old name
   } else {
     dbas$changeSettings("chromatography", dc$chrom_method)
   }
+  
+  # Begin the actual processing
   dbas$changeSettings("numcores", 1)
   crash <- FALSE
   tryCatch(
@@ -539,7 +553,10 @@ proc_esid <- function(escon, rfindex, esid, compsProcess = NULL) {
   if (crash)
     return(NULL)
   
+  # Clear data will remove the meas. file from memory
   dbas$clearData()
+  
+  # Return Report object
   dbas
 }
 

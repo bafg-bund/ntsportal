@@ -28,12 +28,31 @@
 #' @param escon elasticsearch connection object created with elastic::connect
 #' @param index Name of the index you wish to create
 #'
-#' @export
 #'
 put_nts_index <- function(escon, index) {
+  warning("deprecated, use put_ntsp_index")
   f <- fs::path_package("ntsportal", "extdata", "nts_index_mappings.json")
   mappings <- jsonlite::read_json(f)
   elastic::index_create(escon, index, body = mappings)
+}
+
+#' Create an nts type index
+#' 
+#' The index mappings are saved under inst/extdata as json files.
+#' 
+#' @param escon elasticsearch connection object created with elastic::connect
+#' @param mappingType type of mapping (nts only at the moment)
+#' @param indexName Name of the index you wish to create
+#'
+#'
+put_ntsp_index <- function(escon, mappingType = "nts", indexName) {
+  f <- switch(
+    mappingType,
+    nts = fs::path_package("ntsportal", "extdata", "nts_index_mappings.json"),
+    stop("unknown mapping type")
+    )
+  mappings <- jsonlite::read_json(f)
+  elastic::index_create(escon, indexName, body = mappings)
 }
 
 #' Send index creation request for dbas index
