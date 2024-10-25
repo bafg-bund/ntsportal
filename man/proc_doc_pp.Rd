@@ -7,7 +7,7 @@
 proc_doc_pp(dsrc)
 }
 \arguments{
-\item{dsrc}{document source}
+\item{dsrc}{document source ntsp_docs_source}
 }
 \value{
 a list with 3 elements, named pl (peaklist), rf (rawfile), 

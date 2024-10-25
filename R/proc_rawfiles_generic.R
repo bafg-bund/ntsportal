@@ -239,58 +239,11 @@ record_proc <- function(escon, rfindex, pathRawfiles, type) {
 }
 
 
-#' Get unprocessed files as batches
-#'
-#' @param allDocs entire msrawfiles index as docsList from elasticSearch
-#' @param type type of processing, 'nts' or 'dbas'
-#'
-#' @return list of batches, each containing the docs for processing
-#' @export
-#'
-get_unproc_batches <- function(allDocs, type) {
-  docsSrc <- lapply(allDocs, "[[", i = "_source")
-  field <- switch(type, nts = "nts_last_eval", dbas = "dbas_last_eval")
-  notProc <- purrr::keep(docsSrc, function(doc) !is.element(field, names(doc)))
-  # directories containing new files
-  batches <- unique(dirname(gf(notProc, "path", character(1))))
-  # If the doc is found in one of these dirs, then it is returned for processing
-  docsOpen <- purrr::keep(allDocs, function(doc) dirname(doc[["_source"]]$path) %in% batches)
-  dirs <- dirname(vapply(docsOpen, function(doc) doc[["_source"]][["path"]], character(1)))
-  docsGrouped <- split(docsOpen, dirs)
-  docsGrouped
-}
 
 
-#' Just get the whole msrawfiles index
-#' 
-#' @description
-#' We just collect the whole index and do any further further manipulation in R
-#' The sorting is done on the path field.
-#'
-#' @param escon Connection object created with `elastic::connect`
-#' @param rfindex msrawfiles index name
-#'
-#' @return entire msrawfiles as an msrawfiles_docs_list
-#' @export
-#'
-get_msrawfiles <- function(escon, rfindex) {
-  # Collect entire msrawfiles index
-  res <- es_search_paged(escon, rfindex, searchBody = list(
-    query = list(match_all = stats::setNames(list(), character(0)))), 
-    sort = "path")$hits$hits
-  new_msrawfiles_docs_list(res)
-}
 
-#' @export
-new_msrawfiles_docs_list <- function(x) {
-  class(x) <- c("msrawfiles_docs_list", class(x))
-  x
-}
 
-#' @export
-`[.msrawfiles_docs_list` <- function(x, i) {
-  new_msrawfiles_docs_list(NextMethod())
-}
+
 
 #' Create new index for DBAS results documents
 #'

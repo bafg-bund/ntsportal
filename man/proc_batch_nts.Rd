@@ -7,12 +7,12 @@
 proc_batch_nts(docsList, coresBatch)
 }
 \arguments{
-\item{docsList}{list of documents as returned by elasticSearch API (hits.hits array)}
+\item{docsList}{ntsp_docs_list list of documents as returned by elasticSearch API (hits.hits array)}
 
 \item{coresBatch}{Number of cores to use in a signal batch}
 }
 \value{
-A proc_output list with 6 elements:
+Output of processing. An object of class proco_nts
 }
 \description{
 Will take a list of documents and process samples in them for 
@@ -22,5 +22,6 @@ peak-picking, alignment, blank correction, annotation
 # Filtering the alignment table 
 ## Consecutive filter 
 The order of the samples is important for the
-consecutive filter, these must be sorted by start time.
+consecutive filter, these must be sorted by start time prior to starting
+this processing.
 }

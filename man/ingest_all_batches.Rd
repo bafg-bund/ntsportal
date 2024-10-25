@@ -11,7 +11,8 @@ ingest_all_batches(
   configPath = "~/config.yml",
   ingestScriptPath,
   type,
-  pauseTime = 2
+  pauseTime = 2,
+  verbose = F
 )
 }
 \arguments{
@@ -29,10 +30,13 @@ ingest_all_batches(
 
 \item{pauseTime}{how much time to wait between uploading and checking, make 
 sure you give it a lot of pause time for large uploads with many batches}
+
+\item{verbose}{logical, should output of ingest.sh be printed}
 }
 \value{
 Successfully uploaded file paths
 }
 \description{
-Ingest a series of ntsportal json files
+given a folder of compressed json files, and a connection to elasticSearch,
+this function will ingest all the json files sequentially
 }

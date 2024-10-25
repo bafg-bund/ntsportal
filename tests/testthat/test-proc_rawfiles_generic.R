@@ -56,14 +56,3 @@ test_that("New indexes can be created for nts processing", {
   
 })
 
-test_that("Collect whole msrawfiles and make a subset", {
-  source("~/connect-ntsp.R")
-  
-  x <- get_msrawfiles(escon, "ntsp_index_msrawfiles_unit_tests")
-  class(x)
-  expect_s3_class(x, "msrawfiles_docs_list")
-  # This is not working yet for whatever reason
-  # sloop::s3_dispatch(x[1:3])
-  # y <- x[1:3]
-  # class(y)
-})

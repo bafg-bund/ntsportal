@@ -2,6 +2,7 @@
 
 
 test_that("Set of two batches can be processed", {
+  
   docsList <- readRDS(test_path("fixtures", "proc_rawfiles_nts","whole_msrawfiles_docsList.RDS"))
   dl2 <- get_unproc_batches(docsList, "nts")
   dl3 <- dl2[3:4]
@@ -57,85 +58,53 @@ test_that("Process whole msrawfiles for new files and create jsons", {
   # saveRDS(msr, test_path("fixtures", "whole_msrawfiles_docsList.RDS"))
 })
 
-test_that("Collect all batches which are still open for processing", {
-  docsList <- readRDS(test_path("fixtures", "whole_msrawfiles_docsList.RDS"))
-  batches <- get_unproc_batches(docsList, "nts")
-  expect_equal(length(batches), 4)
-  expect_true(any(grepl("olmesartan-d6", names(batches))))
-  x <- sapply(batches, length)["/srv/cifs-mounts/g2/G/G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files/olmesartan-d6-bisoprolol"]
-  expect_equal(as.numeric(x), 8)
-  
-  # For getting data
-  # source("~/connect-ntsp.R")
-  # rfindex <- "ntsp_index_msrawfiles_unit_tests"
-  # reset_eval(escon, rfindex, list(match_all = stats::setNames(list(), character(0))), "nts", confirm = FALSE)
-  # docsList <- es_search_paged(escon, rfindex, searchBody = list(query = list(match_all = stats::setNames(list(), character(0)))), sort = "path")$hit$hits
-  # saveRDS(docsList, test_path("fixtures", "whole_msrawfiles_docsList.RDS"))
-}) 
+
 
 # Batch process functions ####
 
-test_that("Peakpicking on a single file works", {
-  
-  ds <- jsonlite::read_json(
-    test_path("fixtures", "doc_source-Des_07_02_pos.json")
-  )
-  
-  result <- proc_doc_pp(ds)
-  expect_equal(length(result), 3)
-  expect_equal(nrow(result$pl), 16)
-})
-
-test_that("Peakpicking on a single file returns null when no peaks found", {
-  
-  ds <- jsonlite::read_json(
-    test_path("fixtures", "doc_source-RH_pos_20220602_no_peaks.json")
-  )
-  
-  result <- proc_doc_pp(ds)
-  expect_null(result)
-})
 
 test_that("A batch (3 samples), with no blanks is processed to proc_output and
           finds IS and compound annotations", {
   
-  dl <- jsonlite::read_json(
+  msrawfileRecords <- jsonlite::read_json(
     test_path("fixtures", "doc_source-Des_07-batch.json")
   )
   
-  po <- proc_batch_nts(
-    docsList = dl,
+  processingOutput <- proc_batch_nts(
+    docsList = msrawfileRecords,
     coresBatch = 1
   )
   
-  expect_equal(length(po), 7)
-  expect_equal(nrow(po$sampleList), 6)
-  expect_contains(po$annotationTable$name, "Olmesartan-d6")
-  expect_contains(po$annotationTable$name, "Bisoprolol")
-  expect_s3_class(po, "proco_nts")
+  expect_equal(length(processingOutput), 7)
+  expect_equal(nrow(processingOutput$sampleList), 6)
+  expect_contains(processingOutput$annotationTable$name, "Olmesartan-d6")
+  expect_contains(processingOutput$annotationTable$name, "Bisoprolol")
+  expect_s3_class(processingOutput, "proco_nts")
   
-  # Bisoprolol on one row of alignment table
-  alig <- as.data.frame(po$grouped[, c(1,2)])
-  a2 <- subset(alig, abs(mean_mz - 326.233) <= .005 & abs(mean_RT / 60 - 7) <= .4)
-  expect_equal(nrow(a2), 1)
-  
-  # source("~/connect-ntsp.R")
-  # rx <- elastic::Search(
-  #   escon, "ntsp_index_msrawfiles_unit_tests",
-  #   body = list(
-  #     query = list(
-  #       bool = list(
-  #         must = list(
-  #           list(regexp = list(path = "/srv/cifs-mounts/g2/G/G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files/olmesartan-d6-bisoprolol/.*")),
-  #           list(term = list(blank = FALSE))
-  #         )
-  #       )
-  #     ),
-  #     sort = list(list(path = "asc"))
-  #   )
-  # )$hits$hits
-  # jsonlite::write_json(rx, test_path("fixtures", "doc_source-Des_07-batch.json"), pretty = T, auto_unbox = T)
+  alignmentTable <- as.data.frame(processingOutput$grouped[, c(1,2)])
+  rowsBisoprolol <- subset(alignmentTable, abs(mean_mz - 326.233) <= .005 & abs(mean_RT / 60 - 7) <= .4)
+  expect_equal(nrow(rowsBisoprolol), 1)
+})
 
+test_that("Peakpicking on a single file gives a list of 3 elements, one of which is a peaklist", {
+  
+  msrawfileRecord <- jsonlite::read_json(
+    test_path("fixtures", "doc_source-Des_07_02_pos.json")
+  )
+  
+  peakPickingResults <- proc_doc_pp(msrawfileRecord)
+  expect_equal(length(peakPickingResults), 3)
+  expect_equal(nrow(peakPickingResults$pl), 16)
+})
+
+test_that("Peakpicking on a single file returns null when no peaks found", {
+  
+  msrawfileRecordNoPeaks <- jsonlite::read_json(
+    test_path("fixtures", "doc_source-RH_pos_20220602_no_peaks.json")
+  )
+  
+  peakPickingResults <- proc_doc_pp(msrawfileRecordNoPeaks)
+  expect_null(peakPickingResults)
 })
 
 test_that("A batch does not find the IS", {

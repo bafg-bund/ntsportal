@@ -1,10 +1,6 @@
 
 test_that("Test file Des_07_01_pos.mzXML can be processed for Bisoprolol", {
   
-  logger::with_log_threshold(
-    source("~/connect-ntsp.R"),
-    threshold = "OFF"
-  )
   rfindex <- "ntsp_index_msrawfiles_unit_tests"
   rfloc <- "/srv/cifs-mounts/g2/G/G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files/"
   

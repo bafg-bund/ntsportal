@@ -17,7 +17,7 @@ ingest_ntspl(
 \item{escon}{Connection object created with `elastic::connect`}
 
 \item{ntsplJsonPath}{Path to json file, the filename must contain the alias into which
-the data must be ingested using the delimiters '-inda-' and '-indn-'}
+the data must be ingested using the delimiters '-indn-' and '-bi-'}
 
 \item{configPath}{Config file where the credentials for signing into 
 elasticSearch are found, see ntsportal-wiki}
