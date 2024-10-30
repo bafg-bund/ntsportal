@@ -1,4 +1,18 @@
 
+
+test_that("Test file Des_07_01_pos.mzXML can be processed for Bisoprolol v2", {
+  
+  
+  msr <- readRDS(test_path("fixtures", "screeningProcessBatchScanDbas", "whole_msrawfiles_docsList.RDS"))
+  recordDes_07_01 <- msr[[10]][["_source"]]
+  
+  fileResult <- fileScanDbas(msrawfileRecord = recordDes_07_01)
+  
+})
+
+
+
+
 test_that("Test file Des_07_01_pos.mzXML can be processed for Bisoprolol", {
   
   rfindex <- "ntsp_index_msrawfiles_unit_tests"

@@ -24,15 +24,15 @@
 # and therefore the file will be processed again
 
 # Variables ####
-VERSION <- "2024-06-10"
+VERSION <- "2024-10-29"
 RFINDEX <- "ntsp_msrawfiles"
-TEMPSAVE <- "/scratch/nts/tmp"
+TEMPSAVE <- "~/ntsgz/db/ntsp/temp_files"
 CONFG <- "~/config.yml"
-INGESTPTH <- "scripts/ingest.sh"
+INGESTPTH <- "inst/scripts/ingest.sh"
 UPDATESPECDB <- "scripts/update-spectral-library-ntsp.R"
 ADDANALYSIS <- "scripts/compute-analysis-index.R"
-ROOTDIR_RF <- "/scratch/nts/messdaten"
-SPECLIBPATH <- "/scratch/nts/MS2_db_v11.db"  # temporary: only for adding group and formula after processing
+ROOTDIR_RF <- "~/messdaten"
+SPECLIBPATH <- "~/ntsgz/db/ntsp/spectral-lib/CSL_v24.3.db"  # temporary: only for adding group and formula after processing
 CORES <- 1
 CORESBATCH <- 6
 
@@ -41,7 +41,6 @@ library(logger)
 library(ntsportal)
 
 startTime <- lubridate::now()
-#setwd("~/projects/ntsautoeval/msrawfiles-db/")
 
 # Create escon variable
 source("~Jewell/connect-ntsp.R")
@@ -57,7 +56,7 @@ stopifnot(
   file.exists(SPECLIBPATH)
 )
 stopifnot(CORES == 1 || CORESBATCH == 1)
-# debug(check_integrity_msrawfiles)
+
 check_integrity_msrawfiles(escon = escon, rfindex = RFINDEX, locationRf = ROOTDIR_RF)
 
 # Collect rawfiles ####
@@ -202,17 +201,5 @@ hrs <- round(as.numeric(endTime - startTime, units = "hours"))
 
 log_info("--------- Completed eval-new-rawfiles-dbas.R in {hrs} h ------------")
 
-# Copyright 2016-2024 Bundesanstalt für Gewässerkunde
-# This file is part of ntsportal
-# ntsportal is free software: you can redistribute it and/or modify it under the 
-# terms of the GNU General Public License as published by the Free Software 
-# Foundation, either version 3 of the License, or (at your option) any 
-# later version.
-# 
-# ntsportal is distributed in the hope that it will be useful, but WITHOUT ANY 
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License along 
-# with ntsportal. If not, see <https://www.gnu.org/licenses/>.
+
 

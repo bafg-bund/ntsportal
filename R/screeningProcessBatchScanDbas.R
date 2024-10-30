@@ -470,9 +470,62 @@ es_remove_by_filename <- function(escon, index, filenames) {
 
 # Processing functions ####
 
-# will go through all stages dbas1-3+ingest for all files in the 
-# batch
 
+
+
+fileScanDbas(msrawfileRecord, compsToProcess) {
+  fileScannerDbas <- createScannerDbas(msrawfileRecord)
+  fileScannerDbas <- runScanningDbas(fileScannerDbas, compsToProcess)
+  fileScannerDbas
+}
+
+
+createScannerDbas <- function(msrawfileRecord) {
+  rec <- msrawfileRecord
+  scanner <- Report$new()
+  scanner$addRawFiles(F, rec$path)
+  scanner$addIS(F, rec$dbas_is_table)
+  scanner$addDB(F, rec$dbas_spectral_library)
+  scanner$changeSettings("blank_int_factor", rec$dbas_blank_int_factor)
+  scanner$changeSettings("area_threshold", rec$dbas_area_threshold)
+  scanner$changeSettings("rttolm", rec$dbas_rttolm)
+  scanner$changeSettings("mztolu", rec$dbas_mztolu)
+  scanner$changeSettings("mztolu_fine", rec$dbas_mztolu_fine)
+  scanner$changeSettings("use_int_threshold", "area")
+  scanner$changeSettings("threshold", rec$dbas_ndp_threshold)
+  scanner$changeSettings("rtTolReinteg", rec$dbas_rtTolReinteg)
+  scanner$changeSettings("ndp_m", rec$dbas_ndp_m)
+  scanner$changeSettings("ndp_n", rec$dbas_ndp_n)
+  scanner$changeSettings("instr", unlist(rec$dbas_instr))
+  scanner$changeSettings("pol", rec$pol)
+  scanner$changeSettings("numcores", 1)
+  
+  scanner <- changeNameChromMethod(scanner, rec)
+  scanner
+}
+
+changeNameChromMethod <- function(scannerObj, msrawfileRecord) {
+  # Inconsistency in naming of chromatographic method between NTSPortal and CSL
+  # Corrects the naming so that it works for CSL
+  # TODO Change CSL to give bfg retention times the new name "bfg_nts_rp1"
+  if (msrawfileRecord$chrom_method == "bfg_nts_rp1") {  # new name
+    scannerObj$changeSettings("chromatography", "dx.doi.org/10.1016/j.chroma.2015.11.014")  # old name
+  } else {
+    scannerObj$changeSettings("chromatography", msrawfileRecord$chrom_method)
+  }
+  scannerObj
+}
+
+runScanningDbas <- function(scannerObj, compsToProcess) {
+  tryCatch({
+    suppressMessages(scannerObj$process_all(comp_names = compsProcess))
+    scannerObj$clearData()
+  }, 
+  error = function(cnd) {
+    log_error("Processing error in file: {scannerObj$rawfiles},
+                  error message: {conditionMessage(cnd)}")
+  })
+}
 
 #' Process an MS measurement file
 #' 
