@@ -40,10 +40,7 @@ test_that("Test file Des_07_01_pos.mzXML can be processed for Bisoprolol", {
 
 
 test_that("Test file BW1_Dessau_pos.mzXML can be processed for IS Olmesartan-d6", {
-  logger::with_log_threshold(
-    source("~/connect-ntsp.R"),
-    threshold = "OFF"
-  )
+  
   rfindex <- "ntsp_index_msrawfiles_unit_tests"
   res1 <- elastic::Search(
     escon, rfindex, 
@@ -61,13 +58,11 @@ test_that("Test file BW1_Dessau_pos.mzXML can be processed for IS Olmesartan-d6"
 })
 
 test_that("Test multiple files can be processed for IS", {
-  logger::with_log_threshold(
-    source("~/connect-ntsp.R"),
-    threshold = "OFF"
-  )
+ 
   isInd <- "ntsp_is_dbas_unit_tests"
   rfInd <- "ntsp_index_msrawfiles_unit_tests"
-  ingestP <- test_path("fixtures", "ingest.sh")
+  ingestP <- fs::path_package("ntsportal", "scripts", "ingest.sh")
+  rawFilesRoot <- "/srv/cifs-mounts/g2/G/G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files/"
   tempsavedir <- withr::local_tempdir()
   configfile <- "~/config.yml"
   
@@ -93,7 +88,7 @@ test_that("Test multiple files can be processed for IS", {
     indexType = "dbas_is", confirm = F
   )
   
-  # Should process 3 docs, 2 successfully, if this is more, then the test will fail.
+  # Should process 5 docs, 4 successfully, if this is more, then the test will fail.
   process_is_all(
     escon = escon,
     rfindex = rfInd,
@@ -101,20 +96,19 @@ test_that("Test multiple files can be processed for IS", {
     ingestpth = ingestP,
     configfile = configfile,
     tmpPath = tempsavedir,
+    rawfilesRootPath = rawFilesRoot,
     numCores = 1
   )
   #expect_equal(length(list.files(tempsavedir)), 1)
   numDocs <- elastic::Search(escon, isInd, body = '{"query": {"match_all": {}}}', 
                   size = 0)$hits$total$value
-  expect_equal(numDocs, 2)
+  expect_equal(numDocs, 4)
   file.remove(list.files(tempsavedir, full.names = T))
+  file.remove(tempsavedir)
 })
 
 test_that("A file with no peaks should should not return an error", {
-  logger::with_log_threshold(
-    source("~/connect-ntsp.R"),
-    threshold = "OFF"
-  )
+
   tempsavedir <- withr::local_tempdir()
   # VNSTWpABQ5NoSyLHKzdl has no peaks, -8q2OpABQ5NoSyLH7DJR is a normal file
   res <- process_is_all(
@@ -131,15 +125,16 @@ test_that("A file with no peaks should should not return an error", {
   expect_true(res)
   expect_equal(length(list.files(tempsavedir)), 1)
   file.remove(list.files(tempsavedir, full.names = T))
+  file.remove(tempsavedir)
 })
 
 
 test_that("Test triplicate batch can be processed", {
-  source("~/connect-ntsp.R")
+  
   rfindex <- "ntsp_index_msrawfiles_unit_tests"
   tempsavedir <- withr::local_tempdir()
   coresBatch <- 4
-  ingestpth <- test_path("fixtures", "ingest.sh")
+  ingestpth <- fs::path_package("ntsportal", "scripts", "ingest.sh")
   configfile <- "~/config.yml"
   
   res3 <- elastic::Search(
@@ -159,7 +154,7 @@ test_that("Test triplicate batch can be processed", {
   esids <- sapply(res3$hits$hits, function(x) x[["_id"]])
   
   # Delete old index
-  oldIndex <- get_field(escon, rfindex, esids, "dbas_index_name", j = T)
+  oldIndex <- get_field(escon, indexName = rfindex, esids = esids, fieldName = "dbas_index_name", j = T)
   if (elastic::index_exists(escon, oldIndex))
     res6 <- elastic::index_delete(escon, oldIndex, verbose = F)
   
@@ -215,5 +210,6 @@ test_that("Test triplicate batch can be processed", {
   expect_true(round(as.numeric(Sys.time()) - res8$aggregations$maxTime$value / 1000) < 1000)
   
   file.remove(list.files(tempsavedir, full.names = T))
+  file.remove(tempsavedir)
 })
 

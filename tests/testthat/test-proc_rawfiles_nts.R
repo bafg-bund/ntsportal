@@ -32,7 +32,7 @@ test_that("Ingest entire nts folder of batches", {
     rfindex = rfindex,
     resDir = test_path("fixtures", "processed_results_test"),
     configPath = "~/config.yml",
-    ingestScriptPath = test_path("fixtures", "ingest.sh"),
+    ingestScriptPath = fs::path_package("ntsportal", "scripts", "ingest.sh"),
     type = "nts",
     pauseTime = 2
   )

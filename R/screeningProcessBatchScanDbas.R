@@ -473,7 +473,7 @@ es_remove_by_filename <- function(escon, index, filenames) {
 
 
 
-fileScanDbas(msrawfileRecord, compsToProcess) {
+fileScanDbas <- function(msrawfileRecord, compsToProcess) {
   fileScannerDbas <- createScannerDbas(msrawfileRecord)
   fileScannerDbas <- runScanningDbas(fileScannerDbas, compsToProcess)
   fileScannerDbas
