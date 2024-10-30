@@ -30,17 +30,31 @@ NULL
 
 
 .onAttach <- function(libname, pkgname) {
-  packageStartupMessage("\nCreating escon variable for connection to elasticsearch\n")
-  
+  packageStartupMessage("\nBefore starting, use connectNtsportal() to create connection object to ElasticSearch\n")
+}
+
+#' Create ElasticSearch connection object
+#' 
+#' @description
+#' If credentials are available, will create the "escon" connection object in the 
+#' global environment for use by all functions. Otherwise will ask for input of
+#' credentials (in interactive use).
+#' 
+#' @export
+#'
+connectNtsportal <- function() {
+  checkSystemRing() # Bug in keyring, there must be a system ring
   if (haveCred()) {
     createEscon()
-  } else if (!haveRing()) {
+  } else if (!haveRing() && interactive()) {
     createRing()
     setCred()
     createEscon()
-  } else {
+  } else if (interactive()) {
     setCred()
     createEscon()
+  } else {
+    warning("Please run connectNtsportal interactively, in order to set the credentials for accessing NTSPortal")
   }
 }
 
@@ -59,6 +73,7 @@ createEscon <- function(ring = "ntsportal") {
   
   if (escon$ping()$cluster_name != "bfg-elastic-cluster") {
     warning("Connection to Elasticsearch cluster not established")
+    rm(escon)
   }
 }
 
@@ -75,10 +90,6 @@ haveCred <- function(ring = "ntsportal") {
 }
 
 haveRing <- function(ring = "ntsportal") {
-  # Bug in keyring, there must be a "system" keyring
-  if (!is.element("system", keyring::keyring_list()$keyring))
-    keyring::keyring_create("system", password = "system")
-  
   allRings <- keyring::keyring_list()$keyring
   is.element(ring, allRings)
 }
@@ -90,21 +101,47 @@ getCred <- function(ring = "ntsportal") {
   )
 }
 
-setCred <- function(ring = "ntsportal", usr = character(), pwd = character()) {
-  if (keyring::keyring_is_locked(keyring = ring))
-    keyring::keyring_unlock(keyring = ring, password = ring)  
-  
-  if (length(usr) > 0 && length(pwd) > 0) {
-    # Non interactive usage
-    keyring::key_set_with_value("ntsportal-user", keyring = ring, password = usr)
-    keyring::key_set_with_value("ntsportal-pwd", keyring = ring, password = pwd)  
-  } else {
-    # Interactive usage
-    keyring::key_set("ntsportal-user", keyring = ring, prompt = "Username: ")
-    keyring::key_set("ntsportal-pwd", keyring = ring, prompt = "Password: ")
-  }
+setCred <- function(ring = "ntsportal") {
+  keyring::key_set("ntsportal-user", keyring = ring, prompt = "Username for NTSPortal: ")
+  keyring::key_set("ntsportal-pwd", keyring = ring, prompt = "Password for NTSPortal: ")
 }
 
 createRing <- function(ring = "ntsportal") {
   keyring::keyring_create(keyring = ring, password = ring)  # keyring and keyring password are the same
+}
+
+
+checkSystemRing <- function() {
+  if (!haveRing("system"))
+    createRing("system")
+}
+
+#' Set credentials for accessing NTSPortal ElasticSearch
+#'
+#' @param ring Keyring name, do not change the default
+#' @param usr username, enter manually for non-interactive use
+#' @param pwd password, enter manually for non-interactive use
+#'
+#' @export
+#'
+setCredNonInteractive <- function(ring = "ntsportal", usr = character(), pwd = character()) {
+  checkSystemRing() # Bug in keyring, there must be a system ring
+  if (!haveRing(ring = ring)) {
+    createRing(ring = ring)
+  } 
+  if (keyring::keyring_is_locked(keyring = ring))
+    keyring::keyring_unlock(keyring = ring, password = ring)  
+  if (length(usr) > 0 && length(pwd) > 0) {
+    # Non interactive usage
+    keyring::key_set_with_value("ntsportal-user", keyring = ring, password = usr)
+    keyring::key_set_with_value("ntsportal-pwd", keyring = ring, password = pwd)  
+  }
+}
+
+clearRing <- function(ring = "ntsportal") {
+  if (is.element(ring, keyring::keyring_list()$keyring)) {
+    keyring::keyring_delete(ring)
+  } else {
+    warning(ring, " keyring not found")
+  }
 }
