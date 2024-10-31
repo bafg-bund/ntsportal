@@ -76,6 +76,7 @@ getCred <- function(ring = "ntsportal") {
 }
 
 setCred <- function(ring = "ntsportal") {
+  unlockRing()
   keyring::key_set("ntsportal-user", keyring = ring, prompt = "Username for NTSPortal: ")
   keyring::key_set("ntsportal-pwd", keyring = ring, prompt = "Password for NTSPortal: ")
 }
@@ -93,13 +94,17 @@ setCredNonInteractive <- function(ring = "ntsportal", usr = character(), pwd = c
   if (!haveRing(ring = ring)) {
     createRing(ring = ring)
   } 
-  if (keyring::keyring_is_locked(keyring = ring))
-    keyring::keyring_unlock(keyring = ring, password = ring)  
+  unlockRing()
   if (length(usr) > 0 && length(pwd) > 0) {
     # Non interactive usage
     keyring::key_set_with_value("ntsportal-user", keyring = ring, password = usr)
     keyring::key_set_with_value("ntsportal-pwd", keyring = ring, password = pwd)  
   }
+}
+
+unlockRing <- function(ring = "ntsportal") {
+  if (keyring::keyring_is_locked(keyring = ring))
+    keyring::keyring_unlock(keyring = ring, password = ring)  
 }
 
 createRing <- function(ring = "ntsportal") {
