@@ -58,8 +58,6 @@ stopifnot(CORES == 1 || CORESBATCH == 1)
 
 check_integrity_msrawfiles(escon = escon, rfindex = RFINDEX, locationRf = ROOTDIR_RF)
 
-
-
 # Collect rawfiles ####
 qlist <- list(
   query = list(
