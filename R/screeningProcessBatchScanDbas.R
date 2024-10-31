@@ -472,7 +472,7 @@ es_remove_by_filename <- function(escon, index, filenames) {
 
 
 
-fileScanDbas <- function(msrawfileRecord, compsToProcess) {
+fileScanDbas <- function(msrawfileRecord, compsToProcess = NULL) {
   fileScannerDbas <- createScannerDbas(msrawfileRecord)
   fileScannerDbas <- runScanningDbas(fileScannerDbas, compsToProcess)
   fileScannerDbas
@@ -517,13 +517,14 @@ changeNameChromMethod <- function(scannerObj, msrawfileRecord) {
 
 runScanningDbas <- function(scannerObj, compsToProcess) {
   tryCatch({
-    suppressMessages(scannerObj$process_all(comp_names = compsProcess))
+    suppressMessages(scannerObj$process_all(comp_names = compsToProcess))
     scannerObj$clearData()
   }, 
   error = function(cnd) {
-    log_error("Processing error in file: {scannerObj$rawfiles},
+    log_error("Processing error in file: {scannerObj$rawFiles},
                   error message: {conditionMessage(cnd)}")
   })
+  scannerObj
 }
 
 #' Process an MS measurement file
@@ -1218,7 +1219,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
 #' @export
 #' 
 process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile, 
-                           tmpPath = "/scratch/nts/tmp", numCores = 10,
+                           tmpPath = "~/tmp", numCores = 10,
                            rawfilesRootPath = "/scratch/nts/messdaten/",
                            numFilesToProcess = NULL,
                            idsToProcess = NULL, noIngest = FALSE) {
