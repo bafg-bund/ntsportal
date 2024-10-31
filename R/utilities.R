@@ -657,7 +657,9 @@ es_search_paged <- function(escon, index, searchBody = NULL, sort, totalSize = I
   searchAfter <- res1$hits$hits[[numHits]]$sort[[1]]
   
   if (!is.list(searchBody) && is.character(searchBody)) {
+    stop("Do not use a string-based search, convert to a list-based search")
     searchBodyList <- jsonlite::fromJSON(searchBody)
+    
   } else if (is.list(searchBody)) {
     searchBodyList <- searchBody
   } else {

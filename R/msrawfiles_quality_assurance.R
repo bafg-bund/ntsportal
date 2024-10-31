@@ -514,8 +514,8 @@ check_batches_eval <- function(escon, rfindex, batches) {
   
   # Check that each batch contains at least one blank
   okBlank <- vapply(batches, function(x) {
-    br <- get_field(escon, rfindex, x, "dbas_blank_regex", justone = T)
-    fn <- get_field(escon, rfindex, x, "filename")
+    br <- get_field(escon, indexName = rfindex, esids = x, fieldName = "dbas_blank_regex", justone = T)
+    fn <- get_field(escon, indexName = rfindex, esids = x, fieldName = "filename")
     any(grepl(br, fn))
   }, logical(1))
   if (any(!okBlank)) {

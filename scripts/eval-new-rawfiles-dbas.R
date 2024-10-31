@@ -42,8 +42,7 @@ library(ntsportal)
 
 startTime <- lubridate::now()
 
-# Create escon variable
-source("~Jewell/connect-ntsp.R")
+connectNtsportal()
 
 log_info("--------- eval-new-rawfiles-dbas.R v{VERSION} -----------")
 
@@ -59,28 +58,29 @@ stopifnot(CORES == 1 || CORESBATCH == 1)
 
 check_integrity_msrawfiles(escon = escon, rfindex = RFINDEX, locationRf = ROOTDIR_RF)
 
+
+
 # Collect rawfiles ####
-resp <- es_search_paged(escon, RFINDEX, searchBody = '
-  {
-    "query": {
-      "bool": {
-        "must_not": [
-          {
-            "exists": {
-              "field": "dbas_last_eval"
-            }
-          },
-          {
-            "term": {
-              "blank": true
-            }
-          }
-        ]
-      }
-    },
-  "_source": ["path"]
-  }
-', sort = "path:asc")
+qlist <- list(
+  query = list(
+    bool = list(
+      must_not = list(
+        list(
+          exists = list(
+            field = "dbas_last_eval"
+          )
+        ),
+        list(
+          term = list(
+            blank = TRUE
+          )
+        )
+      )
+    )
+  ),
+  `_source` = "path"
+)
+resp <- es_search_paged(escon, RFINDEX, searchBody = qlist, sort = "path:asc")
 hits <- resp$hits$hits
 dirs <- unique(dirname(vapply(hits, function(x) x[["_source"]]$path, character(1))))
 
