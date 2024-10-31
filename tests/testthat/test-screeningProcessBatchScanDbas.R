@@ -1,5 +1,5 @@
 
-connectNtsportal()
+ntsportal::connectNtsportal()
 
 test_that("Test file Des_07_01_pos.mzXML can be processed for Bisoprolol v2", {
   recordDes_07_01 <- getSingleRecordDes_07_01_pos()
@@ -108,6 +108,7 @@ test_that("A file with no peaks should should not return an error", {
     ingestpth = test_path("fixtures", "ingest.sh"),
     configfile = "~/config.yml",
     tmpPath = tempsavedir, 
+    rawfilesRootPath = "/srv/cifs-mounts/g2/G/G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files",
     numCores = 1,
     idsToProcess = c("X","VNSTWpABQ5NoSyLHKzdl","-8q2OpABQ5NoSyLH7DJR"),
     noIngest = T

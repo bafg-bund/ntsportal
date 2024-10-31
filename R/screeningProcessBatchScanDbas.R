@@ -1219,7 +1219,7 @@ proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile
 #' @export
 #' 
 process_is_all <- function(escon, rfindex, isindex, ingestpth, configfile, 
-                           tmpPath = "/scratch/nts/tmp", numCores = 10,
+                           tmpPath = "~/tmp", numCores = 10,
                            rawfilesRootPath = "/scratch/nts/messdaten/",
                            numFilesToProcess = NULL,
                            idsToProcess = NULL, noIngest = FALSE) {

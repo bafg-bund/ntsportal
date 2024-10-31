@@ -23,7 +23,7 @@ import json
 import tqdm
 import time
 import sys
-import yaml
+import yaml  # pyyaml
 
 # set import time, will also be used as batch identifier
 
