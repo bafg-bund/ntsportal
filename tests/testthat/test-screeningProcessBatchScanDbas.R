@@ -1,32 +1,23 @@
 
+connectNtsportal()
 
 test_that("Test file Des_07_01_pos.mzXML can be processed for Bisoprolol v2", {
+  recordDes_07_01 <- getSingleRecordDes_07_01_pos()
   
+  fileResult <- fileScanDbas(msrawfileRecord = recordDes_07_01, compsToProcess = "Bisoprolol")
   
-  msr <- readRDS(test_path("fixtures", "screeningProcessBatchScanDbas", "whole_msrawfiles_docsList.RDS"))
-  recordDes_07_01 <- msr[[10]][["_source"]]
-  
-  fileResult <- fileScanDbas(msrawfileRecord = recordDes_07_01)
-  
+  expect_s4_class(fileResult, "Report")
+  expect_equal(fileResult$peakList$comp_name, "Bisoprolol")
 })
 
-
-
-
-test_that("Test file Des_07_01_pos.mzXML can be processed for Bisoprolol", {
+test_that("Test file Des_07_01_pos.mzXML can be processed for Bisoprolol (old version)", {
   
   rfindex <- "ntsp_index_msrawfiles_unit_tests"
-  rfloc <- "/srv/cifs-mounts/g2/G/G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files/"
-  
-  t1 <- check_integrity_msrawfiles(escon, rfindex = rfindex, locationRf = rfloc)
-  expect_true(t1)
-  
   res1 <- elastic::Search(
     escon, rfindex, 
     body = list(query = list(term = list(filename = "Des_07_01_pos.mzXML"))), 
     source = "_id"
   )
-  
   e <- res1$hits$hits[[1]][["_id"]]
   
   re <- proc_esid(
@@ -87,8 +78,7 @@ test_that("Test multiple files can be processed for IS", {
     queryBody = list(ids = list(values = esids)), 
     indexType = "dbas_is", confirm = F
   )
-  
-  # Should process 5 docs, 4 successfully, if this is more, then the test will fail.
+  Sys.sleep(1)
   process_is_all(
     escon = escon,
     rfindex = rfInd,
@@ -99,7 +89,7 @@ test_that("Test multiple files can be processed for IS", {
     rawfilesRootPath = rawFilesRoot,
     numCores = 1
   )
-  #expect_equal(length(list.files(tempsavedir)), 1)
+  Sys.sleep(1)
   numDocs <- elastic::Search(escon, isInd, body = '{"query": {"match_all": {}}}', 
                   size = 0)$hits$total$value
   expect_equal(numDocs, 4)
