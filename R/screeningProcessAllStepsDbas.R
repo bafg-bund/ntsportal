@@ -1,18 +1,10 @@
 
 #' @export
-screeningProcessAllStepsDbas <- function() {
-  VERSION <- "2024-10-29"
-  RFINDEX <- "ntsp_msrawfiles"
-  TEMPSAVE <- "~/ntsgz/db/ntsp/temp_files"
-  CONFG <- "~/config.yml"
-  INGESTPTH <- "inst/scripts/ingest.sh"
-  UPDATESPECDB <- "scripts/update-spectral-library-ntsp.R"
-  ADDANALYSIS <- "scripts/compute-analysis-index.R"
-  ROOTDIR_RF <- "~/messdaten"
-  SPECLIBPATH <- "~/ntsgz/db/ntsp/spectral-lib/CSL_v24.3.db"  # temporary: only for adding group and formula after processing
-  CORES <- 1
-  CORESBATCH <- 6
-  
+screeningProcessAllStepsDbas <- function(RFINDEX, SPECLIBPATH, TEMPSAVE, CONFG, 
+                                         INGESTPTH, UPDATESPECDB, ADDANALYSIS, 
+                                         ROOTDIR_RF, VERSION, CORES, CORESBATCH) 
+  {
+
   library(ntsworkflow)
   library(logger)
   library(ntsportal)
