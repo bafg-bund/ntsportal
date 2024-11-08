@@ -2,16 +2,559 @@
 
 
 
-# Functions for the eval-rawfiles-dbas.R script ####
+
+#' Process a batch of MS measurement files stored in the msrawfiles index
+#' 
+#' Takes a vector of esids and performs dbas on these as a batch. Files are
+#' evaluated using the settings in the msrawfiles index. Results are ingested to
+#' the indicated dbas results index
+#' 
+#' @param escon Elasticsearch connection object created by `elastic::connect`
+#' @param rfindex Name of rawfiles index
+#' @param esids ElasticSearch document IDs (character)
+#' @param tempsavedir Temporary save location
+#' @param ingestpth Path where the ingest.sh script is found
+#' @param configfile Config file where the credentials for signing into elasticsearch are found
+#' @param coresBatch Number of cores to use in a signal batch
+#' @param noIngest Logical, for testing purposes, no upload, just create json. Will also return JSON (invisibly)
+#'
+#' @return Function is run for side-effects but returns number of documents uploaded
+#' @export
+proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile, 
+                       coresBatch, noIngest = FALSE) {
+  
+  # Define functions
+  # Create a get_field function with some default parameters
+  get_field2 <- get_field_builder(escon = escon, index = rfindex)
+  
+  
+  # Define Variables
+  # These pollute the comp_group field and need to be removed
+  SPEC_SOURCES <- c("BfG", "LfU", "UBA")
+  batchStartTime <- lubridate::now()
+  
+  # Create path for saving report files
+  savename <- gsub("[/\\.]", "_", dirname(get_field2(esids, "path"))[1])
+  savename <- paste0("dbas-batch--", savename, "--", format(Sys.time(), "%y%m%d"), ".report")
+  savename <- file.path(tempsavedir, savename)
+  
+  # Get path to collective spectral library (CSL)
+  dbPath <- get_field2(esids, "dbas_spectral_library", justone = T)
+  
+  # Get path to batch (measurement files)
+  dr <- paste(unique(dirname(get_field2(esids, "path", justone = F))), collapse= ", ")
+  
+  record_end_processing <- function(escon, rfindex, idsEs, pathDb, timeStart) {
+    timeText <- format(Sys.time(), "%Y-%m-%d %H:%M:%S", tz = "GMT")
+    cslHash <- system2("sha256sum", pathDb, stdout = TRUE)
+    timeEnd <- lubridate::now()
+    avgMins <- round(
+      as.numeric(timeEnd - timeStart, units = "mins") / length(idsEs),
+      digits = 2
+    )
+    tryCatch(
+      res <- es_add_value(
+        escon, rfindex, 
+        queryBody = list(ids = list(values = idsEs)),
+        dbas_last_eval = timeText,
+        dbas_spectral_library_sha256 = cslHash,
+        dbas_proc_time = avgMins
+      ),
+      error = function(cnd) {
+        glue("Error recording processing date: {conditionMessage(cnd)}")
+      }
+    )
+    
+    if (exists("res")) {
+      return(invisible(res$updated > 0))
+    } else {
+      return(invisible(FALSE))
+    }
+  }
+  
+  
+  log_info("Starting batch {dr}")
+  
+  tryCatch({
+    # Step 1 - Screening ####
+    tryCatch({
+      if (rstudioapi::isAvailable()) {
+        plan(multisession, workers = coresBatch)  
+      } else {
+        plan(multicore, workers = coresBatch)
+      }
+      repLt <- furrr::future_map(
+        esids, 
+        proc_esid, 
+        escon = escon, 
+        rfindex = rfindex
+      )
+      plan(sequential)
+    },
+    error = function(cnd) {
+      log_warn("Error in screening for batch with id {esids[1]}")
+      message(cnd)
+    }
+    )
+    
+    if (any(vapply(repLt, is.null, logical(1))) || 
+        any(vapply(repLt, inherits, logical(1), what = "try-error"))) {
+      errorEsids <- c(
+        esids[vapply(repLt, is.null, logical(1))],
+        esids[vapply(repLt, inherits, logical(1), what = "try-error")]
+      )
+      errorFiles <- get_field2(errorEsids, "path")
+      errorFilesClps <- paste(errorFiles, collapse = "\n")
+      log_warn("Error in files {errorFilesClps}")
+    }
+    # remove errors
+    repLt <- Filter(Negate(is.null), repLt)
+    repLt <- Filter(function(x) Negate(inherits)(x, what = "try-error"), repLt)
+    
+    if (length(repLt) == 0) {
+      log_warn("No results for batch starting with file {get_field2(esids, 'path')[1]}")
+      record_end_processing(escon, rfindex, esids, dbPath, batchStartTime)
+      return(0)
+    }
+    
+    # Remove reports with no peaks
+    nothingFound <- vapply(repLt, function(x) nrow(x$peakList) == 0, logical(1))
+    
+    if (any(nothingFound)) {
+      errorEsids <- esids[nothingFound]
+      nothingFiles <- get_field2(errorEsids, "path")
+      message(sprintf("\nFiles\n%s\nhave no hits.", 
+                      paste(nothingFiles, collapse = "\n")))
+    }
+    
+    repLt <- Filter(function(x) nrow(x$peakList) != 0, repLt)  
+    
+    if (length(repLt) == 0) {
+      log_warn("No results for batch starting with file {get_field2(esids, 'path')[1]}")
+      record_end_processing(escon, rfindex, esids, dbPath, batchStartTime)
+      return(0)
+    }
+    
+    log_info("Merging reports")
+    if (length(repLt) == 1) {
+      resM <- repLt[[1]]
+    } else if (length(repLt) > 1) {
+      resM <- Reduce(ntsworkflow::mergeReport, repLt)
+    } else {
+      warning("\nNo report files were generated")
+      return(NULL)
+    }
+    
+    log_info("Saving report file at {savename}")
+    resM$clearAndSave(F, savename, clearData = F)
+    numPeaks <- nrow(resM$peakList)
+    rm(repLt)
+    log_info("Completed step 1 with {numPeaks} peaks")
+    if (!file.exists(savename))
+      return(NULL)
+    
+    # Step 2 - Correction and reintegration ####
+    
+    # The settings used must be the same for all the files in the batch
+    # need to check that all entries in batch have the same
+    
+    # blank_regex settings
+    bregex <- get_field2(esids, "dbas_blank_regex")
+    stopifnot(is.vector(bregex))
+    bregex <- unique(bregex)
+    stopifnot(length(bregex) == 1)
+    
+    # Rename Report
+    dbas <- resM
+    dbas$changeSettings("numcores", 1)
+    
+    log_info("Blank correction")
+    
+    if (!is.null(bregex) && any(grepl(bregex, dbas$rawFiles))) {
+      dbas$deleteBackground(grep(bregex, dbas$rawFiles, invert = T), 
+                            grep(bregex, dbas$rawFiles))
+      dbas$remRawFiles(grep(bregex, dbas$rawFiles))
+      esids_blank <- esids[get_field2(esids, "blank", simplify = T)]
+      esids <- esids[!get_field2(esids, "blank", simplify = T)]
+    } else {
+      esids_blank <- NULL
+      log_info("No blanks found in {dr}")
+    }
+    
+    log_info("Remove false positives")
+    
+    # Get list of false positives (will just add all of the fps)
+    bfps <- get_field2(esids, "dbas_fp", simplify = F)
+    # TODO in the future, delete fps on a by-sample basis
+    # for now, just add them all together into a big list
+    bfps <- unique(unlist(bfps))
+    
+    bmindet <- unique(get_field2(esids, "dbas_minimum_detections"))
+    stopifnot(length(bmindet) == 1, is.integer(bmindet))
+    
+    # Get rare compounds from a Report
+    # Get the compounds which are found fewer than min_freq
+    # repo ntsworkflow::Report class object
+    # min_freq Minimum number of detections
+    # return Names of compounds with FEWER than the min_freq of detections
+    get_rare <- function(repo, min_freq) {
+      pl <- repo$peakList
+      finds <- by(pl, pl$comp_name, nrow)
+      rare <- which(finds < min_freq)
+      names(rare)
+    }
+    
+    if (bmindet > 1)
+      bfps <- append(bfps, get_rare(dbas, bmindet))
+    
+    # Append compounds which are not found in at least x out of y replicates
+    # where x is dbas_minimum_detections
+    # dbas_minimum_detections therefore refers to the whole batch as well as
+    # one set of replicates (see previous filter).
+    # The total number of replicates for each sample is irrelevant
+    brepr <- unlist(unique(get_field2(esids, "dbas_replicate_regex")))
+    
+    if (!is.null(brepr) && !is.na(brepr)) {
+      pl <- dbas$peakList
+      pl$orig <- stringr::str_replace(pl$samp, brepr, "\\1")
+      
+      # Get the total number of replicates for each sample
+      # repTotal <- data.frame(
+      #   orig = unique(pl$orig),
+      #   number = tapply(pl$samp, pl$orig, function(p) length(unique(p)))
+      # )
+      
+      repCount <- by(pl, list(pl$comp_name, pl$orig), nrow)
+      repCount <- array2DF(repCount)
+      repCount <- repCount[!is.na(repCount$Value), ]
+      
+      # We take the average number of times a compound is found in y replicates,
+      # that way, if in one set of reps it doesn't get the required number of 
+      # detections, it still doesn't count as an FP
+      compCount <- data.frame(
+        comp_name = unique(repCount$Var1),
+        count = round(tapply(repCount$Value, repCount$Var1, mean))
+      )
+      repFps <- compCount[compCount$count < bmindet, "comp_name"]
+      bfps <- append(bfps, repFps)
+    }
+    
+    if (length(bfps) > 0)
+      for (fpname in bfps) dbas$deleteFP(fpname) 
+    
+    # remove 'B' in peak (compounds with multiple features)
+    pl <- dbas$peakList
+    pl2 <- subset(pl, select = c(comp_name, peak))
+    pl3 <- subset(pl2, peak != "A" )
+    comp_name_u <- unique(pl3$comp_name)
+    if (length(comp_name_u) > 0) {
+      log_info("Delete Peak 'B' of compounds:")
+      for (x in comp_name_u) 
+        message(paste(x, collapse = "\n"))
+    }
+    dbas$peakList <- dbas$peakList[dbas$peakList$peak == "A" , ]
+    
+    log_info("Reintegration")
+    
+    tryCatch(
+      suppressMessages(dbas$reIntegrate()),
+      error = function(cnd) {
+        log_warn("Error in reintegration of batch with id {esids[1]}")
+      }
+    )
+    
+    # save report
+    newsavename <- sub("\\.report$", "_i.report", savename)
+    dbas$clearAndSave(F, newsavename)
+    rm(dbas)
+    log_info("Step 2 complete, processed report file created for: {newsavename}")
+    
+    dbas <- ntsworkflow::loadReport(F, newsavename)  
+    #dbas <- ntsworkflow::loadReport(F, "tests/dbas-eval/temp-files/dbas-batch--_srv_cifs-mounts_g2_G_G2_HRMS_Messdaten_koblenz_wasser_2019_201904_pos--240429_i.report")  
+    
+    
+    # Step 3 - Conversion ####
+    log_info("Collecting data for json export")
+    
+    compData <- dbas$integRes[, c("samp", "comp_name", "adduct", "isotopologue",
+                                  "int_a", "real_mz", "real_rt_min")]
+    compData$samp <- basename(compData$samp)
+    
+    bist <- unique(get_field2(esids, "dbas_is_table"))
+    stopifnot(length(bist) == 1)
+    
+    bisn <- unique(get_field2(esids, "dbas_is_name"))
+    stopifnot(length(bisn) == 1)
+    
+    isData <- dbas$ISresults[dbas$ISresults$IS == bisn, c("samp", "int_a")]
+    
+    # Normalize intensities
+    dat <- merge(compData, isData, by = "samp", suffix = c("", "_IS"))
+    # verify columns are numeric
+    dat[, c("int_a", "int_a_IS")] <- lapply(dat[, c("int_a", "int_a_IS")], as.numeric)
+    dat$norm_a <- round(dat$int_a / dat$int_a_IS, 4)
+    dat$area_normalized <- dat$norm_a  # norm_a and area_normalized are exactly the same within this script. keep both?
+    
+    if (length(dat$int_a_IS) == 0)
+      stop("IS not found in docs ", paste(esids, collapse = ", "))
+    
+    if (!all(is.na(dat$int_a_IS))) {
+      rstdev <- round((sd(dat$int_a_IS)/mean(dat$int_a_IS)), 2)
+      log_info("Die relative SD des internen Standards beträgt ", 100*rstdev, "%")
+      # TODO The script must automatically decide what to do.
+      if  (100*rstdev >= 10) 
+        log_warn("Die Standardabweichung des internen Standards ist über Grenzwert von 10%")
+    }
+    
+    # Build average area from replicates
+    # brepr is the batch replicate regex which was defined for the replicate filter
+    if (!is.null(brepr) && !is.na(brepr)) {
+      log_info("Building replicate averages for testing")
+      # using the regex, give all replicate samples the same name 
+      # (best when replicates are indicated by _1 at the end)
+      dat$reps <- stringr::str_replace(dat$samp, brepr, "\\1")
+      averages <- by(dat, list(dat$reps, dat$comp_name), function(part) {
+        comp1 <- part$comp_name[1]
+        ad1 <- part$adduct[1]
+        isot1 <- part$isotopologue[1]
+        samp1 <- part$samp[1]
+        average_int_a <- mean(part$int_a, na.rm = T)
+        average_norm_a <- mean(part$norm_a, na.rm = T)
+        standard_deviation_norm_a <- sd(part$norm_a, na.rm = T)
+        rsd_norm_a <- standard_deviation_norm_a/average_norm_a
+        average_int_a_IS <- mean(part$int_a_IS, na.rm = T)
+        data.frame(
+          samp = samp1, comp_name = comp1, adduct = ad1, isotopologue = isot1, 
+          int_a = average_int_a, int_a_IS = average_int_a_IS, norm_a = average_norm_a, 
+          sd_norm_a = standard_deviation_norm_a, rsd_norm_a = rsd_norm_a
+        )
+      }, simplify = F)
+      
+      datTemp <- do.call("rbind", averages)
+      #saveRDS(datTemp, file = glue::glue("{esids[1]}_replicateRSD_{format(Sys.Date(), '%Y%m%d')}.RDS"))
+      
+      bba <- unique(get_field2(esids, "dbas_build_averages"))
+      stopifnot(length(bba) == 1)
+      if (bba) {
+        log_info("Using averages for results")
+        dat <- do.call("rbind", averages)
+        # remove column
+        dat$sd_norm_a <- NULL
+        dat$rsd_norm_a <- NULL
+      }
+      
+      # Warning if sd for any comp is high
+      if (any((100*datTemp$rsd_norm_a >= 30), na.rm = T))   {
+        log_info("The SD of a detection in the replicates may be high")
+        probleme <- subset(datTemp, 100*rsd_norm_a >= 30, comp_name, drop = TRUE)
+        problemeProben <- subset(datTemp, 100*rsd_norm_a >= 30, samp, drop = TRUE)
+        log_info("Problematic detections:")
+        for (i in seq_along(probleme)) 
+          message(probleme[i], " in sample ", problemeProben[i])
+      }
+      
+      dat$reps <- NULL
+    }
+    
+    # Round all int columns to 3 sig figs
+    dat$int_a <- signif(dat$int_a, 3)
+    dat$norm_a <- signif(dat$norm_a, 3)
+    dat$area_normalized <- signif(dat$area_normalized, 3)
+    dat$int_a_IS <- signif(dat$int_a_IS, 3)
+    
+    # Round mz
+    dat$real_mz <- round(dat$real_mz, 4)
+    
+    # Get start time for sample
+    idSamp <- data.frame(
+      id = esids,
+      samp = basename(get_field2(esids, "path")),
+      start = get_field2(esids, "start"),
+      date_measurement = get_field2(esids, "date_measurement")
+    )
+    
+    dat <- merge(dat, idSamp, by = "samp", all.x = T)
+    stopifnot(all(!is.na(dat$start)))
+    
+    # Get other data
+    # CAS-RN
+    cas <- dbas$peakList[, c("comp_CAS", "comp_name")]
+    cas <- cas[!duplicated(cas),]
+    dat <- merge(dat, cas, by = "comp_name", all.x = T)
+    
+    dat$date_import <- round(as.numeric(Sys.time()))  # epoch_seconds
+    dat$duration <- get_field2(esids, "duration", justone = T)
+    
+    dat$pol <- get_field2(esids, "pol", justone = T)
+    dat$matrix <- get_field2(esids, "matrix", justone = T)
+    dat$data_source <- get_field2(esids, "data_source", justone = T)
+    dat$sample_source <- get_field2(esids, "sample_source", justone = T)
+    dat$licence <- get_field2(esids, "licence", justone = T)
+    dat$chrom_method <- get_field2(esids, "chrom_method", justone = T)
+    # change names to match ntsp
+    colnames(dat) <- gsub("^comp_name$", "name", colnames(dat))
+    colnames(dat) <- gsub("^int_a$", "area", colnames(dat))
+    colnames(dat) <- gsub("^int_a_IS$", "area_is", colnames(dat))
+    colnames(dat) <- gsub("^comp_CAS$", "cas", colnames(dat))
+    colnames(dat) <- gsub("^samp$", "filename", colnames(dat))
+    colnames(dat) <- gsub("^real_mz$", "mz", colnames(dat))
+    colnames(dat) <- gsub("^real_rt_min$", "rt", colnames(dat))
+    
+    # Make dat into list to allow for nested data structure
+    rownames(dat) <- NULL
+    datl <- split(dat, seq_len(nrow(dat))) 
+    datl <- lapply(datl, as.list)
+    
+    # Add compound information 
+    sdb <- con_sqlite(dbPath)
+    comptab <- tbl(sdb, "compound") %>% collect()
+    grouptab <- tbl(sdb, "compound") %>% 
+      select(name, compound_id) %>% 
+      left_join(tbl(sdb, "compGroupComp"), by = "compound_id") %>% 
+      left_join(tbl(sdb, "compoundGroup"), by = "compoundGroup_id") %>% 
+      select(name.x, name.y) %>% 
+      rename(compname = name.x, groupname = name.y) %>% 
+      collect()
+    
+    # Using '$' will fail without an error because it implements greedy matching 
+    # (inchi and inchikey)
+    datl <- lapply(datl, function(doc) {
+      if(!is.na(doc$name)) {
+        doc[["inchi"]] <- filter(comptab, name == !!doc$name) %>% pull(inchi)
+        doc[["inchikey"]] <- filter(comptab, name == !!doc$name) %>% pull(inchikey)
+        doc[["formula"]] <- filter(comptab, name == !!doc$name) %>% pull(formula)
+        cg <- filter(grouptab, compname == !!doc$name) %>% pull(groupname)
+        cg <- cg[!is.element(cg, SPEC_SOURCES)]
+        doc[["comp_group"]] <- cg
+      }
+      doc
+    })
+    DBI::dbDisconnect(sdb)
+    
+    # Get coordinates, river km
+    datl <- lapply(datl, function(doc) {
+      doc$loc <- get_field2(doc$id, "loc", simplify = F) 
+      doc$station <- get_field2(doc$id, "station", simplify = T)
+      dockm <- get_field2(doc$id, "km", simplify = T)
+      if (!is.null(dockm))
+        doc$km <- dockm   
+      
+      docriv <- get_field2(doc$id, "river", simplify = T)
+      if (!is.null(docriv))
+        doc$river <- docriv
+      
+      docgkz <- get_field2(doc$id, "glz", simplify = T)
+      if (!is.null(docgkz))
+        doc$gkz <- docgkz
+      
+      doc
+    })
+    
+    datl <- unname(datl)
+    
+    log_info("Collecting spectra")
+    
+    datl <- lapply(datl, function(doc) { # doc <- datl[[1]]
+      #browser(expr = doc$name == "10-Hydroxycarbamazepine")
+      idtemp <- subset(
+        dbas$peakList, 
+        comp_name == doc$name & 
+          samp == doc$filename &
+          adduct == doc$adduct &
+          isotopologue == doc$isotopologue, peakID, drop = T)
+      # If the peakID was not found, then this means there is no entry for this
+      # peak in the peaklist. The rest of the entries (eic, ms1, ms2) are skipped.
+      if ( length(idtemp) == 0 || !is.numeric(idtemp))
+        return(doc) 
+      
+      # if more than one peak matches (isomers), which should be marked by peak A, B etc, 
+      # choose the peak with the highest intensity
+      if (length(idtemp) > 1) { 
+        best <- which.max(subset(dbas$peakList, peakID %in% idtemp, int_a, drop = T))
+        idtemp <- subset(dbas$peakList, peakID %in% idtemp, peakID, drop = T)[best]
+        doc$comment <- paste(doc$comment, "isomers found")
+      } else {
+        inttemp <- subset(dbas$peakList, peakID == idtemp, int_h, drop = T) 
+        # eic
+        if (is.numeric(idtemp)) {
+          eictemp <- subset(dbas$EIC, peakID == idtemp, c(time, int))
+          if (nrow(eictemp) > 0) {
+            eictemp$time <- round(eictemp$time)  # in seconds
+            eictemp$int <- round(eictemp$int, 4)
+            rownames(eictemp) <- NULL
+            doc$eic <- eictemp
+          }
+          # ms1
+          ms1temp <- subset(dbas$MS1, peakID == idtemp, c(mz, int))
+          if (nrow(ms1temp) > 0 && is.numeric(inttemp)) {
+            ms1temp <- norm_ms1(ms1temp, doc$mz, inttemp)
+            if (!is.null(ms1temp)) {
+              ms1temp$mz <- round(ms1temp$mz, 4)
+              ms1temp$int <- round(ms1temp$int, 4)
+              rownames(ms1temp) <- NULL
+              doc$ms1 <- ms1temp
+            }
+          }
+          # ms2
+          ms2temp <- subset(dbas$MS2, peakID == idtemp, c(mz, int))
+          if (nrow(ms2temp) > 0) {
+            ms2temp <- norm_ms2(ms2temp, doc$mz)
+            if (!is.null(ms2temp)) {
+              ms2temp$mz <- round(ms2temp$mz, 4)
+              ms2temp$int <- round(ms2temp$int, 4)
+              rownames(ms2temp) <- NULL
+              doc$ms2 <- ms2temp
+            }
+          }
+        }
+      }
+      # TODO even for peaks that are not in the peaklist (no ms2) still have an
+      # eic and an ms1. This information could still be extracted. 
+      doc
+    })  
+    
+    # Add tags if available
+    datl <- lapply(datl, function(doc) {
+      doctag <- get_field2(doc$id, "tag", simplify = F)
+      if (!is.null(doctag))
+        doc$tag <- doctag
+      doc
+    })
+    
+    # add comments if available
+    datl <- lapply(datl, function(doc) {
+      doccomment <- get_field2(doc$id, "comment", simplify = F)
+      if (!is.null(doccomment))
+        doc$comment <- doccomment
+      doc
+    })
+    
+    # remove msrawfiles id
+    datl <- lapply(datl, function(doc) {doc$id <- NULL; doc})
+    
+    # remove NA values (there is no such thing as NA, the value just does not exist)
+    datl <- lapply(datl, remove_na_doc)
+    
+    log_info("Writing json file")
+    
+    # Write JSON ####
+    jsonPath <- sub("\\.report$", ".json", newsavename)  # jsonPath <- "tests/bimmen.json"
+    
+    jsonlite::write_json(datl, jsonPath, pretty = T, digits = NA, auto_unbox = T)
+    
+  },
+  error = function(cnd) {
+    log_error("Fail proc_batch in batch starting with id {esids[1]}: {conditionMessage(cnd)}")
+  })
+  
+  if (!exists("datl") || length(datl) == 0)
+    return(0L)
+  
+  return(length(datl))
+}
 
 
-# Utility and local functions ####
 
-# esids <- allFlsIds[[78]]
-# cat(paste(shQuote(esids, type = "cmd"), collapse = ", "))
-# rfindex <- RFINDEX
-# fieldName <- "duration"
-# source("~/connect-ntsp.R")
 
 # Function to print a search query string to be used for log files
 # Takes a vector of esids and a vector of fields for _source
@@ -603,596 +1146,7 @@ proc_esid <- function(escon, rfindex, esid, compsProcess = NULL) {
 }
 
 
-#' Process a batch of MS measurement files stored in the msrawfiles index
-#' 
-#' Takes a vector of esids and performs dbas on these as a batch. Files are
-#' evaluated using the settings in the msrawfiles index. Results are ingested to
-#' the indicated dbas results index
-#' 
-#' @param escon Elasticsearch connection object created by `elastic::connect`
-#' @param rfindex Name of rawfiles index
-#' @param esids ElasticSearch document IDs (character)
-#' @param tempsavedir Temporary save location
-#' @param ingestpth Path where the ingest.sh script is found
-#' @param configfile Config file where the credentials for signing into elasticsearch are found
-#' @param coresBatch Number of cores to use in a signal batch
-#' @param noIngest Logical, for testing purposes, no upload, just create json. Will also return JSON (invisibly)
-#'
-#' @return Function is run for side-effects but returns number of documents uploaded
-#' @export
-proc_batch <- function(escon, rfindex, esids, tempsavedir, ingestpth, configfile, 
-                       coresBatch, noIngest = FALSE) {
-  
-  # Define functions
-  # Create a get_field function with some default parameters
-  get_field2 <- get_field_builder(escon = escon, index = rfindex)
-  
-  
-  # Define Variables
-  # These pollute the comp_group field and need to be removed
-  SPEC_SOURCES <- c("BfG", "LfU", "UBA")
-  batchStartTime <- lubridate::now()
-  
-  # Create path for saving report files
-  savename <- gsub("[/\\.]", "_", dirname(get_field2(esids, "path"))[1])
-  savename <- paste0("dbas-batch--", savename, "--", format(Sys.time(), "%y%m%d"), ".report")
-  savename <- file.path(tempsavedir, savename)
-  
-  # Get path to collective spectral library (CSL)
-  dbPath <- get_field2(esids, "dbas_spectral_library", justone = T)
 
-  # Get path to batch (measurement files)
-  dr <- paste(unique(dirname(get_field2(esids, "path", justone = F))), collapse= ", ")
-  
-  record_end_processing <- function(escon, rfindex, idsEs, pathDb, timeStart) {
-    timeText <- format(Sys.time(), "%Y-%m-%d %H:%M:%S", tz = "GMT")
-    cslHash <- system2("sha256sum", pathDb, stdout = TRUE)
-    timeEnd <- lubridate::now()
-    avgMins <- round(
-      as.numeric(timeEnd - timeStart, units = "mins") / length(idsEs),
-      digits = 2
-    )
-    tryCatch(
-      res <- es_add_value(
-        escon, rfindex, 
-        queryBody = list(ids = list(values = idsEs)),
-        dbas_last_eval = timeText,
-        dbas_spectral_library_sha256 = cslHash,
-        dbas_proc_time = avgMins
-      ),
-      error = function(cnd) {
-        glue("Error recording processing date: {conditionMessage(cnd)}")
-      }
-    )
-    
-    if (exists("res")) {
-      return(invisible(res$updated > 0))
-    } else {
-      return(invisible(FALSE))
-    }
-  }
-  
-  
-  log_info("Starting batch {dr}")
-
-  tryCatch({
-    # Step 1 - Screening ####
-    tryCatch({
-        if (rstudioapi::isAvailable()) {
-          plan(multisession, workers = coresBatch)  
-        } else {
-          plan(multicore, workers = coresBatch)
-        }
-        repLt <- furrr::future_map(
-          esids, 
-          proc_esid, 
-          escon = escon, 
-          rfindex = rfindex
-        )
-        plan(sequential)
-      },
-      error = function(cnd) {
-        log_warn("Error in screening for batch with id {esids[1]}")
-        message(cnd)
-      }
-    )
-    
-    if (any(vapply(repLt, is.null, logical(1))) || 
-        any(vapply(repLt, inherits, logical(1), what = "try-error"))) {
-      errorEsids <- c(
-        esids[vapply(repLt, is.null, logical(1))],
-        esids[vapply(repLt, inherits, logical(1), what = "try-error")]
-      )
-      errorFiles <- get_field2(errorEsids, "path")
-      errorFilesClps <- paste(errorFiles, collapse = "\n")
-      log_warn("Error in files {errorFilesClps}")
-    }
-    # remove errors
-    repLt <- Filter(Negate(is.null), repLt)
-    repLt <- Filter(function(x) Negate(inherits)(x, what = "try-error"), repLt)
-    
-    if (length(repLt) == 0) {
-      log_warn("No results for batch starting with file {get_field2(esids, 'path')[1]}")
-      record_end_processing(escon, rfindex, esids, dbPath, batchStartTime)
-      return(0)
-    }
-    
-    # Remove reports with no peaks
-    nothingFound <- vapply(repLt, function(x) nrow(x$peakList) == 0, logical(1))
-    
-    if (any(nothingFound)) {
-      errorEsids <- esids[nothingFound]
-      nothingFiles <- get_field2(errorEsids, "path")
-      message(sprintf("\nFiles\n%s\nhave no hits.", 
-                      paste(nothingFiles, collapse = "\n")))
-    }
-    
-    repLt <- Filter(function(x) nrow(x$peakList) != 0, repLt)  
-    
-    if (length(repLt) == 0) {
-      log_warn("No results for batch starting with file {get_field2(esids, 'path')[1]}")
-      record_end_processing(escon, rfindex, esids, dbPath, batchStartTime)
-      return(0)
-    }
-    
-    log_info("Merging reports")
-    if (length(repLt) == 1) {
-      resM <- repLt[[1]]
-    } else if (length(repLt) > 1) {
-      resM <- Reduce(ntsworkflow::mergeReport, repLt)
-    } else {
-      warning("\nNo report files were generated")
-      return(NULL)
-    }
-    
-    log_info("Saving report file at {savename}")
-    resM$clearAndSave(F, savename, clearData = F)
-    numPeaks <- nrow(resM$peakList)
-    rm(repLt)
-    log_info("Completed step 1 with {numPeaks} peaks")
-    if (!file.exists(savename))
-      return(NULL)
-    
-    # Step 2 - Correction and reintegration ####
-    
-    # The settings used must be the same for all the files in the batch
-    # need to check that all entries in batch have the same
-    
-    # blank_regex settings
-    bregex <- get_field2(esids, "dbas_blank_regex")
-    stopifnot(is.vector(bregex))
-    bregex <- unique(bregex)
-    stopifnot(length(bregex) == 1)
-    
-    # Rename Report
-    dbas <- resM
-    dbas$changeSettings("numcores", 1)
-    
-    log_info("Blank correction")
-    
-    if (!is.null(bregex) && any(grepl(bregex, dbas$rawFiles))) {
-      dbas$deleteBackground(grep(bregex, dbas$rawFiles, invert = T), 
-                            grep(bregex, dbas$rawFiles))
-      dbas$remRawFiles(grep(bregex, dbas$rawFiles))
-      esids_blank <- esids[get_field2(esids, "blank", simplify = T)]
-      esids <- esids[!get_field2(esids, "blank", simplify = T)]
-    } else {
-      esids_blank <- NULL
-      log_info("No blanks found in {dr}")
-    }
-    
-    log_info("Remove false positives")
-    
-    # Get list of false positives (will just add all of the fps)
-    bfps <- get_field2(esids, "dbas_fp", simplify = F)
-    # TODO in the future, delete fps on a by-sample basis
-    # for now, just add them all together into a big list
-    bfps <- unique(unlist(bfps))
-    
-    bmindet <- unique(get_field2(esids, "dbas_minimum_detections"))
-    stopifnot(length(bmindet) == 1, is.integer(bmindet))
-    
-    # Get rare compounds from a Report
-    # Get the compounds which are found fewer than min_freq
-    # repo ntsworkflow::Report class object
-    # min_freq Minimum number of detections
-    # return Names of compounds with FEWER than the min_freq of detections
-    get_rare <- function(repo, min_freq) {
-      pl <- repo$peakList
-      finds <- by(pl, pl$comp_name, nrow)
-      rare <- which(finds < min_freq)
-      names(rare)
-    }
-    
-    if (bmindet > 1)
-      bfps <- append(bfps, get_rare(dbas, bmindet))
-    
-    # Append compounds which are not found in at least x out of y replicates
-    # where x is dbas_minimum_detections
-    # dbas_minimum_detections therefore refers to the whole batch as well as
-    # one set of replicates (see previous filter).
-    # The total number of replicates for each sample is irrelevant
-    brepr <- unlist(unique(get_field2(esids, "dbas_replicate_regex")))
-    
-    if (!is.null(brepr) && !is.na(brepr)) {
-      pl <- dbas$peakList
-      pl$orig <- stringr::str_replace(pl$samp, brepr, "\\1")
-      
-      # Get the total number of replicates for each sample
-      # repTotal <- data.frame(
-      #   orig = unique(pl$orig),
-      #   number = tapply(pl$samp, pl$orig, function(p) length(unique(p)))
-      # )
-      
-      repCount <- by(pl, list(pl$comp_name, pl$orig), nrow)
-      repCount <- array2DF(repCount)
-      repCount <- repCount[!is.na(repCount$Value), ]
-      
-      # We take the average number of times a compound is found in y replicates,
-      # that way, if in one set of reps it doesn't get the required number of 
-      # detections, it still doesn't count as an FP
-      compCount <- data.frame(
-        comp_name = unique(repCount$Var1),
-        count = round(tapply(repCount$Value, repCount$Var1, mean))
-      )
-      repFps <- compCount[compCount$count < bmindet, "comp_name"]
-      bfps <- append(bfps, repFps)
-    }
-    
-    if (length(bfps) > 0)
-      for (fpname in bfps) dbas$deleteFP(fpname) 
-    
-    # remove 'B' in peak (compounds with multiple features)
-    pl <- dbas$peakList
-    pl2 <- subset(pl, select = c(comp_name, peak))
-    pl3 <- subset(pl2, peak != "A" )
-    comp_name_u <- unique(pl3$comp_name)
-    if (length(comp_name_u) > 0) {
-      log_info("Delete Peak 'B' of compounds:")
-      for (x in comp_name_u) 
-        message(paste(x, collapse = "\n"))
-    }
-    dbas$peakList <- dbas$peakList[dbas$peakList$peak == "A" , ]
-    
-    log_info("Reintegration")
-    
-    tryCatch(
-      suppressMessages(dbas$reIntegrate()),
-      error = function(cnd) {
-        log_warn("Error in reintegration of batch with id {esids[1]}")
-      }
-    )
-    
-    # save report
-    newsavename <- sub("\\.report$", "_i.report", savename)
-    dbas$clearAndSave(F, newsavename)
-    rm(dbas)
-    log_info("Step 2 complete, processed report file created for: {newsavename}")
-    
-    dbas <- ntsworkflow::loadReport(F, newsavename)  
-    #dbas <- ntsworkflow::loadReport(F, "tests/dbas-eval/temp-files/dbas-batch--_srv_cifs-mounts_g2_G_G2_HRMS_Messdaten_koblenz_wasser_2019_201904_pos--240429_i.report")  
-    
-    
-    # Step 3 - Conversion ####
-    log_info("Collecting data for json export")
-    
-    compData <- dbas$integRes[, c("samp", "comp_name", "adduct", "isotopologue",
-                                  "int_a", "real_mz", "real_rt_min")]
-    compData$samp <- basename(compData$samp)
-    
-    bist <- unique(get_field2(esids, "dbas_is_table"))
-    stopifnot(length(bist) == 1)
-    
-    bisn <- unique(get_field2(esids, "dbas_is_name"))
-    stopifnot(length(bisn) == 1)
-    
-    isData <- dbas$ISresults[dbas$ISresults$IS == bisn, c("samp", "int_a")]
-
-    # Normalize intensities
-    dat <- merge(compData, isData, by = "samp", suffix = c("", "_IS"))
-    # verify columns are numeric
-    dat[, c("int_a", "int_a_IS")] <- lapply(dat[, c("int_a", "int_a_IS")], as.numeric)
-    dat$norm_a <- round(dat$int_a / dat$int_a_IS, 4)
-    dat$area_normalized <- dat$norm_a  # norm_a and area_normalized are exactly the same within this script. keep both?
-    
-    if (length(dat$int_a_IS) == 0)
-      stop("IS not found in docs ", paste(esids, collapse = ", "))
-    
-    if (!all(is.na(dat$int_a_IS))) {
-      rstdev <- round((sd(dat$int_a_IS)/mean(dat$int_a_IS)), 2)
-      log_info("Die relative SD des internen Standards beträgt ", 100*rstdev, "%")
-      # TODO The script must automatically decide what to do.
-      if  (100*rstdev >= 10) 
-        log_warn("Die Standardabweichung des internen Standards ist über Grenzwert von 10%")
-    }
-    
-    # Build average area from replicates
-    # brepr is the batch replicate regex which was defined for the replicate filter
-    if (!is.null(brepr) && !is.na(brepr)) {
-      log_info("Building replicate averages for testing")
-      # using the regex, give all replicate samples the same name 
-      # (best when replicates are indicated by _1 at the end)
-      dat$reps <- stringr::str_replace(dat$samp, brepr, "\\1")
-      averages <- by(dat, list(dat$reps, dat$comp_name), function(part) {
-        comp1 <- part$comp_name[1]
-        ad1 <- part$adduct[1]
-        isot1 <- part$isotopologue[1]
-        samp1 <- part$samp[1]
-        average_int_a <- mean(part$int_a, na.rm = T)
-        average_norm_a <- mean(part$norm_a, na.rm = T)
-        standard_deviation_norm_a <- sd(part$norm_a, na.rm = T)
-        rsd_norm_a <- standard_deviation_norm_a/average_norm_a
-        average_int_a_IS <- mean(part$int_a_IS, na.rm = T)
-        data.frame(
-          samp = samp1, comp_name = comp1, adduct = ad1, isotopologue = isot1, 
-          int_a = average_int_a, int_a_IS = average_int_a_IS, norm_a = average_norm_a, 
-          sd_norm_a = standard_deviation_norm_a, rsd_norm_a = rsd_norm_a
-        )
-      }, simplify = F)
-      
-      datTemp <- do.call("rbind", averages)
-      #saveRDS(datTemp, file = glue::glue("{esids[1]}_replicateRSD_{format(Sys.Date(), '%Y%m%d')}.RDS"))
-      
-      bba <- unique(get_field2(esids, "dbas_build_averages"))
-      stopifnot(length(bba) == 1)
-      if (bba) {
-        log_info("Using averages for results")
-        dat <- do.call("rbind", averages)
-        # remove column
-        dat$sd_norm_a <- NULL
-        dat$rsd_norm_a <- NULL
-      }
-      
-      # Warning if sd for any comp is high
-      if (any((100*datTemp$rsd_norm_a >= 30), na.rm = T))   {
-        log_info("The SD of a detection in the replicates may be high")
-        probleme <- subset(datTemp, 100*rsd_norm_a >= 30, comp_name, drop = TRUE)
-        problemeProben <- subset(datTemp, 100*rsd_norm_a >= 30, samp, drop = TRUE)
-        log_info("Problematic detections:")
-        for (i in seq_along(probleme)) 
-          message(probleme[i], " in sample ", problemeProben[i])
-      }
-      
-      dat$reps <- NULL
-    }
-    
-    # Round all int columns to 3 sig figs
-    dat$int_a <- signif(dat$int_a, 3)
-    dat$norm_a <- signif(dat$norm_a, 3)
-    dat$area_normalized <- signif(dat$area_normalized, 3)
-    dat$int_a_IS <- signif(dat$int_a_IS, 3)
-    
-    # Round mz
-    dat$real_mz <- round(dat$real_mz, 4)
-    
-    # Get start time for sample
-    idSamp <- data.frame(
-      id = esids,
-      samp = basename(get_field2(esids, "path")),
-      start = get_field2(esids, "start"),
-      date_measurement = get_field2(esids, "date_measurement")
-    )
-    
-    dat <- merge(dat, idSamp, by = "samp", all.x = T)
-    stopifnot(all(!is.na(dat$start)))
-    
-    # Get other data
-    # CAS-RN
-    cas <- dbas$peakList[, c("comp_CAS", "comp_name")]
-    cas <- cas[!duplicated(cas),]
-    dat <- merge(dat, cas, by = "comp_name", all.x = T)
-    
-    dat$date_import <- round(as.numeric(Sys.time()))  # epoch_seconds
-    dat$duration <- get_field2(esids, "duration", justone = T)
-    
-    dat$pol <- get_field2(esids, "pol", justone = T)
-    dat$matrix <- get_field2(esids, "matrix", justone = T)
-    dat$data_source <- get_field2(esids, "data_source", justone = T)
-    dat$sample_source <- get_field2(esids, "sample_source", justone = T)
-    dat$licence <- get_field2(esids, "licence", justone = T)
-    dat$chrom_method <- get_field2(esids, "chrom_method", justone = T)
-    # change names to match ntsp
-    colnames(dat) <- gsub("^comp_name$", "name", colnames(dat))
-    colnames(dat) <- gsub("^int_a$", "area", colnames(dat))
-    colnames(dat) <- gsub("^int_a_IS$", "area_is", colnames(dat))
-    colnames(dat) <- gsub("^comp_CAS$", "cas", colnames(dat))
-    colnames(dat) <- gsub("^samp$", "filename", colnames(dat))
-    colnames(dat) <- gsub("^real_mz$", "mz", colnames(dat))
-    colnames(dat) <- gsub("^real_rt_min$", "rt", colnames(dat))
-    
-    # Make dat into list to allow for nested data structure
-    rownames(dat) <- NULL
-    datl <- split(dat, seq_len(nrow(dat))) 
-    datl <- lapply(datl, as.list)
-    
-    # Add compound information 
-    sdb <- con_sqlite(dbPath)
-    comptab <- tbl(sdb, "compound") %>% collect()
-    grouptab <- tbl(sdb, "compound") %>% 
-      select(name, compound_id) %>% 
-      left_join(tbl(sdb, "compGroupComp"), by = "compound_id") %>% 
-      left_join(tbl(sdb, "compoundGroup"), by = "compoundGroup_id") %>% 
-      select(name.x, name.y) %>% 
-      rename(compname = name.x, groupname = name.y) %>% 
-      collect()
-    
-    # Using '$' will fail without an error because it implements greedy matching 
-    # (inchi and inchikey)
-    datl <- lapply(datl, function(doc) {
-      if(!is.na(doc$name)) {
-        doc[["inchi"]] <- filter(comptab, name == !!doc$name) %>% pull(inchi)
-        doc[["inchikey"]] <- filter(comptab, name == !!doc$name) %>% pull(inchikey)
-        doc[["formula"]] <- filter(comptab, name == !!doc$name) %>% pull(formula)
-        cg <- filter(grouptab, compname == !!doc$name) %>% pull(groupname)
-        cg <- cg[!is.element(cg, SPEC_SOURCES)]
-        doc[["comp_group"]] <- cg
-      }
-      doc
-    })
-    DBI::dbDisconnect(sdb)
-    
-    # Get coordinates, river km
-    datl <- lapply(datl, function(doc) {
-      doc$loc <- get_field2(doc$id, "loc", simplify = F) 
-      doc$station <- get_field2(doc$id, "station", simplify = T)
-      dockm <- get_field2(doc$id, "km", simplify = T)
-      if (!is.null(dockm))
-        doc$km <- dockm   
-      
-      docriv <- get_field2(doc$id, "river", simplify = T)
-      if (!is.null(docriv))
-        doc$river <- docriv
-      
-      docgkz <- get_field2(doc$id, "glz", simplify = T)
-      if (!is.null(docgkz))
-        doc$gkz <- docgkz
-      
-      doc
-    })
-    
-    datl <- unname(datl)
-    
-    log_info("Collecting spectra")
-    
-    datl <- lapply(datl, function(doc) { # doc <- datl[[1]]
-      #browser(expr = doc$name == "10-Hydroxycarbamazepine")
-      idtemp <- subset(
-        dbas$peakList, 
-        comp_name == doc$name & 
-          samp == doc$filename &
-          adduct == doc$adduct &
-          isotopologue == doc$isotopologue, peakID, drop = T)
-      # If the peakID was not found, then this means there is no entry for this
-      # peak in the peaklist. The rest of the entries (eic, ms1, ms2) are skipped.
-      if ( length(idtemp) == 0 || !is.numeric(idtemp))
-        return(doc) 
-  
-      # if more than one peak matches (isomers), which should be marked by peak A, B etc, 
-      # choose the peak with the highest intensity
-      if (length(idtemp) > 1) { 
-        best <- which.max(subset(dbas$peakList, peakID %in% idtemp, int_a, drop = T))
-        idtemp <- subset(dbas$peakList, peakID %in% idtemp, peakID, drop = T)[best]
-        doc$comment <- paste(doc$comment, "isomers found")
-      } else {
-        inttemp <- subset(dbas$peakList, peakID == idtemp, int_h, drop = T) 
-        # eic
-        if (is.numeric(idtemp)) {
-          eictemp <- subset(dbas$EIC, peakID == idtemp, c(time, int))
-          if (nrow(eictemp) > 0) {
-            eictemp$time <- round(eictemp$time)  # in seconds
-            eictemp$int <- round(eictemp$int, 4)
-            rownames(eictemp) <- NULL
-            doc$eic <- eictemp
-          }
-          # ms1
-          ms1temp <- subset(dbas$MS1, peakID == idtemp, c(mz, int))
-          if (nrow(ms1temp) > 0 && is.numeric(inttemp)) {
-            ms1temp <- norm_ms1(ms1temp, doc$mz, inttemp)
-            if (!is.null(ms1temp)) {
-              ms1temp$mz <- round(ms1temp$mz, 4)
-              ms1temp$int <- round(ms1temp$int, 4)
-              rownames(ms1temp) <- NULL
-              doc$ms1 <- ms1temp
-            }
-          }
-          # ms2
-          ms2temp <- subset(dbas$MS2, peakID == idtemp, c(mz, int))
-          if (nrow(ms2temp) > 0) {
-            ms2temp <- norm_ms2(ms2temp, doc$mz)
-            if (!is.null(ms2temp)) {
-              ms2temp$mz <- round(ms2temp$mz, 4)
-              ms2temp$int <- round(ms2temp$int, 4)
-              rownames(ms2temp) <- NULL
-              doc$ms2 <- ms2temp
-            }
-          }
-        }
-      }
-      # TODO even for peaks that are not in the peaklist (no ms2) still have an
-      # eic and an ms1. This information could still be extracted. 
-      doc
-    })  
-    
-    # Add tags if available
-    datl <- lapply(datl, function(doc) {
-      doctag <- get_field2(doc$id, "tag", simplify = F)
-      if (!is.null(doctag))
-        doc$tag <- doctag
-      doc
-    })
-    
-    # add comments if available
-    datl <- lapply(datl, function(doc) {
-      doccomment <- get_field2(doc$id, "comment", simplify = F)
-      if (!is.null(doccomment))
-        doc$comment <- doccomment
-      doc
-    })
-    
-    # remove msrawfiles id
-    datl <- lapply(datl, function(doc) {doc$id <- NULL; doc})
-    
-    # remove NA values (there is no such thing as NA, the value just does not exist)
-    datl <- lapply(datl, remove_na_doc)
-    
-    log_info("Writing json file")
-    
-    # Write JSON ####
-    jsonPath <- sub("\\.report$", ".json", newsavename)  # jsonPath <- "tests/bimmen.json"
-    
-    jsonlite::write_json(datl, jsonPath, pretty = T, digits = NA, auto_unbox = T)
-    
-    # Step 4 - Ingest ####
-    if (!noIngest) {
-      bindex <- get_field2(esids, "dbas_index_name", justone = T)
-      log_info("Ingest starting")
-      if (rstudioapi::isAvailable()) {
-        system(glue::glue("{ingestpth} {configfile} {bindex} {jsonPath}"))
-      } else {
-        system(
-          glue::glue("{ingestpth} {configfile} {bindex} {jsonPath} &> /dev/null")
-        )
-      }
-      log_info("Ingest complete, checking database for results")
-      
-      # Need to add a pause so that elastic returns ingested docs
-      Sys.sleep(1)
-      # Check that everything is in the database
-      checkFiles <- basename(get_field2(esids, "path"))
-      
-      resp5 <- elastic::Search(escon, bindex, body = sprintf('
-        {
-          "query": {
-            "terms": {
-              "filename": [%s]
-            }
-          },
-          "size": 0
-        }
-        ', paste(dQuote(checkFiles,q = "\""), collapse = ", "))
-      )
-      
-      if (resp5$hits$total$value == length(datl)) {
-        esidsAll <- c(esids, esids_blank)
-        record_end_processing(escon, rfindex, esidsAll, dbPath, batchStartTime)
-        log_info("Completed batch starting with id {esidsAll[1]}, file {checkFiles[1]}")
-      } else {
-        log_error("Ingested data not found in batch starting with id {esids[1]}")
-      }
-    } else {
-      return(invisible(datl))
-    }
-  },
-  error = function(cnd) {
-    log_error("Fail proc_batch in batch starting with id {esids[1]}: {conditionMessage(cnd)}")
-  }
-  )
-  
-  if (!exists("datl") || length(datl) == 0)
-    return(0L)
-  
-  return(length(datl))
-}
 
 # IS processing functions ####
 

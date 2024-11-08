@@ -31,5 +31,5 @@ tests/summary_scripts2
 tests/ufid_alignment2
 tests/data-export2
 connect.R
-tests/kevin
+kevin
 nohup.out

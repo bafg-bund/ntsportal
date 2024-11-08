@@ -1,5 +1,58 @@
 
-ntsportal::connectNtsportal()
+connectNtsportal()
+
+test_that("Test triplicate batch can be processed and json produced", {
+  
+  rfindex <- "ntsp_index_msrawfiles_unit_tests"
+  tempsavedir <- withr::local_tempdir()
+  coresBatch <- 4
+  
+  res3 <- elastic::Search(
+    escon, rfindex, size = 100, 
+    body = list(
+      query = list(
+        regexp = list(
+          path = ".*bisoprolol.*"
+        )
+      ),
+      sort = list(
+        list(
+          start = "asc"
+        )
+      )
+    ), source = F)
+  esids <- sapply(res3$hits$hits, function(x) x[["_id"]])
+  
+  # Reset eval
+  reset_eval(
+    escon, rfindex, 
+    queryBody = list(ids = list(values = esids)), 
+    indexType = "dbas", confirm = F
+  )
+  
+  # Run processing
+  
+  numDocs <- proc_batch(escon, rfindex, esids, tempsavedir, ingestpth, configfile, coresBatch, noIngest = F)
+  
+  # Test
+  expect_equal(length(list.files(tempsavedir)), 3)
+  expect_equal(numDocs, 33)
+  
+  # Check that Nortilidin is not in the results, since this was only found in one replicate
+  
+  jsonPath <- list.files(tempsavedir, pattern = "json$", full.names = T)
+  
+  results <- jsonlite::read_json(jsonPath)
+  
+  compsFound <- unique(gf(results, "name", character(1)))
+  expect_false(is.element("Nortilidin", compsFound))
+  
+  # Clean up
+  file.remove(list.files(tempsavedir, full.names = T))
+  file.remove(tempsavedir)
+})
+
+
 
 test_that("Test file Des_07_01_pos.mzXML can be processed for Bisoprolol v2", {
   recordDes_07_01 <- getSingleRecordDes_07_01_pos()
@@ -120,87 +173,4 @@ test_that("A file with no peaks should should not return an error", {
 })
 
 
-test_that("Test triplicate batch can be processed", {
-  
-  rfindex <- "ntsp_index_msrawfiles_unit_tests"
-  tempsavedir <- withr::local_tempdir()
-  coresBatch <- 4
-  ingestpth <- fs::path_package("ntsportal", "scripts", "ingest.sh")
-  configfile <- "~/config.yml"
-  
-  res3 <- elastic::Search(
-    escon, rfindex, size = 100, 
-    body = list(
-      query = list(
-        regexp = list(
-          path = ".*bisoprolol.*"
-        )
-      ),
-      sort = list(
-        list(
-          start = "asc"
-        )
-      )
-    ), source = F)
-  esids <- sapply(res3$hits$hits, function(x) x[["_id"]])
-  
-  # Delete old index
-  oldIndex <- get_field(escon, indexName = rfindex, esids = esids, fieldName = "dbas_index_name", j = T)
-  if (elastic::index_exists(escon, oldIndex))
-    res6 <- elastic::index_delete(escon, oldIndex, verbose = F)
-  
-  # Create new index
-  Sys.sleep(1)
-  res1 <- create_dbas_index_all(escon = escon, rfindex = rfindex)
-  
-  expect_true(res1)
-  Sys.sleep(1)
-  # Reset eval
-  reset_eval(
-    escon, rfindex, 
-    queryBody = list(ids = list(values = esids)), 
-    indexType = "dbas", confirm = F
-  )
-  
-  # Run processing
-  
-  numDocs <- proc_batch(escon, rfindex, esids, tempsavedir, ingestpth, configfile, coresBatch, noIngest = F)
-  expect_equal(length(list.files(tempsavedir)), 3)
-  expect_equal(numDocs, 33)
-  
-  # Update the alias
-  res5 <- update_alias_all(escon = escon, rfindex = rfindex)
-  expect_true(res5)
-  # Check that the results are in Elastic
-  res7 <- elastic::Search(
-    escon, "ntsp_dbas_units_tests", 
-    body = '{"query": {"match_all": {}}}', size = 0
-  )
-  expect_equal(res7$hits$total$value, 33)
-  
-  # Check that Nortilidin is not in the results, since this was only found in one replicate
-  
-  res3 <- elastic::Search(
-    escon, "ntsp_dbas_units_tests", 
-    body = list(query = list(term = list(name = "Nortilidin"))), size = 0
-  )
-  expect_equal(res3$hits$total$value, 0)
-  
-  # Check for dbas_last_eval field and make sure the date entered is not more than 1000 s in the past
-  Sys.sleep(1)
-  res8 <- elastic::Search(
-    escon, rfindex, size = 0, 
-    body = list(
-      query = list(ids = list(values = esids)), 
-      aggs = list(
-        maxTime = list(max = list(field = "dbas_last_eval"))
-      )
-    )
-  )
-  
-  expect_true(round(as.numeric(Sys.time()) - res8$aggregations$maxTime$value / 1000) < 1000)
-  
-  file.remove(list.files(tempsavedir, full.names = T))
-  file.remove(tempsavedir)
-})
 

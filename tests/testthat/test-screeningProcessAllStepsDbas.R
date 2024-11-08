@@ -1,3 +1,4 @@
+
 test_that("process dbas all steps", {
   # Test for screeningProcessAllStepsDbas.R
   
@@ -14,8 +15,6 @@ test_that("process dbas all steps", {
   CORES <- 1
   CORESBATCH <- 6
   
-  source("~/connect-ntsp.R")
-
   # Reset field "dbas_index_name" in test-msrawfiles
   ntsportal::create_dbas_index(escon, RFINDEX, "ntsp_dbas_unit_tests", 241105)
   
