@@ -1,46 +1,5 @@
 
-
-test_that("A json file can be ingested into a test index", {
-  
-  source("~/connect-ntsp.R")
-  
-  jf <- list.files(test_path("fixtures", "proc_rawfiles_generic"), pattern = "^nts-batch--inda-ntsp_nts_unit_tests-indn-.*-bi-.*olmesartan-d6-bisoprolol.*\\.json.gz$", full.names = T)
-  tempSaveDir <- withr::local_tempdir()
-  njf <- file.path(tempSaveDir, basename(jf))
-  file.copy(jf, njf)
-  system2("gunzip", njf)
-  njf <- stringr::str_match(njf, "(.*)\\.gz")[,2]
-  
-  # Create test index
-  indexName <- stringr::str_match(njf, "-indn-(ntsp_index_nts.*)-bi-")[,2]
-  aliasName <- stringr::str_match(njf, "-inda-(ntsp_nts.*)-indn-")[,2]
-  put_nts_index(escon, indexName)
-  es_move_alias(escon, indexName, aliasName)
-  success <- FALSE
-  tryCatch(
-    success <- ingest_ntspl(
-      escon, 
-      ntsplJsonPath = njf, 
-      configPath = "~/config.yml", 
-      ingestScriptPath = fs::path_package("ntsportal", "scripts", "ingest.sh"),
-      pauseTime = 2,
-      verbose = F
-    ),
-    error = function(cnd) {
-      log_info("error at ingest: {conditionMessage(cnd)}")
-    },
-    finally = {
-      elastic::alias_delete(escon, indexName, aliasName)
-      elastic::index_delete(escon, indexName)
-      file.remove(list.files(tempSaveDir, full.names = T))
-      file.remove(tempSaveDir)
-    }
-  )
-  expect_true(success)
-  expect_false(elastic::index_exists(escon, aliasName))
-  expect_false(elastic::index_exists(escon, indexName))
-  expect_false(dir.exists(tempSaveDir))
-})
+connectNtsportal()
 
 
 test_that("New indexes can be created for nts processing", {
