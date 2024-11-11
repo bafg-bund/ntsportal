@@ -1,16 +1,126 @@
 # Copyright 2016-2024 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
-# ntsportal is free software: you can redistribute it and/or modify it under the 
-# terms of the GNU General Public License as published by the Free Software 
-# Foundation, either version 3 of the License, or (at your option) any 
-# later version.
-# 
-# ntsportal is distributed in the hope that it will be useful, but WITHOUT ANY 
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License along 
-# with ntsportal. If not, see <https://www.gnu.org/licenses/>.
+
+
+checkQualityBatchList <- function(recordsInBatches) {
+  batchesOk <- purrr::map_lgl(recordsInBatches, checkQualityBatch)
+  if (!all(batchesOk))
+    stop("Quality check batches failed")
+  batchesOk
+}
+
+checkQualityBatch <- function(records) {
+  batchOk <- all(
+    allFieldsUniform(records),
+    blanksPresent(records),
+    enoughSamplesForMinFeatures(records)
+  )
+  batchOk
+}
+
+allFieldsUniform <- function(records) {
+  fieldsToCheckAllSamples <- defineFieldsToCheckAllSamples()
+  uniformAll <- eachFieldUniform(records, fieldsToCheckAllSamples)
+  
+  fieldsToCheckEnvSamples <- defineFieldsToCheckEnvSamples()
+  recordsEnvSamples <- purrr::discard(records, gf(records, "blank", logical(1)))
+  uniformEnv <- eachFieldUniform(recordsEnvSamples, fieldsToCheckEnvSamples) 
+  
+  uniform <- c(uniformAll, uniformEnv)
+  
+  if (!all(uniform)) {
+    badFields <- names(uniform)[which(!uniform)] 
+    for (f in badFields)
+      ununiformFieldWarning(records, f)
+    FALSE
+  } else {
+    TRUE
+  }
+}
+
+blanksPresent <- function(records) {
+  if (!any(getField(records, "blank"))) {
+    badBatchWarning(records, "No blank found")
+    FALSE
+  } else {
+    TRUE
+  }
+}
+
+enoughSamplesForMinFeatures <- function(records) {
+  minFeat <- getField(records, "nts_alig_filter_min_features")[1]
+  if (minFeat > length(records)) {
+    badBatchWarning(records, "Not enough samples for minimum features filter")
+    FALSE
+  } else {
+    TRUE
+  }
+}
+
+eachFieldUniform <- function(records, fields) {
+  vapply(fields, fieldUniform, logical(1), records = records)
+}
+
+fieldUniform <- function(records, fieldToCheck) {
+  if (!fieldPresentAll(records, fieldToCheck))
+    return(TRUE)
+  allEntries <- getField(records, fieldToCheck)
+  length(unique(allEntries)) == 1
+}
+
+defineFieldsToCheckAllSamples <- function() {
+  c(
+    # Sampling
+    "duration",
+    "matrix",
+    
+    # Data acquisition
+    "pol",
+    "data_source",
+    "chrom_method",
+    
+    # dbas Processing
+    "dbas_blank_regex",
+    "dbas_is_table",
+    "dbas_is_name",
+    "dbas_index_name",
+    "dbas_alias_name",
+    "dbas_minimum_detections",
+    
+    # nts processing
+    "nts_spectral_library"
+  )
+}
+
+defineFieldsToCheckEnvSamples <- function() {
+  c(
+    # dbas Processing
+    "dbas_replicate_regex",
+    "dbas_build_averages",
+    
+    # nts processing
+    "nts_alig_filter_min_features",
+    "nts_alig_filter_type"
+  )
+}
+
+ununiformFieldWarning <- function(records, field) {
+  badBatchWarning(records, "field not uniform")
+  warning("Error in field ", field)
+}
+
+badBatchWarning <- function(records, reason) {
+  batchName <- dirname(getField(records, "path")[1])
+  warning(reason, " in batch ", batchName)
+}
+
+
+
+
+
+
+
+
 
 # Integrity checks ####
 
@@ -124,21 +234,9 @@ check_dbas_blank_regex <- function(escon, rfindex) {
   invisible(T)
 }
 
-#rfindex <- "ntsp_index_msrawfiles_unit_tests"
-#rfindex <- "ntsp_msrawfiles"
 
 
-#' Check consistency of msrawfiles for nts data
-#' 
-#' @description
-#' The function will throw an exception if an error is found. It is designed to
-#' be run after uploading data and before processing.
-#' 
-#' @param msrawfilesDocsList msrawfiles_docs_list object (from Elasticsearch API) 
-#'
-#' @return TRUE if completed successfully 
-#' @export
-#'
+
 check_integrity_msrawfiles_nts <- function(msrawfilesDocsList) {
   
   dl <- msrawfilesDocsList
@@ -182,48 +280,7 @@ check_integrity_msrawfiles_nts <- function(msrawfilesDocsList) {
   if (!mzCheck) {
     stop("nts_mz_min is not always lower than nts_mz_max")
   }
-  
-  # Split ds into batches
-  dsBatches <- split(ds, dirname(vapply(ds, "[[", i = "path", character(1))))
-  
-  # Check that certain values are the same across the whole batch
-  fieldsSameNoBlanks <- c(
-    "dbas_replicate_regex", "nts_alig_filter_min_features", "nts_alig_filter_type"
-  )
-  fieldsSameBlanks <- c(
-    "nts_spectral_library"
-  )
-  check_same_in_batch <- function(bInd, field, allB, blanks) {
-    dsBatch <- allB[[bInd]]
-    # Remove blanks
-    if (!blanks) {
-      dsBatch <- dsBatch[!gf(dsBatch, "blank", logical(1))]
-    }
-    batchValues <- sapply(dsBatch, "[[", i  = field)  
-                        
-    if (length(unique(batchValues)) != 1) {
-      batchName <- unique(dirname(gf(dsBatch, "path", character(1))))
-      stop("Field ", field, " not consistent in batch ", batchName)
-    }
-  }
-  # Get all combinations of batches and fields
-  combi <- tidyr::expand_grid(bi = seq_along(dsBatches), f = fieldsSameNoBlanks)
-  purrr::walk2(combi$bi, combi$f, check_same_in_batch, allB = dsBatches, blank = F)
-  
-  combi <- tidyr::expand_grid(bi = seq_along(dsBatches), f = fieldsSameBlanks)
-  purrr::walk2(combi$bi, combi$f, check_same_in_batch, allB = dsBatches, blank = T)
-  
-  check_batch_nts <- function(dsBatch) {
-    #dsBatch <- dsBatches[[3]]
-    # Check that the number of min features does not exceed the number of
-    # samples in the batch
-    batchName <- dirname(gf(dsBatch, "path", character(1)))[1]
-    minFeat <- gf(dsBatch, "nts_alig_filter_min_features", numeric(1), justone = T)
-    if (minFeat > length(dsBatch))
-      stop("nts_alig_filter_min_features is larger than number of files in batch ", batchName)
-  } 
-  purrr::walk(dsBatches, check_batch_nts)
-  
+ 
   invisible(TRUE)
 }
 
@@ -461,71 +518,7 @@ check_integrity_msrawfiles <- function(escon, rfindex, locationRf) {
   invisible(TRUE)
 }
 
-#' Check that evaluation batches have consistent settings
-#' 
-#' Evaluation is run in batches and certain settings must be the same
-#' for all files in the batch.
-#'
-#' @param escon Connection object created with `elastic::connect`
-#' @param rfindex Elasticsearch index name for msrawfiles index 
-#' @param batches a list of batches, where each batch is character vector of 
-#' elasticsearch document ids
-#'
-#' @return TRUE if successful
-#' @export
-#'
-check_batches_eval <- function(escon, rfindex, batches) {
-  # for each of these batches, certain fields must be the same
-  # for all docs, these include:
-  mustBeSame <- c(
-    "dbas_blank_regex",
-    "dbas_minimum_detections",
-    "dbas_is_table",
-    "dbas_is_name",
-    "duration",
-    "pol",
-    "matrix",
-    "data_source",
-    "chrom_method",
-    "dbas_index_name",
-    "dbas_alias_name"
-  )
-  
-  allSame <- vapply(batches, function(x) {
-    all(vapply(mustBeSame, check_uniformity, esids = x, escon = escon, 
-               rfindex = rfindex, logical(1)))
-  }, logical(1))
-  
-  
-  mustBeSameNonBlanks <- c(
-    "dbas_build_averages",
-    "dbas_replicate_regex"
-  )
-  
-  allSame2 <- vapply(batches, function(x) {
-    all(vapply(mustBeSameNonBlanks, check_uniformity, esids = x, escon = escon, 
-               rfindex = rfindex, onlyNonBlanks = T, logical(1)))
-  }, logical(1))
-  
-  # Need to stop here because the next function will not work if there is
-  # no consistency in dbas_blank_regex
-  if (!all(allSame) || !all(allSame2))
-    stop("Batch similarity checks have failed")
-  
-  # Check that each batch contains at least one blank
-  okBlank <- vapply(batches, function(x) {
-    br <- get_field(escon, indexName = rfindex, esids = x, fieldName = "dbas_blank_regex", justone = T)
-    fn <- get_field(escon, indexName = rfindex, esids = x, fieldName = "filename")
-    any(grepl(br, fn))
-  }, logical(1))
-  if (any(!okBlank)) {
-    b <- paste(vapply(batches[!okBlank], "[", i = 1, character(1)), collapse = ", ")
-    logger::log_error("Blanks not found in batch(s) starting with {b}")
-    return(FALSE)
-  }
-  
-  invisible(TRUE)
-}
+
 
 # Copyright 2016-2024 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

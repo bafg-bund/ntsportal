@@ -64,6 +64,22 @@ gf <- function(docsSrc, fieldName, value, justone = F) {
     x[1] else x
 }
 
+getField <- function(listRecords, fieldName) {
+  if (!fieldPresentAll(listRecords, fieldName))
+    stop("Field ", fieldName, " not found in all docs")
+  
+  values <- lapply(listRecords, "[[", i = fieldName)
+  sizes <- vapply(values, length, numeric(1))
+  if (all(sizes == 1)) {
+    unlist(values)
+  } else {
+    values
+  }
+}
+
+fieldPresentAll <- function(listRecords, fieldName) {
+  all(vapply(listRecords, function(x) fieldName %in% names(x), logical(1)))
+}
 
 
 #' Ingest an ntsportal json file

@@ -1,4 +1,6 @@
 
+connectNtsportal()
+
 test_that("process dbas all steps", {
   # Test for screeningProcessAllStepsDbas.R
   

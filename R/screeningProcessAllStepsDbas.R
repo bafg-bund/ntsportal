@@ -7,14 +7,11 @@ screeningProcessAllStepsDbas <- function(RFINDEX, SPECLIBPATH, TEMPSAVE, CONFG,
 
   library(ntsworkflow)
   library(logger)
-  library(ntsportal)
+  
   
   startTime <- lubridate::now()
   
-  connectNtsportal()
-  
-  log_info("--------- eval-new-rawfiles-dbas.R v{VERSION} -----------")
-  
+
   # Overall checks ####
   stopifnot(
     file.exists(CONFG),
@@ -28,6 +25,8 @@ screeningProcessAllStepsDbas <- function(RFINDEX, SPECLIBPATH, TEMPSAVE, CONFG,
   check_integrity_msrawfiles(escon = escon, rfindex = RFINDEX, locationRf = ROOTDIR_RF)
   
   # Collect rawfiles ####
+  recordsInBatches <- getUnprocessedMsfiles(nameRawfilesIndex = RFINDEX, screeningType = "dbas")
+  
   qlist <- list(
     query = list(
       bool = list(
@@ -84,6 +83,7 @@ screeningProcessAllStepsDbas <- function(RFINDEX, SPECLIBPATH, TEMPSAVE, CONFG,
   
   allFlsSpl <- Filter(Negate(is.null), allFlsSpl)
   stopifnot(all(sapply(allFlsSpl, function(x) length(unique(x$dir))) == 1))
+  
   
   log_info("Processing {length(allFlsSpl)} batches, {nrow(do.call('rbind', allFlsSpl))} files")
   allFlsIds <- lapply(allFlsSpl, function(x) x$id)
@@ -157,7 +157,6 @@ screeningProcessAllStepsDbas <- function(RFINDEX, SPECLIBPATH, TEMPSAVE, CONFG,
   
   log_info("Completed all batches")
   log_info("Average peaks found per batch: {mean(numPeaksBatch)}")
-  log_info("currently {free_gb()} GB of memory available")
   
   # Add analysis index ####
   if (any(grepl("_upb", allFlsIndex)))
@@ -166,5 +165,5 @@ screeningProcessAllStepsDbas <- function(RFINDEX, SPECLIBPATH, TEMPSAVE, CONFG,
   endTime <- lubridate::now()
   hrs <- round(as.numeric(endTime - startTime, units = "hours"))
   
-  log_info("--------- Completed eval-new-rawfiles-dbas.R in {hrs} h ------------")
+  
 }
