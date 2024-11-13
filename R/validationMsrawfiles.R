@@ -80,10 +80,8 @@ correctIsTablePolarity <- function(rec) {
 
 correctReplicateRegex <- function(rec) {
   if ("dbas_replicate_regex" %in% names(rec)) {
-    all(
-      bracketsReplicateRegex(rec$dbas_replicate_regex),
+    if (bracketsReplicateRegex(rec$dbas_replicate_regex))
       patternFoundReplicateRegex(rec)
-    )
   } else {
     TRUE
   }
@@ -126,6 +124,7 @@ bracketsReplicateRegex <- function(replicateRegex) {
     TRUE
   } else {
     warning("Brackets not found in ", replicateRegex)
+    FALSE
   }
 }
 
