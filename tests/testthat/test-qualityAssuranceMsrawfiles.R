@@ -29,6 +29,20 @@ test_that("Check nts", {
 })
 
 
+test_that("Quality check for records returns true", {
+  index <- "ntsp_index_msrawfiles_unit_tests"
+  records <- getAllMsrawfilesRecords(index)
+  expect_true(validateAllMsrawfiles(records))
+})
+
+test_that("Quality check for records returns true", {
+  index <- "ntsp_msrawfiles"
+  records <- getAllMsrawfilesRecords(index)
+  system.time(
+    validateAllMsrawfiles(records)
+  )
+  expect_true(validateAllMsrawfiles(records))
+})
 
 test_that("Quality check for unit test index returns without error", {
   rfindex <- "ntsp_index_msrawfiles_unit_tests"

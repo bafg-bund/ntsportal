@@ -1,0 +1,61 @@
+{
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "date_import" : {
+        "type" : "date",
+        "format" : "epoch_second"
+      },
+      "cas" : {"type" : "keyword"},
+      "name" : {"type" : "keyword"},
+      "ms2" : {
+        "type" : "nested",
+        "properties" : {
+          "int" : {
+            "type" : "float"
+          },
+          "mz" : {
+            "type" : "float"
+          }
+        }
+      },
+      "mz" : {"type" : "float"},
+      "tag": {"type": "keyword"},
+      "inchi" : {"type" : "keyword"},
+      "formula" : {"type" : "keyword"},
+      "smiles" : {"type" : "keyword"},
+      "comment": {"type": "text"},
+      "pol" : {"type" : "keyword"},
+      "isotopologue" : {"type" : "keyword"},
+      "adduct" : {"type" : "keyword"},
+      "rtt" : {
+        "type" : "nested",
+        "properties" : {
+          "method" : {
+            "type" : "keyword"
+          },
+          "doi" : {
+            "type" : "keyword"
+          },
+          "predicted" : {
+            "type" : "boolean"
+          },
+          "rt" : {
+            "type" : "float"
+          }
+        }
+      },
+      "inchikey" : {"type" : "keyword"},
+      "mw" : {"type" : "float"},
+      "ce" : {"type" : "float"},
+      "ces" : {"type" : "float"},
+      "instrument": {"type" : "keyword"},
+      "ionisation": {"type" : "keyword"},
+      "ce_unit": {"type" : "keyword"},
+      "frag_type": {"type" : "keyword"},
+      "comp_group": {"type" : "keyword"},
+      "data_source": {"type" : "keyword"},
+      "licence" : {"type" : "keyword"}
+    }
+  }
+}
