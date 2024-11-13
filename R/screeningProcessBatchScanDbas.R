@@ -758,11 +758,7 @@ check_uniformity <- function(escon, rfindex, esids, fieldName, onlyNonBlanks = F
   } 
 }
 
-res_field <- function(res, field, value = character(1)) {
-  vapply(
-    res$hits$hits, 
-    function(x) x[["_source"]][[field]], value)
-}
+
 
 #' Get a field for a set of documents defined by id
 #'
@@ -907,64 +903,6 @@ remove_na_doc <- function(doc) {
   Filter(Negate(is.null), doc)
 }
 
-#' Check that a field exists in all documents in rawfiles index
-#'
-#' @param escon Elasticsearch connection object created by `elastic::connect`
-#' @param rfindex Name of rawfiles index
-#' @param fieldName 
-#' @param onlyNonBlank logical, default FALSE, if TRUE, blanks will be ignored
-#'
-#' @return TRUE if all docs have the field
-#' @export
-#'
-check_field <- function(escon, rfindex, fieldName, onlyNonBlank = FALSE) {
-  res <- if (onlyNonBlank) {
-    elastic::Search(escon, rfindex, body = sprintf('
-    {
-      "query": {
-        "bool": {
-          "must_not": [
-            {
-              "exists": {
-                "field": "%s"
-              }
-            }
-          ],
-          "must": [
-            {
-              "term": {
-                "blank": {
-                  "value": false
-                }
-              }
-            }
-          ]
-        }
-      }
-    }
-                      
-    ', fieldName))
-  } else {
-    elastic::Search(escon, rfindex, body = sprintf('
-    {
-      "query": {
-        "bool": {
-          "must_not": [
-            {
-              "exists": {
-                "field": "%s"
-              }
-            }
-          ]
-        }
-      }
-    }
-                      
-    ', fieldName))
-  }
-  
-  res$hits$total$value == 0
-}
 
 
 #' Removal of documents from dbas documents based on filename

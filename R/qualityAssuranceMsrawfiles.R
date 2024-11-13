@@ -1,7 +1,175 @@
 # Copyright 2016-2024 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
 
+# Check quality records ####
 
+validateAllMsrawfiles <- function(records) {
+  passed <- all(
+    purrr::map_lgl(records, validateRecord),
+    noDuplicatedFilenames(records)  
+  )
+  if (!passed) {
+    stop("Validation failed, see warnings")
+  } else {
+    invisible(TRUE)
+  }
+}
+
+validateRecord <- function(rec) {
+  all(
+    fieldsExistForSampleType(rec),
+    filesExist(rec),
+    correctRawfileLocation(rec$path),
+    correctIsTablePolarity(rec),
+    correctReplicateRegex(rec),
+    correctBlankRegex(rec)
+  )
+}
+
+noDuplicatedFilenames <- function(records) {
+  !any(duplicated(basename(getField(records, "path"))))
+}
+
+fieldsExistForSampleType <- function(rec) {
+  fieldsFound <- fieldsExist(defineRequiredFieldsAnySample(), rec)
+  if (!rec$blank) {
+    fieldsFoundEnv <- fieldsExist(defineRequiredFieldsEnvSample(), rec)
+    fieldsFound <- append(fieldsFound, fieldsFoundEnv)
+  }
+  all(fieldsFound)  
+}
+
+filesExist <- function(rec) {
+  fields <- defineRequiredFilesAnySample()
+  all(purrr::map_lgl(fields, checkFileExists, rec = rec))
+}
+
+correctRawfileLocation <- function(path) {
+  allowedPaths <- c(
+    "G2/HRMS/Messdaten",
+    "G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files"
+  )
+  if (any(purrr::map_lgl(allowedPaths, grepl, x = path))) {
+    TRUE
+  } else {
+    warning("File ", path, "not saved in G2/HRMS/Messdaten")
+    FALSE
+  }
+}
+
+correctIsTablePolarity <- function(rec) {
+  tablePath <- basename(rec$dbas_is_table)
+  if (grepl(rec$pol, tablePath)) {
+    TRUE
+  } else {
+    warning("IS Table does not match polarity in file ", rec$path)
+  }
+}
+
+correctReplicateRegex <- function(rec) {
+  if ("dbas_replicate_regex" %in% names(rec)) {
+    all(
+      bracketsReplicateRegex(rec$dbas_replicate_regex),
+      patternFoundReplicateRegex(rec)
+    )
+  } else {
+    TRUE
+  }
+}
+
+correctBlankRegex <- function(rec) {
+  regexMatch <- grepl(rec$dbas_blank_regex, basename(rec$path))
+  isBlank <- rec$blank
+  if ((regexMatch && isBlank) || (!regexMatch && !isBlank)) {
+    TRUE
+  } else {
+    warning("File blank regex and filename mismatch: ", rec$path, " and ", rec$dbas_blank_regex)
+  }
+}
+
+fieldsExist <- function(fields, rec) {
+  all(purrr::map_lgl(fields, checkFieldExists, rec = rec))
+}
+
+checkFieldExists <- function(field, rec) {
+  if (field %in% names(rec)) {
+    TRUE
+  } else {
+    warning(field, " doesn't exist in file ", rec$path)
+    FALSE
+  }
+}
+
+checkFileExists <- function(field, rec) {
+  if (file.exists(rec[[field]])) {
+    TRUE
+  } else {
+    warning(field, " in record, ", rec$filename, " with value ", rec[[field]], " not found")
+    FALSE
+  }
+}
+
+bracketsReplicateRegex <- function(replicateRegex) {
+  if (grepl("\\(.*\\)", replicateRegex)) {
+    TRUE
+  } else {
+    warning("Brackets not found in ", replicateRegex)
+  }
+}
+
+patternFoundReplicateRegex <- function(rec) {
+  regex <- rec$dbas_replicate_regex
+  fileName <- basename(rec$path)
+  reducedFileName <- stringr::str_replace(fileName, regex, "\\1")
+  if (nchar(reducedFileName) < nchar(fileName)) {
+    TRUE
+  } else {
+    warning("Pattern not found in dbas_replicate_regex for file ", rec$path)
+    FALSE
+  }
+}
+
+defineRequiredFieldsAnySample <- function() {
+  c(
+    "path",
+    "dbas_spectral_library",
+    "dbas_is_table",
+    "dbas_area_threshold",
+    "dbas_rttolm",
+    "dbas_mztolu",
+    "dbas_mztolu_fine",
+    "dbas_ndp_threshold",
+    "dbas_rtTolReinteg",
+    "date_measurement",
+    "dbas_ndp_m",
+    "dbas_ndp_n",
+    "dbas_instr",
+    "pol",
+    "chrom_method",
+    "matrix",
+    "data_source",
+    "dbas_index_name",
+    "blank",
+    "sample_source"
+  )
+}
+
+defineRequiredFieldsEnvSample <- function() {
+  c(
+    "duration"
+  )
+}
+
+defineRequiredFilesAnySample <- function() {
+  c(
+    "dbas_spectral_library",
+    "dbas_is_table",
+    "path"
+  )
+}
+
+
+# Check batch quality ####
 checkQualityBatchList <- function(recordsInBatches) {
   batchesOk <- purrr::map_lgl(recordsInBatches, checkQualityBatch)
   if (!all(batchesOk))
@@ -19,10 +187,10 @@ checkQualityBatch <- function(records) {
 }
 
 allFieldsUniform <- function(records) {
-  fieldsToCheckAllSamples <- defineFieldsToCheckAllSamples()
+  fieldsToCheckAllSamples <- defineFieldsToCheckUniformAllSamples()
   uniformAll <- eachFieldUniform(records, fieldsToCheckAllSamples)
   
-  fieldsToCheckEnvSamples <- defineFieldsToCheckEnvSamples()
+  fieldsToCheckEnvSamples <- defineFieldsToCheckUniformEnvSamples()
   recordsEnvSamples <- purrr::discard(records, gf(records, "blank", logical(1)))
   uniformEnv <- eachFieldUniform(recordsEnvSamples, fieldsToCheckEnvSamples) 
   
@@ -68,7 +236,7 @@ fieldUniform <- function(records, fieldToCheck) {
   length(unique(allEntries)) == 1
 }
 
-defineFieldsToCheckAllSamples <- function() {
+defineFieldsToCheckUniformAllSamples <- function() {
   c(
     # Sampling
     "duration",
@@ -92,7 +260,7 @@ defineFieldsToCheckAllSamples <- function() {
   )
 }
 
-defineFieldsToCheckEnvSamples <- function() {
+defineFieldsToCheckUniformEnvSamples <- function() {
   c(
     # dbas Processing
     "dbas_replicate_regex",
@@ -123,118 +291,6 @@ badBatchWarning <- function(records, reason) {
 
 
 # Integrity checks ####
-
-check_dbas_replicate_regex <- function(escon, rfindex) {
-  
-  # dbas_replicate_regex must have brackets
-  ask_es <- function(rgx) {
-    elastic::Search(
-      escon, rfindex, size = 10000, source ="dbas_replicate_regex", 
-      body = list(
-        query = list(
-          bool = list(
-            must = list(
-              list(
-                exists = list(
-                  field = "dbas_replicate_regex"
-                )
-              )
-            ),
-            must_not = list(
-              list(
-                regexp = list(
-                  dbas_replicate_regex = rgx
-                )
-              )
-            )
-          )
-        )
-      )
-    )
-  }
-  res1 <- ask_es(".*\\(.*")
-  res2 <- ask_es(".*\\).*")
-  addUp <- sum(c(res1$hits$total$value, res2$hits$total$value))
-  if (addUp > 0) {
-    bad <- paste(
-      c(
-        unique(res_field(res1, "dbas_replicate_regex")),
-        unique(res_field(res2, "dbas_replicate_regex"))
-      ),
-      collapse = "\n"
-    )
-    stop("There are dbas_replicate_regex which are missing '()':\n", bad)
-  }
-  
-  # For each entry, check that the regex and filename work with str_replace
-  # Which is how the processing groups the replicates together
-  res3 <- ntsportal::es_search_paged(
-    escon, rfindex, source = c("filename", "dbas_replicate_regex"),
-    sort = "filename",
-    searchBody = list(
-      query = list(
-        exists = list(
-          field = "dbas_replicate_regex"
-        )
-      )
-    )
-  )
-  df <- data.frame(
-    rgx = res_field(res3, "dbas_replicate_regex"),
-    fn = res_field(res3, "filename")
-  )
-  df$repn <- apply(df, 1, function(x) stringr::str_replace(x[2], x[1], "\\1"))
-  df$bad <- df$fn == df$repn
-  
-  if (sum(df$bad > 0)) {
-    message("There are dbas_replicate_regex entries which do not match the filename")
-    print(subset(df, bad, c("rgx", "fn")))
-    stop("Correct errors before continuing")
-  }
-  perGroup <- as.numeric(by(df, df$repn, nrow, simplify = T))
-  if (any(perGroup < 2)) {
-    b <- df[df$repn %in% names(which(by(df, df$repn, nrow, simplify = T) < 2)), "fn"]
-    stop("These files do not produce replicate groups\n", 
-         paste(b, collapse = "\n"))
-  }
-  
-  invisible(TRUE)
-} 
-
-
-check_dbas_blank_regex <- function(escon, rfindex) {
-  
-  res <- elastic::Search(
-    escon, rfindex, source = c("dbas_blank_regex", "filename", "path", "blank"),
-    size = 10000, asdf = T,
-    body = list(
-      query = list(
-        term = list(
-          blank = T
-        )
-      )
-    )
-  )
-  
-  df <- res$hits$hits
-  
-  patFound <- mapply(
-    function(pat, fn)  grepl(pat, fn),
-    df$`_source.dbas_blank_regex`, df$`_source.filename`
-  )
-  if (!all(patFound)) {
-    pths <- paste(df[!patFound, "_source.path"], collapse = "\n")
-    logger::log_error("Value of the field dbas_blank_regex not found in the filename of the following files:\n{pths}")
-    build_es_query_for_ids(
-      ids = df[!patFound, "_id"], 
-      toShow = c("blank", "dbas_blank_regex", "filename")
-    )
-    stop("check_dbas_blank_regex failed")
-  }
-  invisible(T)
-}
-
-
 
 
 check_integrity_msrawfiles_nts <- function(msrawfilesDocsList) {

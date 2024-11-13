@@ -1,12 +1,18 @@
-getUnprocessedMsfiles <- function(nameRawfilesIndex, screeningType) {
-  wholeIndexHits <- getWholeIndex(indexName = nameRawfilesIndex)
-  wholeIndexSource <- getSourceFromHits(hitsArray = wholeIndexHits, className = c("msrawfileRecord", "ntspRecord"))
 
-  docsToProcess <- getDocsToProcess(wholeIndexSource, screeningType)
-  docsInBatches <- splitDocsByDir(docsToProcess)
-  docsInBatches
+
+
+getUnprocessedMsrawfilesRecords <- function(nameMsrawfilesIndex, screeningType) {
+  allRecords <- getAllMsrawfilesRecords(nameMsrawfilesIndex)
+
+  recordsToProcess <- getRecordsToProcess(allRecords, screeningType)
+  recordsInBatches <- splitRecordsByDir(recordsToProcess)
+  recordsInBatches
 }
 
+getAllMsrawfilesRecords <- function(nameRawfilesIndex) {
+  wholeIndexHits <- getWholeIndex(indexName = nameRawfilesIndex)
+  getRecordsFromHits(hitsArray = wholeIndexHits, className = c("msrawfileRecord"))
+}
 
 getWholeIndex <- function(indexName) {
   matchAll <- list(
@@ -15,22 +21,22 @@ getWholeIndex <- function(indexName) {
   es_search_paged(escon, indexName, searchBody = matchAll, sort = "path")$hits$hits
 }
 
-getSourceFromHits <- function(hitsArray, className) {
+getRecordsFromHits <- function(hitsArray, className) {
   lapply(hitsArray, function(x) structure(x[["_source"]], class = className))
 }
 
-getDocsToProcess <- function(wholeIndexSource, screeningType) {
+getRecordsToProcess <- function(allRecords, screeningType) {
   fieldToCheck <- switch(screeningType,
     nts = "nts_last_eval",
     dbas = "dbas_last_eval",
     stop("screeningType unknown")
   )
-  unprocessedDocs <- purrr::keep(wholeIndexSource, function(doc) !is.element(fieldToCheck, names(doc)))
-  dirsWithUnprocessed <- unique(dirname(gf(unprocessedDocs, "path", character(1))))
-  purrr::keep(wholeIndexSource, function(doc) dirname(doc$path) %in% dirsWithUnprocessed)
+  unprocessedRecords <- purrr::keep(allRecords, function(rec) !is.element(fieldToCheck, names(rec)))
+  dirsWithUnprocessed <- unique(dirname(gf(unprocessedRecords, "path", character(1))))
+  purrr::keep(allRecords, function(rec) dirname(rec$path) %in% dirsWithUnprocessed)
 }
 
-splitDocsByDir <- function(docsToProcess) {
+splitRecordsByDir <- function(docsToProcess) {
   dirs <- dirname(gf(docsToProcess, "path", character(1)))
   split(docsToProcess, dirs)
 }
