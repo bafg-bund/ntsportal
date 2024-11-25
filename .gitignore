@@ -30,6 +30,7 @@ tests/envimass-ingest2
 tests/summary_scripts2
 tests/ufid_alignment2
 tests/data-export2
+tests/longTestsScreening/testResults
 connect.R
 kevin
 nohup.out
