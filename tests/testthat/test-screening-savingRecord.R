@@ -1,0 +1,30 @@
+
+
+
+test_that("Simple record can be saved as json", {
+  simpleRecord <- getSimpleRecord()
+  tempSaveDir <- withr::local_tempdir()
+  
+  fileName <- saveRecord(simpleRecord, tempSaveDir)
+  
+  jsonText <- readLines(fileName)
+  expect_true(any(grepl("station", jsonText)))
+  expect_true(grepl("meas_files", fileName))
+  
+  file.remove(list.files(tempSaveDir, full.names = T))
+  file.remove(tempSaveDir)
+})
+
+test_that("An empty record is saved as an empty json", {
+  emptyRecord <- getEmptyRecord()
+  tempSaveDir <- withr::local_tempdir()
+  fileName <- saveRecord(emptyRecord, tempSaveDir)
+  
+  jsonText <- readLines(fileName)
+  expect_true(any(grepl("path", jsonText)))
+  expect_match(fileName, "no-peaks")
+  expect_length(jsonText, 5)
+  
+  file.remove(list.files(tempSaveDir, full.names = T))
+  file.remove(tempSaveDir)
+})

@@ -100,7 +100,8 @@
           "adduct" : {"type" : "keyword"},
           "isotopologue" : {"type" : "keyword"},
           "formula" : {"type" : "keyword"},
-          "mz_error" : {"type" : "float"}
+          "mz_error" : {"type" : "float"},
+          "dbas_alias_name": {"type" : "keyword"}
         }
       }
     }
