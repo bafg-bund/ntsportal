@@ -6,6 +6,11 @@
 
 #' Check an msrawfile index for validity
 #'
+#' @description
+#' This function connects to elasticsearch and checks the given msrawfiles 
+#' index according to the current validation routine.
+#' 
+#'
 #' @param indexName default: ntsp_msrawfiles
 #'
 #' @return TRUE
@@ -27,16 +32,17 @@ validateRecordsMsrawfiles <- function(records) {
   }
 }
 
-validateRecord <- function(rec) {
+validateRecord.msrawfileRecord <- function(record) {
   all(
-    fieldsExistForSampleType(rec),
-    filesExist(rec),
-    correctRawfileLocation(rec$path),
-    correctIsTablePolarity(rec),
-    correctReplicateRegex(rec),
-    correctBlankRegex(rec)
+    fieldsExistForSampleType(record),
+    filesExist(record),
+    correctRawfileLocation(record$path),
+    correctIsTablePolarity(record),
+    correctReplicateRegex(record),
+    correctBlankRegex(record)
   )
 }
+
 
 noDuplicatedFilenames <- function(records) {
   !any(duplicated(basename(getField(records, "path"))))
@@ -81,7 +87,7 @@ correctIsTablePolarity <- function(rec) {
 correctReplicateRegex <- function(rec) {
   if ("dbas_replicate_regex" %in% names(rec)) {
     if (bracketsReplicateRegex(rec$dbas_replicate_regex))
-      patternFoundReplicateRegex(rec)
+      patternFoundReplicateRegex(rec) else FALSE
   } else {
     TRUE
   }
@@ -185,11 +191,12 @@ checkQualityBatchList <- function(recordsInBatches) {
   batchesOk <- purrr::map_lgl(recordsInBatches, checkQualityBatch)
   if (!all(batchesOk))
     stop("Quality check batches failed")
-  batchesOk
+  invisible(batchesOk)
 }
 
 checkQualityBatch <- function(records) {
   batchOk <- all(
+    validateRecordsMsrawfiles(records),
     allFieldsUniform(records),
     blanksPresent(records),
     enoughSamplesForMinFeatures(records)
@@ -198,12 +205,10 @@ checkQualityBatch <- function(records) {
 }
 
 allFieldsUniform <- function(records) {
-  fieldsToCheckAllSamples <- defineFieldsToCheckUniformAllSamples()
-  uniformAll <- eachFieldUniform(records, fieldsToCheckAllSamples)
+  uniformAll <- eachFieldUniform(records, fieldsToCheckUniformAllSamples())
   
-  fieldsToCheckEnvSamples <- defineFieldsToCheckUniformEnvSamples()
-  recordsEnvSamples <- purrr::discard(records, gf(records, "blank", logical(1)))
-  uniformEnv <- eachFieldUniform(recordsEnvSamples, fieldsToCheckEnvSamples) 
+  recordsEnvSamples <- purrr::discard(records, getField(records, "blank"))
+  uniformEnv <- eachFieldUniform(recordsEnvSamples, fieldsToCheckUniformEnvSamples()) 
   
   uniform <- c(uniformAll, uniformEnv)
   
@@ -241,13 +246,17 @@ eachFieldUniform <- function(records, fields) {
 }
 
 fieldUniform <- function(records, fieldToCheck) {
-  if (!fieldPresentAll(records, fieldToCheck))
+  if (!all(fieldExistsRecords(records, fieldToCheck)))
     return(TRUE)
   allEntries <- getField(records, fieldToCheck)
   length(unique(allEntries)) == 1
 }
 
-defineFieldsToCheckUniformAllSamples <- function() {
+fieldExistsRecords <- function(records, fieldToCheck) {
+  purrr::map_lgl(records, checkFieldExists, field = fieldToCheck)
+}
+
+fieldsToCheckUniformAllSamples <- function() {
   c(
     # Sampling
     "duration",
@@ -265,13 +274,14 @@ defineFieldsToCheckUniformAllSamples <- function() {
     "dbas_index_name",
     "dbas_alias_name",
     "dbas_minimum_detections",
+    "dbas_fp",
     
     # nts processing
     "nts_spectral_library"
   )
 }
 
-defineFieldsToCheckUniformEnvSamples <- function() {
+fieldsToCheckUniformEnvSamples <- function() {
   c(
     # dbas Processing
     "dbas_replicate_regex",
@@ -292,6 +302,52 @@ badBatchWarning <- function(records, reason) {
   batchName <- dirname(getField(records, "path")[1])
   warning(reason, " in batch ", batchName)
 }
+
+
+# Check feature quality
+
+validateRecord.featureRecord <- function(record) {
+  all(
+    isNestedFieldAList(record, "ms1"), 
+    isNestedFieldAList(record, "ms2"),
+    isNestedFieldAList(record, "eic"),
+    isNestedFieldAList(record, "loc"),
+    checkFieldsAllowed(record)
+  )
+}
+
+isNestedFieldAList <- function(record, field) {
+  if (field %in% names(record)) {
+    if (is.list(record[[field]]) && !is.data.frame(record[[field]])) {
+      TRUE
+    } else {
+      warning("Badly formated nested field ", field)
+      FALSE
+    }
+  } else {
+    TRUE
+  }
+}
+
+checkFieldsAllowed <- function(record) {
+  fieldsOk <- names(record) %in% allowedFieldsFeature()
+  if (!all(fieldsOk)) {
+    badNames <- paste(names(record)[which(!fieldsOk)], collapse = ", ")
+    warning("Fields which should not be there: ", badNames)
+    FALSE
+  } else {
+    TRUE
+  }
+}
+
+allowedFieldsFeature <- function() {
+  allowed <- union(
+    names(jsonlite::read_json(fs::path_package("ntsportal", "extdata", "dbas_index_mappings.json"))$mappings$properties),
+    names(jsonlite::read_json(fs::path_package("ntsportal", "extdata", "nts_index_mappings.json"))$mappings$properties)
+  )
+  c(allowed, "dbas_alias_name")
+}
+
 
 
 
@@ -345,6 +401,9 @@ check_integrity_msrawfiles_nts <- function(msrawfilesDocsList) {
   invisible(TRUE)
 }
 
+validateRecord <- function(record) {
+  UseMethod("validateRecord")
+}
 
-
-
+.S3method("validateRecord", "msrawfileRecord", validateRecord.msrawfileRecord)
+.S3method("validateRecord", "featureRecord", validateRecord.featureRecord)

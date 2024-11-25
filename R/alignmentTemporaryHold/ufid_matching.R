@@ -15,16 +15,7 @@
 
 # Internal functions ####
 
-# TODO This needs to be combined with the functions in eval_dbas #cleanup
-#' @export
-norm_ms1 <- function(x, precursorMz, noiselevel = 0.01) {
-  precursorInt <- x$int[which.min(abs(x$mz - precursorMz))]
-  # remove noise
-  x <- x[x$int >= noiselevel * precursorInt, ]
-  if (length(x) == 0 || nrow(x) == 0)
-    return(NULL)
-  data.frame(mz = x$mz, int = x$int / precursorInt)
-}
+
 
 #' @export
 norm_ms2 <- function(x, precursorMz, noiselevel = 0.01) {
