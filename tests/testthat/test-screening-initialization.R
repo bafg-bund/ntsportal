@@ -42,4 +42,17 @@ test_that("Unprocessed directories are returned", {
   expect_s3_class(records[[1]], "msrawfileRecord")
 })
 
+test_that("One can provide a root directory to select batches", {
+  allRecords <- entireTestMsrawfilesIndex()
+  rootDir <- "/srv/cifs-mounts/g2/G/G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files/"
+  allRecordsAgain <- getSelectedRecords(allRecords, rootDir)
+  expect_equal(allRecords, allRecordsAgain)
+})
 
+test_that("One can provide multiple directories", {
+  allRecords <- entireTestMsrawfilesIndex()
+  dirs <- c("/srv/cifs-mounts/g2/G/G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files/olmesartan-d6",
+            "/srv/cifs-mounts/g2/G/G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files/olmesartan-d6-bisoprolol")
+  filteredRecords <- getSelectedRecords(allRecords, dirs)
+  expect_lt(length(filteredRecords), length(allRecords))
+})

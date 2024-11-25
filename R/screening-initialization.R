@@ -6,7 +6,7 @@ getSelectedMsrawfileBatches <- function(msrawfilesIndex, batchDirs) {
 }
 
 getSelectedRecords <- function(allRecords, dirsToKeep) {
-  dirsToKeep <- normalizePath(dirsToKeep)
+  dirsToKeep <- normalizePath(list.dirs(dirsToKeep)) 
   purrr::keep(allRecords, function(record) dirname(record$path) %in% dirsToKeep)
 }
 
