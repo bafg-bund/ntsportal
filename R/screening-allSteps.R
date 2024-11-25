@@ -21,5 +21,3 @@ dbaScreeningOneBatch <- function(msrawfileRecords, saveDirectory) {
   featureRecordsBatch <- convertToRecord(resultBatch, msrawfileRecords)
   saveRecord(featureRecordsBatch, saveDirectory)
 }
-
-
