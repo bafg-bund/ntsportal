@@ -40,7 +40,7 @@ saveRecord <- function(ntspList, saveDir, maxSizeGb = 10) {
       SIMPLIFY = FALSE
     )
     # for each of these parts, run this function again
-    savenm <- lapply(ntsplListSplit, save_ntspl, saveDir = saveDir, maxSizeGb = maxSizeGb)
+    savenm <- lapply(ntsplListSplit, saveRecord, saveDir = saveDir, maxSizeGb = maxSizeGb)
     return(as.character(savenm))
   } 
   
@@ -53,20 +53,12 @@ saveRecord <- function(ntspList, saveDir, maxSizeGb = 10) {
   filePath <- file.path(saveDir, fileName)
   
   log_info("Writing JSON file {filePath}")
-  # rjson seems much faster that jsonlite
-  tryCatch({
-    jsonString <- rjson::toJSON(ntspList, indent = 2)
-    writeLines(jsonString, filePath)
-  },
-  error = function(cnd) {
-    log_error("In writing json {filePath} returned: {conditionMessage(cnd)}")
-    stop()
-  })
+  writeRecord(ntspList, filePath)
+  newFilePath <- compressJson(filePath)
   
-  log_info("Completed JSON file {filePath}")
-  filePath
+  log_info("Completed JSON file {newFilePath}")
+  newFilePath
 } 
-
 
 makeFileNameForBatch <- function(ntspList) {
   dirName <- dirname(ntspList[[1]][["path"]])
@@ -87,5 +79,22 @@ makeFileNameForBatch <- function(ntspList) {
   )
 }
 
+writeRecord <- function(record, filePath) {
+  tryCatch({
+    jsonString <- rjson::toJSON(record, indent = 2)
+    writeLines(jsonString, filePath)
+  },
+  error = function(cnd) {
+    log_error("In writing json {filePath} returned: {conditionMessage(cnd)}")
+  })
+}
 
+compressJson <- function(filePath) {
+  system2("gzip", filePath)
+  paste0(filePath, ".gz")
+}
 
+uncompressJson <- function(filePath) {
+  system2("gunzip", filePath)
+  stringr::str_match(filePath, "(.*)\\.gz$")[,2]
+}

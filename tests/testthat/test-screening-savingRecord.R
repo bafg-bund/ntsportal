@@ -5,11 +5,11 @@ test_that("Simple record can be saved as json", {
   simpleRecord <- getSimpleRecord()
   tempSaveDir <- withr::local_tempdir()
   
-  fileName <- saveRecord(simpleRecord, tempSaveDir)
-  
+  fileNameCompressed <- saveRecord(simpleRecord, tempSaveDir)
+  fileName <- uncompressJson(fileNameCompressed)
   jsonText <- readLines(fileName)
   expect_true(any(grepl("station", jsonText)))
-  expect_true(grepl("meas_files", fileName))
+  expect_match(fileName, "meas_files")
   
   file.remove(list.files(tempSaveDir, full.names = T))
   file.remove(tempSaveDir)
