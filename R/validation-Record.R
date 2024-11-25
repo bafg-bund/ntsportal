@@ -253,7 +253,7 @@ fieldUniform <- function(records, fieldToCheck) {
 }
 
 fieldExistsRecords <- function(records, fieldToCheck) {
-  purrr::map_lgl(records, checkFieldExists, field = fieldToCheck)
+  suppressWarnings(purrr::map_lgl(records, checkFieldExists, field = fieldToCheck))
 }
 
 fieldsToCheckUniformAllSamples <- function() {

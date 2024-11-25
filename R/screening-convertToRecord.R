@@ -14,7 +14,7 @@ convertToRecord.dbasResult <- function(scanResult, msrawfileRecords) {
   specLibPath <- getField(msrawfileRecords, "dbas_spectral_library")[1]
   features <- addCompoundInformation(features, specLibPath)
   
-  intStdName <- getField(msrawfileRecords, "dbas_is_name")
+  intStdName <- getField(msrawfileRecords, "dbas_is_name")[1]
   intStdAreas <- getAreasOfIntStd(scanResult, intStdName)
   features <- addAreasOfIntStd(features, intStdAreas)
   
