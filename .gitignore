@@ -31,6 +31,7 @@ tests/summary_scripts2
 tests/ufid_alignment2
 tests/data-export2
 tests/longTestsScreening/testResults
+tests/slurmTesting/testResults
 connect.R
 kevin
 nohup.out

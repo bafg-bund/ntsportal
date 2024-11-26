@@ -23,6 +23,15 @@ dbaScreeningSelectedBatchesSlurm <- function(msrawfileIndex, batchDirs, saveDire
     system(submitCommand) else submitCommand
 }
 
+#' @export
+dbaScreeningOneBatch <- function(msrawfileRecords, saveDirectory) {
+  resultBatch <- scanBatchDbas(msrawfileRecords)
+  featureRecordsBatch <- convertToRecord(resultBatch, msrawfileRecords)
+  saveRecord(featureRecordsBatch, saveDirectory)
+}
+
+
+
 saveFilesSlurm <- function(recordsInBatches, saveDirectory) {
   saveRDS(recordsInBatches, file.path(saveDirectory, "recordsInBatches.RDS"))
   file.copy(fs::path_package("ntsportal", "scripts", "dbaScreeningSlurmArrayJob.sbatch"), saveDirectory)
@@ -38,14 +47,4 @@ dbaScreeningBatches <- function(msrawfileRecordsInBatches, saveDirectory) {
   checkQualityBatchList(msrawfileRecordsInBatches)
   purrr::map_chr(msrawfileRecordsInBatches, dbaScreeningOneBatch, saveDirectory = saveDirectory)
 }
-
-#' @export
-dbaScreeningOneBatch <- function(msrawfileRecords, saveDirectory) {
-  resultBatch <- scanBatchDbas(msrawfileRecords)
-  featureRecordsBatch <- convertToRecord(resultBatch, msrawfileRecords)
-  saveRecord(featureRecordsBatch, saveDirectory)
-}
-
-
-
 
