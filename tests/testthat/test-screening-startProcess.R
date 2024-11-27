@@ -20,3 +20,25 @@ test_that("Dba-screening for a small batch produces a json with peaks", {
   file.remove(tempSaveDir)
 })
 
+test_that("Dba-screening array job file and records in batches are produced", {
+  tempSaveDir <- withr::local_tempdir()
+  index <- "ntsp_index_msrawfiles_unit_tests"
+  
+  dbaScreeningSelectedBatchesSlurm(
+    index, 
+    "/srv/cifs-mounts/g2/G/G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files/", 
+    tempSaveDir,
+    "testEmail@test.de"
+  )
+  
+  expect_length(list.files(tempSaveDir),3)
+  linesJobFile <- readLines(file.path(tempSaveDir, "arrayDbaScreening.sbatch"))
+  expect_equal(linesJobFile[13], "#SBATCH --array=1-4%10")
+  expect_match(linesJobFile[6], "testEmail@test.de")
+  expect_match(linesJobFile[4], tempSaveDir)
+  expect_match(linesJobFile[55], tempSaveDir)
+  
+  file.remove(list.files(tempSaveDir, full.names = T))
+  file.remove(tempSaveDir)
+})
+
