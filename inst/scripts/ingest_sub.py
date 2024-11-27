@@ -98,7 +98,7 @@ def update_import_time(json_docs):
     return json_docs, timestamp
 
 
-def ingest_json_docs(json_docs, es_client, timestamp):
+def ingest_json_docs(json_docs, es_client, timestamp, mapping_path):
     """Ingests json documents into Elasticsearch grouped by unique alias name. For each unique alias name a respective
      target index with timestamp is created and the alias is assigned."""
 
@@ -106,7 +106,7 @@ def ingest_json_docs(json_docs, es_client, timestamp):
     unique_alias_names = (json_docs['dbas_alias_name'].unique())
 
     # Create dbas/nts indeces in Elasticsearch based on alias names
-    target_index_alias_pairs = create_index_add_alias(unique_alias_names, es_client, timestamp)
+    target_index_alias_pairs = create_index_add_alias(unique_alias_names, es_client, timestamp, mapping_path)
 
     # Ingest data to target indeces in Elasticsearch
     ingest_data(target_index_alias_pairs, json_docs, es_client)
@@ -114,7 +114,7 @@ def ingest_json_docs(json_docs, es_client, timestamp):
     return target_index_alias_pairs
 
 
-def create_index_add_alias(unique_alias_names, es_client, timestamp):
+def create_index_add_alias(unique_alias_names, es_client, timestamp, mapping_path):
     """
     Creates new dbas/nts indeces in Elasticsearch based on alias names found in the json documents and adds
     alias names to the created dbas/nts indeces.
@@ -145,8 +145,8 @@ def create_index_add_alias(unique_alias_names, es_client, timestamp):
         if not es_client.indices.exists(index=index_name):
 
             # Get correct index mapping body
-            mapping_path = f'{os.getenv("HOME")}/projects/ntsportal/inst/extdata/'
-            with open(f'{mapping_path}{alias_type}_index_mappings.json', 'r') as f:
+            # mapping_path = f'{os.getenv("HOME")}/projects/ntsportal/inst/extdata/'
+            with open(f'{mapping_path}/{alias_type}_index_mappings.json', 'r') as f:
                 index_mapping_body = json.load(f)
 
             # Create index in Elasticsearch

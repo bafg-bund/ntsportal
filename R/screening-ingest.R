@@ -18,9 +18,9 @@ ingestJson <- function(json_path) {
   
   # Load ingest module
   reticulate::source_python(fs::path_package("ntsportal", "scripts", "ingest_main.py"))
-  
+  mapping_path <- fs::path_package("ntsportal", "inst", "extdata")
   # Run the main ingest function
-  all_index_alias_pairs <- ingest(json_path)
+  all_index_alias_pairs <- ingest(json_path, mapping_path)
   
   return(all_index_alias_pairs)
 }

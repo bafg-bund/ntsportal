@@ -2,7 +2,7 @@
 from ingest_sub import *
 
 
-def ingest(json_path):
+def ingest(json_path, mapping_path):
     """
     Main processing logic for ingest of json files into Elasticsearch:
       1. Read json files
@@ -13,7 +13,8 @@ def ingest(json_path):
         b. Ingest features into each target index (group)
 
     Args:
-      json_path (str) : Path to single json file or directory with json files.
+      json_path (str)     : Path to single json file or directory with json files.
+      mapping_path (str)  : Path to mapping json files.
     
     Returns:
       all_index_alias_pairs (list of dicts) : All pairs of aliases and created indeces.
@@ -34,6 +35,6 @@ def ingest(json_path):
     # Ingest json documents
     all_index_alias_pairs = []
     for batch in tqdm(json_docs, total=len(json_docs), desc='Indexing features in json gz files'):
-        all_index_alias_pairs.append(ingest_json_docs(batch, es_client, timestamp))
+        all_index_alias_pairs.append(ingest_json_docs(batch, es_client, timestamp, mapping_path))
 
     return all_index_alias_pairs
