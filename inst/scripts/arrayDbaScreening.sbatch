@@ -1,20 +1,17 @@
 #!/bin/bash
 #SBATCH -p hpc                         # queue
 #SBATCH -t 00-24:00                    # time DD-HH:MM
-#SBATCH -e sbatch_array_%A_%a.err      # write stderr to 
-#SBATCH -o sbatch_array_%A_%a.out      # write stdout to 
-#SBATCH --mail-user=jewell@bafg.de     # mail address for notifications
+#SBATCH -e RVarDir/sbatch_array_%A_%a.err      # write stderr to 
+#SBATCH -o RVarDir/sbatch_array_%A_%a.out      # write stdout to 
+#SBATCH --mail-user=RVarEmail     # mail address for notifications
 #SBATCH --mail-type=BEGIN,END,FAIL     # mail messages at
 #SBATCH --get-user-env                 # get the standard user env (~/.bashrc, ~/.bash_profile)
 #SBATCH --nodes=1                      # number of requested nodes (max = 7)
 #SBATCH --tasks-per-node=1             # number of tasks per node
 #SBATCH --ntasks=1                     # number of tasks
 #SBATCH --cpus-per-task=1              # number of cpus per task (max = 48)
-#SBATCH --array=1-RVarNumBatches%6
-
-# remove modules possibly loaded through get-user-env
-module purge
-module load R/latest
+#SBATCH --array=1-RVarNumBatches%10
+#SBATCH --nodelist=phil-cn01
 
 #----------------------------------------------------------------
 # Output Environment Variables
@@ -55,11 +52,8 @@ echo -e "Current directory:" $PWD
 echo "=========================================="
 echo ""
 
-#Rscript test_load.R
 
-#Rscript test_sbatch.R
-
-Rscript process_batch_slurm.R recordsInBatches.RDS $SLURM_ARRAY_TASK_ID
+Rscript RVarDir/dbaScreeningSlurm.R RVarDir/recordsInBatches.RDS $SLURM_ARRAY_TASK_ID
 
 
 echo -e "------------------------------------------ \n"
