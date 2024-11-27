@@ -32,7 +32,7 @@
           "duration" : {"type" : "float"},
           "date_import" : {
             "type" : "date",
-            "format" : "epoch_second"
+            "format": "yyyy-MM-dd HH:mm:ss"
           },
           "eic" : {
             "type" : "nested",
@@ -91,6 +91,7 @@
             }
           },
           "filename" : {"type" : "keyword"},
+          "dbas_alias_name": {"type": "keyword"},
           "path": {"type" : "keyword"},
           "station" : {"type" : "keyword"},
           "inchikey" : {"type" : "keyword"},
