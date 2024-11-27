@@ -14,6 +14,9 @@ def ingest(json_path):
 
     Args:
       json_path (str) : Path to single json file or directory with json files.
+    
+    Returns:
+      all_index_alias_pairs (list of dicts) : All pairs of aliases and created indeces.
     """
     from tqdm import tqdm
 
@@ -29,5 +32,8 @@ def ingest(json_path):
     json_docs, timestamp = update_import_time(json_docs)
 
     # Ingest json documents
+    all_index_alias_pairs = []
     for batch in tqdm(json_docs, total=len(json_docs), desc='Indexing features in json gz files'):
-        ingest_json_docs(batch, es_client, timestamp)
+        all_index_alias_pairs.append(ingest_json_docs(batch, es_client, timestamp))
+
+    return all_index_alias_pairs

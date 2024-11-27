@@ -110,6 +110,8 @@ def ingest_json_docs(json_docs, es_client, timestamp):
 
     # Ingest data to target indeces in Elasticsearch
     ingest_data(target_index_alias_pairs, json_docs, es_client)
+    
+    return target_index_alias_pairs
 
 
 def create_index_add_alias(unique_alias_names, es_client, timestamp):
