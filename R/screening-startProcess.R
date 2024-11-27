@@ -1,14 +1,38 @@
 
 #' @export
-dbaScreeningNewBatches <- function(msrawfileIndex, saveDirectory) {
+dbaScreeningNewBatches <- function(msrawfileIndex, saveDirectory, numParallel = 1) {
   recordsInBatches <- getUnprocessedMsrawfileRecords(msrawfileIndex, "dbas")
-  dbaScreeningBatches(recordsInBatches, saveDirectory)
+  dbaScreeningBatches(msrawfileRecordsInBatches, saveDirectory, numParallel)
 }
 
 #' @export
-dbaScreeningSelectedBatches <- function(msrawfileIndex, batchDirs, saveDirectory) {
+dbaScreeningSelectedBatches <- function(msrawfileIndex, batchDirs, saveDirectory, numParallel = 1) {
   recordsInBatches <- getSelectedMsrawfileBatches(msrawfileIndex, batchDirs)
-  dbaScreeningBatches(recordsInBatches, saveDirectory)
+  dbaScreeningBatches(msrawfileRecordsInBatches, saveDirectory, numParallel)
+}
+
+dbaScreeningBatches <- function(msrawfileRecordsInBatches, saveDirectory, numParallel) {
+  checkQualityBatchList(msrawfileRecordsInBatches)
+  if (numParallel == 1) {
+    dbaScreeningSerial(msrawfileRecordsInBatches, saveDirectory)
+  } else {
+    dbaScreeningParallel(msrawfileRecordsInBatches, saveDirectory)
+  }
+}
+
+dbaScreeningSerial <- function(msrawfileRecordsInBatches, saveDirectory) {
+  purrr::map_chr(msrawfileRecordsInBatches, dbaScreeningOneBatch, saveDirectory = saveDirectory)
+}
+
+dbaScreeningParallel <- function(msrawfileRecordsInBatches, saveDirectory, numParallel = 6) {
+  if (rstudioapi::isAvailable()) {
+    future::plan(multisession, workers = numParallel)
+  } else {
+    future::plan(multicore, workers = numParallel)
+  }
+  filePaths <- furrr::future_map(msrawfileRecordsInBatches, dbaScreeningOneBatch, .options = furrr::furrr_options(seed = NULL))
+  plan(sequential)
+  as.character(filePaths)
 }
 
 #' @export
@@ -47,7 +71,4 @@ addTextToJob <- function(jobFile, variableName, value) {
   system(glue::glue("sed -i 's|{variableName}|{value}|g' {jobFile}"))
 }
 
-dbaScreeningBatches <- function(msrawfileRecordsInBatches, saveDirectory) {
-  checkQualityBatchList(msrawfileRecordsInBatches)
-  purrr::map_chr(msrawfileRecordsInBatches, dbaScreeningOneBatch, saveDirectory = saveDirectory)
-}
+
