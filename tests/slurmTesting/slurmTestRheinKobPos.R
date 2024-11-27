@@ -13,3 +13,8 @@ dirs <- c(
 dbaScreeningSelectedBatchesSlurm(index, dirs, "tests/slurmTesting/testResults", "jewell@bafg.de")
 
 stopifnot(length(list.files("tests/slurmTesting/testResults")) == 3)
+
+
+# After finished
+
+ingestJson("tests/slurmTesting/testResults")
