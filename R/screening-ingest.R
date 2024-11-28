@@ -1,24 +1,27 @@
-#' Ingest of json files into Elasticsearch
-#'
+#' Ingest of json.gz files into Elasticsearch
+#' @description
+#' Ingest json.gz files into Elasticsearch
+#' 
+#' @details
+#' Required python packages:
+#' reticulate::py_install('elasticsearch')
+#' reticulate::py_install('pandas')
+#' reticulate::py_install('tqdm')
+#' reticulate::py_install('pyyaml')
+#' 
 #' @param json_path Path to single json file or directory with json files.
 #'
-#' @return Returns TRUE when completed (invisibly)
+#' @return Returns pairs for all unique aliases and the respective indeces
 #' @export
 #'
 ingestJson <- function(json_path) {
   
-  # py_install("keyring")
-  # py_install("elasticsearch")
-  # py_install("keyrings.alt")
-  # py_install("SecretStorage")
-  # py_install("dbus-python")
-  # py_install('pandas')
-  # reticulate::py_install('tqdm')
-  # reticulate::py_install('pyyaml')
-  
-  # Load ingest module
+  # Load python ingest module
   reticulate::source_python(fs::path_package("ntsportal", "scripts", "ingest_main.py"))
+  
+  # Path for index mappings
   mapping_path <- fs::path_package("ntsportal", "inst", "extdata")
+  
   # Run the main ingest function
   all_index_alias_pairs <- ingest(json_path, mapping_path)
   

@@ -17,9 +17,6 @@ def read_json_files(json_path):
             # Parse the decompressed content as json into a DataFrame
             json_docs.append(pd.read_json(io.BytesIO(decompressed_data)))
 
-    # Concatenate all to one DataFrame
-    # json_docs = pd.concat(json_docs, ignore_index=True)
-
     return json_docs
 
 
