@@ -19,7 +19,6 @@ tests/ufid-note
 tests/addrawfiles_test
 tests/reference-shewhart
 tests/machine-learning
-tests/ole
 tests/nts-proc-testing
 tests/archive
 tests/add_data2
@@ -36,3 +35,5 @@ inst/scripts/__pycache__
 connect.R
 kevin
 nohup.out
+franzi
+ole
