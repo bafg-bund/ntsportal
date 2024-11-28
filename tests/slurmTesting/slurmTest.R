@@ -8,6 +8,9 @@ index <- "ntsp_index_msrawfiles_unit_tests"
 dirs <- c(
   "~/ntsgz/db/ntsp/unit_tests/meas_files/olmesartan-d6-bisoprolol/"
 )
-dbaScreeningSelectedBatchesSlurm(index, dirs, "tests/slurmTesting/testResults", "jewell@bafg.de")
+dbaScreeningSelectedBatchesSlurm(index, dirs, "tests/slurmTesting/testResults", "thron@bafg.de")
 
 stopifnot(length(list.files("tests/slurmTesting/testResults")) == 3)
+
+
+ingestJson("tests/slurmTesting/testResults")
