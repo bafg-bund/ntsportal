@@ -19,7 +19,6 @@ tests/ufid-note
 tests/addrawfiles_test
 tests/reference-shewhart
 tests/machine-learning
-tests/ole
 tests/nts-proc-testing
 tests/archive
 tests/add_data2
