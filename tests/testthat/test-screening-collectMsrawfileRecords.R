@@ -11,6 +11,8 @@ test_that("Records for selected batches are returned", {
 
 test_that("Unprocessed files can be collected from msrawfiles", {
   index <- "ntsp_index_msrawfiles_unit_tests"
+  prepareExampleFeatureIndex()
+  
   unprocessedMsFiles <- getUnprocessedMsrawfileBatches(index, "dbasTest")
   
   expect_s3_class(unprocessedMsFiles[[1]][[1]], "msrawfileRecord")
