@@ -11,7 +11,7 @@
 #SBATCH --ntasks=1                     # number of tasks
 #SBATCH --cpus-per-task=1              # number of cpus per task (max = 48)
 #SBATCH --array=1-RVarNumBatches%10
-#SBATCH --nodelist=phil-cn01
+
 
 #----------------------------------------------------------------
 # Output Environment Variables
@@ -52,7 +52,7 @@ echo -e "Current directory:" $PWD
 echo "=========================================="
 echo ""
 
-
+module load R/latest
 Rscript RVarDir/dbaScreeningSlurm.R RVarDir/recordsInBatches.RDS $SLURM_ARRAY_TASK_ID
 
 

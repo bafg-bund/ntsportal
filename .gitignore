@@ -32,6 +32,7 @@ tests/ufid_alignment2
 tests/data-export2
 tests/longTestsScreening/testResults
 tests/slurmTesting/testResults
+inst/scripts/__pycache__
 connect.R
 kevin
 nohup.out

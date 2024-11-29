@@ -38,4 +38,5 @@ test_that("An empty result is converted to an empty record", {
   expect_equal(length(record), 1)
   expect_s3_class(record[[1]], "featureRecord")
   expect_match(record[[1]]$path,"^/srv/.*\\.mzX?ML$")
+  expect_match(record[[1]]$dbas_alias_name,"^ntsp")
 })
