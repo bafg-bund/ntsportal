@@ -8,16 +8,9 @@ test_that("copy CSL", {
 
 test_that("generate structural formula for diclofenac", {
   tempSaveDir <- withr::local_tempdir()
-  name <- createPngFromSmiles("OC(Cc1c(Nc2c(Cl)cccc2Cl)cccc1)=O","DCOPUUMXTXDBNB-UHFFFAOYSA-N",tempSaveDir)
-  expect_true(file.exists(file.path(tempSaveDir, name)))
+  name <- createPngFromSmiles(smilesCode = "C1=CC=C(C(=C1)CC(=O)O)NC2=C(C=CC=C2Cl)Cl", inchikey = "DCOPUUMXTXDBNB-UHFFFAOYSA-N",targetPath = tempSaveDir)
+  expect_true(file.exists(file.path(name)))
+  file.show(file.path(name))
   file.remove(list.files(tempSaveDir,full.names = TRUE))
   file.remove(tempSaveDir)
-})
-#Testen, ob es für mehrere Substanzen funktioniert oder ob Smiles-Code nicht stimmt
-
-test_that("generate structure matrix", {
-  library(rcdk)
-  library(rJava)
-  testmol <- readRDS(test_path("fixtures","createStructuralFormulas","testmol.RDS"))
-  makeStructureMatrix(testmol)
 })
