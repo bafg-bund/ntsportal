@@ -1,3 +1,5 @@
+# Copyright 2016-2024 Bundesanstalt für Gewässerkunde
+# This file is part of ntsportal
 
 #' @export
 dbaScreeningNewBatches <- function(msrawfileIndex, saveDirectory, numParallel = 1) {
