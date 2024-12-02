@@ -2,7 +2,7 @@
 % Please edit documentation in R/screening-ingest.R
 \name{ingestJson}
 \alias{ingestJson}
-\title{Ingest of json files into Elasticsearch}
+\title{Ingest of json.gz files into Elasticsearch}
 \usage{
 ingestJson(json_path)
 }
@@ -10,8 +10,15 @@ ingestJson(json_path)
 \item{json_path}{Path to single json file or directory with json files.}
 }
 \value{
-Returns TRUE when completed (invisibly)
+Returns pairs for all unique aliases and the respective indeces
 }
 \description{
-Ingest of json files into Elasticsearch
+Ingest json.gz files into Elasticsearch
+}
+\details{
+Required python packages:
+reticulate::py_install('elasticsearch')
+reticulate::py_install('pandas')
+reticulate::py_install('tqdm')
+reticulate::py_install('pyyaml')
 }
