@@ -7,7 +7,7 @@ dbaScreeningNewBatches <- function(msrawfileIndex, saveDirectory, numParallel = 
 
 #' @export
 dbaScreeningSelectedBatches <- function(msrawfileIndex, batchDirs, saveDirectory, numParallel = 1) {
-  recordsInBatches <- getSelectedMsrawfileBatches(msrawfileIndex, batchDirs)
+  msrawfileRecordsInBatches <- getSelectedMsrawfileBatches(msrawfileIndex, batchDirs)
   dbaScreeningBatches(msrawfileRecordsInBatches, saveDirectory, numParallel)
 }
 
@@ -30,7 +30,7 @@ dbaScreeningParallel <- function(msrawfileRecordsInBatches, saveDirectory, numPa
   } else {
     future::plan(multicore, workers = numParallel)
   }
-  filePaths <- furrr::future_map(msrawfileRecordsInBatches, dbaScreeningOneBatch, .options = furrr::furrr_options(seed = NULL))
+  filePaths <- furrr::future_map(msrawfileRecordsInBatches, dbaScreeningOneBatch, saveDirectory = saveDirectory, .options = furrr::furrr_options(seed = NULL))
   plan(sequential)
   as.character(filePaths)
 }
