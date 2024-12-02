@@ -22,8 +22,9 @@ test_that("An empty record is saved as an empty json", {
   
   jsonText <- readLines(fileName)
   expect_true(any(grepl("path", jsonText)))
+  expect_true(any(grepl("dbas_alias_name", jsonText)))
   expect_match(fileName, "no-peaks")
-  expect_length(jsonText, 5)
+  expect_length(jsonText, 6)
   
   file.remove(list.files(tempSaveDir, full.names = T))
   file.remove(tempSaveDir)

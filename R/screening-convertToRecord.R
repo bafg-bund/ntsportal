@@ -28,7 +28,14 @@ convertToRecord.dbasResult <- function(scanResult, msrawfileRecords) {
 
 
 makeEmptyRecordWithPath <- function(msrawfileRecords) {
-  list(newFeatureRecord(list(path = msrawfileRecords[[1]]$path)))
+  list(
+    newFeatureRecord(
+      list(
+        path = msrawfileRecords[[1]]$path,
+        dbas_alias_name = msrawfileRecords[[1]]$dbas_alias_name
+      )
+    )
+  )
 }
 
 getAreasOfFeatures.dbasResult <- function(scanResult) {

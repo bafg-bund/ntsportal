@@ -11,10 +11,17 @@ test_that("Records for selected batches are returned", {
 
 test_that("Unprocessed files can be collected from msrawfiles", {
   index <- "ntsp_index_msrawfiles_unit_tests"
+  prepareExampleFeatureIndex(escon)
+  
   unprocessedMsFiles <- getUnprocessedMsrawfileBatches(index, "dbasTest")
   
+  expect_false(all(grepl("no_peaks", names(unprocessedMsFiles))))
+  expect_true(any(grepl("olmesartan-d6-bisoprolol", names(unprocessedMsFiles))))
   expect_s3_class(unprocessedMsFiles[[1]][[1]], "msrawfileRecord")
-  expect_equal(length(unprocessedMsFiles), 4)
+  expect_equal(length(unprocessedMsFiles), 3)
+  
+  deleted <- removeExampleFeatureIndex(escon)
+  expect_true(deleted$acknowledged)
 })
 
 test_that("File directories can be optained from test index", {
