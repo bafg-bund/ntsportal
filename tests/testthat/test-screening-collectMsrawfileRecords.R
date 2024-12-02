@@ -45,7 +45,7 @@ test_that("Unprocessed directories are returned", {
   index <- "ntsp_index_msrawfiles_unit_tests"
   records <- getAllMsrawfilesRecords(index)
   records <- getUnprocessedRecords(records, "dbasTest")
-  expect_length(records, 19)
+  expect_length(records, 20)
   expect_s3_class(records[[1]], "msrawfileRecord")
 })
 
