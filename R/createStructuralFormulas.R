@@ -7,8 +7,18 @@ importCsl <- function(databasePath,targetPath) {
   )
 }
 
-createPngFromSmiles <- function(smilesCode,inchikey,targetPath) {
-  iAtomContainer <- rcdk::parse.smiles(smilesCode, kekulise = TRUE)
+extractCompoundList <- function(databaseFile,targetPath) {
+  sqLiteDriver <- RSQLite::dbDriver("SQLite")
+  database <- RSQLite::dbConnect(RSQLite::dbDriver("SQLite"), dbname = databaseFile)
+  RSQLite::dbListTables(database)
+  compoundList <- RSQLite::dbReadTable(database, "compound")
+  outputPath <- file.path(targetPath,paste0("compoundList.txt"))
+  write.table(compoundList, file = outputPath)
+  RSQLite::dbDisconnect(database)
+}
+
+createPngFromSmiles <- function(smiles,inchikey,targetPath) {
+  iAtomContainer <- rcdk::parse.smiles(smiles, kekulise = TRUE)
   structureMatrix <- lapply(iAtomContainer,makeStructureMatrix)
   outputPath <- file.path(targetPath,paste0(inchikey,".png"))
   png(outputPath)
