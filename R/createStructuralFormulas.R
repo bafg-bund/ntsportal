@@ -1,20 +1,25 @@
-importCsl <- function(databasePath,targetPath) {
-  file.copy(
-    from = databasePath,
-    to = targetPath,
-    copy.date = TRUE,
-    overwrite = TRUE
-  )
+
+createAllStructures <- function(databasePath, targetDir) {
+  tempDir <- withr::local_tempdir()
+  newDbPath <- file.path(tempDir, "db.db")
+  importCsl(databasePath, newDbPath)
+  compList <- extractCompoundList(newDbPath)
+  
+  for (i in 1:nrow(compList))
+    createPngFromSmiles(compList[i, "SMILES"], compList[i, "inchikey"], targetDir)
+  
+  file.remove(list.files(tempDir,full.names = TRUE))
+  file.remove(tempDir)
+  message("Complete")
 }
 
-extractCompoundList <- function(databaseFile,targetPath) {
+extractCompoundList <- function(databaseFile) {
   sqLiteDriver <- RSQLite::dbDriver("SQLite")
   database <- RSQLite::dbConnect(RSQLite::dbDriver("SQLite"), dbname = databaseFile)
   RSQLite::dbListTables(database)
   compoundList <- RSQLite::dbReadTable(database, "compound")
-  outputPath <- file.path(targetPath,paste0("compoundList.txt"))
-  write.table(compoundList, file = outputPath)
   RSQLite::dbDisconnect(database)
+  compoundList
 }
 
 createPngFromSmiles <- function(smiles,inchikey,targetPath) {
@@ -33,4 +38,13 @@ makeStructureMatrix <- function(structureObject) {
   # set resolution of the image
   resolution <- rcdk::get.depictor(width = 400, height = 400, zoom = 2) 
   rcdk::view.image.2d(molecule = structureObject, depictor = resolution)
+}
+
+importCsl <- function(databasePath,targetPath) {
+  file.copy(
+    from = databasePath,
+    to = targetPath,
+    copy.date = TRUE,
+    overwrite = TRUE
+  )
 }

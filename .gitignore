@@ -19,7 +19,6 @@ tests/ufid-note
 tests/addrawfiles_test
 tests/reference-shewhart
 tests/machine-learning
-tests/ole
 tests/nts-proc-testing
 tests/archive
 tests/add_data2
@@ -30,6 +29,12 @@ tests/envimass-ingest2
 tests/summary_scripts2
 tests/ufid_alignment2
 tests/data-export2
+tests/longTestsScreening/testResults
+tests/slurmTesting/testResults
+inst/scripts/__pycache__
 connect.R
-tests/kevin
+kevin
 nohup.out
+franzi
+ole
+tests/testthat/_snaps
