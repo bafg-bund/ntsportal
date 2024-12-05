@@ -1,4 +1,12 @@
 
+#' Create images of structural formulas for display in Kibana dashboard
+#'
+#' @param databasePath Path to CSL
+#' @param targetDir Path to save png of structures
+#'
+#' @return no return value
+#' @export
+#'
 createAllStructures <- function(databasePath, targetDir) {
   tempDir <- withr::local_tempdir()
   newDbPath <- file.path(tempDir, "db.db")
