@@ -1,8 +1,8 @@
 Package: ntsportal
 Type: Package
-Title: Functions to access the NTSPortal database. Federal Institute of Hydrology, Koblenz, Germany
-Version: 0.1.0
-Date: 2021-03-25
+Title: NTSPortal database backend. Federal Institute of Hydrology, Koblenz, Germany
+Version: 0.2.0
+Date: 2024-12-02
 Authors@R: c(
              person(c("Kevin", "S."), "Jewell", email = "jewell@bafg.de", role = c("aut", "cre"),
              comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany"),
@@ -12,14 +12,10 @@ Authors@R: c(
              comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany"),
              person("Franziska", "Thron", email = "thron@bafg.de", role = c("aut"),
              comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany"),
-             person("Iris", "Tuchscherer", email = "Tuchscherer@bafg.de", role = c("aut"),
-             comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany"),
              person("Arne", "Wick", email = "wick@bafg.de", role = "aut",
-             comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany"),
-             person(c("Thomas", "A"), "Ternes", email = "ternes@bafg.de", role = "aut",
              comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany")
              )
-Description: This is a collection of functions to be used for building and managing the NTSPortal database from R
+Description: This package provides functionality for building and managing the NTSPortal database
 License: GNU GPL-3.0 (comes with ABSOLUTELY NO WARRANTY)
 LazyData: TRUE
 Imports:
