@@ -11,31 +11,20 @@ convertToRecord.dbasResult <- function(scanResult, msrawfileRecords) {
     return(makeEmptyRecordWithPath(msrawfileRecords))
     
   specLibPath <- getField(msrawfileRecords, "dbas_spectral_library")[1]
-  features <- addCompoundInformation(features, specLibPath)
+  features <- addCompoundInfo(features, specLibPath)
   
   intStdName <- getField(msrawfileRecords, "dbas_is_name")[1]
   intStdAreas <- getAreasOfIntStd(scanResult, intStdName)
   features <- addAreasOfIntStd(features, intStdAreas)
   
   features <- lapply(features, normalizeArea)
-  features <- addSampleData(features, msrawfileRecords)
+  features <- addSampleInfo(features, msrawfileRecords)
   
   features <- lapply(features, addSpectraToFeature, scanResult = scanResult)
   
   lapply(features, cleanFeature)
 }
 
-
-makeEmptyRecordWithPath <- function(msrawfileRecords) {
-  list(
-    newFeatureRecord(
-      list(
-        path = msrawfileRecords[[1]]$path,
-        dbas_alias_name = msrawfileRecords[[1]]$dbas_alias_name
-      )
-    )
-  )
-}
 
 getAreasOfFeatures.dbasResult <- function(scanResult) {
   features <- scanResult$reintegrationResults[, c("samp", "comp_name", "adduct", "isotopologue",
@@ -67,12 +56,11 @@ getAreasOfIntStd.dbasResult <- function(scanResult, intStdName) {
   intStdData
 }
 
-
 addAreasOfIntStd <- function(features, intStdData) {
   lapply(features, function(doc) c(doc, intStdData[[doc$filename]]))
 }
 
-addCompoundInformation <- function(features, specLibPath) {
+addCompoundInfo <- function(features, specLibPath) {
   specLibConn <- connectSqlite(specLibPath)
   comptab <- tbl(specLibConn, "compound") %>% collect()
   grouptab <- tbl(specLibConn, "compound") %>% 
@@ -99,8 +87,15 @@ addCompoundInformation <- function(features, specLibPath) {
   features
 }
 
-spectrumSourcesToRemoveFromCompGroup <- function() {
-  c("BfG", "LfU", "UBA")
+addSampleInfo <- function(features, msrawfileRecords) {
+  msrawfileRecords <- purrr::map_at(
+    msrawfileRecords, 
+    names(msrawfileRecords), 
+    reduceRecordToFields, 
+    fields = fieldsToMergeFromMsrawfiles()
+  )
+  recordsPerFeature <- msrawfileRecords[sapply(features, "[[", i = "filename")]
+  purrr::map2(features, recordsPerFeature, c)
 }
 
 normalizeArea <- function(feature) {
@@ -110,45 +105,6 @@ normalizeArea <- function(feature) {
   feature$norm_a <- normalizedArea
   feature$intensity_normalized <- normalizedIntensity
   feature
-}
-
-nameRecordsByFilename <- function(msrawfileRecords) {
-  names(msrawfileRecords) <- getField(msrawfileRecords, "filename")
-  msrawfileRecords
-}
-
-addSampleData <- function(features, msrawfileRecords) {
-  msrawfileRecords <- purrr::map_at(msrawfileRecords, names(msrawfileRecords), reduceRecordToFields, fields = fieldsToMergeFromMsrawfiles())
-  recordsPerFeature <- msrawfileRecords[sapply(features, "[[", i = "filename")]
-  purrr::map2(features, recordsPerFeature, c)
-}
-
-reduceRecordToFields <- function(record, fields) {
-  availableFields <- fields[fields %in% names(record)]
-  record[availableFields]
-}
-
-fieldsToMergeFromMsrawfiles <- function() {
-  c(
-    "start",
-    "pol",
-    "matrix",
-    "data_source",
-    "sample_source",
-    "license",
-    "chrom_method",
-    "duration",
-    "path",
-    "date_measurment",
-    "river",
-    "km",
-    "gkz",
-    "tag",
-    "comment",
-    "dbas_alias_name",
-    "station",
-    "loc"
-  )
 }
 
 addSpectraToFeature <- function(feature, scanResult) { 
@@ -203,6 +159,63 @@ cleanFeature <- function(doc) {
   })
   newFeatureRecord(Filter(Negate(is.null), doc))
 }
+
+
+
+makeEmptyRecordWithPath <- function(msrawfileRecords) {
+  list(
+    newFeatureRecord(
+      list(
+        path = msrawfileRecords[[1]]$path,
+        dbas_alias_name = msrawfileRecords[[1]]$dbas_alias_name
+      )
+    )
+  )
+}
+
+
+
+nameRecordsByFilename <- function(msrawfileRecords) {
+  names(msrawfileRecords) <- getField(msrawfileRecords, "filename")
+  msrawfileRecords
+}
+
+
+
+reduceRecordToFields <- function(record, fields) {
+  availableFields <- fields[fields %in% names(record)]
+  record[availableFields]
+}
+
+spectrumSourcesToRemoveFromCompGroup <- function() {
+  c("BfG", "LfU", "UBA")
+}
+
+
+fieldsToMergeFromMsrawfiles <- function() {
+  c(
+    "start",
+    "pol",
+    "matrix",
+    "data_source",
+    "sample_source",
+    "license",
+    "chrom_method",
+    "duration",
+    "path",
+    "date_measurment",
+    "river",
+    "km",
+    "gkz",
+    "tag",
+    "comment",
+    "dbas_alias_name",
+    "station",
+    "loc"
+  )
+}
+
+
 
 newFeatureRecord <- function(feature) {
   stopifnot(is.list(feature))
@@ -286,12 +299,11 @@ removeNoise <- function(msSpectrum, noiseLevel) {
   msSpectrum[msSpectrum$int >= noiseLevel, , drop = F]
 }
 
+# Define generics
+
 convertToRecord <- function(scanResult, msrawfileRecords) {
   UseMethod("convertToRecord")
 }
-
-
-# Define generics
 
 getAreasOfFeatures <- function(scanResult) {
   UseMethod("getAreasOfFeatures")

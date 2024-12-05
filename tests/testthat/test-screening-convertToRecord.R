@@ -11,7 +11,7 @@ test_that("A small result can be reformated to a dbasRecord object", {
 
 test_that("Sample data is added to features", {
   featuresAndReport <- getFeaturesAndRecordsNoSampleData()
-  featureWithData <- addSampleData(featuresAndReport[[1]], featuresAndReport[[2]])
+  featureWithData <- addSampleInfo(featuresAndReport[[1]], featuresAndReport[[2]])
   expect_contains(names(featureWithData[[1]]), c("river", "loc", "station"))
   expect_true(validateRecord(newFeatureRecord(featureWithData[[1]])))
 })

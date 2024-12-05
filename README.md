@@ -32,7 +32,8 @@ Umweltüberwachung der Zukunft” REFOPLAN 3720222010) and continued
 funding is provided the research grant REFOPLAN 3723222020
 (“Weiterentwicklung des Online Portals für die Umweltbeobactung der
 Zukunft”). Additional funding is provided by the Federal Ministry of
-Digital and Transport.
+Digital and Transport and the Federal Ministry of the Environment and
+Consumer Protection.
 
 ## License
 
@@ -59,4 +60,24 @@ To cite this work please use the following citation or run
 > Kevin S. Jewell, Ole Lessmann, Franziska Thron, Jonas Skottnik, Iris
 > Tuchscherer, Arne Wick and Thomas A. Ternes (2024). ntsportal: A
 > Non-Target Screening Data Archive and Distribution Tool. R package
-> version 0.1.0.
+> version 0.2.0.
+
+## Installation
+
+See imports and suggests in DESCRIPTION for the necessary R packages.
+
+A connection to an ElasticSearch cluster is needed, which is connected
+to using `elastic::connect()`.
+
+Python and several modules are also required. These are installed with:
+
+    library(retiuculate)
+    virtualenv_create()
+    py_install('elasticsearch')
+    py_install('pandas')
+    py_install('tqdm')
+    py_install('pyyaml')
+
+To check that the virtual environment is being used:  
+Tools -\> Global Settings -\> Python -\> Interpreter Select -\>
+Virtualenv -\> Choose Virtualenv -\> OK

@@ -22,7 +22,7 @@ Imports:
     dplyr, logger, future, ntsworkflow, ggplot2, rlang
 RoxygenNote: 7.3.2
 Suggests:
-    testthat (>= 3.0.0), elastic, fs, reticulate
+    testthat (>= 3.0.0), elastic, fs, reticulate, purrr
 Encoding: UTF-8
 VignetteBuilder: knitr
 Config/testthat/edition: 3
