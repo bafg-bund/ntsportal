@@ -3,9 +3,9 @@
 \docType{package}
 \name{ntsportal-package}
 \alias{ntsportal-package}
-\title{ntsportal: Functions to access the NTSPortal database. Federal Institute of Hydrology, Koblenz, Germany}
+\title{ntsportal: NTSPortal database backend. Federal Institute of Hydrology, Koblenz, Germany}
 \description{
-This is a collection of functions to be used for building and managing the NTSPortal database from R
+This package provides functionality for building and managing the NTSPortal database
 }
 \author{
 \strong{Maintainer}: Kevin S. Jewell \email{jewell@bafg.de} (Federal Institute of Hydrology (BfG) Koblenz, Germany)
@@ -15,9 +15,7 @@ Authors:
   \item Ole Lessmann \email{lessmann@bafg.de} (Federal Institute of Hydrology (BfG) Koblenz, Germany)
   \item Jonas Skottnik \email{skottnik@bafg.de} (Federal Institute of Hydrology (BfG) Koblenz, Germany)
   \item Franziska Thron \email{thron@bafg.de} (Federal Institute of Hydrology (BfG) Koblenz, Germany)
-  \item Iris Tuchscherer \email{Tuchscherer@bafg.de} (Federal Institute of Hydrology (BfG) Koblenz, Germany)
   \item Arne Wick \email{wick@bafg.de} (Federal Institute of Hydrology (BfG) Koblenz, Germany)
-  \item Thomas A Ternes \email{ternes@bafg.de} (Federal Institute of Hydrology (BfG) Koblenz, Germany)
 }
 
 }

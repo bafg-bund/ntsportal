@@ -1,12 +1,33 @@
 # Copyright 2016-2024 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
 
+#' DBAS process all measurement files which have not yet been processed
+#' 
+#' @description
+#' To determine which files have not yet been processed, the function
+#' collects all directories in msrawfiles and looks in the feature indices
+#' to see which are missing.
+#' 
+#' @param msrawfileIndex Name of index where processing information is stored
+#' @param saveDirectory Location where SLURM job files should be saved
+#' @param numParallel For local parallel processing via future
+#'
 #' @export
 dbaScreeningNewBatches <- function(msrawfileIndex, saveDirectory, numParallel = 1) {
   recordsInBatches <- getUnprocessedMsrawfileRecords(msrawfileIndex, "dbas")
   dbaScreeningBatches(msrawfileRecordsInBatches, saveDirectory, numParallel)
 }
 
+#' DBAS process selected measurement files via batch directory
+#' 
+#' @description
+#' Choose which batches to process by selecting the directory where the measurement files are stored. 
+#' 
+#' @param msrawfileIndex Name of index where processing information is stored
+#' @param batchDirs Directory of measurement files (recursive, multiple permitted)
+#' @param saveDirectory Location where SLURM job files should be saved
+#' @param numParallel For local parallel processing via future
+#'
 #' @export
 dbaScreeningSelectedBatches <- function(msrawfileIndex, batchDirs, saveDirectory, numParallel = 1) {
   msrawfileRecordsInBatches <- getSelectedMsrawfileBatches(msrawfileIndex, batchDirs)
@@ -37,6 +58,12 @@ dbaScreeningParallel <- function(msrawfileRecordsInBatches, saveDirectory, numPa
   as.character(filePaths)
 }
 
+
+#' Process one batch of records
+#' 
+#' @description
+#' A function to be used only by the workload manager SLURM.
+#' 
 #' @export
 dbaScreeningOneBatch <- function(msrawfileRecords, saveDirectory) {
   resultBatch <- scanBatchDbas(msrawfileRecords)
@@ -44,6 +71,23 @@ dbaScreeningOneBatch <- function(msrawfileRecords, saveDirectory) {
   saveRecord(featureRecordsBatch, saveDirectory)
 }
 
+#' DBAS process batches by directory using the workload manager
+#' 
+#' @description
+#' Choose which batches to process by selecting the directory where the measurement files are stored. 
+#' The function will create necessary files for submission of the job to the workflow manager SLURM.
+#' 
+#' @param msrawfileIndex Name of index where processing information is stored
+#' @param batchDirs Directory of measurement files (recursive, multiple permitted)
+#' @param saveDirectory Location where SLURM job files should be saved
+#' @param email Address for SLURM notifications
+#'
+#' @details
+#' Three files are created, the records of all files to process, organized into batches (.RDS); the R script which
+#' SLURM needs to run, and the SLURM job file. The command needed to start the process is given as a message (you
+#' may need to switch to a SLURM-enabled server).
+#'
+#' @returns The command which must be submitted to SLURM (invisibly)
 #' @export
 dbaScreeningSelectedBatchesSlurm <- function(msrawfileIndex, batchDirs, saveDirectory, email) {
   recordsInBatches <- getSelectedMsrawfileBatches(msrawfileIndex, batchDirs)
