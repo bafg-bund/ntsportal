@@ -1,6 +1,390 @@
 # Copyright 2016-2024 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
 
+
+
+#' Add new MS measurement files to msrawfiles index
+#' 
+#' @param escon elastic connection object created by elastic::connect
+#' @param rfindex index name for rawfiles index 
+#' @param templateId Document ID for a document to use as a template
+#' @param newPaths Character vector of full paths to new rawfiles which are to 
+#' be added, must be mzXML files.
+#' @param newStart Either "filename" (default), meaning extract the start time 
+#' from the filename or provide a start date as an 8 digit number "YYYYMMDD"
+#' @param newStation Either be "same_as_template" (default), which will
+#' copy the value from the template document, or "filename", meaning extract
+#' the station and loc values from the code in the filename (will compare to 
+#' other docs in msrawfiles index) or provide a list of length 3 with station, river  
+#' and loc values. See details.
+#' @param rootMeasDir Root directory where measurement files are located. The function
+#' will look for original (vendor) files in this directory or below. Must end with "/".
+#'
+#' @details newStation can be either "same_as_template" or "filename" or
+#' a new fixed station name and location (list with fields "station", "river" and "loc")
+#' "loc" being a geopoint with fields "lat" and "lon"
+#' if it is in the filename it will use the dbas_station_regex field in
+#' the index to get the station information from another doc in the index. Station and
+#' river names all lowercase and no spaces and no special characters. 
+#' For the station name use the convention <river_town_position> where position is l, r or m for 
+#' left, right, middle. If there is no obvious town but km
+#' is known, then use the convention <river_km> for the station name. If neither 
+#' town or km is known, use the convention <river_description> where description
+#' is some indication of the location. 
+#' 
+#' \strong{dbas_date_regex and dbas_date_format}
+#' 
+#' The field `dbas_date_regex` is used to find the date of the sample from the file name. It works
+#' in conjunction with `dbas_date_format`. `dbas_date_regex` extracts the text, while `dbas_date_format`
+#' tells R how to interpret the text. For example, the file name `RH_pos_20170101.mzXML`
+#' uses the date_regex `"([20]*\\d{6})"` and date_format `"ymd"`. The `dbas_date_regex`
+#' uses the tidyverse regular expression syntax and the `stringr::str_match` 
+#' function to extract the text referring to the date. The brackets indicate the
+#' text to extract and these can be surrounded by anchors. It is also possible to
+#' have multiple brackets, the text in multiple brackets will be combined before
+#' parsing. For example the file `UEBMS_2024_002_Main_Kahl_Jan_pos_DDA.mzXML` can
+#' be parsed with date_regex `_(20\\d{2})_.*_(\\w{3})_pos` and date_format `ym`. 
+#' 
+#' `dbas_date_format` may be one of `"ymd"`, `"dmy"`, `"ym"` for year-month and `"yy"` 
+#' for just year. The date parsing is done by `lubridate`.
+#' 
+#' 
+#' @return Returns vector of new ES-IDs
+#' @export
+#'
+add_rawfiles <- function(escon, rfindex, templateId, newPaths, 
+                         newStart = "filename", 
+                         newStation = "same_as_template",
+                         rootMeasDir = "/srv/cifs-mounts/g2/G/G2/HRMS/Messdaten/",
+                         prompt = T,
+                         saveDirectory = getwd()) {
+  
+  # Run start-up checks
+  if (rfindex == "g2_msrawfiles")
+    stop("g2_msrawfiles is depricated")
+  
+  # Define internal functions
+  # Will add earliest measurement time of any file found with the same name 
+  # in the whole "messdaten" directory tree.
+  get_measurement_time <- function(pathMsFile) {
+    nm <- stringr::str_match(basename(pathMsFile), "^(.*)\\.mzXML$")[,2]
+    fd <- list.files(rootMeasDir, pattern = nm, recursive = T, full.names = T)
+    if (length(fd) > 0) {
+      format(min(file.mtime(fd)), "%Y-%m-%d %H:%M:%S")
+    } else {
+      message("Measurement time not found")
+      NULL
+    }
+  }
+  
+  fileFound <- vapply(newPaths, file.exists, logical(1))
+  if (!all(fileFound))
+    stop("Files not found")
+  fileKind <- vapply(newPaths, grepl, pattern = "\\.mzX?ML$", logical(1))
+  if (!all(fileKind))
+    stop("Files are not all .mzXML files")
+  # For now newStart must be filename or a new start date
+  stopifnot(newStart == "filename" || grepl("^\\d{8}$", newStart))
+  stopifnot(any(newStation %in% c("same_as_template", "filename")) || is.list(newStation))
+  if (is.list(newStation)) {
+    stopifnot(
+      length(newStation) >= 2, 
+      all(c("station", "loc") %in% names(newStation)),
+      is.character(newStation$station),
+      length(newStation$station) == 1,
+      all(c("lat", "lon") %in% names(newStation$loc)),
+      all(vapply(newStation$loc, is.numeric, logical(1)))
+    )
+  }
+  
+  #Check if any duplicates in filenames
+  check_files <- function(pths, isBlank = FALSE) {
+    vapply(pths, function(pth) {
+      if (!file.exists(pth))
+        return(FALSE)
+      pth <- normalizePath(pth)
+      checkValue <- ifelse(isBlank, pth, basename(pth))
+      checkField <- ifelse(isBlank, "path", "filename")
+      resx <- elastic::Search(escon, rfindex, body = sprintf('{
+        "query": {
+          "term": {
+            "%s": {
+              "value": "%s"
+            }
+          }
+        },
+        "size": 0
+      }', checkField, checkValue))
+      if (resx$hits$total$value > 1)
+        stop("There are duplicates of ", pth, " in ", rfindex)
+      resx$hits$total$value == 1
+    }, logical(1))
+  }
+  
+  stopifnot(length(templateId) == 1)
+  
+  # Get template doc
+  
+  res <- elastic::docs_get(escon, rfindex, templateId, verbose = F)
+  templDoc <- res$`_source`
+  
+  if (templDoc$blank)
+    message("Template document is a blank file")
+  
+  # Check that the files do not already exist
+  # If the file is not a blank, the basename must be unique, otherwise, the
+  # path must be unique
+  # The file paths are normalized before comparison
+  checkBefore <- if (templDoc$blank) 
+    check_files(newPaths, isBlank = T) else check_files(newPaths)
+  
+  if (any(checkBefore)) {
+    alreadyPresent <- names(checkBefore[checkBefore])
+    message("The files\n", paste(alreadyPresent, collapse = "\n"), 
+            "\nare already present and will not be added")
+    newPaths <- newPaths[!checkBefore]
+  }
+  
+  filestoupload <- basename(newPaths)
+  message("The files\n", paste(filestoupload, collapse = "\n"), 
+          "\n will be added")
+  
+  # Copy template and change some values
+  newDocs <- lapply(newPaths, function(pth) {
+    doc <- templDoc
+    doc$path <- normalizePath(pth)
+    doc$filename <- basename(pth)
+    doc$dbas_is_last_eval <- NULL
+    doc$dbas_last_eval <- NULL
+    poli <- stringr::str_extract(doc$filename, "pos|neg")
+    if (doc$pol != poli) {
+      if (length(newPaths) == 1) {
+        message("File ", pth, " has other polarity than the template, please check")
+        doc$pol <- poli
+      } else {
+        stop("File ", pth, " does not have the same polarity as the template")
+      }
+    }
+    
+    # All blanks must also have a start from now on. 
+    # TODO at the moment only dates can be read. This function must also
+    # work for ymd_hms datetimes.
+    if (newStart == "filename") {
+      #browser()
+      dateString <- paste(stringr::str_match(doc$filename, doc$dbas_date_regex)[,-1], collapse = "_")
+      dateFormat <- doc$dbas_date_format
+      if (!is.element(dateFormat, c("ymd", "dmy", "yy", "ym"))) {
+        stop("Unknown dbas_date_format ", dateFormat, " in ", doc$filename)
+      }
+      temp <- switch(
+        dateFormat,
+        yy = lubridate::ymd(dateString, tz = "Europe/Berlin", truncated = 2),
+        ym = lubridate::ymd(dateString, tz = "Europe/Berlin", truncated = 1),
+        ymd = lubridate::ymd(dateString, tz = "Europe/Berlin"),
+        dmy = lubridate::dmy(dateString, tz = "Europe/Berlin")
+      )
+      doc$start <- format(temp, "%Y-%m-%d", tz = "Europe/Berlin")
+    } else {
+      temp <- lubridate::ymd(newStart, tz = "Europe/Berlin", truncated = 2)
+      doc$start <- format(temp, "%Y-%m-%d", tz = "Europe/Berlin")
+    }
+    
+    if (is.na(doc$start)) {
+      if (length(newPaths) == 1) {
+        message("File ", pth, " produced an NA start date, changed to 1970-01-01, must be corrected")
+        doc$start <- "1970-01-01"
+      } else {
+        stop("File ", pth, " produced an NA start date")
+      }
+    }
+    
+    
+    if (!is.list(newStation) && newStation == "filename") {
+      if (!is.element("dbas_station_regex", names(doc)))
+        stop("dbas_station_regex, not found in template")
+      staList <- station_from_code(
+        escon = escon, 
+        rfindex = rfindex, 
+        filename = doc$filename,
+        stationRegex = doc$dbas_station_regex
+      )
+      #browser()
+      if (is.list(staList) && length(staList) >= 2 && 
+          all(c("station", "loc") %in% names(staList))) {
+        doc$station <- staList$station
+        doc$loc <- staList$loc
+        if ("river" %in% names(staList)) {
+          doc$river <- staList$river
+        } else {
+          doc$river <- NULL
+        }
+        
+        if ("km" %in% names(staList)) {
+          doc$km <- staList$km
+        } else {
+          doc$km <- NULL
+        }
+        
+        if ("gkz" %in% names(staList)) {
+          doc$gkz <- staList$gkz
+        } else {
+          doc$gkz <- NULL
+        }
+        
+      } else {
+        stop("Station parsing in file ", pth, " failed")
+      }
+    } else if (is.list(newStation)) {
+      doc$station <- newStation$station
+      doc$loc <- newStation$loc
+      doc$river <- newStation$river
+    }
+    
+    doc$date_import <- as.integer(Sys.time())
+    # Alphabetically sort names for easy reading
+    doc <- doc[order(names(doc))]
+    doc
+  })
+  
+  # Add filesize
+  newDocs <- lapply(newDocs, function(doc) {
+    doc$filesize <- file.size(doc$path) / 1e6
+    doc
+  })
+  # Add measurement time
+  
+  message("Looking for corresponding Wiff files in ", rootMeasDir, 
+          " to find measurement time")
+  newDocs <- lapply(newDocs, function(doc) {
+    doc$date_measurement <- get_measurement_time(doc$path)
+    doc
+  })
+  
+  jsonlite::write_json(newDocs, file.path(saveDirectory, "add-rawfiles-check.json"), pretty = T, digits = NA, auto_unbox = T)
+  
+  message("Please check ", file.path(saveDirectory, "add-rawfiles-check.json"))
+  
+  message("Is it okay to proceed? 
+          y = will be uploaded 
+          n = terminate process without uploading 
+          c = json was changed manually. Only 1 doc allowed. Save changes before proceeding.")
+  if (prompt)
+    isOk <- readline("(y/n/c): ") else isOk <- "y"
+  
+  switch(
+    isOk,
+    y = NULL,
+    n = stop("processing stoped, files not added"),
+    c = {
+      if (length(newDocs) != 1)
+        stop("You can only change one document and use this as template for others")
+      message("Adding changed document")
+      newDocsNew <- jsonlite::read_json("add-rawfiles-check.json")
+      if (all.equal(newDocsNew, newDocs)[1] == TRUE)
+        stop("There was no change made, aborted process")
+      newDocs <- newDocsNew
+    },
+    stop("Unknown input, processing stopped, files not added")
+  )
+  
+  ids <- character()
+  for (doci in newDocs) {
+    response <- elastic::docs_create(escon, rfindex, body = doci)
+    ids <- append(ids, response[["_id"]])
+  }
+  idString <- paste(shQuote(ids, type = "cmd"), collapse = ", ")
+  idString <- paste0(idString, "\n")
+  message("Documents were uploaded with the IDs")
+  cat(idString)
+  
+  Sys.sleep(5)
+  # check that everything has been entered
+  
+  checkAfter <- check_files(newPaths)
+  
+  if (!all(checkAfter)) {
+    notCreated <- names(checkAfter[!checkAfter])
+    warning("The files ", paste(notCreated, collapse = ", "), " were not created.")
+  } else {
+    message("Function completed, all files in index ", rfindex)  
+  }
+  invisible(idString)
+}
+
+
+#' Get ID based on search parameters
+#'
+#' @param escon elastic connection object created by elastic::connect
+#' @param rfindex index name for rawfiles index 
+#' @param isBlank boolean default is FALSE
+#' @param polarity Either "pos" or "neg"
+#' @param station Station ID name 
+#' @param matrix character default is "spm"
+#'
+#' @return string templateID
+#' @export
+#'
+find_templateid <- function(escon, rfindex, isBlank = FALSE, polarity, station, matrix = "spm", duration) {
+  tempID <- elastic::Search(
+    escon, rfindex, body = 
+      sprintf('
+        {
+          "query": {
+            "bool": {
+              "must": [
+                {
+                  "term": {
+                     "station": {
+                      "value": "%s"
+                    }
+                  }
+                },
+                {
+                  "term": {
+                    "pol": {
+                      "value": "%s"
+                    }
+                  }
+                },
+                {
+                  "term": {
+                    "matrix": {
+                      "value": "%s"
+                    }
+                  }
+                },
+                {
+                  "term": {
+                    "blank": {
+                      "value": %s
+                    }
+                  }
+                },
+                {
+                  "term": {
+                    "duration": {
+                      "value": %s
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "_source": false,
+          "size": 1
+        }
+        ', 
+              station, polarity, matrix, ifelse(isBlank, "true", "false"), duration
+      )
+  )
+  if (tempID$hits$total$value == 0) {
+    warning("search have no hits")
+    return(NULL)
+  }
+  tempID$hits$hits[[1]]$`_id`
+}
+
+
 #' Get all esids from an index
 #' 
 #' The maximum allowed number of return ids is 10000. This function will
@@ -169,381 +553,7 @@ station_from_code <- function(escon, rfindex, filename, stationRegex) {
   resList
 }
 
-#' Add new MS measurement files to msrawfiles index
-#' 
-#' @param escon elastic connection object created by elastic::connect
-#' @param rfindex index name for rawfiles index 
-#' @param templateId Document ID for a document to use as a template
-#' @param newPaths Character vector of full paths to new rawfiles which are to 
-#' be added, must be mzXML files.
-#' @param newStart Either "filename" (default), meaning extract the start time 
-#' from the filename or provide a start date as an 8 digit number "YYYYMMDD"
-#' @param newStation Either be "same_as_template" (default), which will
-#' copy the value from the template document, or "filename", meaning extract
-#' the station and loc values from the code in the filename (will compare to 
-#' other docs in msrawfiles index) or provide a list of length 3 with station, river  
-#' and loc values. See details.
-#' @param rootMeasDir Root directory where measurement files are located. The function
-#' will look for original (vendor) files in this directory or below. Must end with "/".
-#'
-#' @details newStation can be either "same_as_template" or "filename" or
-#' a new fixed station name and location (list with fields "station", "river" and "loc")
-#' "loc" being a geopoint with fields "lat" and "lon"
-#' if it is in the filename it will use the dbas_station_regex field in
-#' the index to get the station information from another doc in the index. Station and
-#' river names all lowercase and no spaces and no special characters. 
-#' For the station name use the convention <river_town_position> where position is l, r or m for 
-#' left, right, middle. If there is no obvious town but km
-#' is known, then use the convention <river_km> for the station name. If neither 
-#' town or km is known, use the convention <river_description> where description
-#' is some indication of the location. 
-#' 
-#' \strong{dbas_date_regex and dbas_date_format}
-#' 
-#' The field `dbas_date_regex` is used to find the date of the sample from the file name. It works
-#' in conjunction with `dbas_date_format`. `dbas_date_regex` extracts the text, while `dbas_date_format`
-#' tells R how to interpret the text. For example, the file name `RH_pos_20170101.mzXML`
-#' uses the date_regex `"([20]*\\d{6})"` and date_format `"ymd"`. The `dbas_date_regex`
-#' uses the tidyverse regular expression syntax and the `stringr::str_match` 
-#' function to extract the text referring to the date. The brackets indicate the
-#' text to extract and these can be surrounded by anchors. It is also possible to
-#' have multiple brackets, the text in multiple brackets will be combined before
-#' parsing. For example the file `UEBMS_2024_002_Main_Kahl_Jan_pos_DDA.mzXML` can
-#' be parsed with date_regex `_(20\\d{2})_.*_(\\w{3})_pos` and date_format `ym`. 
-#' 
-#' `dbas_date_format` may be one of `"ymd"`, `"dmy"`, `"ym"` for year-month and `"yy"` 
-#' for just year. The date parsing is done by `lubridate`.
-#' 
-#' 
-#' @return Returns TRUE, invisibly.
-#' @export
-#'
-add_rawfiles <- function(escon, rfindex, templateId, newPaths, 
-                         newStart = "filename", 
-                         newStation = "same_as_template",
-                         rootMeasDir = "/srv/cifs-mounts/g2/G/G2/HRMS/Messdaten/") {
-  
-  # Run start-up checks
-  if (rfindex == "g2_msrawfiles")
-    stop("g2_msrawfiles is depricated")
-  
-  # Define internal functions
-  # Will add earliest measurement time of any file found with the same name 
-  # in the whole "messdaten" directory tree.
-  get_measurement_time <- function(pathMsFile) {
-    nm <- stringr::str_match(basename(pathMsFile), "^(.*)\\.mzXML$")[,2]
-    fd <- list.files(rootMeasDir, pattern = nm, recursive = T, full.names = T)
-    if (length(fd) > 0) {
-      format(min(file.mtime(fd)), "%Y-%m-%d %H:%M:%S")
-    } else {
-      message("Measurement time not found")
-      NULL
-    }
-  }
-  
-  fileFound <- vapply(newPaths, file.exists, logical(1))
-  if (!all(fileFound))
-    stop("Files not found")
-  fileKind <- vapply(newPaths, grepl, pattern = "\\.mzX?ML$", logical(1))
-  if (!all(fileKind))
-    stop("Files are not all .mzXML files")
-  # For now newStart must be filename or a new start date
-  stopifnot(newStart == "filename" || grepl("^\\d{8}$", newStart))
-  stopifnot(any(newStation %in% c("same_as_template", "filename")) || is.list(newStation))
-  if (is.list(newStation)) {
-    stopifnot(
-      length(newStation) >= 2, 
-      all(c("station", "loc") %in% names(newStation)),
-      is.character(newStation$station),
-      length(newStation$station) == 1,
-      all(c("lat", "lon") %in% names(newStation$loc)),
-      all(vapply(newStation$loc, is.numeric, logical(1)))
-    )
-  }
-  
-  #Check if any duplicates in filenames
-  check_files <- function(pths, isBlank = FALSE) {
-    vapply(pths, function(pth) {
-      if (!file.exists(pth))
-        return(FALSE)
-      pth <- normalizePath(pth)
-      checkValue <- ifelse(isBlank, pth, basename(pth))
-      checkField <- ifelse(isBlank, "path", "filename")
-      resx <- elastic::Search(escon, rfindex, body = sprintf('{
-        "query": {
-          "term": {
-            "%s": {
-              "value": "%s"
-            }
-          }
-        },
-        "size": 0
-      }', checkField, checkValue))
-      if (resx$hits$total$value > 1)
-        stop("There are duplicates of ", pth, " in ", rfindex)
-      resx$hits$total$value == 1
-    }, logical(1))
-  }
-  
-  stopifnot(length(templateId) == 1)
-  
-  # Get template doc
-  
-  res <- elastic::docs_get(escon, rfindex, templateId, verbose = F)
-  templDoc <- res$`_source`
-  
-  if (templDoc$blank)
-    message("Template document is a blank file")
-  
-  # Check that the files do not already exist
-  # If the file is not a blank, the basename must be unique, otherwise, the
-  # path must be unique
-  # The file paths are normalized before comparison
-  checkBefore <- if (templDoc$blank) 
-    check_files(newPaths, isBlank = T) else check_files(newPaths)
-  
-  if (any(checkBefore)) {
-    alreadyPresent <- names(checkBefore[checkBefore])
-    message("The files\n", paste(alreadyPresent, collapse = "\n"), 
-            "\nare already present and will not be added")
-    newPaths <- newPaths[!checkBefore]
-  }
-  
-  filestoupload <- basename(newPaths)
-  message("The files\n", paste(filestoupload, collapse = "\n"), 
-          "\n will be added")
-  
-  # Copy template and change some values
-  newDocs <- lapply(newPaths, function(pth) {
-    doc <- templDoc
-    doc$path <- normalizePath(pth)
-    doc$filename <- basename(pth)
-    doc$dbas_is_last_eval <- NULL
-    doc$dbas_last_eval <- NULL
-    poli <- stringr::str_extract(doc$filename, "pos|neg")
-    if (doc$pol != poli) {
-      if (length(newPaths) == 1) {
-        message("File ", pth, " has other polarity than the template, please check")
-        doc$pol <- poli
-      } else {
-        stop("File ", pth, " does not have the same polarity as the template")
-      }
-    }
-    
-    # All blanks must also have a start from now on. 
-    # TODO at the moment only dates can be read. This function must also
-    # work for ymd_hms datetimes.
-    if (newStart == "filename") {
-      #browser()
-      dateString <- paste(stringr::str_match(doc$filename, doc$dbas_date_regex)[,-1], collapse = "_")
-      dateFormat <- doc$dbas_date_format
-      if (!is.element(dateFormat, c("ymd", "dmy", "yy", "ym"))) {
-        stop("Unknown dbas_date_format ", dateFormat, " in ", doc$filename)
-      }
-      temp <- switch(
-        dateFormat,
-        yy = lubridate::ymd(dateString, tz = "Europe/Berlin", truncated = 2),
-        ym = lubridate::ymd(dateString, tz = "Europe/Berlin", truncated = 1),
-        ymd = lubridate::ymd(dateString, tz = "Europe/Berlin"),
-        dmy = lubridate::dmy(dateString, tz = "Europe/Berlin")
-      )
-      doc$start <- format(temp, "%Y-%m-%d", tz = "Europe/Berlin")
-    } else {
-      temp <- lubridate::ymd(newStart, tz = "Europe/Berlin", truncated = 2)
-      doc$start <- format(temp, "%Y-%m-%d", tz = "Europe/Berlin")
-    }
-    
-    if (is.na(doc$start)) {
-      if (length(newPaths) == 1) {
-        message("File ", pth, " produced an NA start date, changed to 1970-01-01, must be corrected")
-        doc$start <- "1970-01-01"
-      } else {
-        stop("File ", pth, " produced an NA start date")
-      }
-    }
-      
-    
-    if (!is.list(newStation) && newStation == "filename") {
-      if (!is.element("dbas_station_regex", names(doc)))
-        stop("dbas_station_regex, not found in template")
-      staList <- station_from_code(
-        escon = escon, 
-        rfindex = rfindex, 
-        filename = doc$filename,
-        stationRegex = doc$dbas_station_regex
-      )
-      #browser()
-      if (is.list(staList) && length(staList) >= 2 && 
-          all(c("station", "loc") %in% names(staList))) {
-        doc$station <- staList$station
-        doc$loc <- staList$loc
-        if ("river" %in% names(staList)) {
-          doc$river <- staList$river
-        } else {
-          doc$river <- NULL
-        }
-          
-        if ("km" %in% names(staList)) {
-          doc$km <- staList$km
-        } else {
-          doc$km <- NULL
-        }
-          
-        if ("gkz" %in% names(staList)) {
-          doc$gkz <- staList$gkz
-        } else {
-          doc$gkz <- NULL
-        }
-          
-      } else {
-        stop("Station parsing in file ", pth, " failed")
-      }
-    } else if (is.list(newStation)) {
-      doc$station <- newStation$station
-      doc$loc <- newStation$loc
-      doc$river <- newStation$river
-    }
-    
-    doc$date_import <- as.integer(Sys.time())
-    # Alphabetically sort names for easy reading
-    doc <- doc[order(names(doc))]
-    doc
-  })
-  
-  # Add filesize
-  newDocs <- lapply(newDocs, function(doc) {
-    doc$filesize <- file.size(doc$path) / 1e6
-    doc
-  })
-  # Add measurement time
-  
-  message("Looking for corresponding Wiff files in ", rootMeasDir, 
-          " to find measurement time")
-  newDocs <- lapply(newDocs, function(doc) {
-    doc$date_measurement <- get_measurement_time(doc$path)
-    doc
-  })
-  
-  jsonlite::write_json(newDocs, "add-rawfiles-check.json", pretty = T, digits = NA, auto_unbox = T)
-  
-  message("Please check ", file.path(getwd(), "add-rawfiles-check.json"))
-  
-  message("Is it okay to proceed? 
-          y = will be uploaded 
-          n = terminate process without uploading 
-          c = json was changed manually. Only 1 doc allowed. Save changes before proceeding.")
-  isOk <- readline("(y/n/c): ")
 
-  switch(
-    isOk,
-    y = NULL,
-    n = stop("processing stoped, files not added"),
-    c = {
-      if (length(newDocs) != 1)
-        stop("You can only change one document and use this as template for others")
-      message("Adding changed document")
-      newDocsNew <- jsonlite::read_json("add-rawfiles-check.json")
-      if (all.equal(newDocsNew, newDocs)[1] == TRUE)
-        stop("There was no change made, aborted process")
-      newDocs <- newDocsNew
-    },
-    stop("Unknown input, processing stopped, files not added")
-    )
 
-  ids <- character()
-  for (doci in newDocs) {
-    response <- elastic::docs_create(escon, rfindex, body = doci)
-    ids <- append(ids, response[["_id"]])
-  }
-  idString <- paste(shQuote(ids, type = "cmd"), collapse = ", ")
-  idString <- paste0(idString, "\n")
-  message("Documents were uploaded with the IDs")
-  cat(idString)
-  
-  Sys.sleep(5)
-  # check that everything has been entered
-  
-  checkAfter <- check_files(newPaths)
-  
-  if (!all(checkAfter)) {
-    notCreated <- names(checkAfter[!checkAfter])
-    warning("The files ", paste(notCreated, collapse = ", "), " were not created.")
-  } else {
-    message("Function completed, all files in index ", rfindex)  
-  }
-  invisible(TRUE)
-}
-
-#' Get ID based on search parameters
-#'
-#' @param escon elastic connection object created by elastic::connect
-#' @param rfindex index name for rawfiles index 
-#' @param isBlank boolean default is FALSE
-#' @param polarity Either "pos" or "neg"
-#' @param station Station ID name 
-#' @param matrix character default is "spm"
-#'
-#' @return string templateID
-#' @export
-#'
-find_templateid <- function(escon, rfindex, isBlank = FALSE, polarity, station, matrix = "spm", duration) {
-    tempID <- elastic::Search(
-      escon, rfindex, body = 
-      sprintf('
-        {
-          "query": {
-            "bool": {
-              "must": [
-                {
-                  "term": {
-                     "station": {
-                      "value": "%s"
-                    }
-                  }
-                },
-                {
-                  "term": {
-                    "pol": {
-                      "value": "%s"
-                    }
-                  }
-                },
-                {
-                  "term": {
-                    "matrix": {
-                      "value": "%s"
-                    }
-                  }
-                },
-                {
-                  "term": {
-                    "blank": {
-                      "value": %s
-                    }
-                  }
-                },
-                {
-                  "term": {
-                    "duration": {
-                      "value": %s
-                    }
-                  }
-                }
-              ]
-            }
-          },
-          "_source": false,
-          "size": 1
-        }
-        ', 
-        station, polarity, matrix, ifelse(isBlank, "true", "false"), duration
-      )
-  )
-  if (tempID$hits$total$value == 0) {
-    warning("search have no hits")
-    return(NULL)
-  }
-  tempID$hits$hits[[1]]$`_id`
-}
 
 

@@ -10,26 +10,6 @@ tconvert <- function(unixtime) {
   as.POSIXct(unixtime, origin = "1970-01-01 00:00")
 }
 
-#' Plot an ms2 spectrum for viewing
-#'
-#' @param ms2Spec data.frame with columns mz and int
-#'
-#' @return ggplot2 plot object
-plot_ms2 <- function(ms2Spec) {
-  # change name of int field
-  if (!is.element("int", colnames(ms2Spec))) {
-    colnames(ms2Spec)[grep("int", colnames(ms2Spec))] <- "int"
-  }
-  ggplot(ms2Spec, aes(mz, int, label = round(mz,4))) +
-    geom_segment(aes(x = mz, xend = mz, y = 0, yend = int),
-                 stat = "identity", linewidth = .5, alpha = .5) +
-    theme_bw(base_size = 14) +
-    geom_text(data = ms2Spec[ms2Spec$int > 0.01, ], check_overlap = TRUE, vjust = -0.5) +
-    scale_y_continuous(expand = c(0, 0)) +
-    coord_cartesian(ylim = c(0, max(ms2Spec$int)*1.1), xlim = c(0, max(ms2Spec$mz) + 5)) +
-    ylab("Intensity") +
-    xlab("m/z (u)")
-}
 
 #' Handle errors from ElasticSearch
 #' 
@@ -56,9 +36,7 @@ connectSqlite <- function(pth) {
   DBI::dbConnect(RSQLite::SQLite(), pth)
 }
 
-#' Return the number of Gb of free memory on linux server
-#'
-#' @return numeric length 1
+
 free_gb <- function() {
   x <- system("free -g", intern = T)
   x <- strsplit(x[2], "\\s+")
