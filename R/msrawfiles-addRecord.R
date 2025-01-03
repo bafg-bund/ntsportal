@@ -53,7 +53,9 @@
 #' @export
 #'
 addRawfiles <- function(
-    rfIndex, templateId, newPaths, 
+    rfIndex, 
+    templateId, 
+    newPaths, 
     newStart = "filename",
     newStation = "same_as_template",
     rootMeasDir = "/srv/cifs-mounts/g2/G/G2/HRMS/Messdaten/",
@@ -61,82 +63,34 @@ addRawfiles <- function(
     saveDirectory = getwd()
 ) {
   
-  checkArguments(rfIndex, newPaths, newStart, newStation)
- 
-  if (is.list(newStation)) {
-    stopifnot(
-      length(newStation) >= 2, 
-      all(c("station", "loc") %in% names(newStation)),
-      is.character(newStation$station),
-      length(newStation$station) == 1,
-      all(c("lat", "lon") %in% names(newStation$loc)),
-      all(vapply(newStation$loc, is.numeric, logical(1)))
-    )
+  checkArgumentValidity(rfIndex, templateId, newPaths, newStart, newStation)
+  
+  newPaths <- removePreviouslyAdded(rfIndex, newPaths)
+  
+  if (length(newPaths) == 0) {
+    stop("No files to add")
   }
   
-  #Check if any duplicates in filenames
-  check_files <- function(pths, isBlank = FALSE) {
-    vapply(pths, function(pth) {
-      if (!file.exists(pth))
-        return(FALSE)
-      pth <- normalizePath(pth)
-      checkValue <- ifelse(isBlank, pth, basename(pth))
-      checkField <- ifelse(isBlank, "path", "filename")
-      resx <- elastic::Search(escon, rfIndex, body = sprintf('{
-        "query": {
-          "term": {
-            "%s": {
-              "value": "%s"
-            }
-          }
-        },
-        "size": 0
-      }', checkField, checkValue))
-      if (resx$hits$total$value > 1)
-        stop("There are duplicates of ", pth, " in ", rfIndex)
-      resx$hits$total$value == 1
-    }, logical(1))
-  }
-  
-  stopifnot(length(templateId) == 1)
-  
-  # Get template doc
-  
-  res <- elastic::docs_get(escon, rfIndex, templateId, verbose = F)
-  templDoc <- res$`_source`
-  
-  if (templDoc$blank)
-    message("Template document is a blank file")
-  
-  # Check that the files do not already exist
-  # If the file is not a blank, the basename must be unique, otherwise, the
-  # path must be unique
-  # The file paths are normalized before comparison
-  checkBefore <- if (templDoc$blank) 
-    check_files(newPaths, isBlank = T) else check_files(newPaths)
-  
-  if (any(checkBefore)) {
-    alreadyPresent <- names(checkBefore[checkBefore])
-    message("The files\n", paste(alreadyPresent, collapse = "\n"), 
-            "\nare already present and will not be added")
-    newPaths <- newPaths[!checkBefore]
-  }
-  
-  filestoupload <- basename(newPaths)
-  message("The files\n", paste(filestoupload, collapse = "\n"), 
+  message("The files\n", paste(basename(newPaths), collapse = "\n"), 
           "\n will be added")
+  
+  templateRec <- getTemplateRecord(rfIndex, templateId)
+  
+  if (templateRec$blank)
+    message("Template document is a blank file")
   
   # Copy template and change some values
   newDocs <- lapply(newPaths, function(pth) {
-    doc <- templDoc
+    doc <- templateRec
     doc$path <- normalizePath(pth)
     doc$filename <- basename(pth)
+    
     doc$dbas_is_last_eval <- NULL
     doc$dbas_last_eval <- NULL
     poli <- stringr::str_extract(doc$filename, "pos|neg")
     if (doc$pol != poli) {
       if (length(newPaths) == 1) {
-        message("File ", pth, " has other polarity than the template, please check")
+        message("Note: ", pth, " has a different polarity than the template")
         doc$pol <- poli
       } else {
         stop("File ", pth, " does not have the same polarity as the template")
@@ -174,7 +128,6 @@ addRawfiles <- function(
         stop("File ", pth, " produced an NA start date")
       }
     }
-    
     
     if (!is.list(newStation) && newStation == "filename") {
       if (!is.element("dbas_station_regex", names(doc)))
@@ -233,7 +186,7 @@ addRawfiles <- function(
   message("Looking for corresponding Wiff files in ", rootMeasDir, 
           " to find measurement time")
   newDocs <- lapply(newDocs, function(doc) {
-    doc$date_measurement <- get_measurement_time(doc$path)
+    doc$date_measurement <- get_measurement_time(doc$path, rootMeasDir)
     doc
   })
   
@@ -274,40 +227,110 @@ addRawfiles <- function(
   message("Documents were uploaded with the IDs")
   cat(idString)
   
-  Sys.sleep(5)
-  # check that everything has been entered
+  Sys.sleep(2)  # elasticSearch needs a break for indexing
+
+  timesFound <- fileCountInIndex(rfIndex, newPaths)
   
-  checkAfter <- check_files(newPaths)
-  
-  if (!all(checkAfter)) {
-    notCreated <- names(checkAfter[!checkAfter])
+  if (any(timesFound == 0)) {
+    notCreated <- newPaths[timesFound == 0]
     warning("The files ", paste(notCreated, collapse = ", "), " were not created.")
   } else {
     message("Function completed, all files in index ", rfIndex)  
   }
-  invisible(idString)
+  
+  ids
 }
 
-checkArguments <- function(rfIndex, newPaths, newStart, newStation) {
-  if (!grepl("^ntsp.*msrawfiles.*"))
-    stop("Index name is incorrect or does not follow convention")
+checkArgumentValidity <- function(rfIndex, templateId, newPaths, newStart, newStation) {
+  checkResult <- TRUE
+  
+  if (length(templateId) != 1) {
+    warning("Only one templateId allowed")
+    checkResult <- c(checkResult, FALSE)
+  }
+  if (!grepl("^ntsp.*msrawfiles.*", rfIndex)) {
+    warning("Index name is incorrect or does not follow convention")
+    checkResult <- c(checkResult, FALSE)
+  }
   
   fileFound <- vapply(newPaths, file.exists, logical(1))
-  if (!all(fileFound))
-    stop("Files not found")
-  fileKind <- vapply(newPaths, grepl, pattern = "\\.mzX?ML$", logical(1))
-  if (!all(fileKind))
-    stop("Files are not all .mzXML files")
+  if (!all(fileFound)) {
+    warning("Files not found")
+    checkResult <- c(checkResult, FALSE)
+  }
+    
   
-  stopifnot(newStart == "filename" || grepl("^\\d{8}$", newStart))
-  stopifnot(any(newStation %in% c("same_as_template", "filename")) || is.list(newStation))
+  if (anyDuplicated(newPaths)) {
+    warning("There are duplicated filepaths")
+    checkResult <- c(checkResult, FALSE)
+  }
+  
+  fileKind <- vapply(newPaths, grepl, pattern = "\\.mzX?ML$", logical(1))
+  if (!all(fileKind)) {
+    warning("Files are not all .mzXML or .mzML files") 
+    checkResult <- c(checkResult, FALSE)
+  }
+  
+  if (newStart != "filename" || !grepl("^\\d{8}$", newStart)) {
+    warning("newStart must be 'filename' or a date in the form 'yyyymmdd'")
+    checkResult <- c(checkResult, FALSE)
+  }
+  if (!is.element(newStation, c("same_as_template", "filename")) || !is.list(newStation)) {
+    warning("newStation must be 'same_as_template' or 'filename' or a list 
+            with the elements station, loc and optionally river and km")
+    checkResult <- c(checkResult, FALSE)
+  } else if (is.list(newStation)) {
+    if (!all(length(newStation) >= 2, 
+      all(c("station", "loc") %in% names(newStation)),
+      is.character(newStation$station),
+      length(newStation$station) == 1,
+      all(c("lat", "lon") %in% names(newStation$loc)),
+      all(vapply(newStation$loc, is.numeric, logical(1))))
+    ) {
+      warning("newStation list is malformed")
+      checkResult <- c(checkResult, FALSE)
+    }
+  }
+  
+  if (any(checkResult == FALSE)) {
+    message("Error in arguments, function will terminate")
+  }
+  
+  stopifnot(all(checkResult))
+  invisible(all(checkResult))
+}
+
+
+removePreviouslyAdded <- function(rfIndex, newPaths) {
+  newPaths[filesNotInIndex(rfIndex, newPaths)]
+}
+
+filesNotInIndex <- function(rfIndex, newPaths) {
+  vapply(basename(newPaths), fileNotInIndex, logical(1), rfIndex = rfIndex)
+}
+
+fileNotInIndex <- function(newFilename, rfIndex) {
+  fileCount <- fileCountInIndex(newFilename, rfIndex)
+  if (fileCount == 1)
+    warning(rfIndex, " already contains ", newFilename)
+  if (fileCount > 1)
+    warning(rfIndex, " contains duplicates in ", newFilename, ".\n Please correct.")
+  fileCount == 0
+}
+
+fileCountInIndex <- function(newFilename, rfIndex) {
+  res <- elastic::Search(
+    escon, rfIndex, size = 0, 
+    body = list(query = list(term = list(filename = newFilename)))
+  )
+  res$hits$total$value
 }
 
 
 # Define internal functions
 # Will add earliest measurement time of any file found with the same name 
 # in the whole "messdaten" directory tree.
-get_measurement_time <- function(pathMsFile) {
+get_measurement_time <- function(pathMsFile, rootMeasDir) {
   nm <- stringr::str_match(basename(pathMsFile), "^(.*)\\.mzXML$")[,2]
   fd <- list.files(rootMeasDir, pattern = nm, recursive = T, full.names = T)
   if (length(fd) > 0) {
@@ -316,6 +339,11 @@ get_measurement_time <- function(pathMsFile) {
     message("Measurement time not found")
     NULL
   }
+}
+
+getTemplateRecord <- function(rfIndex, templateId) {
+  res <- elastic::docs_get(escon, rfIndex, templateId, verbose = F)
+  res$`_source`
 }
 
 #' Get ID based on search parameters
