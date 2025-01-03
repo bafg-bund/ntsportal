@@ -79,11 +79,80 @@ addRawfiles <- function(
   if (templateRec$blank)
     message("Template document is a blank file")
   
-  # Copy template and change some values
+  newRecords <- lapply(newPaths, newRecordFromTemplate, newStart = newStart, newStation = newStation, template = templateRec)
+  
+  
+  # Add measurement time
+  
+  message("Looking for corresponding Wiff files in ", rootMeasDir, 
+          " to find measurement time")
+  newDocs <- lapply(newDocs, function(doc) {
+    doc$date_measurement <- get_measurement_time(doc$path, rootMeasDir)
+    doc
+  })
+  
+  jsonlite::write_json(newDocs, file.path(saveDirectory, "add-rawfiles-check.json"), pretty = T, digits = NA, auto_unbox = T)
+  
+  message("Please check ", file.path(saveDirectory, "add-rawfiles-check.json"))
+  
+  message("Is it okay to proceed? 
+          y = will be uploaded 
+          n = terminate process without uploading 
+          c = json was changed manually. Only 1 doc allowed. Save changes before proceeding.")
+  if (prompt)
+    isOk <- readline("(y/n/c): ") else isOk <- "y"
+  
+  switch(
+    isOk,
+    y = NULL,
+    n = stop("processing stoped, files not added"),
+    c = {
+      if (length(newDocs) != 1)
+        stop("You can only change one document and use this as template for others")
+      message("Adding changed document")
+      newDocsNew <- jsonlite::read_json("add-rawfiles-check.json")
+      if (all.equal(newDocsNew, newDocs)[1] == TRUE)
+        stop("There was no change made, aborted process")
+      newDocs <- newDocsNew
+    },
+    stop("Unknown input, processing stopped, files not added")
+  )
+  
+  ids <- character()
+  for (doci in newDocs) {
+    response <- elastic::docs_create(escon, rfIndex, body = doci)
+    ids <- append(ids, response[["_id"]])
+  }
+  idString <- paste(shQuote(ids, type = "cmd"), collapse = ", ")
+  idString <- paste0(idString, "\n")
+  message("Documents were uploaded with the IDs")
+  cat(idString)
+  
+  Sys.sleep(2)  # elasticSearch needs a break for indexing
+
+  timesFound <- fileCountInIndex(rfIndex, newPaths)
+  
+  if (any(timesFound == 0)) {
+    notCreated <- newPaths[timesFound == 0]
+    warning("The files ", paste(notCreated, collapse = ", "), " were not created.")
+  } else {
+    message("Function completed, all files in index ", rfIndex)  
+  }
+  
+  ids
+}
+
+
+newRecordFromTemplate <- function(pth, newStart, newStation, template) {
+
+  rec <- template
+  rec$path <- normalizePath(pth)
+  rec$filename <- basename(pth)
+  
+  
   newDocs <- lapply(newPaths, function(pth) {
-    doc <- templateRec
-    doc$path <- normalizePath(pth)
-    doc$filename <- basename(pth)
+    
+    
     
     doc$dbas_is_last_eval <- NULL
     doc$dbas_last_eval <- NULL
@@ -181,65 +250,8 @@ addRawfiles <- function(
     doc$filesize <- file.size(doc$path) / 1e6
     doc
   })
-  # Add measurement time
-  
-  message("Looking for corresponding Wiff files in ", rootMeasDir, 
-          " to find measurement time")
-  newDocs <- lapply(newDocs, function(doc) {
-    doc$date_measurement <- get_measurement_time(doc$path, rootMeasDir)
-    doc
-  })
-  
-  jsonlite::write_json(newDocs, file.path(saveDirectory, "add-rawfiles-check.json"), pretty = T, digits = NA, auto_unbox = T)
-  
-  message("Please check ", file.path(saveDirectory, "add-rawfiles-check.json"))
-  
-  message("Is it okay to proceed? 
-          y = will be uploaded 
-          n = terminate process without uploading 
-          c = json was changed manually. Only 1 doc allowed. Save changes before proceeding.")
-  if (prompt)
-    isOk <- readline("(y/n/c): ") else isOk <- "y"
-  
-  switch(
-    isOk,
-    y = NULL,
-    n = stop("processing stoped, files not added"),
-    c = {
-      if (length(newDocs) != 1)
-        stop("You can only change one document and use this as template for others")
-      message("Adding changed document")
-      newDocsNew <- jsonlite::read_json("add-rawfiles-check.json")
-      if (all.equal(newDocsNew, newDocs)[1] == TRUE)
-        stop("There was no change made, aborted process")
-      newDocs <- newDocsNew
-    },
-    stop("Unknown input, processing stopped, files not added")
-  )
-  
-  ids <- character()
-  for (doci in newDocs) {
-    response <- elastic::docs_create(escon, rfIndex, body = doci)
-    ids <- append(ids, response[["_id"]])
-  }
-  idString <- paste(shQuote(ids, type = "cmd"), collapse = ", ")
-  idString <- paste0(idString, "\n")
-  message("Documents were uploaded with the IDs")
-  cat(idString)
-  
-  Sys.sleep(2)  # elasticSearch needs a break for indexing
-
-  timesFound <- fileCountInIndex(rfIndex, newPaths)
-  
-  if (any(timesFound == 0)) {
-    notCreated <- newPaths[timesFound == 0]
-    warning("The files ", paste(notCreated, collapse = ", "), " were not created.")
-  } else {
-    message("Function completed, all files in index ", rfIndex)  
-  }
-  
-  ids
 }
+
 
 checkArgumentValidity <- function(rfIndex, templateId, newPaths, newStart, newStation) {
   checkResult <- TRUE
