@@ -1,53 +1,67 @@
 # Copyright 2016-2024 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
 
-#' Add new MS measurement files to msrawfiles index
-#' 
-#' @param escon elastic connection object created by elastic::connect
-#' @param rfindex index name for rawfiles index 
-#' @param templateId Document ID for a document to use as a template
-#' @param newPaths Character vector of full paths to new rawfiles which are to 
-#' be added, must be mzXML files.
-#' @param newStart Either "filename" (default), meaning extract the start time 
-#' from the filename or provide a start date as an 8 digit number "YYYYMMDD"
-#' @param newStation Either be "same_as_template" (default), which will
-#' copy the value from the template document, or "filename", meaning extract
-#' the station and loc values from the code in the filename (will compare to 
-#' other docs in msrawfiles index) or "newStationList" to add a new station. See details.
-#' @param newStationList List with fields "station" and "loc" and optionally "river", "gkz" and "km" to add a new station. see details
-#' @param rootMeasDir Root directory where measurement files are located. The function
-#' will look for original (vendor) files in this directory or below. Must end with "/".
+#' Add new records for MS measurement files to msrawfiles index
 #'
-#' @details newStation can be either "same_as_template" or "filename" or
-#' a new fixed station name and location (list in the argument "newStationList" with fields "station" and "loc" and optionally "river", "gkz" and "km")
-#' "loc" being a geopoint with fields "lat" and "lon"
-#' if it is in the filename it will use the dbas_station_regex field in
-#' the index to get the station information from another doc in the index. Station and
-#' river names all lowercase and no spaces and no special characters. 
-#' For the station name use the convention <river_town_position> where position is l, r or m for 
-#' left, right, middle. If there is no obvious town but km
-#' is known, then use the convention <river_km> for the station name. If neither 
-#' town or km is known, use the convention <river_description> where description
-#' is some indication of the location. 
+#' @param rfindex index name for rawfiles index
+#' @param templateId Document ID for a document to use as a template
+#' @param newPaths Character vector of full paths to new rawfiles which are to be added, must be mzXML files.
+#' @param newStart Either "filename" (default), meaning extract the start time from the filename or provide a start date
+#'   as an 8 digit number "YYYYMMDD"
+#' @param newStation Either be "same_as_template" (default), which will copy the value from the template document, or
+#'   "filename", meaning extract the station and loc values from the code in the filename (will compare to other docs in
+#'   msrawfiles index) or "newStationList" to add a new station. See details.
+#' @param dirMeasurmentFiles Root directory where measurement files are located. The function will look for original
+#'   (vendor) files in this directory or below. Must end with "/".
+#' @param promptBeforeIngest Should the user be asked to verify the submission? (Default: TRUE). A file called
+#'   "add-rawfiles-check.json" created in the saveDirectory which the user can check and make changes to. See details
+#'   "making manual changes".
+#' @param saveDirectory Location to save temporary json file for checking and making manual changes. (defaults to
+#'   current working dir)
+#' @param newStationList List with fields "station" and "loc" and optionally "river", "gkz" and "km" to add a new
+#'   station. see details
+#'   
+#' @details \strong{Adding location information (`station` and `loc` fields)}
+#'   newStation can be either "same_as_template", "filename" or "newStationList".
+#'
+#'   Using "same_as_template" means the station and location information is copied from the template
+#'
+#'   Using "filename" means it will use the `dbas_station_regex` field in the index to get the station information from
+#'   another record in the index. The function will use the regex to extract the station code from the filename and
+#'   search the msrawfiles index for other records with this station code. If an unambiguous location is found, it will
+#'   gather all available location information and use this for the new record entry. This option is useful if the batch
+#'   that is being added contains more than one station.
+#'
+#'   Using "newStationList" means a new fixed station name and location is passed (use list in the argument
+#'   "newStationList" with fields "station" and "loc" and optionally "river", "gkz" and "km") "loc" being a geopoint
+#'   with fields "lat" and "lon". Station and river names should all be lowercase with no spaces and no special
+#'   characters. For the station name use the convention <river_town_position> where position is l, r or m for left,
+#'   right, middle. If there is no obvious town but km is known, then use the convention <river>_<km> for the station
+#'   name. If neither town nor km is known, use the convention <river>_<description> where description is some
+#'   indication of the location.
 #' 
-#' \strong{dbas_date_regex and dbas_date_format}
-#' 
-#' The field `dbas_date_regex` is used to find the date of the sample from the file name. It works
-#' in conjunction with `dbas_date_format`. `dbas_date_regex` extracts the text, while `dbas_date_format`
-#' tells R how to interpret the text. For example, the file name `RH_pos_20170101.mzXML`
-#' uses the date_regex `"([20]*\\d{6})"` and date_format `"ymd"`. The `dbas_date_regex`
-#' uses the tidyverse regular expression syntax and the `stringr::str_match` 
-#' function to extract the text referring to the date. The brackets indicate the
-#' text to extract and these can be surrounded by anchors. It is also possible to
-#' have multiple brackets, the text in multiple brackets will be combined before
-#' parsing. For example the file `UEBMS_2024_002_Main_Kahl_Jan_pos_DDA.mzXML` can
-#' be parsed with date_regex `_(20\\d{2})_.*_(\\w{3})_pos` and date_format `ym`. 
-#' 
-#' `dbas_date_format` may be one of `"ymd"`, `"dmy"`, `"ym"` for year-month and `"yy"` 
-#' for just year. The date parsing is done by `lubridate`.
-#' 
-#' 
-#' @return Returns vector of new ES-IDs
+#'   \strong{Adding sample time information (`start` field)}
+#'   
+#'   Using "filename" means that the sample time is extracted from the filename. The field `dbas_date_regex` is used to
+#'   find the date of the sample from the file name. It works in conjunction with `dbas_date_format`. `dbas_date_regex`
+#'   extracts the text, while `dbas_date_format` tells R how to interpret the text. For example, the file name
+#'   `RH_pos_20170101.mzXML` uses the date_regex `"([20]*\\d{6})"` and date_format `"ymd"`. The `dbas_date_regex` uses
+#'   the tidyverse regular expression syntax and the `stringr::str_match` function to extract the text referring to the
+#'   date. The brackets indicate the text to extract and these can be surrounded by anchors. It is also possible to have
+#'   multiple brackets, the text in multiple brackets will be combined before parsing. For example the file
+#'   `UEBMS_2024_002_Main_Kahl_Jan_pos_DDA.mzXML` can be parsed with date_regex `_(20\\d{2})_.*_(\\w{3})_pos` and
+#'   date_format `ym`.
+#'
+#'   `dbas_date_format` may be one of `"ymd"`, `"dmy"`, `"ym"` for year-month and `"yy"` for just the year. The date
+#'   parsing is done by `lubridate`.
+#'   
+#'   \strong{Making manual changes}
+#'   
+#'   Manual changes can be made to the json but only if one document is added (this is to minimize errors). Select "c"
+#'   at the promt (after changes to the json have been saved).
+#'   
+#'
+#' @return Returns vector of new ES-IDs of the generated and imported documents
 #' @export
 #'
 addRawfiles <- function(
@@ -56,9 +70,9 @@ addRawfiles <- function(
     newPaths, 
     newStart = "filename",
     newStation = "same_as_template",
-    rootMeasDir = "/srv/cifs-mounts/g2/G/G2/HRMS/Messdaten/",
-    prompt = T,
-    saveDirectory = getwd()
+    dirMeasurmentFiles = "/srv/cifs-mounts/g2/G/G2/HRMS/Messdaten/",
+    promptBeforeIngest = TRUE,
+    saveDirectory = getwd(),
     newStationList = list(
       station = "example_new_station",
       loc = list(lat = 1.23456, lon = 1.23456),
@@ -80,9 +94,9 @@ addRawfiles <- function(
           "\n will be added")
   
   templateRec <- getTemplateRecord(rfIndex, templateId)
-  checkTemplateRecord(newPaths, templateRec)
+  checkTemplateRecord(newPaths, templateRec, promptBeforeIngest)
   if (newStart == "filename")
-    checkDateParsing(newPaths, templateRec)
+    checkDateParsing(newPaths, templateRec, promptBeforeIngest)
   if (newStation == "filename")
     checkStationParsing(newPaths, templateRec)
   
@@ -93,10 +107,12 @@ addRawfiles <- function(
     newStation = newStation,
     template = templateRec,
     rfIndex = rfIndex, 
-    newStationList = newStationList
+    newStationList = newStationList,
+    dirMeasurmentFiles = dirMeasurmentFiles
   )
   
-  jsonlite::write_json(newRecords, file.path(saveDirectory, "add-rawfiles-check.json"), pretty = T, digits = NA, auto_unbox = T)
+  jsonlite::write_json(newRecords, file.path(saveDirectory, "add-rawfiles-check.json"), pretty = T, 
+                       digits = NA, auto_unbox = T)
   
   message("Please check ", file.path(saveDirectory, "add-rawfiles-check.json"))
   
@@ -104,7 +120,7 @@ addRawfiles <- function(
           y = will be uploaded 
           n = terminate process without uploading 
           c = json was changed manually. Only 1 doc allowed. Save changes before proceeding.")
-  if (prompt)
+  if (promptBeforeIngest)
     isOk <- readline("(y/n/c): ") else isOk <- "y"
   
   switch(
@@ -131,11 +147,12 @@ addRawfiles <- function(
   idString <- paste(shQuote(ids, type = "cmd"), collapse = ", ")
   idString <- paste0(idString, "\n")
   message("Documents were uploaded with the IDs")
-  cat(idString)
+  message(idString)
   
-  Sys.sleep(2)  # elasticSearch needs time for indexing
+  # ElasticSearch needs time for indexing
+  Sys.sleep(2)  
 
-  timesFound <- fileCountInIndex(rfIndex, newPaths)
+  timesFound <- vapply(newPaths, filenameCountInIndex, numeric(1), rfIndex = rfIndex)
   
   if (any(timesFound == 0)) {
     notCreated <- newPaths[timesFound == 0]
@@ -151,110 +168,93 @@ checkArgumentValidity <- function(rfIndex, templateId, newPaths, newStart, newSt
   checkResult <- TRUE
   
   if (length(templateId) != 1) {
-    warning("Only one templateId allowed")
-    checkResult <- c(checkResult, FALSE)
+    checkResult <- addError(checkResult, "Only one templateId allowed")
   }
+  
   if (!grepl("^ntsp.*msrawfiles.*", rfIndex)) {
-    warning("Index name is incorrect or does not follow convention")
-    checkResult <- c(checkResult, FALSE)
+    checkResult <- addError(checkResult, "Index name is incorrect or does not follow convention")
   }
   
   fileFound <- vapply(newPaths, file.exists, logical(1))
   
   if (!all(fileFound)) {
-    warning("Files not found")
-    checkResult <- c(checkResult, FALSE)
+    checkResult <- addError(checkResult, "Files not found")
   }
   
   if (anyDuplicated(newPaths)) {
-    warning("There are duplicated filepaths")
-    checkResult <- c(checkResult, FALSE)
+    checkResult <- addError(checkResult, "There are duplicated filepaths")
   }
   
   fileKind <- vapply(newPaths, grepl, pattern = "\\.mzX?ML$", logical(1))
   if (!all(fileKind)) {
-    warning("Files are not all .mzXML or .mzML files") 
-    checkResult <- c(checkResult, FALSE)
+    checkResult <- addError(checkResult, "Files are not all .mzXML or .mzML files")
   }
   
   filePol <- getPolFromPaths(newPaths)
   if (length(filePol) != 1) {
-    warning("Only one polarity allowed per batch")
-    checkResult <- c(checkResult, FALSE)
+    checkResult <- addError(checkResult, "Only one polarity allowed per batch")
   }
   
-  if (newStart != "filename" || !grepl("^\\d{8}$", newStart)) {
-    warning("newStart must be 'filename' or a date in the form 'yyyymmdd'")
-    checkResult <- c(checkResult, FALSE)
+  if (!(newStart == "filename" || grepl("^\\d{8}$", newStart))) {
+    checkResult <- addError(checkResult, "'newStart' must be 'filename' or a fixed date in the form 'yyyymmdd'")
   }
   
-  
-  if (!is.element(newStation, c("same_as_template", "filename")) || !is.list(newStation)) {
-    warning("newStation must be 'same_as_template' or 'filename' or a list 
+  if (!is.element(newStation, c("same_as_template", "filename", "newStationList"))) {
+    checkResult <- addError(checkResult, "newStation must be 'same_as_template' or 'filename' or a list 
             with the elements station, loc and optionally river and km")
-    checkResult <- c(checkResult, FALSE)
-  } else if (is.list(newStation)) {
-    if (!all(length(newStation) >= 2, 
-             all(c("station", "loc") %in% names(newStation)),
-             is.character(newStation$station),
-             length(newStation$station) == 1,
-             all(c("lat", "lon") %in% names(newStation$loc)),
-             all(vapply(newStation$loc, is.numeric, logical(1))))
-    ) {
-      warning("newStation list is malformed")
-      checkResult <- c(checkResult, FALSE)
-    }
-  }
+  } 
   
   if (!validateStationList(newStationList)) {
-    warning("Invalid newStationList")
-    checkResult <- c(checkResult, FALSE)
+    checkResult <- addError(checkResult, "'newStationList' is malformed, check documentation")
   }
   
   stopIfAnyErrors(checkResult)
 }
 
-checkTemplateRecord <- function(newPaths, templateRec) {
+checkTemplateRecord <- function(newPaths, templateRec, promptBeforeIngest) {
   checkResult <- TRUE
   if (templateRec$blank)
-    message("Template document is a blank file")
+    message("Note: Template document is a blank file")
   
-  polFromFiles <- getPolFromPaths(newPaths)
+  polFromFilename <- getPolFromPaths(newPaths)
   if (templateRec$pol != polFromFilename) {
-    warning("New file(s) do not have the same polarity as the template, only 
+    message("New file(s) do not have the same polarity as the template, only 
             one file may be added")
-    if (length(newPaths) > 1)
-      checkResult <- c(checkResult, FALSE)
+    if (length(newPaths) > 1 || !promptBeforeIngest)
+      checkResult <- addError(checkResult, "More than one file added with different polarity to template")
   }
   
   dateFormat <- templateRec$dbas_date_format
   if (!is.element(dateFormat, c("ymd", "dmy", "yy", "ym"))) {
-    warning("Unknown dbas_date_format ", dateFormat, " in template")
-    if (length(newPaths) > 1)
-      checkResult <- c(checkResult, FALSE)
+    message("Unknown dbas_date_format ", dateFormat, " in template")
+    if (length(newPaths) > 1 || !promptBeforeIngest)
+      checkResult <- addError(checkResult, "More than one file added with invalid dbas_date_format in template")
   }
   stopIfAnyErrors(checkResult)
 }
 
 
 
-checkDateParsing <- function(newPaths, templateRec) {
+checkDateParsing <- function(newPaths, templateRec, promptBeforeIngest) {
   checkResult <- TRUE
-  # Check start can be parsed
-  newDates <- vapply(basename(newPaths), getStartFromFilenameAsDate, Date(1), dateRegex = templateRec$dbas_date_regex, 
-                     dateFormat = templateRec$dbas_date_format)
+  newDates <- vapply(
+    basename(newPaths),
+    getStartFromFilenameAsDate,
+    lubridate::ymd(19700101),
+    dateRegex = templateRec$dbas_date_regex,
+    dateFormat = templateRec$dbas_date_format
+  )
   if (any(is.na(newDates))) {
     badFiles <- newPaths[is.na(newDates)]
     badFilesString <- paste(badFiles, collapse = ", ")
-    if (length(newPaths) == 1) {
-      warning("File", badFilesString, " produced an NA start date, changed to 1970-01-01, must be corrected")
+    if (length(newPaths) == 1 && promptBeforeIngest) {
+      message("File ", badFilesString, " produced an NA start date, changed to 1970-01-01, must be corrected")
     } else {
-      warning("Files ", badFilesString, " produced an NA start dates")
-      checkResult <- c(checkResult, FALSE)
+      checkResult <- addError(checkResult, paste("File(s)", badFilesString, "produced NA start date(s)"))
     }
   }
 
-  evalCheckResult(checkResult)
+  stopIfAnyErrors(checkResult)
 }
 
 checkStationParsing <- function(newPaths, templateRec) {
@@ -264,17 +264,16 @@ checkStationParsing <- function(newPaths, templateRec) {
 
 
 
-
 newRecordFromTemplate <- function(pth, newStart, newStation, template, rfIndex, newStationList, dirMeasurmentFiles) {
   rec <- template
   rec <- addPathToRecord(rec, pth)
   rec <- addPolToRecord(rec)
-  rec <- addStartToRecord(rec)
+  rec <- addStartToRecord(rec, newStart)
   rec <- addStationToRecord(rec, newStation, rfIndex, newStationList)
+  rec <- addMeasurementTimeToRecord(rec, dirMeasurmentFiles)
+  
   rec$date_import <- as.integer(Sys.time())
   rec$filesize <- file.size(rec$path) / 1e6
-  rec$date_measurement <- getMeasurementTime(rec$path, rootMeasDir)
-  
   rec <- rec[order(names(rec))]
   rec
 }
@@ -289,12 +288,14 @@ addPolToRecord <- function(rec) {
   rec$pol <-  getPolFromFilename(rec$filename)
   rec
 }
+
 addStartToRecord <- function(rec, newStart) {
   if (newStart == "filename") {
     rec$start <- getFormatedStartFromFilename(rec$filename, rec$dbas_date_regex, rec$dbas_date_format)
   } else {
     rec$start <- getFixedStart(newStart)
   }
+  rec
 }
 
 getFormatedStartFromFilename <- function(fname, dateRegex, dateFormat) {
@@ -324,9 +325,10 @@ getFixedFormatedStart <- function(newStart) {
   reformatDate(newDate)
 }
 
-reformatDate(dateVar) {
-  format(tempDate, "%Y-%m-%d", tz = "Europe/Berlin")
+reformatDate <- function(dateObject) {
+  format(dateObject, "%Y-%m-%d", tz = "Europe/Berlin")
 }
+
 addStationToRecord <- function(rec, newStation, rfIndex, newStationList) {
   # In the case of "same_as_template" no changes are made to rec (it was a copy of template)
   if (newStation == "filename") {
@@ -470,49 +472,57 @@ addOptionalStationField <- function(field, resListTemp, hits) {
   resListTemp
 }
 
-getMeasurementTime <- function(pathMsFile, rootMeasDir) {
-  nm <- stringr::str_match(basename(pathMsFile), "^(.*)\\.mzX?ML$")[,2]
-  fd <- list.files(rootMeasDir, pattern = nm, recursive = T, full.names = T)
+addMeasurementTimeToRecord <- function(rec, dirMeasurmentFiles) {
+  nm <- stringr::str_match(basename(rec$path), "^(.*)\\.mzX?ML$")[,2]
+  fd <- list.files(dirMeasurmentFiles, pattern = nm, recursive = T, full.names = T)
   if (length(fd) > 0) {
-    format(min(file.mtime(fd)), "%Y-%m-%d %H:%M:%S")
+    timeString <- format(min(file.mtime(fd)), "%Y-%m-%d %H:%M:%S")
   } else {
     warning("Measurement time not found, using creation date of mzXML file")
-    format(min(file.mtime(pathMsFile)), "%Y-%m-%d %H:%M:%S")
+    timeString <- format(min(file.mtime(pathMsFile)), "%Y-%m-%d %H:%M:%S")
   }
+  if (!is.na(timeString) && timeString != "") {
+    rec$date_measurement <- timeString
+  }
+  rec
 }
-
 
 removePreviouslyAdded <- function(rfIndex, newPaths) {
   newPaths[filesNotInIndex(rfIndex, newPaths)]
 }
 
 filesNotInIndex <- function(rfIndex, newPaths) {
-  vapply(basename(newPaths), fileNotInIndex, logical(1), rfIndex = rfIndex)
+  vapply(newPaths, fileNotInIndex, logical(1), rfIndex = rfIndex)
 }
 
-fileNotInIndex <- function(newFilename, rfIndex) {
-  fileCount <- fileCountInIndex(newFilename, rfIndex)
+fileNotInIndex <- function(pathToCheck, rfIndex) {
+  fileCount <- filenameCountInIndex(pathToCheck, rfIndex)
   if (fileCount == 1)
-    warning(rfIndex, " already contains ", newFilename)
+    warning(rfIndex, " already contains ", pathToCheck)
   if (fileCount > 1)
-    warning(rfIndex, " contains duplicates in ", newFilename, ".\n Please correct.")
+    warning(rfIndex, " contains duplicates in ", pathToCheck, ".\n Please correct.")
   fileCount == 0
 }
 
-fileCountInIndex <- function(newFilename, rfIndex) {
+filenameCountInIndex <- function(pathToCheck, rfIndex) {
   res <- elastic::Search(
     escon, rfIndex, size = 0, 
-    body = list(query = list(term = list(filename = newFilename)))
+    body = list(query = list(term = list(filename = basename(pathToCheck))))
   )
   res$hits$total$value
 }
 
 getPolFromPaths <- function(newPaths) {
-  unique(vapply(basename(newPaths), getPolFromFilename, characer(1)))
+  unique(vapply(basename(newPaths), getPolFromFilename, character(1)))
 }
 
 getPolFromFilename <- function(fname) {
-  stringr::str_extract(rec$filename, "pos|neg")
+  stringr::str_extract(fname, "pos|neg")
+}
+
+addError <- function(checkResult, warningText) {
+  warning(warningText, call. = FALSE)
+  c(checkResult, FALSE)
 }
 
 stopIfAnyErrors <- function(checkResult) {
@@ -520,7 +530,8 @@ stopIfAnyErrors <- function(checkResult) {
     message("Error in arguments, function will terminate")
   }
   
-  stopifnot(all(checkResult))
+  if (!all(checkResult))
+    stop("Error in addRawfiles, see warnings for details")
   invisible(all(checkResult))
 }
 
