@@ -5,7 +5,7 @@
 #' Extract field from docs list
 #' 
 #' @description
-#' a wrapper around vapply or lapply to get values from docs_source object
+#' a wrapper around vapply or lapply to get values from ntspRecord objects
 #' 
 #' @param docsSrc docs_source object: list returned by elasticSearch API (only the _source part)
 #' @param fieldName field to extract (length 1 character)

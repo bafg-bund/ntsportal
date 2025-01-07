@@ -1,8 +1,8 @@
 # Copyright 2016-2024 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
 
-glue_json <- function(...) {
-  x <- glue::glue(..., .open = "[[", .close = "]]")
+glue_json <- function(stringToModify) {
+  x <- glue::glue(stringToModify, .envir = parent.frame(1), .open = "[[", .close = "]]")
   gsub("[\r\n]", "", x)
 }
 
@@ -44,31 +44,33 @@ free_gb <- function() {
 }  
 
 
-#' Get search results for more than 10000 docs by pagination.
+#' Get search results for more than 10000 docs by pagination. 
+#' 
+#' local function
 #'
-#' @param escon Elasticsearch connection object created by `elastic::connect`
-#' @param index Name of ElasticSearch index
-#' @param searchBody search body, if NULL, will return all docs
+#' @param indexName Name of ElasticSearch index
+#' @param searchBody search body, default will return all docs
 #' @param sort Sort argument passed onto elastic::Search. Defines which field 
 #' the results are sorted by (best if this is unique for all docs to avoid ties) 
-#' currently can only be one field and may not be _id.
+#' currently can only be one field and may not be '_id'.
 #' @param totalSize 
 #' @param ... further arguments to elastic::Search, asdf argument does not work for now.
 #'
 #' @return ElasticSearch API response as a list
 #'
-es_search_paged <- function(escon, index, searchBody = NULL, sort, totalSize = Inf, ...) {
-  # initial request
-  if (is.null(searchBody)) {
-    searchBody <- list(query = list(match_all = list()))
-    names(searchBody$query$match_all) <- character()
-  }
+esSearchPaged <- function(
+    indexName, 
+    searchBody = list(query = list(match_all = stats::setNames(list(), character(0)))), 
+    sort, 
+    totalSize = Inf, 
+    ...
+  ) {
     
   stopifnot(length(sort) == 1)
   newSize <- 10000
   if (totalSize < 10000)
     newSize <- totalSize
-  res1 <- elastic::Search(escon, index, body = searchBody, sort = sort, 
+  res1 <- elastic::Search(escon, indexName, body = searchBody, sort = sort, 
                           size = newSize, ...)
   numHits <- length(res1$hits$hits)
   
@@ -80,8 +82,6 @@ es_search_paged <- function(escon, index, searchBody = NULL, sort, totalSize = I
   
   if (!is.list(searchBody) && is.character(searchBody)) {
     stop("Do not use a string-based search, convert to a list-based search")
-    searchBodyList <- jsonlite::fromJSON(searchBody)
-    
   } else if (is.list(searchBody)) {
     searchBodyList <- searchBody
   } else {
@@ -91,7 +91,7 @@ es_search_paged <- function(escon, index, searchBody = NULL, sort, totalSize = I
   searchBodyList$search_after <- list(searchAfter)
   
   repeat {
-    nextRes <- elastic::Search(escon, index, body = searchBodyList, sort = sort, 
+    nextRes <- elastic::Search(escon, indexName, body = searchBodyList, sort = sort, 
                                size = 10000, ...)
     newNumHits <- length(nextRes$hits$hits)
     if (newNumHits > 0)

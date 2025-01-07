@@ -2,74 +2,91 @@
 % Please edit documentation in R/msrawfiles-addRecord.R
 \name{addRawfiles}
 \alias{addRawfiles}
-\title{Add new MS measurement files to msrawfiles index}
+\title{Add new records for MS measurement files to msrawfiles index}
 \usage{
 addRawfiles(
-  escon,
-  rfindex,
+  rfIndex,
   templateId,
   newPaths,
   newStart = "filename",
   newStation = "same_as_template",
-  rootMeasDir = "/srv/cifs-mounts/g2/G/G2/HRMS/Messdaten/",
-  prompt = T,
-  saveDirectory = getwd()
+  dirMeasurmentFiles = "/srv/cifs-mounts/g2/G/G2/HRMS/Messdaten/",
+  promptBeforeIngest = TRUE,
+  saveDirectory = getwd(),
+  newStationList = list(station = "example_new_station", loc = list(lat = 1.23456, lon =
+    1.23456), river = "example_new_river", gkz = 99999, km = 99999)
 )
 }
 \arguments{
-\item{escon}{elastic connection object created by elastic::connect}
-
-\item{rfindex}{index name for rawfiles index}
-
 \item{templateId}{Document ID for a document to use as a template}
 
-\item{newPaths}{Character vector of full paths to new rawfiles which are to 
-be added, must be mzXML files.}
+\item{newPaths}{Character vector of full paths to new rawfiles which are to be added, must be mzXML files.}
 
-\item{newStart}{Either "filename" (default), meaning extract the start time 
-from the filename or provide a start date as an 8 digit number "YYYYMMDD"}
+\item{newStart}{Either "filename" (default), meaning extract the start time from the filename or provide a start date
+as an 8 digit number "YYYYMMDD"}
 
-\item{newStation}{Either be "same_as_template" (default), which will
-copy the value from the template document, or "filename", meaning extract
-the station and loc values from the code in the filename (will compare to 
-other docs in msrawfiles index) or provide a list of length 3 with station, river  
-and loc values. See details.}
+\item{newStation}{Either be "same_as_template" (default), which will copy the value from the template document, or
+"filename", meaning extract the station and loc values from the code in the filename (will compare to other docs in
+msrawfiles index) or "newStationList" to add a new station. See details.}
 
-\item{rootMeasDir}{Root directory where measurement files are located. The function
-will look for original (vendor) files in this directory or below. Must end with "/".}
+\item{dirMeasurmentFiles}{Root directory where measurement files are located. The function will look for original
+(vendor) files in this directory or below. Must end with "/".}
+
+\item{promptBeforeIngest}{Should the user be asked to verify the submission? (Default: TRUE). A file called
+"add-rawfiles-check.json" created in the saveDirectory which the user can check and make changes to. See details
+"making manual changes".}
+
+\item{saveDirectory}{Location to save temporary json file for checking and making manual changes. (defaults to
+current working dir)}
+
+\item{newStationList}{List with fields "station" and "loc" and optionally "river", "gkz" and "km" to add a new
+station. see details}
+
+\item{rfindex}{index name for rawfiles index}
 }
 \value{
-Returns vector of new ES-IDs
+Returns vector of new ES-IDs of the generated and imported documents
 }
 \description{
-Add new MS measurement files to msrawfiles index
+Add new records for MS measurement files to msrawfiles index
 }
 \details{
-newStation can be either "same_as_template" or "filename" or
-a new fixed station name and location (list with fields "station", "river" and "loc")
-"loc" being a geopoint with fields "lat" and "lon"
-if it is in the filename it will use the dbas_station_regex field in
-the index to get the station information from another doc in the index. Station and
-river names all lowercase and no spaces and no special characters. 
-For the station name use the convention <river_town_position> where position is l, r or m for 
-left, right, middle. If there is no obvious town but km
-is known, then use the convention <river_km> for the station name. If neither 
-town or km is known, use the convention <river_description> where description
-is some indication of the location. 
+\strong{Adding location information (`station` and `loc` fields)}
+  newStation can be either "same_as_template", "filename" or "newStationList".
 
-\strong{dbas_date_regex and dbas_date_format}
+  Using "same_as_template" means the station and location information is copied from the template
 
-The field `dbas_date_regex` is used to find the date of the sample from the file name. It works
-in conjunction with `dbas_date_format`. `dbas_date_regex` extracts the text, while `dbas_date_format`
-tells R how to interpret the text. For example, the file name `RH_pos_20170101.mzXML`
-uses the date_regex `"([20]*\\d{6})"` and date_format `"ymd"`. The `dbas_date_regex`
-uses the tidyverse regular expression syntax and the `stringr::str_match` 
-function to extract the text referring to the date. The brackets indicate the
-text to extract and these can be surrounded by anchors. It is also possible to
-have multiple brackets, the text in multiple brackets will be combined before
-parsing. For example the file `UEBMS_2024_002_Main_Kahl_Jan_pos_DDA.mzXML` can
-be parsed with date_regex `_(20\\d{2})_.*_(\\w{3})_pos` and date_format `ym`. 
+  Using "filename" means it will use the `dbas_station_regex` field in the index to get the station information from
+  another record in the index. The function will use the regex to extract the station code from the filename and
+  search the msrawfiles index for other records with this station code. If an unambiguous location is found, it will
+  gather all available location information and use this for the new record entry. This option is useful if the batch
+  that is being added contains more than one station.
 
-`dbas_date_format` may be one of `"ymd"`, `"dmy"`, `"ym"` for year-month and `"yy"` 
-for just year. The date parsing is done by `lubridate`.
+  Using "newStationList" means a new fixed station name and location is passed (use list in the argument
+  "newStationList" with fields "station" and "loc" and optionally "river", "gkz" and "km") "loc" being a geopoint
+  with fields "lat" and "lon". Station and river names should all be lowercase with no spaces and no special
+  characters. For the station name use the convention <river_town_position> where position is l, r or m for left,
+  right, middle. If there is no obvious town but km is known, then use the convention <river>_<km> for the station
+  name. If neither town nor km is known, use the convention <river>_<description> where description is some
+  indication of the location.
+
+  \strong{Adding sample time information (`start` field)}
+  
+  Using "filename" means that the sample time is extracted from the filename. The field `dbas_date_regex` is used to
+  find the date of the sample from the file name. It works in conjunction with `dbas_date_format`. `dbas_date_regex`
+  extracts the text, while `dbas_date_format` tells R how to interpret the text. For example, the file name
+  `RH_pos_20170101.mzXML` uses the date_regex `"([20]*\\d{6})"` and date_format `"ymd"`. The `dbas_date_regex` uses
+  the tidyverse regular expression syntax and the `stringr::str_match` function to extract the text referring to the
+  date. The brackets indicate the text to extract and these can be surrounded by anchors. It is also possible to have
+  multiple brackets, the text in multiple brackets will be combined before parsing. For example the file
+  `UEBMS_2024_002_Main_Kahl_Jan_pos_DDA.mzXML` can be parsed with date_regex `_(20\\d{2})_.*_(\\w{3})_pos` and
+  date_format `ym`.
+
+  `dbas_date_format` may be one of `"ymd"`, `"dmy"`, `"ym"` for year-month and `"yy"` for just the year. The date
+  parsing is done by `lubridate`.
+  
+  \strong{Making manual changes}
+  
+  Manual changes can be made to the json but only if one document is added (this is to minimize errors). Select "c"
+  at the promt (after changes to the json have been saved).
 }

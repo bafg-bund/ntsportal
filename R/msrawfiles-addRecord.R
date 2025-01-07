@@ -1,4 +1,4 @@
-# Copyright 2016-2024 Bundesanstalt für Gewässerkunde
+# Copyright Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
 
 #' Add new records for MS measurement files to msrawfiles index
@@ -230,6 +230,11 @@ checkTemplateRecord <- function(newPaths, templateRec, promptBeforeIngest) {
     if (length(newPaths) > 1 || !promptBeforeIngest)
       checkResult <- addError(checkResult, "More than one file added with invalid dbas_date_format in template")
   }
+  
+  if (!validateRecord(templateRec)) {
+    checkResult <- addError(checkResult, "validateRecord failed for template")
+  }
+  
   stopIfAnyErrors(checkResult)
 }
 
@@ -263,7 +268,6 @@ checkStationParsing <- function(newPaths, templateRec) {
 }
 
 
-
 newRecordFromTemplate <- function(pth, newStart, newStation, template, rfIndex, newStationList, dirMeasurmentFiles) {
   rec <- template
   rec <- addPathToRecord(rec, pth)
@@ -275,6 +279,8 @@ newRecordFromTemplate <- function(pth, newStart, newStation, template, rfIndex, 
   rec$date_import <- as.integer(Sys.time())
   rec$filesize <- file.size(rec$path) / 1e6
   rec <- rec[order(names(rec))]
+  class(rec) <- c("msrawfileRecord", "list")
+  stopifnot(validateRecord(rec))
   rec
 }
 
@@ -535,10 +541,10 @@ stopIfAnyErrors <- function(checkResult) {
   invisible(all(checkResult))
 }
 
-
 getTemplateRecord <- function(rfIndex, templateId) {
   res <- elastic::docs_get(escon, rfIndex, templateId, verbose = F)
-  res$`_source`
+  rec <- structure(res$`_source`, class = "msrawfileRecord")
+  rec
 }
 
 

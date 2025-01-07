@@ -27,7 +27,7 @@ getWholeIndex <- function(indexName) {
   matchAll <- list(
     query = list(match_all = stats::setNames(list(), character(0)))
   )
-  es_search_paged(escon, indexName, searchBody = matchAll, sort = "path")$hits$hits
+  esSearchPaged(indexName, searchBody = matchAll, sort = "path")$hits$hits
 }
 
 getRecordsFromHits <- function(hitsArray, className) {

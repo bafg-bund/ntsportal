@@ -65,7 +65,8 @@ filesExist <- function(rec) {
 correctRawfileLocation <- function(path) {
   allowedPaths <- c(
     "G2/HRMS/Messdaten",
-    "G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files"
+    "G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files",
+    "tests/testthat/fixtures/msrawfiles-addRecord"
   )
   if (any(purrr::map_lgl(allowedPaths, grepl, x = path))) {
     TRUE

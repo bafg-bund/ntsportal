@@ -2,72 +2,34 @@
 
 #' Get ID based on search parameters
 #'
-#' @param escon elastic connection object created by elastic::connect
-#' @param rfindex index name for rawfiles index 
+#' @param rfIndex index name for rawfiles index 
 #' @param isBlank boolean default is FALSE
-#' @param polarity Either "pos" or "neg"
+#' @param pol Either "pos" or "neg", default "pos"
 #' @param station Station ID name 
 #' @param matrix character default is "spm"
+#' @param duration numeric, default 365
 #'
-#' @return string templateID
+#' @return ES-ID of template record in msrawfiles index
 #' @export
 #'
-find_templateid <- function(escon, rfindex, isBlank = FALSE, polarity, station, matrix = "spm", duration) {
-  tempID <- elastic::Search(
-    escon, rfindex, body = 
-      sprintf('
-        {
-          "query": {
-            "bool": {
-              "must": [
-                {
-                  "term": {
-                     "station": {
-                      "value": "%s"
-                    }
-                  }
-                },
-                {
-                  "term": {
-                    "pol": {
-                      "value": "%s"
-                    }
-                  }
-                },
-                {
-                  "term": {
-                    "matrix": {
-                      "value": "%s"
-                    }
-                  }
-                },
-                {
-                  "term": {
-                    "blank": {
-                      "value": %s
-                    }
-                  }
-                },
-                {
-                  "term": {
-                    "duration": {
-                      "value": %s
-                    }
-                  }
-                }
-              ]
-            }
-          },
-          "_source": false,
-          "size": 1
-        }
-        ', 
-              station, polarity, matrix, ifelse(isBlank, "true", "false"), duration
+findTemplateId <- function(rfIndex, blank = FALSE, pol = "pos", station = "rhein_ko_l", matrix = "spm", duration = 365) {
+  queryBody <- list(
+    query = list(
+      bool = list(
+        must = list(
+          list(term = list(station = station)),
+          list(term = list(pol = pol)),
+          list(term = list(matrix = matrix)),
+          list(term = list(blank = blank)),
+          list(term = list(duration = duration))
+        )
       )
+    )
   )
+  tempID <- elastic::Search(escon, rfIndex, body = queryBody)
   if (tempID$hits$total$value == 0) {
-    warning("search have no hits")
-    return(NULL)
+    warning("Search returned no hits")
+    return("")
   }
   tempID$hits$hits[[1]]$`_id`
 }

@@ -19,5 +19,5 @@ gf(docsSrc, fieldName, value, justone = F)
 vector or list of the extracted value
 }
 \description{
-a wrapper around vapply or lapply to get values from docs_source object
+a wrapper around vapply or lapply to get values from ntspRecord objects
 }
