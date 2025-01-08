@@ -108,3 +108,59 @@ esSearchPaged <- function(
   res1  
 }
 
+es_remove_by_filename <- function(index, filenames) {
+  # Must be a dbas index, not msrawfiles, otherwise this function would be bad!
+  stopifnot(grepl("ntsp_index_dbas", index))
+  stopifnot(is.character(filenames), length(filenames) > 0)
+  qbod <- list(
+    query = list(
+      terms = list(
+        filename = as.list(filenames)
+      )
+    )
+  )
+  suc <- TRUE
+  if (elastic::Search(escon, index, body = qbod, size = 0)$hits$total$value == 0) {
+    logger::log_info("No docs found in index {index}")
+    return(invisible(FALSE))
+  }
+  
+  
+  tryCatch(
+    res <- elastic::docs_delete_by_query(escon, index, body = qbod, refresh = "true"),
+    error = function(cnd) {
+      logger::log_error("Could not remove docs from {index}, \
+                        {conditionMessage(cnd)}")
+      suc <<- FALSE
+    }
+  )
+  if (suc) {
+    invisible(TRUE)  
+  } else {
+    invisible(FALSE)
+  }
+}
+
+# Function to print a search query string to be used for log files
+# Takes a vector of esids and a vector of fields for _source
+build_es_query_for_ids <- function(ids, toShow) {
+  message("\nUse the following query to search for the docs:")
+  cat(
+    sprintf('GET %s/_search
+  {
+    "query": {
+      "ids": {
+        "values": [%s]
+      }
+    },
+    "_source": [%s]
+  }\n', 
+            rfindex, 
+            paste(shQuote(ids, type = "cmd") , collapse = ", "),
+            paste(shQuote(toShow, type = "cmd") , collapse = ", ")
+    )
+  )
+  invisible(T)
+}
+
+
