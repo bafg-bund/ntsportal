@@ -55,7 +55,7 @@ free_gb <- function() {
 #' currently can only be one field and may not be '_id'.
 #' @param totalSize 
 #' @param ... further arguments to elastic::Search, asdf argument does not work for now.
-#'
+#' @export
 #' @return ElasticSearch API response as a list
 #'
 esSearchPaged <- function(

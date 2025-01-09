@@ -4,14 +4,14 @@
 #' Add new records for MS measurement files to msrawfiles index
 #'
 #' @param rfindex index name for rawfiles index
-#' @param templateId Document ID for a document to use as a template
+#' @param templateId ES-ID for an existing msrawfiles-record to use as a template
 #' @param newPaths Character vector of full paths to new rawfiles which are to be added, must be mzXML files.
 #' @param newStart Either "filename" (default), meaning extract the start time from the filename or provide a start date
 #'   as an 8 digit number "YYYYMMDD"
 #' @param newStation Either be "same_as_template" (default), which will copy the value from the template document, or
 #'   "filename", meaning extract the station and loc values from the code in the filename (will compare to other docs in
 #'   msrawfiles index) or "newStationList" to add a new station. See details.
-#' @param dirMeasurmentFiles Root directory where measurement files are located. The function will look for original
+#' @param dirMeasurmentFiles Root directory where original measurement files are located. The function will look for original
 #'   (vendor) files in this directory or below. Must end with "/".
 #' @param promptBeforeIngest Should the user be asked to verify the submission? (Default: TRUE). A file called
 #'   "add-rawfiles-check.json" created in the saveDirectory which the user can check and make changes to. See details
@@ -60,7 +60,43 @@
 #'   Manual changes can be made to the json but only if one document is added (this is to minimize errors). Select "c"
 #'   at the promt (after changes to the json have been saved).
 #'   
-#'
+#'   \strong{File storage locations}
+#'   
+#'   The location of where the mzXML files are stored is given in the argument `newPaths`.`saveDirectory` is where the json
+#'   file is written to. `dirMeasurmentFiles` is only used to look for the original (non-converted) vendor files (e.g.,
+#'   wiff files) to read the measurement time (which is not copied into the mzXML file using some converters). Depending
+#'   on the number of files being uploaded, the function can be very slow because the function will look through a large
+#'   directory. To improve performance, you can tell the function to look in a smaller directory. If no files are found
+#'   then the function will add the creation time of the mzXML file.
+#'   
+#' @examples
+#' \dontrun{
+#' library(ntsportal)
+#' source("~/connect-ntsp.R")
+#' rfindex <- "ntsp_msrawfiles"
+#' paths <- list.files("/beegfs/nts/ntsportal/msrawfiles/ulm/schwebstoff/dou_pos/", "^Ulm.*mzXML$", full.names = TRUE)
+#' templateId <- findTemplateId(rfindex, blank = FALSE, pol = "pos", station = "donau_ul_m", matrix = "spm")
+#' addRawfiles(rfindex = rfindex, templateId = templateId, newPaths = paths)
+#' checkMsrawfiles()
+#' 
+#' # Files in batch have different sample location
+#' addRawfiles(rfindex, "eIRBnYkBcjCrX8D7v4H5", newFiles[4:17], newStation = "filename", 
+#' dirMeasurmentFiles = "~/messdaten/sachsen/") 
+#' 
+#' # Addition of a new station
+#' addRawfiles(
+#'   rfindex, "eIRBnYkBcjCrX8D7v4H5", newFiles[15], 
+#'   newStation = "newStationList",
+#'   newStationList = list(
+#'     station = "pleisse_9",
+#'     loc = list(lat = 51.251489, lon = 12.383758),
+#'     river = "pleisse",
+#'     km = 9,
+#'     gkz = 5666
+#'   )
+#' ) 
+#' }
+#' 
 #' @return Returns vector of new ES-IDs of the generated and imported documents
 #' @export
 #'
@@ -546,8 +582,4 @@ getTemplateRecord <- function(rfIndex, templateId) {
   rec <- structure(res$`_source`, class = "msrawfileRecord")
   rec
 }
-
-
-
-
 

@@ -29,12 +29,24 @@ filesize check.
 }
 \examples{
 \dontrun{
-rfIndex <- "ntsp_index_msrawfiles_unit_tests"
-res <- elastic::Search(escon, rfIndex, source = "path")
-opths <- sapply(res$hits$hits, function(x) x[["_source"]]$path)
-fn <- basename(opths)
-npths <- list.files("/scratch/nts/ntsportal_unit_tests/meas_files", f = T)
-npths <- nps[sapply(fn, grep, x = opths)]
-purrr::walk2(opths, npths, change_msrawfile_path, escon = escon, rfIndex = rfIndex)
+library(ntsportal)
+connectNtsportal()
+
+ind <- "ntsp_msrawfiles"
+res <- esSearchPaged(ind, sort = "path", searchBody = list(query = list(regexp = list(path = "/srv.*"))), source = "path")$hits$hits
+partToRemove <- "/srv/cifs-mounts/g2/G/G2/HRMS/Messdaten/"
+paths <- sapply(res, function(x) x[["_source"]]$path)
+oldPaths <- data.frame(oldPath = paths, relPath = sub(partToRemove, "", paths))
+relPaths <- list.files("/beegfs/nts/ntsportal/msrawfiles", recursive = T)
+newPaths <- data.frame(
+  newPath = paste0("/beegfs/nts/ntsportal/msrawfiles/", relPaths),
+  relPath = relPaths
+)
+
+oldAndNewPaths <- merge(oldPaths, newPaths, all.x = T, by = "relPath")
+
+for (i in 1:nrow(oldAndNewPaths)) {
+  changeMsrawfilePath(ind, oldAndNewPaths$oldPath[i], oldAndNewPaths$newPath[i], checkType = "filesize")  
+}
 }
 }
