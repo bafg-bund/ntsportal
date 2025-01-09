@@ -1,11 +1,10 @@
 
-connectNtsportal()
 
 
 test_that("Dba-screening for a small batch produces a json with peaks", {
   tempSaveDir <- withr::local_tempdir()
   index <- "ntsp_index_msrawfiles_unit_tests"
-  batchDirectory <- "/srv/cifs-mounts/g2/G/G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files/olmesartan-d6-bisoprolol"
+  batchDirectory <- file.path(rootDirectoryForTestMsrawfiles, "olmesartan-d6-bisoprolol")
   startTime <- Sys.time()
   pathJson <- dbaScreeningSelectedBatches(index, batchDirectory, tempSaveDir)
   endTime <- Sys.time()
@@ -24,8 +23,8 @@ test_that("Dba-screening for two batches runs in parallel", {
   tempSaveDir <- withr::local_tempdir()
   index <- "ntsp_index_msrawfiles_unit_tests"
   batchDirectory <- c(
-    "/srv/cifs-mounts/g2/G/G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files/olmesartan-d6-bisoprolol",
-    "/srv/cifs-mounts/g2/G/G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files/no-peaks"
+    file.path(rootDirectoryForTestMsrawfiles, "olmesartan-d6-bisoprolol"),
+    file.path(rootDirectoryForTestMsrawfiles, "no-peaks")
   )
   startTime <- Sys.time()
   pathJson <- dbaScreeningSelectedBatches(index, batchDirectory, tempSaveDir, numParallel = 2)
@@ -49,7 +48,7 @@ test_that("Dba-screening array job file and records in batches are produced", {
   
   dbaScreeningSelectedBatchesSlurm(
     index, 
-    "/srv/cifs-mounts/g2/G/G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files/", 
+    rootDirectoryForTestMsrawfiles, 
     tempSaveDir,
     "testEmail@test.de"
   )

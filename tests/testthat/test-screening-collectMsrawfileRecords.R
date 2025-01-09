@@ -1,5 +1,5 @@
 
-connectNtsportal()
+
 
 test_that("Records for selected batches are returned", {
   index <- "ntsp_index_msrawfiles_unit_tests"
@@ -11,9 +11,9 @@ test_that("Records for selected batches are returned", {
 
 test_that("Unprocessed files can be collected from msrawfiles", {
   index <- "ntsp_index_msrawfiles_unit_tests"
-  prepareExampleFeatureIndex(escon)
+  expect_true(prepareExampleFeatureIndex(escon))
   
-  unprocessedMsFiles <- getUnprocessedMsrawfileBatches(index, "dbasTest")
+  unprocessedMsFiles <- getUnprocessedMsrawfileBatches(index, screeningType = "dbasTest")
   
   expect_false(all(grepl("no_peaks", names(unprocessedMsFiles))))
   expect_true(any(grepl("olmesartan-d6-bisoprolol", names(unprocessedMsFiles))))
@@ -51,13 +51,17 @@ test_that("Unprocessed directories are returned", {
 
 test_that("One can provide a root directory to select batches", {
   allRecords <- entireTestMsrawfilesIndex()
-  rootDir <- "/srv/cifs-mounts/g2/G/G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files/"
-  allRecordsAgain <- getSelectedRecords(allRecords, rootDir)
+  allRecordsAgain <- getSelectedRecords(allRecords, rootDirectoryForTestMsrawfiles)
   expect_equal(allRecords, allRecordsAgain)
 })
 
 test_that("One can provide multiple directories", {
   allRecords <- entireTestMsrawfilesIndex()
+  dirs <- c(
+    file.path(rootDirectoryForTestMsrawfiles, "olmesartan-d6"),
+    file.path(rootDirectoryForTestMsrawfiles, "olmesartan-d6-bisoprolol")
+  )
+  
   dirs <- c("/srv/cifs-mounts/g2/G/G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files/olmesartan-d6",
             "/srv/cifs-mounts/g2/G/G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files/olmesartan-d6-bisoprolol")
   filteredRecords <- getSelectedRecords(allRecords, dirs)

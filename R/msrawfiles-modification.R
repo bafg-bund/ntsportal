@@ -66,7 +66,6 @@ changeAliasAddress <- function(indexName, aliasName, closeAfter = FALSE) {
 #' 
 #' @examples
 #' \dontrun{
-#' source("~/connect-ntsp.R")
 #' rfIndex <- "ntsp_index_msrawfiles_unit_tests"
 #' res <- elastic::Search(escon, rfIndex, source = "path")
 #' opths <- sapply(res$hits$hits, function(x) x[["_source"]]$path)
