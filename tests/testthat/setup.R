@@ -1,18 +1,16 @@
 
 
 
-
+# first run helper
 
 recreateEntireTestMsrawfilesIndex <- function() {
-  msrawfilesIndex <- "ntsp_index_msrawfiles_unit_tests"
-  allRecords <- getAllMsrawfilesRecords(msrawfilesIndex)
+  allRecords <- getAllMsrawfilesRecords(testIndexName)
   saveRDS(allRecords, test_path("fixtures", "screening-collectMsrawfileRecords", "entireTestMsrawfilesIndex.RDS"))
 }
 
 
 recreateAllMsrawfileRecords <- function() {
-  msrawfilesIndex <- "ntsp_index_msrawfiles_unit_tests"
-  allRecords <- getAllMsrawfilesRecords(msrawfilesIndex)
+  allRecords <- getAllMsrawfilesRecords(testIndexName)
   allBatches <- splitRecordsByDir(allRecords)
   saveRDS(allBatches, test_path("fixtures", "screening-fileScanning", "allMsrawfileRecords.RDS"))
 }

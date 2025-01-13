@@ -3,10 +3,9 @@
 
 test_that("Dba-screening for a small batch produces a json with peaks", {
   tempSaveDir <- withr::local_tempdir()
-  index <- "ntsp_index_msrawfiles_unit_tests"
   batchDirectory <- file.path(rootDirectoryForTestMsrawfiles, "olmesartan-d6-bisoprolol")
   startTime <- Sys.time()
-  pathJson <- dbaScreeningSelectedBatches(index, batchDirectory, tempSaveDir)
+  pathJson <- dbaScreeningSelectedBatches(testIndexName, batchDirectory, tempSaveDir)
   endTime <- Sys.time()
   
   message("Time needed to processes samples: ", round(difftime(endTime, startTime, units = "secs")), " s")
@@ -21,13 +20,12 @@ test_that("Dba-screening for a small batch produces a json with peaks", {
 
 test_that("Dba-screening for two batches runs in parallel", {
   tempSaveDir <- withr::local_tempdir()
-  index <- "ntsp_index_msrawfiles_unit_tests"
   batchDirectory <- c(
     file.path(rootDirectoryForTestMsrawfiles, "olmesartan-d6-bisoprolol"),
     file.path(rootDirectoryForTestMsrawfiles, "no-peaks")
   )
   startTime <- Sys.time()
-  pathJson <- dbaScreeningSelectedBatches(index, batchDirectory, tempSaveDir, numParallel = 2)
+  pathJson <- dbaScreeningSelectedBatches(testIndexName, batchDirectory, tempSaveDir, numParallel = 2)
   endTime <- Sys.time()
   
   message("Time needed to processes samples: ", round(difftime(endTime, startTime, units = "secs")), " s")
@@ -44,10 +42,9 @@ test_that("Dba-screening for two batches runs in parallel", {
 
 test_that("Dba-screening array job file and records in batches are produced", {
   tempSaveDir <- withr::local_tempdir()
-  index <- "ntsp_index_msrawfiles_unit_tests"
   
   dbaScreeningSelectedBatchesSlurm(
-    index, 
+    testIndexName, 
     rootDirectoryForTestMsrawfiles, 
     tempSaveDir,
     "testEmail@test.de"
