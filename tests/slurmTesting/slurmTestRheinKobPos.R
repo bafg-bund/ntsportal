@@ -7,10 +7,10 @@ file.remove(list.files("tests/slurmTesting/testResults", f = T))
 
 index <- "ntsp_msrawfiles"
 dirs <- c(
-  "~Jewell/messdaten/koblenz/wasser/2021/202105/pos/",
-  "~Jewell/messdaten/koblenz/wasser/2021/202106/pos/"
+  "/beegfs/nts/ntsportal/msrawfiles/koblenz/wasser/2021/202105/pos/",
+  "/beegfs/nts/ntsportal/msrawfiles/koblenz/wasser/2021/202106/pos/"
 )
-dbaScreeningSelectedBatchesSlurm(index, dirs, "tests/slurmTesting/testResults", "thron@bafg.de")
+dbaScreeningSelectedBatchesSlurm(index, dirs, "tests/slurmTesting/testResults", "jewell@bafg.de")
 
 stopifnot(length(list.files("tests/slurmTesting/testResults")) == 3)
 
