@@ -238,13 +238,6 @@ getValueOrEmpty <- function(record, field) {
     NA else temp
 }
 
-
-
-
-
-
-
-
 # Copyright 2016-2024 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
 

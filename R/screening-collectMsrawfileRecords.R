@@ -49,7 +49,12 @@ getUnprocessedRecords <- function(allRecords, screeningType) {
 }
 
 splitRecordsByDir <- function(recsToProcess) {
-  dirs <- dirname(getField(recsToProcess, "path"))
+  paths <- getField(recsToProcess, "path")
+  if (length(paths) > 0) {
+    dirs <- dirname(getField(recsToProcess, "path"))
+  } else {
+    dirs <- character(0)
+  }
   split(recsToProcess, dirs)
 }
 
