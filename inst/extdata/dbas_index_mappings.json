@@ -1,108 +1,117 @@
 {
-      "mappings" : {
-        "dynamic": "strict",
+  "mappings" : {
+    "dynamic": "strict",
+    "properties" : {
+      "area" : {"type" : "float"},
+      "area_is" : {"type" : "float"},
+      "area_normalized" : {"type" : "float"},
+      "norm_a" : {"type" : "float"},
+      "intensity" : {"type" : "float"},
+      "intensity_is" : {"type" : "float"},
+      "intensity_normalized" : {"type" : "float"},
+      "cas" : {"type" : "keyword"},
+      "comment" : {"type" : "text"},
+      "comp_group" : {
+        "type" : "keyword"
+      },
+      "conc" : {"type" : "float"},
+      "tag": {"type": "keyword"},
+      "data_source" : {"type" : "keyword"},
+      "sample_source" : {"type" : "keyword"},
+      "licence" : {"type" : "keyword"},
+      "start" : {
+        "type" : "date",
+        "format" : "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||yyyy-MM-dd HH:mm"
+      },
+      "date_measurement" : {
+        "type" : "date",
+        "format" : "yyyy-MM-dd HH:mm:ss"
+      },
+      "km": { "type" : "float" },
+      "gkz" : { "type" : "integer" },
+      "river" : { "type" : "keyword" },
+      "duration" : {"type" : "float"},
+      "date_import" : {
+        "type" : "date",
+        "format": "yyyy-MM-dd HH:mm:ss"
+      },
+      "eic" : {
+        "type" : "nested",
         "properties" : {
-          "area" : {"type" : "float"},
-          "area_is" : {"type" : "float"},
-          "area_normalized" : {"type" : "float"},
-          "intensity" : {"type" : "float"},
-          "intensity_is" : {"type" : "float"},
-          "intensity_normalized" : {"type" : "float"},
-          "cas" : {"type" : "keyword"},
-          "comment" : {"type" : "text"},
-          "comp_group" : {
+          "int" : {
+            "type" : "float"
+          },
+          "time" : {
+            "type" : "short"
+          }
+        }
+      },
+      "chrom_method" : {"type" : "keyword"},
+      "instrument": { "type" : "text"},
+      "loc" : {"type" : "geo_point"},
+      "matrix" : {"type" : "keyword"},
+      "ms1" : {
+        "type" : "nested",
+        "properties" : {
+          "int" : {
+            "type" : "float"
+          },
+          "mz" : {
+            "type" : "float"
+          }
+        }
+      },
+      "ms2" : {
+        "type" : "nested",
+        "properties" : {
+          "int" : {
+            "type" : "float"
+          },
+          "mz" : {
+            "type" : "float"
+          }
+        }
+      },
+      "mz" : {"type" : "float"},
+      "name" : {"type" : "keyword"},
+      "primary_is_name" : {"type" : "keyword"},
+      "pol" : {"type" : "keyword"},
+      "rt" : {"type" : "float"},
+      "rtt" : {
+        "type" : "nested",
+        "properties" : {
+          "method" : {
             "type" : "keyword"
           },
-          "conc" : {"type" : "float"},
-          "tag": {"type": "keyword"},
-          "data_source" : {"type" : "keyword"},
-          "sample_source" : {"type" : "keyword"},
-          "licence" : {"type" : "keyword"},
-          "start" : {
-            "type" : "date",
-            "format" : "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||yyyy-MM-dd HH:mm"
+          "predicted" : {
+            "type" : "boolean"
           },
-          "date_measurement" : {
-            "type" : "date",
-            "format" : "yyyy-MM-dd HH:mm:ss"
-          },
-          "km": { "type" : "float" },
-          "gkz" : { "type" : "integer" },
-          "river" : { "type" : "keyword" },
-          "duration" : {"type" : "float"},
-          "date_import" : {
-            "type" : "date",
-            "format": "yyyy-MM-dd HH:mm:ss"
-          },
-          "eic" : {
-            "type" : "nested",
-            "properties" : {
-              "int" : {
-                "type" : "float"
-              },
-              "time" : {
-                "type" : "short"
-              }
-            }
-          },
-          "chrom_method" : {"type" : "keyword"},
-          "instrument": { "type" : "text"},
-          "loc" : {"type" : "geo_point"},
-          "matrix" : {"type" : "keyword"},
-          "ms1" : {
-            "type" : "nested",
-            "properties" : {
-              "int" : {
-                "type" : "float"
-              },
-              "mz" : {
-                "type" : "float"
-              }
-            }
-          },
-          "ms2" : {
-            "type" : "nested",
-            "properties" : {
-              "int" : {
-                "type" : "float"
-              },
-              "mz" : {
-                "type" : "float"
-              }
-            }
-          },
-          "mz" : {"type" : "float"},
-          "name" : {"type" : "keyword"},
-          "norm_a" : {"type" : "float"},
-          "pol" : {"type" : "keyword"},
-          "rt" : {"type" : "float"},
-          "rtt" : {
-            "type" : "nested",
-            "properties" : {
-              "method" : {
-                "type" : "keyword"
-              },
-              "predicted" : {
-                "type" : "boolean"
-              },
-              "rt" : {
-                "type" : "float"
-              }
-            }
-          },
-          "filename" : {"type" : "keyword"},
-          "dbas_alias_name": {"type": "keyword"},
-          "path": {"type" : "keyword"},
-          "station" : {"type" : "keyword"},
-          "inchikey" : {"type" : "keyword"},
-          "inchi" : {"type" : "keyword"},
-          "smiles" : {"type" : "keyword"},
-          "mw" : {"type" : "float"},
-          "adduct" : {"type" : "keyword"},
-          "isotopologue" : {"type" : "keyword"},
-          "formula" : {"type" : "keyword"},
-          "mz_error" : {"type" : "float"},
-          "dbas_alias_name": {"type" : "keyword"}
+          "rt" : {
+            "type" : "float"
+          }
         }
-      }
+      },
+      "internal_standard": {
+        "type": "nested",
+        "properties": {
+          "compound_name": {"type": "keyword"},
+          "intensity": {"type": "float"},
+          "area": {"type": "float"}
+        }
+      },
+      "filename" : {"type" : "keyword"},
+      "dbas_alias_name": {"type": "keyword"},
+      "path": {"type" : "keyword"},
+      "station" : {"type" : "keyword"},
+      "inchikey" : {"type" : "keyword"},
+      "inchi" : {"type" : "keyword"},
+      "smiles" : {"type" : "keyword"},
+      "mw" : {"type" : "float"},
+      "adduct" : {"type" : "keyword"},
+      "isotopologue" : {"type" : "keyword"},
+      "formula" : {"type" : "keyword"},
+      "mz_error" : {"type" : "float"},
+      "dbas_alias_name": {"type" : "keyword"}
     }
+  }
+}

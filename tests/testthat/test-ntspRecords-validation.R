@@ -55,4 +55,13 @@ test_that("Wrong blank returns a warning", {
   expect_warning(correctBlankRegex(records[[10]]))
 })
 
+test_that("An incorrect field in dbasRecord in a nested field results in an error", {
+  resultAndRecords <- getOneSampleDbasResultAndRecords()
+  oneSampleRecordInList <- convertToRecord(resultAndRecords$dbasResult, resultAndRecords$records)
+  oneSampleRecord <- oneSampleRecordInList[[1]]
+  expect_true(validateRecord(oneSampleRecord))
+  oneSampleRecord$internal_standard <- c(oneSampleRecord$internal_standard, error_field = "error")
+  expect_warning(validateRecord(oneSampleRecord))
+  expect_false(suppressWarnings(validateRecord(oneSampleRecord)))
+})
 

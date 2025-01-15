@@ -18,7 +18,7 @@ addRawfiles(
 )
 }
 \arguments{
-\item{templateId}{Document ID for a document to use as a template}
+\item{templateId}{ES-ID for an existing msrawfiles-record to use as a template}
 
 \item{newPaths}{Character vector of full paths to new rawfiles which are to be added, must be mzXML files.}
 
