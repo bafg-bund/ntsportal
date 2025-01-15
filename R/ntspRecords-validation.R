@@ -314,6 +314,7 @@ validateRecord.featureRecord <- function(record) {
     isNestedFieldAList(record, "ms2"),
     isNestedFieldAList(record, "eic"),
     isNestedFieldAList(record, "loc"),
+    isNestedFieldAList(record, "internal_standards"),
     checkFieldsAllowed(record)
   )
 }
@@ -332,75 +333,56 @@ isNestedFieldAList <- function(record, field) {
 }
 
 checkFieldsAllowed <- function(record) {
+  all(checkUnnestedFields(record), checkNestedFields(record))
+}
+
+checkUnnestedFields <- function(record) {
   fieldsOk <- names(record) %in% allowedFieldsFeature()
   if (!all(fieldsOk)) {
-    badNames <- paste(names(record)[which(!fieldsOk)], collapse = ", ")
-    warning("Fields which should not be there: ", badNames)
-    FALSE
-  } else {
-    TRUE
+    warnBadFields(names(record)[!fieldsOk])
   }
+  all(fieldsOk)
+}
+
+checkNestedFields <- function(record) {
+  nestedFields <- getNestedFields()
+  all(vapply(nestedFields, checkNestedField, logical(1), record = record))
+}
+
+
+checkNestedField <- function(record, fieldName) {
+  nestedNames <- names(getMappingsDbas()[[fieldName]]$properties)
+  fieldsOk <- vapply(names(record[[fieldName]]), function(x) x %in% nestedNames, logical(1))
+  if (!all(fieldsOk)) {
+    warnBadFields(names(record[[fieldName]])[!fieldsOk], parentField = fieldName)
+  }
+  all(fieldsOk)
+}
+
+getNestedFields <- function() {
+  mappings <- getMappingsDbas()
+  names(purrr::keep(mappings, function(x) x$type == "nested"))
 }
 
 allowedFieldsFeature <- function() {
   allowed <- union(
-    names(jsonlite::read_json(fs::path_package("ntsportal", "extdata", "dbas_index_mappings.json"))$mappings$properties),
-    names(jsonlite::read_json(fs::path_package("ntsportal", "extdata", "nts_index_mappings.json"))$mappings$properties)
+    names(getMappingsDbas()),
+    names(getMappingsNts())
   )
   c(allowed, "dbas_alias_name")
 }
 
+getMappingsDbas <- function() {
+  jsonlite::read_json(fs::path_package("ntsportal", "extdata", "dbas_index_mappings.json"))$mappings$properties
+}
 
+getMappingsNts <- function() {
+  jsonlite::read_json(fs::path_package("ntsportal", "extdata", "nts_index_mappings.json"))$mappings$properties
+}
 
-
-# Old Integrity checks ####
-
-
-check_integrity_msrawfiles_nts <- function(msrawfilesDocsList) {
-  
-  dl <- msrawfilesDocsList
-  ds <- lapply(dl, "[[", i = "_source")
-  # takes too long
-  #df <- data.table::rbindlist(lapply(ds, as.data.frame), fill = T)
-  
-
-  # Fields that must be present in all docs
-  fieldsPresentAll <- c(
-    "nts_mz_step",
-    "nts_spectral_library"
-  )
-  purrr::walk(ds, function(doc) {
-    purrr::walk(fieldsPresentAll, function(x) {
-      if (!is.element(x, names(doc)))
-        stop("Field ", x, " not found in doc ", doc$path)
-    })
-  })
-
-  # Check that files exist
-  pth1 <- unique(gf(ds, "nts_spectral_library", character(1)))
-  pth2 <- gf(ds, "path", character(1))
-  if (!all(file.exists(pth1, pth2)))
-    stop("Not all files found")
-  
-  # Check that nts_mz_min is always lower than nts_mz_max
-  
-  mzCheck <- all(
-    as.numeric(
-      purrr::compact(
-        sapply(ds, "[[", i = "nts_mz_min")
-        )
-      ) < 
-      as.numeric(
-        purrr::compact(
-          sapply(ds, "[[", i = "nts_mz_max")
-        )
-      )
-  )
-  if (!mzCheck) {
-    stop("nts_mz_min is not always lower than nts_mz_max")
-  }
- 
-  invisible(TRUE)
+warnBadFields <- function(badFields, parentField = "top-level") {
+  badFieldsString <- paste(badFields, collapse = ", ")
+  warning("Fields in ", parentField, " field which should not be there: ", badFieldsString)
 }
 
 validateRecord <- function(record) {

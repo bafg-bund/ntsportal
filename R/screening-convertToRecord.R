@@ -13,9 +13,7 @@ convertToRecord.dbasResult <- function(scanResult, msrawfileRecords) {
   specLibPath <- getField(msrawfileRecords, "dbas_spectral_library")[1]
   features <- addCompoundInfo(features, specLibPath)
   
-  intStdName <- getField(msrawfileRecords, "dbas_is_name")[1]
-  intStdAreas <- getAreasOfIntStd(scanResult, intStdName)
-  features <- addAreasOfIntStd(features, intStdAreas)
+  features <- addIntStdData(features, scanResult, msrawfileRecords)
   
   features <- lapply(features, normalizeArea)
   features <- addSampleInfo(features, msrawfileRecords)
@@ -46,20 +44,6 @@ getAreasOfFeatures.dbasResult <- function(scanResult) {
   featureList
 }
 
-getAreasOfIntStd.dbasResult <- function(scanResult, intStdName) {
-  intStdData <- subset(scanResult$isResults, IS == intStdName, c(samp, int_h, int_a))
-  colnames(intStdData) <- gsub("^int_a$", "area_is", colnames(intStdData))
-  colnames(intStdData) <- gsub("^int_h$", "intensity_is", colnames(intStdData))
-  intStdData <- split(intStdData, intStdData$samp) 
-  intStdData <- lapply(intStdData, as.list)
-  intStdData <- lapply(intStdData, reduceRecordToFields, fields = c("area_is", "intensity_is")) 
-  intStdData
-}
-
-addAreasOfIntStd <- function(features, intStdData) {
-  lapply(features, function(doc) c(doc, intStdData[[doc$filename]]))
-}
-
 addCompoundInfo <- function(features, specLibPath) {
   specLibConn <- connectSqlite(specLibPath)
   comptab <- tbl(specLibConn, "compound") %>% collect()
@@ -85,6 +69,30 @@ addCompoundInfo <- function(features, specLibPath) {
   })
   DBI::dbDisconnect(specLibConn)
   features
+}
+
+addIntStdData <- function(features, scanResult, msrawfileRecords) {
+  features <- addAreasIntStd(features, scanResult)
+  addPrimaryIntStdName(features, msrawfileRecords)
+}
+
+addAreasIntStd <- function(features, scanResult) {
+  intStdAreas <- getAreasIntStds(scanResult)
+  lapply(features, function(rec) {rec$internal_standard <- intStdAreas[[rec$filename]]; rec})
+}
+
+getAreasIntStds.dbasResult <- function(scanResult) {
+  newIsResults <- scanResult$isResults[, c("samp", "IS", "int_h", "int_a")]
+  newIsResults <- dplyr::rename(newIsResults, filename = samp, compound_name = IS, intensity = int_h, area = int_a)
+  newIsResults <- dataframeToList(newIsResults)
+  names(newIsResults) <- vapply(newIsResults, function(x) x$filename, character(1))
+  newIsResults <- lapply(newIsResults, function(x) {x$filename <- NULL; x})
+  lapply(newIsResults, as.list)
+}
+
+addPrimaryIntStdName <- function(features, msrawfileRecords) {
+  nameIntStd <- getField(msrawfileRecords, "dbas_is_name")[1]
+  lapply(features, function(rec) {rec$primary_is_name <- nameIntStd; rec})
 }
 
 addSampleInfo <- function(features, msrawfileRecords) {
@@ -308,10 +316,12 @@ convertToRecord <- function(scanResult, msrawfileRecords) {
 getAreasOfFeatures <- function(scanResult) {
   UseMethod("getAreasOfFeatures")
 }
-getAreasOfIntStd <- function(scanResult, intStdName) {
-  UseMethod("getAreasOfIntStd")
+
+getAreasIntStds <- function(scanResult) {
+  UseMethod("getAreasIntStds")
 }
 
 .S3method("convertToRecord", "dbasResult", convertToRecord.dbasResult)
 .S3method("getAreasOfFeatures", "dbasResult", getAreasOfFeatures.dbasResult)
-.S3method("getAreasOfIntStd", "dbasResult", getAreasOfIntStd.dbasResult)
+.S3method("getAreasIntStds", "dbasResult", getAreasIntStds.dbasResult)
+

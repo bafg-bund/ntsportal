@@ -48,9 +48,9 @@ getUnprocessedRecords <- function(allRecords, screeningType) {
   purrr::keep(allRecords, function(rec) dirname(rec$path) %in% dirsWithUnprocessed)
 }
 
-splitRecordsByDir <- function(docsToProcess) {
-  dirs <- dirname(gf(docsToProcess, "path", character(1)))
-  split(docsToProcess, dirs)
+splitRecordsByDir <- function(recsToProcess) {
+  dirs <- dirname(getField(recsToProcess, "path"))
+  split(recsToProcess, dirs)
 }
 
 extractDirs <- function(allRecords) {

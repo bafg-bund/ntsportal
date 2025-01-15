@@ -222,9 +222,9 @@ getField <- function(listRecords, fieldName) {
   values <- lapply(listRecords, getValueOrEmpty, field = fieldName)
   sizes <- vapply(values, length, numeric(1))
   if (all(sizes == 1)) {
-    unlist(values)
+    unname(unlist(values))
   } else {
-    values
+    unname(values)
   }
 }
 
