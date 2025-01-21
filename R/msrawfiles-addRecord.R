@@ -316,7 +316,9 @@ newRecordFromTemplate <- function(pth, newStart, newStation, template, rfIndex, 
   rec$filesize <- file.size(rec$path) / 1e6
   rec <- rec[order(names(rec))]
   class(rec) <- c("msrawfileRecord", "list")
-  stopifnot(validateRecord(rec))
+  if (!validateRecord(rec))
+    warning("Record validation failed for file ", pth)
+    
   rec
 }
 

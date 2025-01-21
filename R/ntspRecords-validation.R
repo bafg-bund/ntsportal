@@ -83,6 +83,7 @@ correctIsTablePolarity <- function(rec) {
     TRUE
   } else {
     warning("IS Table does not match polarity in file ", rec$path)
+    FALSE
   }
 }
 
@@ -102,6 +103,7 @@ correctBlankRegex <- function(rec) {
     TRUE
   } else {
     warning("File blank regex and filename mismatch: ", rec$path, " and ", rec$dbas_blank_regex)
+    FALSE
   }
 }
 
