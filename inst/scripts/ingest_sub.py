@@ -125,15 +125,15 @@ def create_index_add_alias(unique_alias_names, es_client, timestamp, mapping_pat
     target_index_alias_pairs = dict()
     for alias_name in unique_alias_names:
 
-        # Get alias name type
-        result = re.search(r'(_dbas|_nts)', alias_name)
+        # Get alias name type#
+        result = re.search(r'(_dbas|_nts|_testdbas)', alias_name)
         if not result:
-            raise ValueError("Alias name must contain 'nts' or 'dbas'")
+            raise ValueError(f"Alias '{alias_name}' must contain 'nts' or 'dbas'")
         alias_type = result.group(0)[1:]
 
         # Create index name from alias name
         version = timestamp.strftime("%y%m%d%H%M%S")
-        index_name = re.sub(r'(ntsp)_(dbas|nts)', rf'\1_index_\2_v{version}', alias_name)
+        index_name = re.sub(r'(ntsp)_(dbas|nts|testdbas)', rf'\1_index_\2_v{version}', alias_name)
 
         # Add name pairs for target index and alias
         target_index_alias_pairs.update({alias_name: index_name})

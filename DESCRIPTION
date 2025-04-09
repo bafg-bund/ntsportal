@@ -1,8 +1,8 @@
 Package: ntsportal
 Type: Package
 Title: NTSPortal database backend. Federal Institute of Hydrology, Koblenz, Germany
-Version: 0.2.0
-Date: 2024-12-02
+Version: 0.2.1
+Date: 2025-04-07
 Authors@R: c(
              person(c("Kevin", "S."), "Jewell", email = "jewell@bafg.de", role = c("aut", "cre"),
              comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany"),
@@ -19,8 +19,17 @@ Description: This package provides functionality for building and managing the N
 License: GNU GPL-3.0 (comes with ABSOLUTELY NO WARRANTY)
 LazyData: TRUE
 Imports:
-    dplyr, logger, future, ntsworkflow, ggplot2, rlang
+    tidyverse,
+    logger,
+    future,
+    fs,
+    shiny,
+    yaml,
+    jsonlite,
+    rjson
 RoxygenNote: 7.3.2
+Remotes:
+    bafg-bund/ntsworkflow
 Suggests:
     testthat (>= 3.0.0), elastic, fs, reticulate, purrr, keyring
 Encoding: UTF-8
