@@ -5,24 +5,19 @@
       "area_relative_to_internal_standard" : {
         "type": "double",
         "script": {
-          "source": "emit((double)params._source.area / (double)params._source.area_is)"
+          "source": "emit((double)params._source.area / (double)params._source.area_internal_standard)"
         }
       },
       "intensity_relative_to_internal_standard" : {
         "type": "double",
         "script": {
-          "source": "emit((double)params._source.intensity / (double)params._source.intensity_is)"
+          "source": "emit((double)params._source.intensity / (double)params._source.intensity_internal_standard)"
         }
       }
     },
     "properties" : {
       "area" : {"type" : "float"},
-      "area_is" : {"type" : "float"},
-      "area_normalized" : {"type" : "float"},
-      "norm_a" : {"type" : "float"},
       "intensity" : {"type" : "float"},
-      "intensity_is" : {"type" : "float"},
-      "intensity_normalized" : {"type" : "float"},
       "cas" : {"type" : "keyword"},
       "comment" : {"type" : "text"},
       "comp_group" : {
@@ -91,6 +86,8 @@
       "mz" : {"type" : "float"},
       "name" : {"type" : "keyword"},
       "internal_standard" : {"type" : "keyword"},
+      "area_internal_standard" : {"type" : "float"},
+      "intensity_internal_standard" : {"type" : "float"},
       "pol" : {"type" : "keyword"},
       "rt" : {"type" : "float"},
       "rtt" : {
@@ -118,8 +115,7 @@
       "adduct" : {"type" : "keyword"},
       "isotopologue" : {"type" : "keyword"},
       "formula" : {"type" : "keyword"},
-      "mz_error" : {"type" : "float"},
-      "dbas_alias_name": {"type" : "keyword"}
+      "mz_error" : {"type" : "float"}
     }
   }
 }

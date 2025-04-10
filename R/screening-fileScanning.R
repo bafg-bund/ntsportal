@@ -1,8 +1,7 @@
-# Copyright 2016-2024 Bundesanstalt für Gewässerkunde
-# This file is part of ntsportal
 
-scanBatchDbas <- function(records) {
-  reports <- purrr::map(records, fileScanDbas)
+
+scanBatchDbas <- function(records, compsToProcess = NULL) {
+  reports <- purrr::map(records, fileScanDbas, compsToProcess = compsToProcess)
   reports <- removeEmptyReports(reports)
   mergedReport <- mergeReports(reports)
   cleanedReport <- cleanReport(mergedReport, records)
@@ -199,8 +198,11 @@ convertToDbasResult <- function(report) {
     ms1Table = report$MS1,
     ms2Table = report$MS2,
     eicTable = report$EIC,
-    isResults = report$ISresults
+    intStdResults = report$ISresults
   )
+  results$intStdResults <- results$intStdResults[, c("samp", "IS", "int_h", "int_a")]
+  results$intStdResults <- dplyr::rename(results$intStdResults, filename = samp, compound_name = IS, intensity = int_h, 
+                                         area = int_a)
   class(results) <- "dbasResult"
   results
 }
@@ -238,6 +240,6 @@ getValueOrEmpty <- function(record, field) {
     NA else temp
 }
 
-# Copyright 2016-2024 Bundesanstalt für Gewässerkunde
+# Copyright 2025 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
 

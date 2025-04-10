@@ -72,27 +72,26 @@ addCompoundInfo <- function(features, specLibPath) {
 }
 
 addIntStdData <- function(features, scanResult, msrawfileRecords) {
-  features <- addAreasIntStd(features, scanResult)
-  addPrimaryIntStdName(features, msrawfileRecords)
+  features <- addIntStdName(features, msrawfileRecords)
+  addResponseIntStd(features, scanResult)
 }
 
-addAreasIntStd <- function(features, scanResult) {
-  intStdAreas <- getAreasIntStds(scanResult)
-  lapply(features, function(rec) {rec$internal_standard <- intStdAreas[[rec$filename]]; rec})
-}
-
-getAreasIntStds.dbasResult <- function(scanResult) {
-  newIsResults <- scanResult$isResults[, c("samp", "IS", "int_h", "int_a")]
-  newIsResults <- dplyr::rename(newIsResults, filename = samp, compound_name = IS, intensity = int_h, area = int_a)
-  newIsResults <- dataframeToList(newIsResults)
-  names(newIsResults) <- vapply(newIsResults, function(x) x$filename, character(1))
-  newIsResults <- lapply(newIsResults, function(x) {x$filename <- NULL; x})
-  lapply(newIsResults, as.list)
-}
-
-addPrimaryIntStdName <- function(features, msrawfileRecords) {
+addIntStdName <- function(features, msrawfileRecords) {
   nameIntStd <- getField(msrawfileRecords, "dbas_is_name")[1]
-  lapply(features, function(rec) {rec$primary_is_name <- nameIntStd; rec})
+  lapply(features, function(rec) {rec$internal_standard <- nameIntStd; rec})
+}
+
+addResponseIntStd <- function(features, scanResult) {
+  resp <- scanResult$intStdResults
+  lapply(features, function(rec) {
+    if (!is.element(rec$internal_standard, resp$compound_name)) {
+      return(rec)
+    } else {
+      rec$area_internal_standard <- resp[resp$filename == rec$filename & resp$compound_name == rec$internal_standard, "area"]
+      rec$intensity_internal_standard <- resp[resp$filename == rec$filename & resp$compound_name == rec$internal_standard, "intensity"]
+      rec
+    }
+  })
 }
 
 addSampleInfo <- function(features, msrawfileRecords) {
@@ -317,11 +316,7 @@ getAreasOfFeatures <- function(scanResult) {
   UseMethod("getAreasOfFeatures")
 }
 
-getAreasIntStds <- function(scanResult) {
-  UseMethod("getAreasIntStds")
-}
 
 .S3method("convertToRecord", "dbasResult", convertToRecord.dbasResult)
 .S3method("getAreasOfFeatures", "dbasResult", getAreasOfFeatures.dbasResult)
-.S3method("getAreasIntStds", "dbasResult", getAreasIntStds.dbasResult)
 

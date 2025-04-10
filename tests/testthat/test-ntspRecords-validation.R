@@ -1,5 +1,4 @@
 
-connectNtsportal()
 
 test_that("Batch check runs and returns error", {
   recordsInBatches <- readRDS(test_path("fixtures", "ntspRecords-validation", "recordsInBatches.RDS"))
@@ -56,11 +55,9 @@ test_that("Wrong blank returns a warning", {
 })
 
 test_that("An incorrect field in dbasRecord in a nested field results in an error", {
-  resultAndRecords <- getOneSampleDbasResultAndRecords()
-  oneSampleRecordInList <- convertToRecord(resultAndRecords$dbasResult, resultAndRecords$records)
-  oneSampleRecord <- oneSampleRecordInList[[1]]
+  oneSampleRecord <- getFeatureRecordAndMsrawfileRecord()$featureRecord[[1]]
   expect_true(validateRecord(oneSampleRecord))
-  oneSampleRecord$internal_standard <- c(oneSampleRecord$internal_standard, error_field = "error")
+  oneSampleRecord$ms2 <- c(oneSampleRecord$ms2, error_field = "error")
   expect_warning(validateRecord(oneSampleRecord))
   expect_false(suppressWarnings(validateRecord(oneSampleRecord)))
 })

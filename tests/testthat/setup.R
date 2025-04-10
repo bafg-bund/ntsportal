@@ -8,7 +8,6 @@ recreateEntireTestMsrawfilesIndex <- function() {
   saveRDS(allRecords, test_path("fixtures", "screening-collectMsrawfileRecords", "entireTestMsrawfilesIndex.RDS"))
 }
 
-
 recreateAllMsrawfileRecords <- function() {
   allRecords <- getAllMsrawfilesRecords(testIndexName)
   allBatches <- splitRecordsByDir(allRecords)
