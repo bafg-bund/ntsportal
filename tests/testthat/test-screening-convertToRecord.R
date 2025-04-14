@@ -2,10 +2,11 @@
 
 
 test_that("A small result can be reformated to a dbasRecord object", {
-  featureRecord <- getFeatureRecordAndMsrawfileRecord()$featureRecord
+  featureRecord <- getFeatureRecord()
   expect_contains(names(featureRecord[[1]]), c("mz", "rt", "intensity", "ms2", "dbas_alias_name"))
   expect_s3_class(featureRecord[[1]], "featureRecord")
   expect_true(validateRecord(featureRecord[[1]]))
+  checkForAlias(featureRecord[[1]]$dbas_alias_name)
 })
 
 test_that("Sample data is added to features", {

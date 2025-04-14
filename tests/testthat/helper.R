@@ -2,10 +2,21 @@
 connectNtsportal()
 
 rootDirectoryForTestMsrawfiles <- "/beegfs/nts/ntsportal/msrawfiles/unit_tests"
+ntspVersion <- "25.1"
 
-testIndexName <- "ntsp_msrawfiles_unit_tests"
+testIndexName <- glue("ntsp{ntspVersion}_msrawfiles_unit_tests")
 
 getEmptyRecord <- function() {
   emptyResult <- convertToDbasResult(emptyReport())
   convertToRecord(emptyResult, list(getMsrawfileRecordNoPeaks()))
+}
+
+
+
+checkForAlias <- function(string) {
+  expect_true(any(grepl("ntsp\\d{2}\\.\\d+_dbas_unit_tests", string)))  # e.g. ntsp25.1_dbas_unit_tests
+}
+
+checkForStation <- function(string) {
+  expect_true(any(grepl("station", string)))
 }

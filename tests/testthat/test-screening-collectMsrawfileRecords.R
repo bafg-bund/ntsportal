@@ -9,28 +9,20 @@ test_that("Records for selected batches are returned", {
 })
 
 test_that("Unprocessed files can be collected from msrawfiles", {
-  expect_true(prepareExampleFeatureIndex(escon))
+  prepareExampleFeatureIndex(escon, ntspVersion)
+  Sys.sleep(1)
+  unprocessedBatches <- getUnprocessedMsrawfileBatches(testIndexName, screeningType = "dbasTest", ntspVersion = ntspVersion)
+  expect_false(all(grepl("no_peaks", names(unprocessedBatches))))
+  expect_true(any(grepl("olmesartan-d6-bisoprolol", names(unprocessedBatches))))
+  expect_s3_class(unprocessedBatches[[1]][[1]], "msrawfileRecord")
+  expect_equal(length(unprocessedBatches), 3)
   
-  unprocessedMsFiles <- getUnprocessedMsrawfileBatches(testIndexName, screeningType = "dbasTest")
-  
-  expect_false(all(grepl("no_peaks", names(unprocessedMsFiles))))
-  expect_true(any(grepl("olmesartan-d6-bisoprolol", names(unprocessedMsFiles))))
-  expect_s3_class(unprocessedMsFiles[[1]][[1]], "msrawfileRecord")
-  expect_equal(length(unprocessedMsFiles), 3)
-  
-  deleted <- removeExampleFeatureIndex(escon)
-  expect_true(deleted$acknowledged)
+  removeExampleFeatureIndex(escon, ntspVersion)
 })
 
 test_that("File directories can be optained from test index", {
   dirnames <- getDirsInFeatureIndex(testIndexName)
   expect_length(dirnames, 4)
-})
-
-test_that("Unprocessed directories are returned", {
-  records <- getAllMsrawfilesRecords(testIndexName)
-  records <- getUnprocessedRecords(records, "msrawfilesTest")
-  expect_length(records, 0)
 })
 
 test_that("splitRecordsByDir works with length 0 input", {
@@ -40,7 +32,7 @@ test_that("splitRecordsByDir works with length 0 input", {
 
 test_that("Unprocessed directories are returned", {
   records <- getAllMsrawfilesRecords(testIndexName)
-  records <- getUnprocessedRecords(records, "dbasTest")
+  records <- getUnprocessedRecords(records, "dbasTest", ntspVersion = ntspVersion)
   expect_length(records, 20)
   expect_s3_class(records[[1]], "msrawfileRecord")
 })
@@ -61,3 +53,4 @@ test_that("One can provide multiple directories", {
   filteredRecords <- getSelectedRecords(allRecords, dirs)
   expect_lt(length(filteredRecords), length(allRecords))
 })
+

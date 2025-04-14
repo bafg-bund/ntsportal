@@ -1,4 +1,4 @@
-connectNtsportal()
+
 
 test_that("A measurement file can be moved and name can be changed", {
   saveDir <- withr::local_tempdir()

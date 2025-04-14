@@ -26,7 +26,8 @@ Imports:
     shiny,
     yaml,
     jsonlite,
-    rjson
+    rjson,
+    glue
 RoxygenNote: 7.3.2
 Remotes:
     bafg-bund/ntsworkflow

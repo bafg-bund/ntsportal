@@ -2,6 +2,10 @@
 from ingest_sub import *
 from tqdm import tqdm
 
+import urllib3
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 def ingest(json_path, mapping_path):
     """
     Main processing logic for ingest of json files into Elasticsearch:

@@ -19,7 +19,7 @@ test_that("A dummy record can be added to msrawfiles", {
   
   
   importedRecord <- jsonlite::read_json(list.files(saveDir, f = T))
-  expect_length(importedRecord[[1]], 86)
+  expect_length(importedRecord[[1]], 85)
   pathResult <- elastic::Search(escon, testIndexName, source = "path", body = list(query = list(
     regexp = list(path = ".*RH_pos_20220603_no_peaks_test_addRecord.mzXML")
   )))$hits$hits[[1]][["_source"]]$path

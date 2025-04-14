@@ -12,7 +12,8 @@ test_that("Dba-screening for a small batch produces a json with peaks", {
   
   expect_length(list.files(tempSaveDir), 1)
   jsonLines <- readLines(pathJson)[1:40]
-  expect_true(any(grepl("station", jsonLines)))
+  checkForStation(jsonLines)
+  checkForAlias(jsonLines)
   
   file.remove(list.files(tempSaveDir, full.names = T))
   file.remove(tempSaveDir)

@@ -2,14 +2,16 @@
 
 
 test_that("Simple record can be saved as json", {
-  simpleRecord <- getSimpleRecord()
+  featureRecord <- getFeatureRecord()
   tempSaveDir <- withr::local_tempdir()
   
-  fileNameCompressed <- saveRecord(simpleRecord, tempSaveDir)
+  fileNameCompressed <- saveRecord(featureRecord, tempSaveDir)
   fileName <- uncompressJson(fileNameCompressed)
   jsonText <- readLines(fileName)
-  expect_true(any(grepl("station", jsonText)))
-  expect_match(fileName, "meas_files")
+  checkForStation(jsonText)
+  checkForAlias(jsonText)
+  
+  expect_match(fileName, "unit_tests")
   
   file.remove(list.files(tempSaveDir, full.names = T))
   file.remove(tempSaveDir)
@@ -22,7 +24,7 @@ test_that("An empty record is saved as an empty json", {
   
   jsonText <- readLines(fileName)
   expect_true(any(grepl("path", jsonText)))
-  expect_true(any(grepl("dbas_alias_name", jsonText)))
+  checkForAlias(jsonText)
   expect_match(fileName, "no-peaks")
   expect_length(jsonText, 6)
   

@@ -12,9 +12,9 @@ getSelectedRecords <- function(allRecords, dirsToKeep) {
   purrr::keep(allRecords, function(record) dirname(record$path) %in% dirsToKeep)
 }
 
-getUnprocessedMsrawfileBatches <- function(msrawfilesIndex, screeningType) {
+getUnprocessedMsrawfileBatches <- function(msrawfilesIndex, screeningType, ntspVersion) {
   allRecords <- getAllMsrawfilesRecords(msrawfilesIndex)
-  recordsToProcess <- getUnprocessedRecords(allRecords, screeningType)
+  recordsToProcess <- getUnprocessedRecords(allRecords, screeningType, ntspVersion)
   splitRecordsByDir(recordsToProcess)
 }
 
@@ -34,12 +34,11 @@ getRecordsFromHits <- function(hitsArray, className) {
   lapply(hitsArray, function(x) structure(x[["_source"]], class = className))
 }
 
-getUnprocessedRecords <- function(allRecords, screeningType) {
+getUnprocessedRecords <- function(allRecords, screeningType, ntspVersion) {
   indexToCheck <- switch(screeningType,
-    nts = "ntsp_nts*",
-    dbas = "ntsp_dbas*",
-    dbasTest = "ntsp_dbas_unit_tests*",
-    msrawfilesTest = "ntsp_index_msrawfiles_unit_tests*",
+    nts = glue("ntsp{ntspVersion}_nts*"),
+    dbas = glue("ntsp{ntspVersion}_dbas*"),
+    dbasTest = glue("ntsp{ntspVersion}_dbas_unit_tests*"),
     stop("screeningType unknown")
   )
   allDirs <- extractDirs(allRecords)

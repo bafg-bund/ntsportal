@@ -1,6 +1,8 @@
 
 
-
+getFeatureRecord <- function() {
+  getFeatureRecordAndMsrawfileRecord()$featureRecord
+}
 getFeatureRecordAndMsrawfileRecord <- function() {
   rr <- getOneSampleDbasResultAndRecords()
   featureRecord <- convertToRecord(rr$dbasResult, rr$records)

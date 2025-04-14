@@ -1,15 +1,17 @@
 
 
-# Test display of spm time series (standard test, no changes)
+# Test dashboard "Time Series SPM"
 
-# if you make changes to python code, you must restart R
-
-# make changes to index mappings by modifying inst/extdata/testdbas_index_mappings.json
+# Note: If you make changes to python code, you must restart R
 
 source("tests/kibanaIntegrationTests/helper.R")
 
 aliasExampleDocs <- "ntsp_dbas_upb"
-newAliasName <- "ntsp_testdbas_upb"
+newAliasName <- "ntsp_2025_1dbas_upb"
+
+# Process 2 Bimmen files for one compound
+
+# ingest docs
 
 exampleDocs <- getExampleDocs(aliasExampleDocs)
 newDocs <- changeAliasInDocs(exampleDocs, newAliasName)

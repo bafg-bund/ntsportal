@@ -2,8 +2,7 @@
 
 
 
-
-test_that("You can connect to elasticsearch from the keychain", {
+test_that("You can connect to elasticsearch from the keychain and create escon", {
   # The test user "ntsportal_test_user" was created for this test
   if (haveRing("test"))
     clearRing("test")

@@ -113,7 +113,7 @@ def ingest_json_docs(json_docs, es_client, timestamp, mapping_path):
 
 def create_index_add_alias(unique_alias_names, es_client, timestamp, mapping_path):
     """
-    Creates new dbas/nts indeces in Elasticsearch based on alias names found in the json documents and adds
+    Creates new dbas/nts indices in Elasticsearch based on alias names found in the json documents and adds
     alias names to the created dbas/nts indeces.
     """
     import re
@@ -126,14 +126,14 @@ def create_index_add_alias(unique_alias_names, es_client, timestamp, mapping_pat
     for alias_name in unique_alias_names:
 
         # Get alias name type#
-        result = re.search(r'(_dbas|_nts|_testdbas)', alias_name)
+        result = re.search(r'(_dbas|_nts)', alias_name)
         if not result:
             raise ValueError(f"Alias '{alias_name}' must contain 'nts' or 'dbas'")
         alias_type = result.group(0)[1:]
 
         # Create index name from alias name
         version = timestamp.strftime("%y%m%d%H%M%S")
-        index_name = re.sub(r'(ntsp)_(dbas|nts|testdbas)', rf'\1_index_\2_v{version}', alias_name)
+        index_name = re.sub(r'(ntsp\d\d\.\d)_(dbas|nts)', f'\\1_index_\\2_v{version}', alias_name)
 
         # Add name pairs for target index and alias
         target_index_alias_pairs.update({alias_name: index_name})

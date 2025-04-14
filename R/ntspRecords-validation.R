@@ -374,7 +374,7 @@ allowedFieldsFeature <- function() {
 }
 
 getMappingsDbas <- function() {
-  jsonlite::read_json(fs::path_package("ntsportal", "extdata", "testdbas_index_mappings.json"))$mappings$properties
+  jsonlite::read_json(fs::path_package("ntsportal", "extdata", "dbas_index_mappings.json"))$mappings$properties
 }
 
 getMappingsNts <- function() {

@@ -1,5 +1,4 @@
-# Copyright 2016-2024 Bundesanstalt für Gewässerkunde
-# This file is part of ntsportal
+
 
 saveRecord <- function(ntspList, saveDir, maxSizeGb = 10) {
   
@@ -63,7 +62,7 @@ saveRecord <- function(ntspList, saveDir, maxSizeGb = 10) {
 makeFileNameForBatch <- function(ntspList) {
   dirName <- dirname(ntspList[[1]][["path"]])
   if (grepl("unit_tests", dirName)) {
-    batchName <- stringr::str_match(dirName, "unit_tests/(.*)$")[,2]  
+    batchName <- stringr::str_match(dirName, "(unit_tests/?.*)$")[,2]  
   } else {
     batchName <- stringr::str_match(dirName, "Messdaten/(.*)$")[,2]  
   }
@@ -98,3 +97,7 @@ uncompressJson <- function(filePath) {
   system2("gunzip", filePath)
   stringr::str_match(filePath, "(.*)\\.gz$")[,2]
 }
+
+
+# Copyright 2025 Bundesanstalt für Gewässerkunde
+# This file is part of ntsportal

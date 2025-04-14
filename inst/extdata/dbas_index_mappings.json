@@ -1,14 +1,23 @@
 {
   "mappings" : {
     "dynamic": "strict",
+    "runtime": {
+      "area_relative_to_internal_standard" : {
+        "type": "double",
+        "script": {
+          "source": "emit((double)params._source.area / (double)params._source.area_internal_standard)"
+        }
+      },
+      "intensity_relative_to_internal_standard" : {
+        "type": "double",
+        "script": {
+          "source": "emit((double)params._source.intensity / (double)params._source.intensity_internal_standard)"
+        }
+      }
+    },
     "properties" : {
       "area" : {"type" : "float"},
-      "area_is" : {"type" : "float"},
-      "area_normalized" : {"type" : "float"},
-      "norm_a" : {"type" : "float"},
       "intensity" : {"type" : "float"},
-      "intensity_is" : {"type" : "float"},
-      "intensity_normalized" : {"type" : "float"},
       "cas" : {"type" : "keyword"},
       "comment" : {"type" : "text"},
       "comp_group" : {
@@ -44,7 +53,8 @@
           "time" : {
             "type" : "short"
           }
-        }
+        },
+        "enabled": false
       },
       "chrom_method" : {"type" : "keyword"},
       "instrument": { "type" : "text"},
@@ -57,9 +67,11 @@
             "type" : "float"
           },
           "mz" : {
-            "type" : "float"
+            "type" : "float",
+            "meta": {"unit": "Da"}
           }
-        }
+        },
+        "enabled": false
       },
       "ms2" : {
         "type" : "nested",
@@ -68,15 +80,18 @@
             "type" : "float"
           },
           "mz" : {
-            "type" : "float"
+            "type" : "float", 
+            "meta": {"unit": "Da"}
           }
         }
       },
-      "mz" : {"type" : "float"},
+      "mz" : {"type" : "float", "meta": {"unit": "Da"}},
       "name" : {"type" : "keyword"},
-      "primary_is_name" : {"type" : "keyword"},
+      "internal_standard" : {"type" : "keyword"},
+      "area_internal_standard" : {"type" : "float"},
+      "intensity_internal_standard" : {"type" : "float"},
       "pol" : {"type" : "keyword"},
-      "rt" : {"type" : "float"},
+      "rt" : {"type" : "float", "meta": {"unit": "min"}},
       "rtt" : {
         "type" : "nested",
         "properties" : {
@@ -87,16 +102,9 @@
             "type" : "boolean"
           },
           "rt" : {
-            "type" : "float"
+            "type" : "float",
+            "meta": {"unit": "min"}
           }
-        }
-      },
-      "internal_standard": {
-        "type": "nested",
-        "properties": {
-          "compound_name": {"type": "keyword"},
-          "intensity": {"type": "float"},
-          "area": {"type": "float"}
         }
       },
       "filename" : {"type" : "keyword"},
@@ -106,12 +114,11 @@
       "inchikey" : {"type" : "keyword"},
       "inchi" : {"type" : "keyword"},
       "smiles" : {"type" : "keyword"},
-      "mw" : {"type" : "float"},
+      "mw" : {"type" : "float", "meta": {"unit": "Da"}},
       "adduct" : {"type" : "keyword"},
       "isotopologue" : {"type" : "keyword"},
       "formula" : {"type" : "keyword"},
-      "mz_error" : {"type" : "float"},
-      "dbas_alias_name": {"type" : "keyword"}
+      "mz_error" : {"type" : "float", "meta": {"unit": "Da"}}
     }
   }
 }
