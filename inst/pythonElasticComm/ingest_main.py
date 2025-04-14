@@ -1,10 +1,26 @@
 # Main function for ingesting json files into Elasticsearch
-from ingest_sub import *
-from tqdm import tqdm
 
+from tqdm import tqdm
+from pathlib import Path
+import importlib.util
 import urllib3
+import os
+import sys
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+def import_module_from_path_importlib(module_name, module_path):
+    """Imports a module from a specified path using importlib."""
+    try:
+        spec = importlib.util.spec_from_file_location(module_name, module_path)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+        return module
+
+    except Exception as e:
+        print(f"Error importing module: {e}")
+        return None
 
 def ingest(json_path, mapping_path):
     """
@@ -23,22 +39,24 @@ def ingest(json_path, mapping_path):
     Returns:
       all_index_alias_pairs (list of dicts) : All pairs of aliases and created indeces.
     """
-
+    scriptDir = Path(__file__).parent.absolute()
+    module_path = os.path.join(scriptDir, "ingest_sub.py")
+    sub = import_module_from_path_importlib("ingest_sub.py", module_path)
     # Read json files
-    json_docs = read_json_files(json_path)
+    json_docs = sub.read_json_files(json_path)
 
     # Get user credentials (needs config.yml file in home folder)
-    credentials = get_user_credentials()
+    credentials = sub.get_user_credentials()
 
     # Connect to the Elasticsearch (es) client
-    es_client = connect_to_es(credentials)
+    es_client = sub.connect_to_es(credentials)
 
     # Update import time for all json documents
-    json_docs, timestamp = update_import_time(json_docs)
+    json_docs, timestamp = sub.update_import_time(json_docs)
 
     # Ingest json documents
     all_index_alias_pairs = []
     for batch in tqdm(json_docs, total=len(json_docs), desc='Indexing features in json gz files'):
-        all_index_alias_pairs.append(ingest_json_docs(batch, es_client, timestamp, mapping_path))
+        all_index_alias_pairs.append(sub.ingest_json_docs(batch, es_client, timestamp, mapping_path))
 
     return all_index_alias_pairs

@@ -18,7 +18,9 @@
 NULL
 
 .onLoad <- function(libname, pkgname) {
-  source_python(fs::path_package("ntsportal", "python", "elasticSearch.py"), envir = globalenv())
+  pathToPyModules <- fs::path_package("ntsportal", "pythonElasticComm")
+  elasticSearchComm <<- reticulate::import_from_path(module = "elasticSearchComm", path = pathToPyModules, delay_load = T)
+  ingestModule <<- reticulate::import_from_path(module = "ingest_main", path = pathToPyModules, delay_load = T)
 }
 
 .onAttach <- function(libname, pkgname) {

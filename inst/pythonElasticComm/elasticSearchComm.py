@@ -1,10 +1,27 @@
 
+
 import urllib3
 import sys
 import os
 import json
+from pathlib import Path
+import importlib.util
   
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+
+def import_module_from_path_importlib(module_name, module_path):
+    """Imports a module from a specified path using importlib."""
+    try:
+        spec = importlib.util.spec_from_file_location(module_name, module_path)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+        return module
+
+    except Exception as e:
+        print(f"Error importing module: {e}")
+        return None
 
 def createNewIndex(newIndexName, mappingType):
   client = getEsClient()
@@ -43,9 +60,9 @@ def getMapping(mappingType):
   return indexMapping
 
 def getEsClient():
-  sys.path.append(os.path.join(os.getcwd(), "inst", "extdata", "scripts"))
-  import ingest_sub
-  
-  credentials = ingest_sub.get_user_credentials()
-  es_client = ingest_sub.connect_to_es(credentials)
+  scriptDir = Path(__file__).parent.absolute()
+  module_path = os.path.join(scriptDir, "ingest_sub.py")
+  olesStuff = import_module_from_path_importlib("ingest_sub.py", module_path)
+  credentials = olesStuff.get_user_credentials()
+  es_client = olesStuff.connect_to_es(credentials)
   return es_client
