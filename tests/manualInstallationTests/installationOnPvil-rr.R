@@ -25,6 +25,7 @@ testthat::test_file("tests/testthat/test-connectionToElasticSearch.R")
 
 # switch back to original project, cleanup
 
-reticulate::virtualenv_remove("~/.virtualenvs/testvenv")
+reticulate::virtualenv_remove("~/.virtualenvs/testvenv")  # must be confirmed
+
 tmpDir <- "~/temp_installation_ntsportal"
 system2("rm", c("-rf", tmpDir))

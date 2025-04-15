@@ -30,7 +30,7 @@ Imports:
     glue
 RoxygenNote: 7.3.2
 Remotes:
-    bafg-bund/ntsworkflow
+    github::bafg-bund/ntsworkflow
 Suggests:
     testthat (>= 3.0.0), elastic, fs, reticulate, purrr, keyring
 Encoding: UTF-8

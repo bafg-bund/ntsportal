@@ -52,7 +52,7 @@ echo -e "Current directory:" $PWD
 echo "=========================================="
 echo ""
 
-module load R/latest
+
 Rscript RVarDir/dbaScreeningSlurm.R RVarDir/recordsInBatches.RDS $SLURM_ARRAY_TASK_ID
 
 

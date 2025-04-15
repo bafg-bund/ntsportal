@@ -1,10 +1,14 @@
 
 library(ntsportal)
 
+renv::deactivate()
+
+# first update ntsworkflow and ntsportal in R user library
+
 connectNtsportal()
 file.remove(list.files("tests/slurmTesting/testResults", f = T))
 
-index <- "ntsp_msrawfiles_unit_tests"
+index <- "ntsp25.1_msrawfiles_unit_tests"
 dirs <- c(
   "/beegfs/nts/ntsportal/msrawfiles/unit_tests/olmesartan-d6-bisoprolol/"
 )
@@ -14,7 +18,9 @@ stopifnot(length(list.files("tests/slurmTesting/testResults")) == 3)
 
 # User must manually submit job
 
-ingestJson("tests/slurmTesting/testResults")
+indexNames <- ingestJson("tests/slurmTesting/testResults")
 
 # Cleanup
-elastic::index_delete(escon, "ntsp_index_dbas_v250113135033_unit_tests")
+elastic::index_delete(escon, indexNames[[1]]$ntsp25.1_dbas_unit_tests)
+
+renv::activate()
