@@ -36,4 +36,8 @@ kevin
 nohup.out
 franzi
 ole
+inst/scripts/__pycache__
+inst/pythonElasticComm/__pycache__
+tests/testthat/_snaps
+
 
