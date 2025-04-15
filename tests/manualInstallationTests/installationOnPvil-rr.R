@@ -27,5 +27,4 @@ testthat::test_file("tests/testthat/test-connectionToElasticSearch.R")
 
 reticulate::virtualenv_remove("~/.virtualenvs/testvenv")
 tmpDir <- "~/temp_installation_ntsportal"
-file.remove(list.files(tmpDir, recursive = T))
-file.remove(tmpDir)
+system2("rm", c("-rf", tmpDir))
