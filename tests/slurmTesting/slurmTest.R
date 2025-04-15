@@ -1,10 +1,11 @@
 
-library(ntsportal)
+
 
 renv::deactivate()
 
 # first update ntsworkflow and ntsportal in R user library
 
+library(ntsportal)
 connectNtsportal()
 file.remove(list.files("tests/slurmTesting/testResults", f = T))
 
@@ -12,7 +13,7 @@ index <- "ntsp25.1_msrawfiles_unit_tests"
 dirs <- c(
   "/beegfs/nts/ntsportal/msrawfiles/unit_tests/olmesartan-d6-bisoprolol/"
 )
-dbaScreeningSelectedBatchesSlurm(index, dirs, "tests/slurmTesting/testResults", "jewell@bafg.de")
+dbaScreeningSelectedBatchesSlurm(index, dirs, "tests/slurmTesting/testResults", "lessmann@bafg.de")
 
 stopifnot(length(list.files("tests/slurmTesting/testResults")) == 3)
 
