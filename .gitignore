@@ -38,3 +38,4 @@ nohup.out
 franzi
 ole
 tests/testthat/_snaps
+inst/pythonElasticComm/__pycache__
