@@ -11,7 +11,7 @@ test_that("Records for selected batches are returned", {
 test_that("Unprocessed files can be collected from msrawfiles", {
   prepareExampleFeatureIndex(escon, ntspVersion)
   Sys.sleep(1)
-  unprocessedBatches <- getUnprocessedMsrawfileBatches(testIndexName, screeningType = "dbasTest", ntspVersion = ntspVersion)
+  unprocessedBatches <- getUnprocessedMsrawfileBatches(testIndexName, screeningType = "dbasTest")
   expect_false(all(grepl("no_peaks", names(unprocessedBatches))))
   expect_true(any(grepl("olmesartan-d6-bisoprolol", names(unprocessedBatches))))
   expect_s3_class(unprocessedBatches[[1]][[1]], "msrawfileRecord")

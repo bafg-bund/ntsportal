@@ -20,9 +20,6 @@ dbaScreeningSelectedBatchesSlurm(
 
 \item{email}{Address for SLURM notifications}
 }
-\value{
-The command which must be submitted to SLURM (invisibly)
-}
 \description{
 Choose which batches to process by selecting the directory where the measurement files are stored. 
 The function will create necessary files for submission of the job to the workflow manager SLURM.

@@ -12,7 +12,9 @@ getSelectedRecords <- function(allRecords, dirsToKeep) {
   purrr::keep(allRecords, function(record) dirname(record$path) %in% dirsToKeep)
 }
 
-getUnprocessedMsrawfileBatches <- function(msrawfilesIndex, screeningType, ntspVersion) {
+getUnprocessedMsrawfileBatches <- function(msrawfilesIndex, screeningType) {
+  ntspVersion <- stringr::str_match(msrawfilesIndex, "^ntsp(\\d\\d\\.\\d)")[,2]
+  stopifnot(grepl("^\\d\\d\\.\\d$", ntspVersion))
   allRecords <- getAllMsrawfilesRecords(msrawfilesIndex)
   recordsToProcess <- getUnprocessedRecords(allRecords, screeningType, ntspVersion)
   splitRecordsByDir(recordsToProcess)

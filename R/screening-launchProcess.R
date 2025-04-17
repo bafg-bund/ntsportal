@@ -87,7 +87,6 @@ dbaScreeningOneBatch <- function(msrawfileRecords, saveDirectory) {
 #' SLURM needs to run, and the SLURM job file. The command needed to start the process is given as a message (you
 #' may need to switch to a SLURM-enabled server).
 #'
-#' @returns The command which must be submitted to SLURM (invisibly)
 #' @export
 dbaScreeningSelectedBatchesSlurm <- function(msrawfileIndex, batchDirs, saveDirectory, email) {
   recordsInBatches <- getSelectedMsrawfileBatches(msrawfileIndex, batchDirs)
@@ -98,7 +97,18 @@ dbaScreeningSelectedBatchesSlurm <- function(msrawfileIndex, batchDirs, saveDire
   
   submitCommand <- glue::glue("sbatch {slurmJobFile}")
   message("Files are prepared, run \n$ ", submitCommand, "\non a Slurm-enabled terminal")
-  invisible(submitCommand)
+}
+
+#' @export
+dbaScreeningUnprocessedBatchesSlurm <- function(msrawfileIndex, saveDirectory, email) {
+  recordsInBatches <- getUnprocessedMsrawfileBatches(msrawfileIndex, screeningType = "dbas")
+  saveFilesSlurm(recordsInBatches, saveDirectory)
+  slurmJobFile <- file.path(saveDirectory, "arrayDbaScreening.sbatch")
+  
+  addInfoToJob(slurmJobFile, saveDirectory, email, length(recordsInBatches))
+  
+  submitCommand <- glue::glue("sbatch {slurmJobFile}")
+  message("Files are prepared, run \n$ ", submitCommand, "\non a Slurm-enabled terminal")
 }
 
 saveFilesSlurm <- function(recordsInBatches, saveDirectory) {
