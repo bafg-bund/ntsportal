@@ -12,13 +12,14 @@
 #' @import logger
 #' @import future
 #' @import ntsworkflow
-#' @import rlang
 #' @import glue
 #' @import reticulate
+#' @import purrr
 NULL
 
 .onLoad <- function(libname, pkgname) {
   pathToPyModules <- fs::path_package("ntsportal", "pythonElasticComm")
+  options(warn = 1)
   elasticSearchComm <<- reticulate::import_from_path(module = "elasticSearchComm", path = pathToPyModules, delay_load = T)
   ingestModule <<- reticulate::import_from_path(module = "ingest_main", path = pathToPyModules, delay_load = T)
 }

@@ -1,5 +1,4 @@
-# Copyright Bundesanstalt für Gewässerkunde
-# This file is part of ntsportal
+
 
 createNewIndexForResults <- function(escon, mappingType = "nts", indexName) {
   f <- switch(
@@ -198,4 +197,5 @@ changeMsrawfileFilename <- function(rfIndex, oldPath, newPath) {
   invisible(TRUE)
 }
 
-
+# Copyright 2025 Bundesanstalt für Gewässerkunde
+# This file is part of ntsportal

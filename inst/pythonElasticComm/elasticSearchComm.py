@@ -6,9 +6,17 @@ import os
 import json
 from pathlib import Path
 import importlib.util
+from elasticsearch.dsl import Search
   
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+
+def collectTable(tableName):
+  client = getEsClient()
+  s = Search(using=client, index=tableName)
+  s = s[:10000]
+  resp = s.execute()
+  return resp.hits.to_list()
 
 def import_module_from_path_importlib(module_name, module_path):
     """Imports a module from a specified path using importlib."""

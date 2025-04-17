@@ -18,7 +18,7 @@ makeTestRecord <- function(originalPath, indexName, saveDir) {
 
 pathInIndex <- function(testPath, rfIndex) {
   res <- elastic::Search(
-    get("escon", envir = global_env()), rfIndex, size = 0, 
+    escon, rfIndex, size = 0, 
     body = list(query = list(term = list(path = testPath)))
   )
   res$hits$total$value == 1

@@ -27,7 +27,8 @@ Imports:
     yaml,
     jsonlite,
     rjson,
-    glue
+    glue,
+    keyring
 RoxygenNote: 7.3.2
 Remotes:
     github::bafg-bund/ntsworkflow
