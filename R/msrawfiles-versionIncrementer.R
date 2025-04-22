@@ -1,7 +1,20 @@
 
 
 
+#' Change msrawfiles to a new version
+#'
+#' @param msrawfilesName Name of msrawfiles table
+#' @param version New version number
+#' @param dbCommGenerator Function to produce a new connection interface 
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' msrawfilesSetVersion("msrawfiles", "25.1")
+#' }
 msrawfilesSetVersion <- function(msrawfilesName, version, dbCommGenerator = newPythonDbComm) {
+  version <- as.character(version)
   verifyVersionText(version)
   newTableName <- getNewTableName(msrawfilesName, version)
   dbComm <- dbCommGenerator()
