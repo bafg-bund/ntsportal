@@ -24,8 +24,8 @@ test_that("You can connect to elasticsearch from the keychain and create escon",
 })
 
 test_that("You can connect to elasticsearch with the python client", {
-  pyComm <- newPythonComm()
-  expect_true(isCommActive(pyComm))
+  pyComm <- newPythonDbComm()
+  expect_true(ping(pyComm))
 })
 
 

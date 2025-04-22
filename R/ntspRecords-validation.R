@@ -32,6 +32,7 @@ validateRecordsMsrawfiles <- function(records) {
   }
 }
 
+#' @export
 validateRecord.msrawfileRecord <- function(record) {
   all(
     fieldsExistForSampleType(record),
@@ -310,6 +311,7 @@ badBatchWarning <- function(records, reason) {
 
 # Check feature quality
 
+#' @export
 validateRecord.featureRecord <- function(record) {
   all(
     isNestedFieldAList(record, "ms1"), 
@@ -386,6 +388,7 @@ warnBadFields <- function(badFields, parentField = "top-level") {
   warning("Fields in ", parentField, " field which should not be there: ", badFieldsString)
 }
 
+#' @export
 validateRecord <- function(record) {
   UseMethod("validateRecord")
 }

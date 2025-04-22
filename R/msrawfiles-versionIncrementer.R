@@ -1,13 +1,19 @@
 
 
 
-msrawfilesSetVersion <- function(dbComm, msrawfilesName, version) {
-  versionRegex <- "^\\d\\d\\.\\d$"
-  if (!grepl(versionRegex, version))
-    stop("Version number must be of the form 'XX.X'")
+msrawfilesSetVersion <- function(msrawfilesName, version, dbCommGenerator = newPythonDbComm) {
+  verifyVersionText(version)
   newTableName <- getNewTableName(msrawfilesName, version)
+  dbComm <- dbCommGenerator()
   copyTable(dbComm, msrawfilesName, newTableName, "msrawfiles")
   changeAllDbasAliasNames(dbComm, newTableName, version)
+}
+
+verifyVersionText <- function(version) {
+  versionRegex <- "^\\d\\d\\.\\d$"
+  currentYear <- format(Sys.Date(), "%y")
+  if (!is.character(version) || !grepl(versionRegex, version) || substr(version, 1, 2) != currentYear)
+    stop("Version number must be of the form 'YY.X' with YY being the current year")
 }
 
 getNewTableName <- function(oldName, version) {
@@ -16,7 +22,7 @@ getNewTableName <- function(oldName, version) {
 
 copyTable <- function(dbComm, tableName, newTableName, mappingType) {
   createNewTable(dbComm, newTableName, mappingType)
-  dbComm$reindex(source = list(index = tableName), dest = list(index = newTableName))
+  dbComm$client$reindex(source = list(index = tableName), dest = list(index = newTableName))
   refreshTable(dbComm, newTableName)
 }
 
@@ -26,10 +32,18 @@ changeAllDbasAliasNames <- function(dbComm, msrawfilesName, version) {
   walk2(allAliases, newAliases, changeDbasAliasName, dbComm = dbComm, msrawfilesName = msrawfilesName)
 } 
 
+getAllDbasAliasNames <- function(dbComm, msrawfilesName) {
+  resp <- dbComm$client$search(
+    index = msrawfilesName, 
+    body = list(aggs = list(aliases = list(terms = list(field = "dbas_alias_name", size = 1000))))
+  )
+  map_chr(resp$body$aggregations$aliases$buckets, function(x) x$key)
+}
+
 changeDbasAliasName <- function(dbComm, msrawfilesName, oldName, newName) {
   dsl <- import("elasticsearch.dsl")
   tryCatch({
-    ubq <- dsl$UpdateByQuery(using = dbComm, index = msrawfilesName)$
+    ubq <- dsl$UpdateByQuery(using = dbComm$client, index = msrawfilesName)$
       query("term", dbas_alias_name = oldName)$
       script(source="ctx._source.dbas_alias_name = params.newName", params = list(newName = newName))
     resp <- ubq$execute()
@@ -44,25 +58,15 @@ changeDbasAliasName <- function(dbComm, msrawfilesName, oldName, newName) {
 }
 
 
-getAllDbasAliasNames <- function(dbComm, msrawfilesName) {
-  resp <- dbComm$search(
-    index = msrawfilesName, 
-    body = list(aggs = list(aliases = list(terms = list(field = "dbas_alias_name", size = 1000))))
-  )
-  map_chr(resp$body$aggregations$aliases$buckets, function(x) x$key)
-}
-
 refreshTable <- function(dbComm, tableName) {
   dsl <- import("elasticsearch.dsl")
-  invisible(dsl$Index(tableName)$refresh(using=dbComm))
+  invisible(dsl$Index(tableName)$refresh(using=dbComm$client))
 }
-
-
 
 deleteTable <- function(dbComm, tableName) {
   dsl <- import("elasticsearch.dsl")
   tryCatch(
-    resp <- dsl$Index(tableName)$delete(using = dbComm),
+    resp <- dsl$Index(tableName)$delete(using = dbComm$client),
     error = function(cnd) {
       warning("deleteTable Error. Message: ", conditionMessage(cnd))
     }
@@ -73,12 +77,12 @@ deleteTable <- function(dbComm, tableName) {
 
 isTable <- function(dbComm, tableName) {
   dsl <- import("elasticsearch.dsl")
-  dsl$Index(tableName)$exists(using = dbComm)
+  dsl$Index(tableName)$exists(using = dbComm$client)
 }
 
 createNewTable <- function(dbComm, tableName, mappingType) {
   mapping <- getMapping(mappingType)
-  dbComm$indices$create(index = tableName, body = mapping)
+  dbComm$client$indices$create(index = tableName, body = mapping)
 }
 
 getMapping <- function(mappingType) {

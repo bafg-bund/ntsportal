@@ -126,28 +126,26 @@ clearRing <- function(ring = "ntsportal") {
   }
 }
 
-#' Create an Elasticsearch Python connection
-#'
-#' @returns class pythonComm
-#' @export
-#'
-newPythonComm <- function() {
-  client <- elasticSearchComm$getEsClient()
-  class(client) <- c("pythonComm", class(client))
-  client
+
+newPythonDbComm <- function(ring = "ntsportal") {
+  ntspCred <- getCred(ring)
+  client <- elasticSearchComm$getDbClient(ntspCred[1], ntspCred[2])
+  newDbComm <- list()
+  newDbComm$client <- client
+  class(newDbComm) <- "pythonDbComm"
+  newDbComm
 }
 
 #' @export
-#' @method isCommActive pythonComm
-isCommActive.pythonComm <- function(dbComm) {
-  resp <- dbComm$info()
+ping.pythonDbComm <- function(dbComm) {
+  resp <- dbComm$client$info()
   resp$meta$status == 200
 }
 
 #' @export
-isCommActive <- function(dbComm) {
-  UseMethod("isCommActive")
+ping <- function(dbComm) {
+  UseMethod("ping")
 }
 
-.S3method("isCommActive", "pythonComm", isCommActive.pythonComm)
+.S3method("ping", "pythonDbComm", ping.pythonDbComm)
 

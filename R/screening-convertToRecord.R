@@ -1,6 +1,6 @@
-# Copyright 2016-2024 Bundesanstalt für Gewässerkunde
-# This file is part of ntsportal
 
+
+#' @export
 convertToRecord.dbasResult <- function(scanResult, msrawfileRecords) {
   
   msrawfileRecords <- nameRecordsByFilename(msrawfileRecords)
@@ -23,7 +23,7 @@ convertToRecord.dbasResult <- function(scanResult, msrawfileRecords) {
   lapply(features, cleanFeature)
 }
 
-
+#' @export
 getAreasOfFeatures.dbasResult <- function(scanResult) {
   features <- scanResult$reintegrationResults[, c("samp", "comp_name", "adduct", "isotopologue",
                                                   "int_h", "int_a", "real_mz", "real_rt_min")]
@@ -308,10 +308,12 @@ removeNoise <- function(msSpectrum, noiseLevel) {
 
 # Define generics
 
+#' @export
 convertToRecord <- function(scanResult, msrawfileRecords) {
   UseMethod("convertToRecord")
 }
 
+#' @export
 getAreasOfFeatures <- function(scanResult) {
   UseMethod("getAreasOfFeatures")
 }
@@ -320,3 +322,5 @@ getAreasOfFeatures <- function(scanResult) {
 .S3method("convertToRecord", "dbasResult", convertToRecord.dbasResult)
 .S3method("getAreasOfFeatures", "dbasResult", getAreasOfFeatures.dbasResult)
 
+# Copyright 2025 Bundesanstalt für Gewässerkunde
+# This file is part of ntsportal

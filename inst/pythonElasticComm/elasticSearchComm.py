@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import importlib.util
 from elasticsearch.dsl import Search
+from elasticsearch import Elasticsearch
   
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -66,6 +67,14 @@ def getMapping(mappingType):
   with open(os.path.join(os.getcwd(), "inst", "extdata", f"{mappingType}_index_mappings.json"), 'r') as f:
     indexMapping = json.load(f)
   return indexMapping
+
+def getDbClient(username, password, hostUrl="https://elastic.dmz.bafg.de"):
+  es_client = Elasticsearch(
+        hosts=hostUrl,  # Elasticsearch endpoint
+        basic_auth=(username, password),
+        verify_certs=False
+    )
+  return es_client
 
 def getEsClient():
   scriptDir = Path(__file__).parent.absolute()
