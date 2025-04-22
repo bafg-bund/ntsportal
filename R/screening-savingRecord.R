@@ -2,13 +2,13 @@
 
 saveRecord <- function(ntspList, saveDir, maxSizeGb = 10) {
   
-  # If ntsplList is too large, cannot write this to json (exceeds R's string
+  # If featureRecords is too large, cannot write this to json (exceeds R's string
   # object limit)
-  # It is estimated that an ntspl object of >10 will create a string that is
+  # It is estimated that a featureRecord list of >10 GB will create a string that is
   # too large for R to hold.
   
   # Get the memory size in GB
-  ntsplSize <- round(as.numeric(object.size(ntspList)) / 1000000000)
+  ntsplSize <- round(as.numeric(object.size(ntspList)) / 1000000000, 1)
   
   # How many times is the object bigger that maxSizeGb, we have to split the object
   # by this number and each part has to be saved as a separate json
@@ -27,15 +27,14 @@ saveRecord <- function(ntspList, saveDir, maxSizeGb = 10) {
     ntsplListSplit <- split(ntspList, splitFac)
     rm(ntspList)
     ntsplListSplit <- mapply(
-      function(theList, thePart, theAtt, theClass) {
+      function(theList, thePart, theAtt) {
         attributes(theList) <- theAtt
         attr(theList, "part") <- thePart
-        class(theList) <- theClass
         theList
       }, 
       ntsplListSplit, 
       splitNames, 
-      MoreArgs = list(theAtt = prevAttributes, theClass = prevClass),
+      MoreArgs = list(theAtt = prevAttributes),
       SIMPLIFY = FALSE
     )
     # for each of these parts, run this function again
@@ -45,6 +44,7 @@ saveRecord <- function(ntspList, saveDir, maxSizeGb = 10) {
   
   # If the "part" is not yet set, this means the list is the only part so it 
   # can be set to "a" 
+  
   if (!is.element("part", names(attributes(ntspList))))
     attr(ntspList, "part") <- "a"
   
@@ -59,21 +59,18 @@ saveRecord <- function(ntspList, saveDir, maxSizeGb = 10) {
   newFilePath
 } 
 
-makeFileNameForBatch <- function(ntspList) {
-  dirName <- dirname(ntspList[[1]][["path"]])
-  if (grepl("unit_tests", dirName)) {
-    batchName <- stringr::str_match(dirName, "(unit_tests/?.*)$")[,2]  
-  } else {
-    batchName <- stringr::str_match(dirName, "Messdaten/(.*)$")[,2]  
-  }
-  batchName <- gsub("/", "_", batchName)
-  batchName <- gsub("\\.", "_", batchName)
+makeFileNameForBatch <- function(featureRecords) {
+  stopifnot(is.character(attr(featureRecords, "part")))
+  stopifnot(nchar(attr(featureRecords, "part")) == 1)
+  stopifnot(attr(featureRecords, "part") %in% letters)
+  dirName <- dirname(featureRecords[[1]][["path"]])
+  batchNameHash <- digest::digest(dirName, algo = "crc32")
   paste0(
     "ntsportal-featureRecord-", 
     format(Sys.time(), "%y%m%d-%H%M-"), 
-    batchName,
+    batchNameHash,
     "-part-",
-    attr(ntspList, "part"),
+    attr(featureRecords, "part"),
     ".json"
   )
 }
