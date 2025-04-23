@@ -59,10 +59,7 @@ dbaScreeningParallel <- function(msrawfileRecordsInBatches, saveDirectory, numPa
 }
 
 
-#' Process one batch of records
-#' 
-#' @description
-#' A function to be used only by the workload manager SLURM.
+#' Process one batch of msrawfile records
 #' 
 #' @export
 dbaScreeningOneBatch <- function(msrawfileRecords, saveDirectory) {

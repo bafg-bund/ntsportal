@@ -2,10 +2,10 @@
 % Please edit documentation in R/screening-launchProcess.R
 \name{dbaScreeningOneBatch}
 \alias{dbaScreeningOneBatch}
-\title{Process one batch of records}
+\title{Process one batch of msrawfile records}
 \usage{
 dbaScreeningOneBatch(msrawfileRecords, saveDirectory)
 }
 \description{
-A function to be used only by the workload manager SLURM.
+Process one batch of msrawfile records
 }

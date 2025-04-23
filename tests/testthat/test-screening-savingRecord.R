@@ -52,3 +52,12 @@ test_that("A filename can be correctly generated", {
   fileName2 <- makeFileNameForBatch(featureRecordList)
   expect_true(fileName != fileName2)
 })
+
+test_that("Compressing a file that already exists results in an error", {
+  tfile <- withr::local_tempfile()
+  cat("test", file = tfile)
+  newPath <- compressJson(tfile)
+  expect_true(file.exists(newPath))
+  expect_error(compressJson(tfile))
+  file.remove(newPath)
+})

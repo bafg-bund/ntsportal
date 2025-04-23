@@ -1,58 +1,33 @@
 
 
-saveRecord <- function(ntspList, saveDir, maxSizeGb = 10) {
+saveRecord <- function(featureRecordList, saveDir, maxSizeGb = 10) {
   
-  # If featureRecords is too large, cannot write this to json (exceeds R's string
-  # object limit)
-  # It is estimated that a featureRecord list of >10 GB will create a string that is
-  # too large for R to hold.
+  ntsplSize <- getObjectSizeGB(featureRecordList)
   
-  # Get the memory size in GB
-  ntsplSize <- round(as.numeric(object.size(ntspList)) / 1000000000, 1)
-  
-  # How many times is the object bigger that maxSizeGb, we have to split the object
-  # by this number and each part has to be saved as a separate json
+  # If featureRecords is too large, cannot write this to json (exceeds R's string object limit) It is estimated that a
+  # featureRecord list of >10 GB will create a string that is too large for R to hold. we have to split the object and
+  # each part has to be saved as a separate json
   if (ntsplSize > maxSizeGb) {
-    # At this point, part should not be in the attributes, otherwise something
-    # went wrong
-    stopifnot(!is.element("part", names(attributes(ntspList))))
-    # How many splits needed
+    stopifnot(noPartAttribute(featureRecordList))
     splitBy <- ceiling(ntsplSize / maxSizeGb)
-    splitNames <- letters[1:splitBy]
-    splitFac <- rep(splitNames, length.out = length(ntspList))
-    # We have to add the part name and the old attributes back to each part
-    prevAttributes <- attributes(ntspList)
-    prevClass <- class(ntspList)
-    # Split up the list and overwrite the memory location
-    ntsplListSplit <- split(ntspList, splitFac)
-    rm(ntspList)
-    ntsplListSplit <- mapply(
-      function(theList, thePart, theAtt) {
-        attributes(theList) <- theAtt
-        attr(theList, "part") <- thePart
-        theList
-      }, 
-      ntsplListSplit, 
-      splitNames, 
-      MoreArgs = list(theAtt = prevAttributes),
-      SIMPLIFY = FALSE
-    )
-    # for each of these parts, run this function again
-    savenm <- lapply(ntsplListSplit, saveRecord, saveDir = saveDir, maxSizeGb = maxSizeGb)
+    splitFac <- rep(1:splitBy, length.out = length(featureRecordList))
+    featureRecordListSplit <- split(featureRecordList, splitFac)
+    rm(featureRecordList)
+    for (i in seq_along(featureRecordListSplit)) {
+      attr(featureRecordListSplit[[i]], "part") <- letters[i]
+    }
+    # Run this function on each part
+    savenm <- lapply(featureRecordListSplit, saveRecord, saveDir = saveDir, maxSizeGb = maxSizeGb)
     return(as.character(savenm))
   } 
   
-  # If the "part" is not yet set, this means the list is the only part so it 
-  # can be set to "a" 
+  # If the "part" is not set this is the only part.
+  if (noPartAttribute(featureRecordList))
+    attr(featureRecordList, "part") <- "a"
   
-  if (!is.element("part", names(attributes(ntspList))))
-    attr(ntspList, "part") <- "a"
-  
-  fileName <- makeFileNameForBatch(ntspList)
+  fileName <- makeFileNameForBatch(featureRecordList)
   filePath <- file.path(saveDir, fileName)
-  
-  log_info("Writing JSON file {filePath}")
-  writeRecord(ntspList, filePath)
+  writeRecord(featureRecordList, filePath)
   newFilePath <- compressJson(filePath)
   
   log_info("Completed JSON file {newFilePath}")
@@ -76,6 +51,7 @@ makeFileNameForBatch <- function(featureRecords) {
 }
 
 writeRecord <- function(record, filePath) {
+  log_info("Writing JSON file {filePath}")
   tryCatch({
     jsonString <- rjson::toJSON(record, indent = 2)
     writeLines(jsonString, filePath)
@@ -86,8 +62,11 @@ writeRecord <- function(record, filePath) {
 }
 
 compressJson <- function(filePath) {
+  newName <- paste0(filePath, ".gz")
+  if (file.exists(newName))
+    stop("A file with the name ", newName, "already exists. Aborting.")
   system2("gzip", filePath)
-  paste0(filePath, ".gz")
+  newName
 }
 
 uncompressJson <- function(filePath) {
@@ -95,6 +74,13 @@ uncompressJson <- function(filePath) {
   stringr::str_match(filePath, "(.*)\\.gz$")[,2]
 }
 
+getObjectSizeGB <- function(featureRecordList) {
+  round(as.numeric(object.size(featureRecordList)) / 1000000000, 1)
+}
+
+noPartAttribute <- function(featureRecordList) {
+  !is.element("part", names(attributes(featureRecordList)))
+}
 
 # Copyright 2025 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
