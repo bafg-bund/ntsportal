@@ -49,7 +49,33 @@ To cite this work please use the following citation or run `citation("ntsportal"
 
 ## Installation
 
+### Current installation guidance for pvil-rr (temporary)
 
+1) Create a gitlab PAT
+2) Add it with the following line to `~/.Rprofile`
+
+```
+Sys.setenv(GITLAB_PAT = "<...>")
+```
+3) Restart R session
+4) Install ntsworkflow and ntsportal
+
+```
+devtools::install_gitlab(
+  repo = "nts/ntsworkflow",
+  host = "https://gitlab.lan.bafg.de"
+)
+
+devtools::install_gitlab(
+  repo = "nts/ntsportal",
+  host = "https://gitlab.lan.bafg.de"
+)
+```
+5) Download requirements.txt and install python requirements
+
+```
+reticulate::virtualenv_install(requirements = "requirements.txt")
+```
 
 
 
