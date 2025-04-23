@@ -54,33 +54,6 @@ def validate_path(path):
         raise FileNotFoundError(f"Path at {path} does not exist.")
 
 
-def get_user_credentials():
-    """
-    Retrieves username and password from user config file (config.yml).
-    Config file needs to be located at: /home/user/config.yml and needs to contain
-    {'elastic_connect': {'user': <username>, 'pwd': <password>}}
-    """
-    import yaml
-    import os
-
-    with open(f'{os.getenv("HOME")}/config.yml', 'r') as f:
-        user_config = yaml.safe_load(f)
-
-    return user_config['default']['elastic_connect']
-
-
-def connect_to_es(credentials):
-    """Connects to Elasticsearch client with user credentials."""
-    from elasticsearch import Elasticsearch
-
-    # Create an Elasticsearch client using the user credentials
-    es_client = Elasticsearch(
-        hosts="https://elastic.dmz.bafg.de",  # Elasticsearch endpoint
-        basic_auth=(credentials['user'], credentials['pwd']),
-        verify_certs=False
-    )
-    return es_client
-
 
 def update_import_time(json_docs):
     """Update the import time for the field 'date_import' in all json documents with single timestamp."""

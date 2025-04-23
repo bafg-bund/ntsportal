@@ -22,7 +22,7 @@ def import_module_from_path_importlib(module_name, module_path):
         print(f"Error importing module: {e}")
         return None
 
-def ingest(json_path, mapping_path):
+def ingest(json_path, mapping_path, es_client):
     """
     Main processing logic for ingest of json files into Elasticsearch:
       1. Read json files
@@ -44,12 +44,6 @@ def ingest(json_path, mapping_path):
     sub = import_module_from_path_importlib("ingest_sub.py", module_path)
     # Read json files
     json_docs = sub.read_json_files(json_path)
-
-    # Get user credentials (needs config.yml file in home folder)
-    credentials = sub.get_user_credentials()
-
-    # Connect to the Elasticsearch (es) client
-    es_client = sub.connect_to_es(credentials)
 
     # Update import time for all json documents
     json_docs, timestamp = sub.update_import_time(json_docs)

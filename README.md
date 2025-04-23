@@ -65,7 +65,7 @@ To cite this work please use the following citation or run
 ### Current installation guidance for pvil-rr (temporary)
 
 1)  Create a gitlab PAT
-2)  Add it with the following line to `~/.Rprofile`
+2)  Add it, with the following line, to `~/.Rprofile`
 
 ``` r
 Sys.setenv(GITLAB_PAT = "<...>")
@@ -86,17 +86,8 @@ devtools::install_gitlab(
 )
 ```
 
-5)  Download requirements.txt and install python requirements
+5)  Install python requirements
 
 ``` r
-reticulate::virtualenv_install(requirements = "requirements.txt")
-```
-
-6)  Add your elasticsearch access code to `~/config.yml`
-
-``` yaml
-default:
-  elastic_connect:
-    user: '<...user.name...>' 
-    pwd: '<...password...>'
+reticulate::virtualenv_install(requirements = fs::path_package("ntsportal", "pythonElasticComm", "requirements.txt"))
 ```

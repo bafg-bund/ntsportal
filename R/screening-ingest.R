@@ -21,9 +21,9 @@ ingestJson <- function(json_path) {
   
   # Path for index mappings
   mapping_path <- fs::path_package("ntsportal", "extdata")
-  
+  dbComm <- newPythonDbComm()
   # Run the main ingest function
-  all_index_alias_pairs <- ingestModule$ingest(json_path, mapping_path)
+  all_index_alias_pairs <- ingestModule$ingest(json_path, mapping_path, dbComm$client)
   
   return(all_index_alias_pairs)
 }

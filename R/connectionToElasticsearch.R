@@ -1,7 +1,6 @@
-# Copyright 2016-2024 Bundesanstalt für Gewässerkunde
-# This file is part of ntsportal
 
-#' Create ElasticSearch connection object
+
+#' Set ElasticSearch credentials and create ElasticSearch connection object
 #' 
 #' @description
 #' If credentials are available, will create the "escon" connection object in the 
@@ -129,7 +128,7 @@ clearRing <- function(ring = "ntsportal") {
 
 newPythonDbComm <- function(ring = "ntsportal") {
   ntspCred <- getCred(ring)
-  client <- elasticSearchComm$getDbClient(ntspCred[1], ntspCred[2])
+  client <- elasticSearchComm$getDbClient(ntspCred[1], ntspCred[2], "https://elastic.dmz.bafg.de")
   newDbComm <- list()
   newDbComm$client <- client
   class(newDbComm) <- "pythonDbComm"
@@ -149,3 +148,5 @@ ping <- function(dbComm) {
 
 .S3method("ping", "pythonDbComm", ping.pythonDbComm)
 
+# Copyright 2025 Bundesanstalt für Gewässerkunde
+# This file is part of ntsportal

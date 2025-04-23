@@ -1,9 +1,9 @@
 # first run helper
 
 # Create new msrawfiles_unit_tests index
-createNewIndex(testIndexName, "msrawfiles")
-reindexDocs("ntsp_msrawfiles_unit_tests", testIndexName)
-updateAllDocs(testIndexName, script=glue("ctx._source.dbas_alias_name = 'ntsp{ntspVersion}_dbas_unit_tests'"))
+dbComm <- newPythonDbComm()
+copyTable(dbComm, "ntsp_msrawfiles_unit_tests", testIndexName, "msrawfiles")
+changeAllDbasAliasNames(dbComm, testIndexName, ntspVersion)
 
 # deleteIndex(testIndexName)
 
