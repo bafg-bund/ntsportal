@@ -54,13 +54,13 @@ To cite this work please use the following citation or run `citation("ntsportal"
 1) Create a gitlab PAT
 2) Add it with the following line to `~/.Rprofile`
 
-```
+```{r, eval=FALSE}
 Sys.setenv(GITLAB_PAT = "<...>")
 ```
 3) Restart R session
 4) Install ntsworkflow and ntsportal
 
-```
+```{r, eval=FALSE}
 devtools::install_gitlab(
   repo = "nts/ntsworkflow",
   host = "https://gitlab.lan.bafg.de"
@@ -73,11 +73,18 @@ devtools::install_gitlab(
 ```
 5) Download requirements.txt and install python requirements
 
-```
+```{r, eval=FALSE}
 reticulate::virtualenv_install(requirements = "requirements.txt")
 ```
 
+6) Add your elasticsearch access code to `~/config.yml`
 
+```{yaml}
+default:
+  elastic_connect:
+    user: '<...user.name...>' 
+    pwd: '<...password...>'
+```
 
 
 

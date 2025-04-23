@@ -1,5 +1,5 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+<!-- README.md is generated from README.Rmd. Please edit README.Rmd -->
 
 # ntsportal
 
@@ -12,9 +12,7 @@ system currently uses
 [Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
 as the DBMS. This R-package is used for processing data and building the
 database. The included scripts for automated data processing use
-[ntsworkflow](https://github.com/bafg-bund/ntsworkflow). Other
-processing software can be used and data is harmonized into the
-ntsportal format (see Wiki, Section “Database Structure”). Latest
+[ntsworkflow](https://github.com/bafg-bund/ntsworkflow). Latest
 information on the structure and internal design of ntsportal is found
 in the wiki.
 
@@ -37,8 +35,8 @@ Consumer Protection.
 
 ## License
 
-Copyright 2019-2024 Bundesanstalt für Gewässerkunde (Federal Institute
-of Hydrology)
+Copyright 2025 Bundesanstalt für Gewässerkunde (Federal Institute of
+Hydrology)
 
 ntsportal is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -58,26 +56,47 @@ To cite this work please use the following citation or run
 `citation("ntsportal")`.
 
 > Kevin S. Jewell, Ole Lessmann, Franziska Thron, Jonas Skottnik, Iris
-> Tuchscherer, Arne Wick and Thomas A. Ternes (2024). ntsportal: A
+> Tuchscherer, Arne Wick and Thomas A. Ternes (2025). ntsportal: A
 > Non-Target Screening Data Archive and Distribution Tool. R package
-> version 0.2.0.
+> version 0.2.1.
 
 ## Installation
 
-See imports and suggests in DESCRIPTION for the necessary R packages.
+### Current installation guidance for pvil-rr (temporary)
 
-A connection to an ElasticSearch cluster is needed, which is connected
-to using `elastic::connect()`.
+1)  Create a gitlab PAT
+2)  Add it with the following line to `~/.Rprofile`
 
-Python and several modules are also required. These are installed with:
+``` r
+Sys.setenv(GITLAB_PAT = "<...>")
+```
 
-    library(retiuculate)
-    virtualenv_create()
-    py_install('elasticsearch')
-    py_install('pandas')
-    py_install('tqdm')
-    py_install('pyyaml')
+3)  Restart R session
+4)  Install ntsworkflow and ntsportal
 
-To check that the virtual environment is being used:  
-Tools -\> Global Settings -\> Python -\> Interpreter Select -\>
-Virtualenv -\> Choose Virtualenv -\> OK
+``` r
+devtools::install_gitlab(
+  repo = "nts/ntsworkflow",
+  host = "https://gitlab.lan.bafg.de"
+)
+
+devtools::install_gitlab(
+  repo = "nts/ntsportal",
+  host = "https://gitlab.lan.bafg.de"
+)
+```
+
+5)  Download requirements.txt and install python requirements
+
+``` r
+reticulate::virtualenv_install(requirements = "requirements.txt")
+```
+
+6)  Add your elasticsearch access code to `~/config.yml`
+
+``` yaml
+default:
+  elastic_connect:
+    user: '<...user.name...>' 
+    pwd: '<...password...>'
+```
