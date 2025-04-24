@@ -2,7 +2,7 @@
 % Please edit documentation in R/connectionToElasticsearch.R
 \name{connectNtsportal}
 \alias{connectNtsportal}
-\title{Create ElasticSearch connection object}
+\title{Set ElasticSearch credentials and create ElasticSearch connection object}
 \usage{
 connectNtsportal()
 }

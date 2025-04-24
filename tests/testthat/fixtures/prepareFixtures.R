@@ -1,7 +1,7 @@
 # first run helper
 
 # Create new msrawfiles_unit_tests index
-dbComm <- newPythonDbComm()
+dbComm <- PythonDbComm()
 copyTable(dbComm, "ntsp_msrawfiles_unit_tests", testIndexName, "msrawfiles")
 changeAllDbasAliasNames(dbComm, testIndexName, ntspVersion)
 

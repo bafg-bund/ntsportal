@@ -2,7 +2,7 @@
 
 test_that("A measurement file can be moved and name can be changed", {
   saveDir <- withr::local_tempdir()
-  dbComm <- newPythonDbComm()
+  dbComm <- PythonDbComm()
   originalPath <- test_path("fixtures", "msrawfiles-addRecord", "RH_pos_20220603_no_peaks_test_addRecord.mzXML")
   newPath <- file.path(saveDir, basename(originalPath))
   expect_true(file.copy(originalPath, newPath))

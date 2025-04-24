@@ -126,27 +126,6 @@ clearRing <- function(ring = "ntsportal") {
 }
 
 
-newPythonDbComm <- function(ring = "ntsportal") {
-  ntspCred <- getCred(ring)
-  client <- elasticSearchComm$getDbClient(ntspCred[1], ntspCred[2], "https://elastic.dmz.bafg.de")
-  newDbComm <- list()
-  newDbComm$client <- client
-  class(newDbComm) <- "pythonDbComm"
-  newDbComm
-}
-
-#' @export
-ping.pythonDbComm <- function(dbComm) {
-  resp <- dbComm$client$info()
-  resp$meta$status == 200
-}
-
-#' @export
-ping <- function(dbComm) {
-  UseMethod("ping")
-}
-
-.S3method("ping", "pythonDbComm", ping.pythonDbComm)
 
 # Copyright 2025 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

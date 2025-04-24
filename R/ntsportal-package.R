@@ -15,6 +15,7 @@
 #' @import glue
 #' @import reticulate
 #' @import purrr
+#' @import methods
 NULL
 
 .onLoad <- function(libname, pkgname) {
