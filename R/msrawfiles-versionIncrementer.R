@@ -5,7 +5,6 @@
 #'
 #' @param msrawfilesName Name of msrawfiles table
 #' @param version New version number
-#' @param dbCommGenerator Function to produce a new connection interface 
 #'
 #' @export
 #'
@@ -13,13 +12,13 @@
 #' \dontrun{
 #' msrawfilesSetVersion("msrawfiles", "25.1")
 #' }
-msrawfilesSetVersion <- function(msrawfilesName, version, dbCommGenerator = PythonDbComm) {
+msrawfilesSetVersion <- function(msrawfilesName, version) {
   version <- as.character(version)
   verifyVersionText(version)
   newTableName <- getNewTableName(msrawfilesName, version)
-  dbComm <- dbCommGenerator()
+  dbComm <- getOption("ntsportal.dbComm")()
   copyTable(dbComm, msrawfilesName, newTableName, "msrawfiles")
-  changeAllDbasAliasNames(dbComm, newTableName, version)
+  changeAllDbasAliasNames(newTableName, version)
 }
 
 verifyVersionText <- function(version) {
@@ -33,40 +32,19 @@ getNewTableName <- function(oldName, version) {
   stringr::str_replace(oldName, "^(ntsp)\\d?\\d?\\.?\\d?(_.*)$", glue("\\1{version}\\2"))
 }
 
-changeAllDbasAliasNames <- function(dbComm, msrawfilesName, version) {
-  allAliases <- getAllDbasAliasNames(dbComm, msrawfilesName)
+changeAllDbasAliasNames <- function(msrawfilesName, version) {
+  dbComm <- getOption("ntsportal.dbComm")()
+  allAliases <- getUniqueValues(dbComm, msrawfilesName, "dbas_alias_name")
   newAliases <- getNewTableName(allAliases, version)
-  walk2(allAliases, newAliases, changeDbasAliasName, dbComm = dbComm, msrawfilesName = msrawfilesName)
+  walk2(allAliases, newAliases, 
+    function(old, new) 
+      replaceValueInField(
+        dbComm = dbComm, 
+        tableName = msrawfilesName, 
+        field = "dbas_alias_name",
+        oldValue = old,
+        newValue = new
+      )
+  )
 } 
-
-getAllDbasAliasNames <- function(dbComm, msrawfilesName) {
-  resp <- dbComm@client$search(
-    index = msrawfilesName, 
-    body = list(aggs = list(aliases = list(terms = list(field = "dbas_alias_name", size = 1000))))
-  )
-  map_chr(resp$body$aggregations$aliases$buckets, function(x) x$key)
-}
-
-changeDbasAliasName <- function(dbComm, msrawfilesName, oldName, newName) {
-  tryCatch({
-    ubq <- dbComm@dsl$UpdateByQuery(using = dbComm@client, index = msrawfilesName)$
-      query("term", dbas_alias_name = oldName)$
-      script(source="ctx._source.dbas_alias_name = params.newName", params = list(newName = newName))
-    resp <- ubq$execute()
-    },
-    error = function(cnd) {
-      warning("error in changeDbasAliasName: ", conditionMessage(cnd))
-    }
-  )
-  if (resp$success())
-    message("Change accepted")
-  refreshTable(dbComm, msrawfilesName)
-}
-
-
-
-
-
-
-
 

@@ -2,7 +2,7 @@
 
 
 entireTestMsrawfilesIndex <- function() {
-  readRDS(test_path("fixtures", "screening-collectMsrawfileRecords", "entireTestMsrawfilesIndex.RDS"))
+  readRDS(test_path("fixtures", "msrawfilesTestRecords", "allRecords.RDS"))
 }
 
 prepareExampleFeatureIndex <- function(escon, ntspVersion) {
@@ -11,7 +11,9 @@ prepareExampleFeatureIndex <- function(escon, ntspVersion) {
   emptyRecord <- convertToRecord(emptyResult, list(getMsrawfileRecordNoPeaks()))
   tempDir <- withr::local_tempdir()
   saveRecord(emptyRecord, tempDir)
-  ingestJson(tempDir)
+  indexNames <- ingestJson(tempDir)
+  dbComm <- getDbComm()
+  refreshTable(dbComm, indexNames[[1]][[1]])
 }
 
 removeExampleFeatureIndex <- function(escon, ntspVersion) {

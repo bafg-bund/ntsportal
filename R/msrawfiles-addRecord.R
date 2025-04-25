@@ -315,7 +315,7 @@ newRecordFromTemplate <- function(pth, newStart, newStation, template, rfIndex, 
   rec$date_import <- as.integer(Sys.time())
   rec$filesize <- file.size(rec$path) / 1e6
   rec <- rec[order(names(rec))]
-  class(rec) <- c("msrawfileRecord", "list")
+  rec <- newMsrawfilesRecord(rec)
   if (!validateRecord(rec))
     warning("Record validation failed for file ", pth)
     
@@ -581,7 +581,6 @@ stopIfAnyErrors <- function(checkResult) {
 
 getTemplateRecord <- function(rfIndex, templateId) {
   res <- elastic::docs_get(escon, rfIndex, templateId, verbose = F)
-  rec <- structure(res$`_source`, class = "msrawfileRecord")
-  rec
+  newMsrawfilesRecord(res$`_source`)
 }
 

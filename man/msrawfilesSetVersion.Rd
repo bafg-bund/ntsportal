@@ -4,14 +4,12 @@
 \alias{msrawfilesSetVersion}
 \title{Change msrawfiles to a new version}
 \usage{
-msrawfilesSetVersion(msrawfilesName, version, dbCommGenerator = PythonDbComm)
+msrawfilesSetVersion(msrawfilesName, version)
 }
 \arguments{
 \item{msrawfilesName}{Name of msrawfiles table}
 
 \item{version}{New version number}
-
-\item{dbCommGenerator}{Function to produce a new connection interface}
 }
 \description{
 Change msrawfiles to a new version

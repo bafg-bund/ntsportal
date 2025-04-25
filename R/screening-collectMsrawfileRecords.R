@@ -1,5 +1,4 @@
-# Copyright 2016-2024 Bundesanstalt für Gewässerkunde
-# This file is part of ntsportal
+
 
 getSelectedMsrawfileBatches <- function(msrawfilesIndex, batchDirs) {
   allRecords <- getAllMsrawfilesRecords(msrawfilesIndex)
@@ -20,16 +19,9 @@ getUnprocessedMsrawfileBatches <- function(msrawfilesIndex, screeningType) {
   splitRecordsByDir(recordsToProcess)
 }
 
-getAllMsrawfilesRecords <- function(nameRawfilesIndex) {
-  wholeIndexHits <- getWholeIndex(indexName = nameRawfilesIndex)
-  getRecordsFromHits(hitsArray = wholeIndexHits, className = c("msrawfileRecord"))
-}
-
-getWholeIndex <- function(indexName) {
-  matchAll <- list(
-    query = list(match_all = stats::setNames(list(), character(0)))
-  )
-  esSearchPaged(indexName, searchBody = matchAll, sort = "path")$hits$hits
+getAllMsrawfilesRecords <- function(msrawfilesIndex) {
+  dbComm <- getDbComm()
+  getTableAsRecords(dbComm, msrawfilesIndex, recordConstructor = newMsrawfilesRecord)
 }
 
 getRecordsFromHits <- function(hitsArray, className) {
@@ -64,9 +56,10 @@ extractDirs <- function(allRecords) {
 }
 
 getDirsInFeatureIndex <- function(indexName) {
-  query <- list(size = 0, aggs = list(paths = list(terms = list(field = "path", size = 900000))))
-  response <- elastic::Search(escon, indexName, body = query)$aggregations$paths$buckets
-  unique(dirname(vapply(response, "[[", i = "key", character(1))))
+  dbComm <- getOption("ntsportal.dbComm")()
+  allPaths <- getUniqueValues(dbComm, indexName, "path", maxLength = 9e5)
+  unique(dirname(allPaths))
 }
 
-
+# Copyright 2025 Bundesanstalt für Gewässerkunde
+# This file is part of ntsportal

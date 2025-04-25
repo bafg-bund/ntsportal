@@ -34,31 +34,20 @@ test_that("new Alias name can be generated", {
 
 test_that("You can get all aliases from a table", {
   dbComm <- PythonDbComm()
-  aliases <- getAllDbasAliasNames(dbComm, testIndexName)
+  aliases <- getUniqueValues(dbComm, testIndexName, "dbas_alias_name")
   expect_equal(aliases, "ntsp25.1_dbas_unit_tests")
-  aliases <- getAllDbasAliasNames(dbComm, "ntsp_msrawfiles")
+  aliases <- getUniqueValues(dbComm, "ntsp_msrawfiles", "dbas_alias_name")
   expect_gte(length(aliases), 9)
-})
-
-test_that("You can change the value of the dbas_alias_name field", {
-  dbComm <- PythonDbComm()
-  oldName <- getAllDbasAliasNames(dbComm, testIndexName)
-  newName <- "ntsp99.9_dbas_unit_tests"
-  #newName <- glue("ntsp{ntspVersion}_dbas_unit_tests")  # in case you need to reset
-  changeDbasAliasName(dbComm, testIndexName, oldName, newName)
-  n <- dbComm@dsl$Search(using=dbComm@client, index = testIndexName)$query("term", dbas_alias_name = newName)$count()
-  expect_gte(n, 20)
-  changeDbasAliasName(dbComm, testIndexName, newName, oldName)
 })
 
 test_that("You can change the version of all dbas_alias_names", {
   dbComm <- PythonDbComm()
-  oldName <- getAllDbasAliasNames(dbComm, testIndexName)
+  oldName <- getUniqueValues(dbComm, testIndexName, "dbas_alias_name")
   #changeAllDbasAliasNames(dbComm, testIndexName, ntspVersion)
-  changeAllDbasAliasNames(dbComm, testIndexName, "99.9")
+  changeAllDbasAliasNames(testIndexName, "99.9")
   q <- dbComm@dsl$Search(using=dbComm@client, index = testIndexName)$source("dbas_alias_name")
   expect_equal(q$execute()$hits$to_list()[[1]]$dbas_alias_name, "ntsp99.9_dbas_unit_tests")
-  changeAllDbasAliasNames(dbComm, testIndexName, ntspVersion)
+  changeAllDbasAliasNames(testIndexName, ntspVersion)
 })
 
 

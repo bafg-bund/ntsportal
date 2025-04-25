@@ -223,12 +223,6 @@ fieldsToMergeFromMsrawfiles <- function() {
 }
 
 
-
-newFeatureRecord <- function(feature) {
-  stopifnot(is.list(feature))
-  structure(feature, class = "featureRecord")
-}
-
 getPeakIdForFeature <- function(feature, peakList) {
   subset(
     peakList, 

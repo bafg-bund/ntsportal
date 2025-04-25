@@ -3,10 +3,13 @@
 \docType{methods}
 \name{ping}
 \alias{ping}
+\alias{show,PythonDbComm-method}
 \alias{ping,PythonDbComm-method}
 \title{Test the DB-Connection}
 \usage{
 ping(dbComm)
+
+\S4method{show}{PythonDbComm}(object)
 
 \S4method{ping}{PythonDbComm}(dbComm)
 }

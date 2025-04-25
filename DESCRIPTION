@@ -1,7 +1,7 @@
 Package: ntsportal
 Type: Package
 Title: NTSPortal database backend. Federal Institute of Hydrology, Koblenz, Germany
-Version: 0.2.1
+Version: 25.1
 Authors@R: c(
              person(c("Kevin", "S."), "Jewell", email = "jewell@bafg.de", role = c("aut", "cre"),
              comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany"),
@@ -30,7 +30,8 @@ Imports:
     keyring,
     reticulate,
     elastic,
-    digest
+    digest,
+    rlang
 RoxygenNote: 7.3.2
 Remotes:
     github::bafg-bund/ntsworkflow

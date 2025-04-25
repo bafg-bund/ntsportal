@@ -1,8 +1,6 @@
-# Copyright 2016-2024 Bundesanstalt für Gewässerkunde
-# This file is part of ntsportal
+
 
 # Validate records in msrawfiles ####
-
 
 #' Check an msrawfile index for validity
 #'
@@ -16,7 +14,10 @@
 #' @return TRUE
 #' @export
 checkMsrawfiles <- function(indexName = "ntsp_msrawfiles") {
-  allRecords <- getAllMsrawfilesRecords(indexName)
+  if (!grepl("msrawfiles", indexName))
+    stop("This function is intended only for msrawfiles-type indices")
+  dbComm <- getOption("ntsportal.dbComm")()
+  allRecords <- getTableAsRecords(dbComm, indexName, recordConstructor = newMsrawfilesRecord)
   validateRecordsMsrawfiles(allRecords)
 }
 
@@ -32,8 +33,17 @@ validateRecordsMsrawfiles <- function(records) {
   }
 }
 
+#' Validate that a record is correctly formated
+#' 
 #' @export
-validateRecord.msrawfileRecord <- function(record) {
+validateRecord <- function(record) {
+  UseMethod("validateRecord")
+}
+
+#' @rdname validateRecord
+#' @method validateRecord msrawfilesRecord
+#' @export
+validateRecord.msrawfilesRecord <- function(record) {
   all(
     fieldsExistForSampleType(record),
     filesExist(record),
@@ -311,6 +321,8 @@ badBatchWarning <- function(records, reason) {
 
 # Check feature quality
 
+#' @rdname validateRecord
+#' @method validateRecord featureRecord
 #' @export
 validateRecord.featureRecord <- function(record) {
   all(
@@ -388,10 +400,9 @@ warnBadFields <- function(badFields, parentField = "top-level") {
   warning("Fields in ", parentField, " field which should not be there: ", badFieldsString)
 }
 
-#' @export
-validateRecord <- function(record) {
-  UseMethod("validateRecord")
-}
 
-.S3method("validateRecord", "msrawfileRecord", validateRecord.msrawfileRecord)
-.S3method("validateRecord", "featureRecord", validateRecord.featureRecord)
+
+
+
+# Copyright 2025 Bundesanstalt für Gewässerkunde
+# This file is part of ntsportal

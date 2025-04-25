@@ -44,6 +44,8 @@ free_gb <- function() {
 }  
 
 
+
+
 #' Get search results for more than 10000 docs by pagination. 
 #' 
 #' local function
