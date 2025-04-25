@@ -65,7 +65,7 @@ setClass(
 PythonDbComm <- function(ring = "ntsportal") {
   unlockRing(ring)
   ntspCred <- getCred(ring)
-  client <- elasticSearchComm$getDbClient(ntspCred[1], ntspCred[2], "https://elastic.dmz.bafg.de")
+  client <- pyElasticSearchComm$getDbClient(ntspCred[1], ntspCred[2], getOption("ntsportal.elasticsearchHostUrl"))
   dsl <- import("elasticsearch.dsl")
   new("PythonDbComm", client = client, dsl = dsl)
 }

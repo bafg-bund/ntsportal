@@ -16,14 +16,19 @@
 #' @import reticulate
 #' @import purrr
 #' @import methods
+#' @import R6
+#' @import cli
 NULL
 
 .onLoad <- function(libname, pkgname) {
   pathToPyModules <- fs::path_package("ntsportal", "pythonElasticComm")
   options(warn = 1)
   options(ntsportal.dbComm = PythonDbComm)
-  elasticSearchComm <<- reticulate::import_from_path(module = "elasticSearchComm", path = pathToPyModules, delay_load = T)
-  ingestModule <<- reticulate::import_from_path(module = "ingest_main", path = pathToPyModules, delay_load = T)
+  options(ntsportal.elasticsearchHostUrl = "https://elastic.dmz.bafg.de")
+  options(cli.progress_clear = FALSE)
+  options(cli.progress_show_after = 0)
+  pyElasticSearchComm <<- reticulate::import_from_path(module = "elasticSearchComm", path = pathToPyModules, delay_load = T)
+  pyIngestModule <<- reticulate::import_from_path(module = "ingest", path = pathToPyModules, delay_load = T)
 }
 
 .onAttach <- function(libname, pkgname) {
