@@ -2,6 +2,10 @@
 #' DbComm interface
 setClass("DbComm", contains = "VIRTUAL")
 
+getDbComm <- function() {
+  getOption("ntsportal.dbComm")()
+}
+
 setGeneric("refreshTable", function(dbComm, tableName) standardGeneric("refreshTable"))
 setGeneric("deleteTable", function(dbComm, tableName) standardGeneric("deleteTable"))
 setGeneric("isTable", function(dbComm, tableName) standardGeneric("isTable"))
@@ -33,9 +37,7 @@ setGeneric(
 #' @rdname DbComm-methods
 setGeneric("ping", function(dbComm) standardGeneric("ping"))
 
-getDbComm <- function() {
-  getOption("ntsportal.dbComm")()
-}
+
 
 setOldClass(c("elasticsearch.Elasticsearch", "elasticsearch._sync.client._base.BaseClient", "python.builtin.object"))
 setOldClass(c("python.builtin.module", "python.builtin.object"))
@@ -61,6 +63,7 @@ setClass(
 #' @export
 #'
 PythonDbComm <- function(ring = "ntsportal") {
+  unlockRing(ring)
   ntspCred <- getCred(ring)
   client <- elasticSearchComm$getDbClient(ntspCred[1], ntspCred[2], "https://elastic.dmz.bafg.de")
   dsl <- import("elasticsearch.dsl")
