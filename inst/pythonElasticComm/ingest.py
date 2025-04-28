@@ -70,9 +70,7 @@ def ingestToIndices(targetIndexAliasPairs, recs, client):
     for aliasName, targetIndexName in targetIndexAliasPairs.items():
         filteredRecs = [rec for rec in recs if rec['dbas_alias_name'] == aliasName]
 
-        # Function to drop NaN values during conversion from DataFrame to list of dictionaries
-        def drop_nan_entries(row):
-            return {key: value for key, value in row.items() if not (isinstance(value, float) and math.isnan(value))}
+
 
         # Transform DataFrame into list of dictionaries for ingest
         ingestRecs = [drop_nan_entries(rec) for rec in filteredRecs]
@@ -90,6 +88,9 @@ def ingestToIndices(targetIndexAliasPairs, recs, client):
             print(f"BulkIndexError: {e.errors}")
             for error in e.errors:
                 print(f"Document failed: {error}")
-                
+
+def drop_nan_entries(row):
+    return {key: value for key, value in row.items() if not (isinstance(value, float) and math.isnan(value))}                
+
 # Copyright 2025 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
