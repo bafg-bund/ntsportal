@@ -71,6 +71,14 @@ devtools::install_gitlab(
   host = "https://gitlab.lan.bafg.de"
 )
 ```
+
+If that does not work, revert to using the binary file (be aware of the current version):
+
+```{r, eval=FALSE}
+install.packages("/beegfs/nts/renv_package_cellar/ntsportal/ntsportal_25.1.tar.gz")
+```
+
+
 5) Install python requirements
 
 ```{r, eval=FALSE}
