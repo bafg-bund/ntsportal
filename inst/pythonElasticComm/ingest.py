@@ -65,30 +65,26 @@ def createIndexAddAlias(uniqueAliasNames, client, indexTimeStamp, indexMappingPa
     return targetIndexAliasPairs
 
 
-def ingestToIndices(targetIndexAliasPairs, recs, client):
-    """Ingest data to target indices in Elasticsearch."""
+def ingestToIndices(targetIndexAliasPairs, records, client):
     for aliasName, targetIndexName in targetIndexAliasPairs.items():
-        filteredRecs = [rec for rec in recs if rec['dbas_alias_name'] == aliasName]
+        filteredRecs = [rec for rec in records if rec['dbas_alias_name'] == aliasName]
+        recsForAppending = [drop_nan_entries(rec) for rec in filteredRecs]
+        appendRecordsToTable(targetIndexName, recsForAppending, client)
 
+def appendRecordsToTable(tableName, records, client):
+    # Prepare actions as an iterable for streaming_bulk
+    actions = ({"_index": tableName, "_source": doc} for doc in records)
 
-
-        # Transform DataFrame into list of dictionaries for ingest
-        ingestRecs = [drop_nan_entries(rec) for rec in filteredRecs]
-
-        # Prepare actions as an iterable for streaming_bulk
-        actions = ({"_index": targetIndexName, "_source": doc} for doc in ingestRecs)
-
-        try:
-            # Index documents using streaming_bulk
-            for success, result in streaming_bulk(client, actions):
-                action, response = result.popitem()
-                if not success:
-                    print(f"Failed to {action}: {response}")
-        except BulkIndexError as e:
-            print(f"BulkIndexError: {e.errors}")
-            for error in e.errors:
-                print(f"Document failed: {error}")
-
+    try:
+        for success, result in streaming_bulk(client, actions):
+            action, response = result.popitem()
+            if not success:
+                print(f"Failed to {action}: {response}")
+    except BulkIndexError as e:
+        print(f"BulkIndexError: {e.errors}")
+        for error in e.errors:
+            print(f"Document failed: {error}")
+                
 def drop_nan_entries(row):
     return {key: value for key, value in row.items() if not (isinstance(value, float) and math.isnan(value))}                
 

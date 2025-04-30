@@ -50,3 +50,17 @@ test_that("You can retrieve an entire index as records", {
   expect_gte(length(records), 20)
 })
 
+test_that("You can append records to a table (ingest)", {
+  dbComm <- getDbComm()
+  tableName <- "ntsp_temp"
+  createNewTable(dbComm, tableName, "dbas")
+  emptyRecordList <- getEmptyRecord()
+  appendRecords(dbComm, tableName, emptyRecordList)
+  
+  resp <- getTableAsRecords(dbComm, tableName)
+  expect_contains(names(resp[[1]]), "path")
+  checkForAlias(resp[[1]]$dbas_alias_name)
+  
+  deleteTable(dbComm, tableName)
+})
+

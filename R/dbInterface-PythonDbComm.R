@@ -1,45 +1,4 @@
 
-#' DbComm interface
-setClass("DbComm", contains = "VIRTUAL")
-
-getDbComm <- function() {
-  getOption("ntsportal.dbComm")()
-}
-
-setGeneric("refreshTable", function(dbComm, tableName) standardGeneric("refreshTable"))
-setGeneric("deleteTable", function(dbComm, tableName) standardGeneric("deleteTable"))
-setGeneric("isTable", function(dbComm, tableName) standardGeneric("isTable"))
-setGeneric("createNewTable", function(dbComm, tableName, mappingType) standardGeneric("createNewTable"))
-setGeneric("copyTable", function(dbComm, tableName, newTableName, mappingType) standardGeneric("copyTable"))
-setGeneric("getUniqueValues", function(dbComm, tableName, field, maxLength = 10000) standardGeneric("getUniqueValues"))
-setGeneric("replaceValueInField", function(dbComm, tableName, field, oldValue, newValue) standardGeneric("replaceValueInField"))
-setGeneric("getNrow", function(dbComm, tableName, queryBlock = list()) standardGeneric("getNrow"))
-setGeneric("deleteRow", function(dbComm, tableName, queryBlock = list()) standardGeneric("deleteRow"))
-
-
-#' Test the DB-Connection
-#' 
-#' @param queryBlock list coercible to json for elasticSearch REST API (Query DSL)
-#' @param recordConstructor function to construct new records
-#'  
-#' @return TRUE when connection active
-#' @export
-#' @docType methods
-#' @rdname DbComm-methods
-setGeneric(
-  "getTableAsRecords", 
-  function(dbComm, tableName, queryBlock = list(), recordConstructor = newNtspRecord) 
-    standardGeneric("getTableAsRecords")
-)
-
-#' Test the DB-Connection
-#' 
-#' @return TRUE when connection active
-#' @export
-#' @docType methods
-#' @rdname DbComm-methods
-setGeneric("ping", function(dbComm) standardGeneric("ping"))
-
 
 
 setOldClass(c("elasticsearch.Elasticsearch", "elasticsearch._sync.client._base.BaseClient", "python.builtin.object"))
@@ -173,16 +132,21 @@ setMethod("getNrow", "PythonDbComm",function(dbComm, tableName, queryBlock = lis
   s$count()
 })
 
-setMethod("deleteRow", "PythonDbComm",function(dbComm, tableName, queryBlock) {
+setMethod("deleteRow", "PythonDbComm", function(dbComm, tableName, queryBlock) {
   resp <- dbComm@client$delete_by_query(index = tableName, body = queryBlock)
   message(resp$body$deleted, " row(s) deleted")
 })
 
-getAliasTable <- function(dbComm, aliasName) {
+setMethod("getAliasTable" , "PythonDbComm",  function(dbComm, aliasName) {
   stopifnot(length(aliasName) == 1)
   resp <- dbComm@client$cat$aliases(name=aliasName)
   if (resp$body == "")
     return("")
   respTab <- read.delim(text = resp$body, header = F, sep = " ") 
   respTab[, 2]
-}
+})
+
+setMethod("appendRecords", "PythonDbComm", function(dbComm, tableName, records) {
+  pyIngestModule$appendRecordsToTable(tableName, records, dbComm@client)
+  refreshTable(dbComm, tableName)
+})

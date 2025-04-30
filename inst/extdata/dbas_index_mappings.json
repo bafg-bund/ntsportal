@@ -5,13 +5,13 @@
       "area_relative_to_internal_standard" : {
         "type": "double",
         "script": {
-          "source": "emit((double)params._source.area / (double)params._source.area_internal_standard)"
+          "source": "if (params._source.area_internal_standard != null) emit((double)params._source.area / (double)params._source.area_internal_standard)"
         }
       },
       "intensity_relative_to_internal_standard" : {
         "type": "double",
         "script": {
-          "source": "emit((double)params._source.intensity / (double)params._source.intensity_internal_standard)"
+          "source": "if (params._source.intensity_internal_standard != null) emit((double)params._source.intensity / (double)params._source.intensity_internal_standard)"
         }
       }
     },

@@ -16,3 +16,4 @@
 ^franzi$
 ^ole$
 ^.*\.json$
+^.git$
