@@ -2,35 +2,29 @@
 
 # Create new msrawfiles_unit_tests index
 createNewMsrawfileUnitTestsIndex <- function() {
-  dbComm <- getOption("ntsportal.dbComm")()
+  dbComm <- getDbComm()
   copyTable(dbComm, "ntsp_msrawfiles_unit_tests", testIndexName, "msrawfiles")
   changeAllDbasAliasNames(dbComm, testIndexName, ntspVersion)
 }
 
 
 # deleteIndex(testIndexName)
-
-recreateEntireTestMsrawfilesIndex <- function() {
-  dbComm <- getOption("ntsportal.dbComm")()
-  allRecords <- getTableAsRecords(dbComm, testIndexName, recordConstructor = newMsrawfilesRecord)
-  saveRDS(allRecords, test_path("fixtures", "screening-collectMsrawfileRecords", "entireTestMsrawfilesIndex.RDS"))
-}
-
 buildMsrawfilesAllRecords <- function() {
-  dbComm <- getOption("ntsportal.dbComm")()
+  dbComm <- getDbComm()
   allRecords <- getTableAsRecords(dbComm, testIndexName, recordConstructor = newMsrawfilesRecord)
   saveRDS(allRecords, test_path("fixtures", "msrawfilesTestRecords", "allRecords.RDS"))
 }
 
-buildRecordsInBatches <- function() {
-  dbComm <- getOption("ntsportal.dbComm")()
-  allRecords <- getTableAsRecords(dbComm, testIndexName, recordConstructor = newMsrawfilesRecord)
-  recordsInBatches <- splitRecordsByDir(allRecords)
-  saveRDS(recordsInBatches, test_path("fixtures", "msrawfilesTestRecords", "recordsInBatches.RDS"))
+buildOneSampleDbasResult <- function() {
+  records <- getOneSampleRecords()
+  result <- scanBatchDbas(records)
+  saveRDS(result, test_path("fixtures", "screening-convertToRecord", "oneSampleDbasResult.RDS"))
 }
 
+
+
 buildAllRecordsFlat <- function() {
-  dbComm <- getOption("ntsportal.dbComm")()
+  dbComm <- getDbComm()
   allRecords <- getTableAsRecords(dbComm, testIndexName, recordConstructor = newMsrawfilesRecord)
 }
 

@@ -1,6 +1,16 @@
 {
   "mappings" : {
     "dynamic": "strict",
+    "runtime": {
+      "filename": {
+        "type" : "keyword",
+        "script": "def x=params._source.path.splitOnToken('/'); emit(x[x.length-1])"
+      },
+      "batchname": {
+        "type": "keyword",
+        "script": "def x = params._source.path.splitOnToken('/'); emit(String.join('/', Arrays.asList(x).subList(0,x.length-1)))"
+      }
+    },
     "properties" : {
       "comment" : {"type" : "text"},
       "tag": {"type": "keyword"},
@@ -32,7 +42,6 @@
       "loc" : {"type" : "geo_point"},
       "matrix" : {"type" : "keyword"},
       "pol" : {"type" : "keyword"},
-      "filename" : {"type" : "keyword"},
       "station" : {"type" : "keyword"},
       "path": {"type" : "keyword"},
       "filesize": {"type" : "float", "meta": {"unit": "MB"}},                                   

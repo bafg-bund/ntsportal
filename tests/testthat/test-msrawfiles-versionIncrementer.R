@@ -3,15 +3,15 @@ test_that("A new ntsp version can be set in msrawfiles", {
   dbComm <- PythonDbComm()
   currentYear <- format(Sys.Date(), "%y")
   version <- paste0(currentYear, ".9")
-  msrawfilesSetVersion(testIndexName, version)
   newTableName <- getNewTableName(testIndexName, version)
+  if (isTable(dbComm, newTableName))
+    deleteTable(dbComm, newTableName)
+  
+  msrawfilesSetVersion(testIndexName, version)
+  
   expect_true(isTable(dbComm, newTableName))
-  newAliasName <- esSearchPaged(
-    newTableName, 
-    totalSize = 1, 
-    sort = "start", 
-    source = "dbas_alias_name"
-  )$hits$hits[[1]][["_source"]]$dbas_alias_name
+  recs <- getTableAsRecords(dbComm, newTableName)
+  newAliasName <- recs[[1]][["dbas_alias_name"]]
   expect_equal(newAliasName, glue("ntsp{currentYear}.9_dbas_unit_tests"))
   deleteTable(dbComm, newTableName)
 })

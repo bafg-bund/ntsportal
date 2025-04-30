@@ -1,24 +1,23 @@
 
 
 
-entireTestMsrawfilesIndex <- function() {
-  readRDS(test_path("fixtures", "msrawfilesTestRecords", "allRecords.RDS"))
-}
 
-prepareExampleFeatureIndex <- function(escon, ntspVersion) {
-  removeExampleFeatureIndex(escon, ntspVersion)
+prepareExampleFeatureIndex <- function(ntspVersion) {
+  removeExampleFeatureIndex(ntspVersion)
   emptyResult <- convertToDbasResult(emptyReport())
-  emptyRecord <- convertToRecord(emptyResult, list(getMsrawfileRecordNoPeaks()))
+  emptyRecord <- convertToRecord(emptyResult, list(getRecordNoPeaks()))
   tempDir <- withr::local_tempdir()
   saveRecord(emptyRecord, tempDir)
-  indexNames <- ingestJson(tempDir)
+  indexNames <- ingest(tempDir)
   dbComm <- getDbComm()
   refreshTable(dbComm, indexNames[[1]][[1]])
 }
 
-removeExampleFeatureIndex <- function(escon, ntspVersion) {
-  indexNames <- elastic::cat_aliases(escon, index = glue("ntsp{ntspVersion}_dbas_unit_tests"), parse = T)[,2]
-  if (!is.null(indexNames))
-    for (indexName in indexNames) 
-      elastic::index_delete(escon, index = indexName)
+removeExampleFeatureIndex <- function(ntspVersion) {
+  dbComm <- getDbComm()
+  tableNames <- getAliasTable(dbComm, glue("ntsp{ntspVersion}_dbas_unit_tests"))
+  
+  if (tableNames != "")
+    for (tableName in tableNames) 
+      deleteTable(dbComm, tableName)
 }

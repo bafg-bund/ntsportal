@@ -1,8 +1,7 @@
 
-connectNtsportal()
 
 test_that("A dummy record can be added to msrawfiles", {
-  
+  dbComm <- getDbComm()
   testFile <- test_path("fixtures", "msrawfiles-addRecord", "RH_pos_20220603_no_peaks_test_addRecord.mzXML")
   templateIdFromMsrawfilesIndex <- "VNSTWpABQ5NoSyLHKzdl"
   saveDir <- withr::local_tempdir()
@@ -17,24 +16,20 @@ test_that("A dummy record can be added to msrawfiles", {
     )  
   )
   
-  
   importedRecord <- jsonlite::read_json(list.files(saveDir, f = T))
-  expect_length(importedRecord[[1]], 85)
-  pathResult <- elastic::Search(escon, testIndexName, source = "path", body = list(query = list(
+  expect_length(importedRecord[[1]], 84)
+  recs <- getTableAsRecords(dbComm, testIndexName, list(query = list(
     regexp = list(path = ".*RH_pos_20220603_no_peaks_test_addRecord.mzXML")
-  )))$hits$hits[[1]][["_source"]]$path
+  )))
+  pathResult <- recs[[1]]$path
+
   expect_equal(normalizePath(testFile), pathResult)
-  
-  elastic::docs_delete(escon, testIndexName, idAdded)
+  deleteRow(dbComm, testIndexName, list(query = list(ids = list(values = idAdded))))
   file.remove(list.files(saveDir, f = T))
-  
-  Sys.sleep(1)
-  numFound <- elastic::Search(escon,
-                              testIndexName,
-                              source = "path",
-                              body = list(query = list(
-                                regexp = list(path = ".*msrawfiles-addRecord/RH_pos_20220603_no_peaks_test_addRecord.mzXML")
-                              )))$hits$total$value
+  refreshTable(dbComm, testIndexName)
+  numFound <- getNrow(dbComm, testIndexName, list(query = list(
+    regexp = list(path = ".*msrawfiles-addRecord/RH_pos_20220603_no_peaks_test_addRecord.mzXML")
+  )))
   expect_equal(numFound, 0)
 })
 

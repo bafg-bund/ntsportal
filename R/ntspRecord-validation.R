@@ -88,6 +88,7 @@ correctRawfileLocation <- function(path) {
   }
 }
 
+
 correctIsTablePolarity <- function(rec) {
   tablePath <- basename(rec$dbas_is_table)
   if (grepl(rec$pol, tablePath)) {

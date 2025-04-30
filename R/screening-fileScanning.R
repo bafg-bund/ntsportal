@@ -200,7 +200,10 @@ convertToDbasResult <- function(report) {
     eicTable = report$EIC,
     intStdResults = report$ISresults
   )
+  # Correct bug in ntsworkflow - integRes$samp is full path rather than sample name
+  results$reintegrationResults$samp <- basename(results$reintegrationResults$samp) 
   results$intStdResults <- results$intStdResults[, c("samp", "IS", "int_h", "int_a")]
+  
   results$intStdResults <- dplyr::rename(results$intStdResults, filename = samp, compound_name = IS, intensity = int_h, 
                                          area = int_a)
   class(results) <- "dbasResult"

@@ -8,6 +8,7 @@ test_that("A sample and blank can be scanned", {
   endTime <- Sys.time()
   message("Time needed to processes sample and blank: ", round(difftime(endTime, startTime, units = "secs")), " s")
   expect_true(nrow(results$peakList) > 0)
+  expect_no_match(results$reintegrationResults$samp, "/")
   expect_s3_class(results, "dbasResult")
 })
 
@@ -78,7 +79,7 @@ test_that("False positives are removed", {
 test_that("Test file Des_07_01_pos.mzXML can be processed for Bisoprolol", {
   recordDes_07_01 <- getSingleRecordDes_07_01_pos()
   
-  fileResult <- fileScanDbas(msrawfileRecord = recordDes_07_01, compsToProcess = "Bisoprolol")
+  fileResult <- fileScanDbas(msrawfileRecord = recordDes_07_01[[1]], compsToProcess = "Bisoprolol")
   
   expect_s4_class(fileResult, "Report")
   expect_equal(fileResult$peakList$comp_name, "Bisoprolol")

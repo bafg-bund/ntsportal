@@ -3,7 +3,7 @@
 #' @export
 convertToRecord.dbasResult <- function(scanResult, msrawfileRecords) {
   
-  msrawfileRecords <- nameRecordsByFilename(msrawfileRecords)
+  msrawfileRecords <- nameRecordsByPath(msrawfileRecords)
   
   features <- getAreasOfFeatures(scanResult)
   
@@ -27,7 +27,6 @@ convertToRecord.dbasResult <- function(scanResult, msrawfileRecords) {
 getAreasOfFeatures.dbasResult <- function(scanResult) {
   features <- scanResult$reintegrationResults[, c("samp", "comp_name", "adduct", "isotopologue",
                                                   "int_h", "int_a", "real_mz", "real_rt_min")]
-  features$samp <- basename(features$samp)
   features$int_a <- signif(features$int_a, 3)
   features$int_a <- signif(features$int_h, 3)
   features$real_mz <- round(features$real_mz, 4)
@@ -38,7 +37,10 @@ getAreasOfFeatures.dbasResult <- function(scanResult) {
   colnames(features) <- gsub("^real_mz$", "mz", colnames(features))
   colnames(features) <- gsub("^real_rt_min$", "rt", colnames(features))
   rownames(features) <- NULL
-  featureList <- split(features, seq_len(nrow(features))) 
+  allFilePaths <- data.frame(path = scanResult$rawFilePaths, filename = basename(scanResult$rawFilePaths))
+  featuresWithPath <- merge(features, allFilePaths, by = "filename")
+  featuresWithPath$filename <- NULL
+  featureList <- split(featuresWithPath, seq_len(nrow(featuresWithPath))) 
   featureList <- lapply(featureList, as.list)
   featureList <- unname(featureList)
   featureList
@@ -87,8 +89,9 @@ addResponseIntStd <- function(features, scanResult) {
     if (!is.element(rec$internal_standard, resp$compound_name)) {
       return(rec)
     } else {
-      rec$area_internal_standard <- resp[resp$filename == rec$filename & resp$compound_name == rec$internal_standard, "area"]
-      rec$intensity_internal_standard <- resp[resp$filename == rec$filename & resp$compound_name == rec$internal_standard, "intensity"]
+      fileName <- basename(rec$path)
+      rec$area_internal_standard <- resp[resp$filename == fileName & resp$compound_name == rec$internal_standard, "area"]
+      rec$intensity_internal_standard <- resp[resp$filename == fileName & resp$compound_name == rec$internal_standard, "intensity"]
       rec
     }
   })
@@ -101,7 +104,7 @@ addSampleInfo <- function(features, msrawfileRecords) {
     reduceRecordToFields, 
     fields = fieldsToMergeFromMsrawfiles()
   )
-  recordsPerFeature <- msrawfileRecords[sapply(features, "[[", i = "filename")]
+  recordsPerFeature <- msrawfileRecords[sapply(features, "[[", i = "path")]
   purrr::map2(features, recordsPerFeature, c)
 }
 
@@ -182,8 +185,8 @@ makeEmptyRecordWithPath <- function(msrawfileRecords) {
 
 
 
-nameRecordsByFilename <- function(msrawfileRecords) {
-  names(msrawfileRecords) <- getField(msrawfileRecords, "filename")
+nameRecordsByPath <- function(msrawfileRecords) {
+  names(msrawfileRecords) <- getField(msrawfileRecords, "path")
   msrawfileRecords
 }
 
@@ -227,7 +230,7 @@ getPeakIdForFeature <- function(feature, peakList) {
   subset(
     peakList, 
     comp_name == feature$name & 
-      samp == feature$filename &
+      samp == basename(feature$path) &
       adduct == feature$adduct &
       isotopologue == feature$isotopologue, 
     peakID, 

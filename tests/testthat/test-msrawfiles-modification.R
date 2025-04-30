@@ -12,7 +12,7 @@ test_that("A measurement file can be moved and name can be changed", {
   expect_true(changeMsrawfilePath(testIndexName, originalPath, newPath, "filesize"))
   refreshTable(dbComm, testIndexName)
   # test the change
-  n <- esSearchPaged(testIndexName, searchBody = list(query = list(term = list(path = newPath))), totalSize = 0, sort = "start")$hits$total$value
+  n <- getNrow(dbComm, testIndexName, queryBlock = list(query = list(term = list(path = newPath))))
   expect_equal(n, 1)
   
   # change filename to "blah.mzXML"
@@ -20,10 +20,9 @@ test_that("A measurement file can be moved and name can be changed", {
   expect_true(suppressMessages(changeMsrawfileFilename(testIndexName, newPath, newNewPath)))
   refreshTable(dbComm, testIndexName)
   # test the change
-  n <- esSearchPaged(testIndexName, searchBody = list(query = list(term = list(path = newNewPath))), totalSize = 0, sort = "start")$hits$total$value
+  n <- getNrow(dbComm, testIndexName, queryBlock = list(query = list(term = list(path = newNewPath))))
   expect_equal(n, 1)
-  
-  elastic::docs_delete(escon, testIndexName, idAdded)
+  deleteRow(dbComm, testIndexName, list(query = list(ids = list(values = idAdded))))
   refreshTable(dbComm, testIndexName)
   file.remove(list.files(saveDir, f = T))
 })

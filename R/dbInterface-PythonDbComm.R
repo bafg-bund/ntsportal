@@ -13,6 +13,9 @@ setGeneric("createNewTable", function(dbComm, tableName, mappingType) standardGe
 setGeneric("copyTable", function(dbComm, tableName, newTableName, mappingType) standardGeneric("copyTable"))
 setGeneric("getUniqueValues", function(dbComm, tableName, field, maxLength = 10000) standardGeneric("getUniqueValues"))
 setGeneric("replaceValueInField", function(dbComm, tableName, field, oldValue, newValue) standardGeneric("replaceValueInField"))
+setGeneric("getNrow", function(dbComm, tableName, queryBlock = list()) standardGeneric("getNrow"))
+setGeneric("deleteRow", function(dbComm, tableName, queryBlock = list()) standardGeneric("deleteRow"))
+
 
 #' Test the DB-Connection
 #' 
@@ -160,3 +163,26 @@ setMethod("getTableAsRecords", "PythonDbComm", function(dbComm, tableName, query
     stop("Exceeded the maximum docs that may be retrieved (1e6)")
   iterate(s$iterate(), function(hit) recordConstructor(hit$to_dict()))
 })
+
+
+setMethod("getNrow", "PythonDbComm",function(dbComm, tableName, queryBlock = list()) {
+  if (length(queryBlock) == 0)
+    queryBlock <- list(query = list(match_all = stats::setNames(list(), character(0))))
+  s <- dbComm@dsl$Search(using=dbComm@client, index = tableName)$
+    update_from_dict(queryBlock)
+  s$count()
+})
+
+setMethod("deleteRow", "PythonDbComm",function(dbComm, tableName, queryBlock) {
+  resp <- dbComm@client$delete_by_query(index = tableName, body = queryBlock)
+  message(resp$body$deleted, " row(s) deleted")
+})
+
+getAliasTable <- function(dbComm, aliasName) {
+  stopifnot(length(aliasName) == 1)
+  resp <- dbComm@client$cat$aliases(name=aliasName)
+  if (resp$body == "")
+    return("")
+  respTab <- read.delim(text = resp$body, header = F, sep = " ") 
+  respTab[, 2]
+}

@@ -72,6 +72,7 @@ esSearchPaged <- function(
   newSize <- 10000
   if (totalSize < 10000)
     newSize <- totalSize
+  createEscon()
   res1 <- elastic::Search(escon, indexName, body = searchBody, sort = sort, 
                           size = newSize, ...)
   numHits <- length(res1$hits$hits)

@@ -174,7 +174,7 @@ addRawfiles <- function(
     },
     stop("Unknown input, aborting.")
   )
-  
+  createEscon()
   ids <- character()
   for (doci in newRecords) {
     response <- elastic::docs_create(escon, rfIndex, body = doci)
@@ -185,8 +185,8 @@ addRawfiles <- function(
   message("Documents were uploaded with the IDs")
   message(idString)
   
-  # ElasticSearch needs time for indexing
-  Sys.sleep(2)  
+  dbComm <- getDbComm()
+  refreshTable(dbComm, rfIndex)
 
   timesFound <- vapply(newPaths, filenameCountInIndex, numeric(1), rfIndex = rfIndex)
   
@@ -324,18 +324,17 @@ newRecordFromTemplate <- function(pth, newStart, newStation, template, rfIndex, 
 
 addPathToRecord <- function(rec, pth) {
   rec$path <- normalizePath(pth)
-  rec$filename <- basename(pth)
   rec
 }
 
 addPolToRecord <- function(rec) {
-  rec$pol <-  getPolFromFilename(rec$filename)
+  rec$pol <-  getPolFromPath(rec$path)
   rec
 }
 
 addStartToRecord <- function(rec, newStart) {
   if (newStart == "filename") {
-    rec$start <- getFormatedStartFromFilename(rec$filename, rec$dbas_date_regex, rec$dbas_date_format)
+    rec$start <- getFormatedStartFromFilename(basename(rec$path), rec$dbas_date_regex, rec$dbas_date_format)
   } else {
     rec$start <- getFixedStart(newStart)
   }
@@ -377,7 +376,7 @@ addStationToRecord <- function(rec, newStation, rfIndex, newStationList) {
   # In the case of "same_as_template" no changes are made to rec (it was a copy of template)
   if (newStation == "filename") {
     
-    stationList <- getStationListFromCode(rfIndex, rec$filename, rec$dbas_station_regex)
+    stationList <- getStationListFromCode(rfIndex, basename(rec$path), rec$dbas_station_regex)
     rec <- appendStationListFields(rec, stationList)
   } else if (newStation == "newStationList") {
     rec <- appendStationListFields(rec, newStationList)
@@ -549,19 +548,16 @@ fileNotInIndex <- function(pathToCheck, rfIndex) {
 }
 
 filenameCountInIndex <- function(pathToCheck, rfIndex) {
-  res <- elastic::Search(
-    escon, rfIndex, size = 0, 
-    body = list(query = list(term = list(filename = basename(pathToCheck))))
-  )
-  res$hits$total$value
+  dbComm <- getDbComm()
+  getNrow(dbComm, rfIndex, list(query = list(term = list(filename = basename(pathToCheck)))))
 }
 
 getPolFromPaths <- function(newPaths) {
-  unique(vapply(basename(newPaths), getPolFromFilename, character(1)))
+  unique(vapply(newPaths, getPolFromPath, character(1)))
 }
 
-getPolFromFilename <- function(fname) {
-  stringr::str_extract(fname, "pos|neg")
+getPolFromPath <- function(path) {
+  stringr::str_extract(basename(path), "pos|neg")
 }
 
 addError <- function(checkResult, warningText) {
@@ -580,7 +576,11 @@ stopIfAnyErrors <- function(checkResult) {
 }
 
 getTemplateRecord <- function(rfIndex, templateId) {
-  res <- elastic::docs_get(escon, rfIndex, templateId, verbose = F)
-  newMsrawfilesRecord(res$`_source`)
+  dbComm <- getDbComm()
+  getTableAsRecords(
+    dbComm, rfIndex, 
+    list(query = list(ids = list(values = templateId))), 
+    newMsrawfilesRecord
+  )[[1]]
 }
 
