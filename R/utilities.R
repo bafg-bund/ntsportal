@@ -167,7 +167,7 @@ build_es_query_for_ids <- function(ids, toShow) {
 }
 
 getMapping <- function(mappingType) {
-  stopifnot(mappingType %in% c("dbas", "msrawfiles", "nts"))
+  stopifnot(mappingType %in% c("dbas", "msrawfiles", "nts", "analysis_dbas"))
   pth <- fs::path_package("ntsportal", "extdata", glue("{mappingType}_index_mappings.json"))
   jsonlite::read_json(pth)
 }

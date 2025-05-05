@@ -60,14 +60,18 @@ setMethod("refreshTable", "PythonDbComm", function(dbComm, tableName) {
 
 
 setMethod("deleteTable", "PythonDbComm", function(dbComm, tableName) {
-  tryCatch(
-    resp <- dbComm@dsl$Index(tableName)$delete(using = dbComm@client),
-    error = function(cnd) {
-      warning("deleteTable Error. Message: ", conditionMessage(cnd))
-    }
-  )
-  if (resp$body$acknowledged)
-    message("Table deleted")
+  if (isTable(dbComm, tableName)) {
+    tryCatch(
+      resp <- dbComm@dsl$Index(tableName)$delete(using = dbComm@client),
+      error = function(cnd) {
+        warning("deleteTable Error. Message: ", conditionMessage(cnd))
+      }
+    )
+    if (resp$body$acknowledged)
+      message("Table deleted")
+  } else {
+    message("Table not found")
+  }
 })
 
 
@@ -114,8 +118,7 @@ setMethod("replaceValueInField", "PythonDbComm", function(dbComm, tableName, fie
 })
 
 setMethod("getTableAsRecords", "PythonDbComm", function(dbComm, tableName, queryBlock = list(), recordConstructor = newNtspRecord) {
-  if (length(queryBlock) == 0)
-    queryBlock <- list(query = list(match_all = stats::setNames(list(), character(0))))
+  queryBlock <- matchAllIfEmpty(queryBlock)
   s <- dbComm@dsl$Search(using=dbComm@client, index = tableName)$
     update_from_dict(queryBlock)
   if (s$count() > 1e6)
@@ -123,10 +126,32 @@ setMethod("getTableAsRecords", "PythonDbComm", function(dbComm, tableName, query
   iterate(s$iterate(), function(hit) recordConstructor(hit$to_dict()))
 })
 
+getTableAsTibble <- function(dbComm, tableName, queryBlock = list()) {
+  recs <- getTableAsRecords(dbComm, tableName, queryBlock)
+  convertRecordsToTibble(recs)
+}
+
+convertRecordsToTibble <- function(recs) {
+  tibbleRowsList <- map(recs, getTibbleRow)
+  dplyr::bind_rows(tibbleRowsList)
+} 
+
+getTibbleRow <- function(rec) {
+  tibbleRow <- unclass(rec) |> 
+    tibble::enframe() |> 
+    tidyr::pivot_wider() 
+  
+  length1Cols <- tibbleRow |>
+    select(where(is.list)) |>
+    select(where(~ all(lengths(.) == 1))) |>
+    names()
+  
+  tibbleRow |> tidyr::unnest(cols = all_of(length1Cols))
+}
 
 setMethod("getNrow", "PythonDbComm",function(dbComm, tableName, queryBlock = list()) {
-  if (length(queryBlock) == 0)
-    queryBlock <- list(query = list(match_all = stats::setNames(list(), character(0))))
+  queryBlock <- matchAllIfEmpty(queryBlock)
+  
   s <- dbComm@dsl$Search(using=dbComm@client, index = tableName)$
     update_from_dict(queryBlock)
   s$count()
@@ -149,4 +174,14 @@ setMethod("getAliasTable" , "PythonDbComm",  function(dbComm, aliasName) {
 setMethod("appendRecords", "PythonDbComm", function(dbComm, tableName, records) {
   pyIngestModule$appendRecordsToTable(tableName, records, dbComm@client)
   refreshTable(dbComm, tableName)
+  message("Records appended to table ", tableName)
 })
+
+
+matchAllIfEmpty <- function(queryBlock) {
+  if (length(queryBlock) == 0) {
+    return(list(query = list(match_all = stats::setNames(list(), character(0)))))
+  } else {
+    return(queryBlock)
+  }
+}

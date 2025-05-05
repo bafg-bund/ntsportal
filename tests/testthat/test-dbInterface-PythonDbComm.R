@@ -50,6 +50,13 @@ test_that("You can retrieve an entire index as records", {
   expect_gte(length(records), 20)
 })
 
+test_that("You can retrieve an index as a tibble", {
+  dbComm <- getDbComm()
+  testTibble <- getTableAsTibble(dbComm, testIndexName)
+  expect_s3_class(testTibble, "tbl_df")
+  expect_gte(nrow(testTibble), 20)
+})
+
 test_that("You can append records to a table (ingest)", {
   dbComm <- getDbComm()
   tableName <- "ntsp_temp"

@@ -13,6 +13,7 @@ test_that("A long list of feature records are saved to multiple files", {
 })
 
 test_that("Simple record can be saved as json", {
+  Sys.getenv()
   featureRecordList <- getFeatureRecord()
   tempSaveDir <- withr::local_tempdir()
   

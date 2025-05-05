@@ -1,0 +1,22 @@
+{
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "lm": {
+        "type": "float"
+      },
+      "matrix": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "pol": {
+        "type": "keyword"
+      },
+      "station": {
+        "type": "keyword"
+      }
+    }
+  }
+}
