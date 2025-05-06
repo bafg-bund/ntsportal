@@ -34,3 +34,9 @@ getRecordNoPeaks <- function() {
 getMsrawfilesTestRecords <- function() {
   readRDS(test_path("fixtures", "msrawfilesTestRecords", "allRecords.RDS"))
 }
+
+getExampleCslAsRecords <- function() {
+  suppressMessages(
+    records <- SpecLibRecords$new(test_path("fixtures", "CSL_olmesartan-d6.db"))
+  )
+}

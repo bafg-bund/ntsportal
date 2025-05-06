@@ -2,9 +2,9 @@
   "mappings": {
     "dynamic": "strict",
     "properties": {
-      "date_import" : {
+      "time_added" : {
         "type" : "date",
-        "format" : "epoch_second"
+        "format" : "yyyy-MM-dd HH:mm:ss"
       },
       "cas" : {"type" : "keyword"},
       "name" : {"type" : "keyword"},

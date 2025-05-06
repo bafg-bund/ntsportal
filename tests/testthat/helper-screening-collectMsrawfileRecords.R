@@ -17,7 +17,9 @@ removeExampleFeatureIndex <- function(ntspVersion) {
   dbComm <- getDbComm()
   tableNames <- getAliasTable(dbComm, glue("ntsp{ntspVersion}_dbas_unit_tests"))
   
-  if (tableNames != "")
-    for (tableName in tableNames) 
-      deleteTable(dbComm, tableName)
+  if (tableNames[1] == "")
+    return(NULL)
+  
+  for (tableName in tableNames) 
+    deleteTable(dbComm, tableName)
 }

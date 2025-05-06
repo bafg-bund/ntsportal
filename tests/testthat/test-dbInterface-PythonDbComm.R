@@ -60,6 +60,7 @@ test_that("You can retrieve an index as a tibble", {
 test_that("You can append records to a table (ingest)", {
   dbComm <- getDbComm()
   tableName <- "ntsp_temp"
+  deleteTable(dbComm, tableName)  # in case it already exists
   createNewTable(dbComm, tableName, "dbas")
   emptyRecordList <- getEmptyRecord()
   appendRecords(dbComm, tableName, emptyRecordList)

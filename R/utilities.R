@@ -167,8 +167,13 @@ build_es_query_for_ids <- function(ids, toShow) {
 }
 
 getMapping <- function(mappingType) {
-  stopifnot(mappingType %in% c("dbas", "msrawfiles", "nts", "analysis_dbas"))
+  stopifnot(mappingType %in% c("dbas", "msrawfiles", "nts", "analysis_dbas", "spectral_library"))
   pth <- fs::path_package("ntsportal", "extdata", glue("{mappingType}_index_mappings.json"))
   jsonlite::read_json(pth)
 }
 
+testConnection <- function() {
+  dbComm <- getDbComm()
+  if (!ping(dbComm))
+    stop("Unable to connect to elasticSearch")
+}

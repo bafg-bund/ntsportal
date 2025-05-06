@@ -8,11 +8,11 @@ test_that("A measurement file can be moved and name can be changed", {
   expect_true(file.copy(originalPath, newPath))
   idAdded <- makeTestRecord(originalPath, testIndexName, saveDir)
   
-  # move test file to temporary location
+  # move test record path to temporary location
   expect_true(changeMsrawfilePath(testIndexName, originalPath, newPath, "filesize"))
   refreshTable(dbComm, testIndexName)
   # test the change
-  n <- getNrow(dbComm, testIndexName, queryBlock = list(query = list(term = list(path = newPath))))
+  n <- getNrow(dbComm, testIndexName, queryBlock = list(query = list(regexp = list(path = ".*test_addRecord.*"))))
   expect_equal(n, 1)
   
   # change filename to "blah.mzXML"
@@ -20,7 +20,7 @@ test_that("A measurement file can be moved and name can be changed", {
   expect_true(suppressMessages(changeMsrawfileFilename(testIndexName, newPath, newNewPath)))
   refreshTable(dbComm, testIndexName)
   # test the change
-  n <- getNrow(dbComm, testIndexName, queryBlock = list(query = list(term = list(path = newNewPath))))
+  n <- getNrow(dbComm, testIndexName, queryBlock = list(query = list(regexp = list(path = ".*blah.*"))))
   expect_equal(n, 1)
   deleteRow(dbComm, testIndexName, list(query = list(ids = list(values = idAdded))))
   refreshTable(dbComm, testIndexName)
