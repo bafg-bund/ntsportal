@@ -1,8 +1,8 @@
 
 #' Create images of structural formulas for display in Kibana dashboard
 #'
-#' @param databasePath Path to CSL
-#' @param targetDir Path to save png of structures
+#' @param databasePath Path to spectral library (sqlite)
+#' @param targetDir Path where the PNGs are stored
 #'
 #' @return no return value
 #' @export
@@ -12,19 +12,20 @@ createAllStructures <- function(databasePath, targetDir) {
   newDbPath <- file.path(tempDir, "db.db")
   importCsl(databasePath, newDbPath)
   compList <- extractCompoundList(newDbPath)
-  
-  for (i in 1:nrow(compList))
+  cli_progress_bar("Creating PNGs", total = nrow(compList))
+  for (i in 1:nrow(compList)) {
     createPngFromSmiles(compList[i, "SMILES"], compList[i, "inchikey"], targetDir)
+    cli_progress_update()
+  }
+  cli_process_done()
   
-  file.remove(list.files(tempDir,full.names = TRUE))
+  file.remove(list.files(tempDir, full.names = TRUE))
   file.remove(tempDir)
   message("Complete")
 }
 
 extractCompoundList <- function(databaseFile) {
-  sqLiteDriver <- RSQLite::dbDriver("SQLite")
   database <- RSQLite::dbConnect(RSQLite::dbDriver("SQLite"), dbname = databaseFile)
-  RSQLite::dbListTables(database)
   compoundList <- RSQLite::dbReadTable(database, "compound")
   RSQLite::dbDisconnect(database)
   compoundList
@@ -33,7 +34,7 @@ extractCompoundList <- function(databaseFile) {
 createPngFromSmiles <- function(smiles,inchikey,targetPath) {
   iAtomContainer <- rcdk::parse.smiles(smiles, kekulise = TRUE)
   structureMatrix <- lapply(iAtomContainer,makeStructureMatrix)
-  outputPath <- file.path(targetPath,paste0(inchikey,".png"))
+  outputPath <- file.path(targetPath, paste0(inchikey,".png"))
   png(outputPath)
   plot.new()
   plot.window(c(0, 1), c(0, 1))
@@ -55,4 +56,54 @@ importCsl <- function(databasePath,targetPath) {
     copy.date = TRUE,
     overwrite = TRUE
   )
+}
+
+#' Check that PNGs for structural formulae are consistent with the spectral library
+#'
+#' @inheritParams createAllStructures
+#'
+#' @export
+checkPngAvailability <- function(databasePath, targetDir) {
+  compList <- extractCompoundList(databasePath)
+  missingPngs <- getMissingPngs(databasePath, targetDir)
+  redundantPngs <- getRedundantPngs(databasePath, targetDir)
+  
+  if (length(missingPngs) > 0) {
+    cli_alert_warning("Structure PNG(s) missing")
+    compIds <- paste(sapply(missingPngs, \(x) compList[compList$inchikey == x, "name"]), missingPngs, sep = " - ")
+    cli_ul(compIds)
+  }
+  if (length(redundantPngs) > 0) {
+    cli_alert_warning("Structure PNG(s) have no corresponding DB entry")
+    cli_ul(redundantPngs)
+  }
+}
+
+getRedundantPngs <- function(databasePath, targetDir) {
+  compList <- extractCompoundList(databasePath)
+  inchikeyFiles <- getAllPngInchikeys(targetDir)
+  setdiff(inchikeyFiles, compList$inchikey)
+}
+
+getMissingPngs <- function(databasePath, targetDir) {
+  compList <- extractCompoundList(databasePath)
+  inchikeyFiles <- getAllPngInchikeys(targetDir)
+  setdiff(compList$inchikey, inchikeyFiles)
+}
+
+getAllPngInchikeys <- function(targetDir) {
+  allFiles <- list.files(targetDir, pattern = "\\.png$")
+  stringr::str_match(allFiles, "^(.*)\\.png$")[,2]
+}
+
+#' Delete redundant PNGs
+#'
+#' @inheritParams createAllStructures
+#'
+#' @export
+#'
+removeRedundantPngs <- function(databasePath, targetDir) {
+  redundantPngs <- getRedundantPngs(databasePath, targetDir)
+  for (ik in redundantPngs)
+    file.remove(file.path(targetDir, paste0(ik, ".png")))
 }
