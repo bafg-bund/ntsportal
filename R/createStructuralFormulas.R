@@ -49,7 +49,7 @@ makeStructureMatrix <- function(structureObject) {
   rcdk::view.image.2d(molecule = structureObject, depictor = resolution)
 }
 
-importCsl <- function(databasePath,targetPath) {
+importCsl <- function(databasePath, targetPath) {
   file.copy(
     from = databasePath,
     to = targetPath,
@@ -104,6 +104,24 @@ getAllPngInchikeys <- function(targetDir) {
 #'
 removeRedundantPngs <- function(databasePath, targetDir) {
   redundantPngs <- getRedundantPngs(databasePath, targetDir)
-  for (ik in redundantPngs)
+  for (ik in redundantPngs) {
     file.remove(file.path(targetDir, paste0(ik, ".png")))
+    cli_alert_info("Removed file {ik}.png")
+  }
+}
+
+
+checkPngSyncronization <- function(fileUrl, filePathHd) {
+  saveDir <- withr::local_tempdir()
+  download.file(fileUrl, file.path(saveDir, "urlFile.png"), method = "curl", extra = c("--insecure"), quiet = T)
+  file.copy(filePathHd, file.path(saveDir, "fileOnHd.png"))
+  urlImg <- magick::image_read(file.path(saveDir, "urlFile.png"))
+  hdImg <- magick::image_read(file.path(saveDir, "fileOnHd.png"))
+  urlImgPx <- as.integer(urlImg[[1]]) # Assuming a single frame
+  hdImgPx <- as.integer(hdImg[[1]])
+  if (all(urlImgPx == hdImgPx)) {
+    cli::cli_alert_success("Images are the same")
+  } else {
+    cli::cli_alert_warning("Images are not the same")
+  }
 }

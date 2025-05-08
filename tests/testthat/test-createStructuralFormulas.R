@@ -20,9 +20,7 @@ test_that("generate structural formula for diclofenac", {
     ),
     "DCOPUUMXTXDBNB-UHFFFAOYSA-N.png"
   )
-  
   expect_true(file.exists(pngPath))
-  #file.show(pngPath)
   file.remove(list.files(tempSaveDir, full.names = TRUE))
   file.remove(tempSaveDir)
 })
@@ -39,42 +37,39 @@ test_that("Generate structural formula for (2-dodecanoylamino-ethyl)-dimethyl-te
     "FFBIRENCNBBTSF-UHFFFAOYSA-O.png"
   )
   expect_true(file.exists(pngPath))
-  #file.copy(pngPath, "/srv/cifs-mounts/ntsportal/intern/picture_sync/FFBIRENCNBBTSF-UHFFFAOYSA-O.png", overwrite = T)
   file.remove(list.files(tempSaveDir, full.names = TRUE))
   file.remove(tempSaveDir)
-  
 })
 
-test_that("extract compound list from database", {
+test_that("Extracting compound list from database returns a data.frame", {
   tempSaveDir <- withr::local_tempdir()
-  importCsl(databasePath = "/srv/cifs-mounts/g2/G/G2/HRMS/Spektrendatenbank/sqlite/CSL_v24.4.db",targetPath = tempSaveDir)
+  importCsl(databasePath = test_path("fixtures", "CSL_olmesartan-d6.db"), targetPath = tempSaveDir)
   
-  compList <- extractCompoundList(databaseFile = file.path(tempSaveDir,"CSL_v24.4.db"))
+  compList <- extractCompoundList(databaseFile = file.path(tempSaveDir, "CSL_olmesartan-d6.db"))
   expect_length(compList, 8)
-  expect_gt(nrow(compList), 2)
+  expect_gte(nrow(compList), 1)
   
   file.remove(list.files(tempSaveDir,full.names = TRUE))
   file.remove(tempSaveDir)
 })
 
-test_that("copy CSL", {
+test_that("Copy CSL works", {
   tempSaveDir <- withr::local_tempdir()
-  importCsl("/srv/cifs-mounts/g2/G/G2/HRMS/Spektrendatenbank/sqlite/CSL_v24.4.db",tempSaveDir)
-  expect_true(file.exists(file.path(tempSaveDir,"CSL_v24.4.db")))
+  importCsl(databasePath = test_path("fixtures", "CSL_olmesartan-d6.db"), targetPath = tempSaveDir)
+  expect_true(file.exists(file.path(tempSaveDir, "CSL_olmesartan-d6.db")))
   file.remove(list.files(tempSaveDir,full.names = TRUE))
   file.remove(tempSaveDir)
 })
 
 
-test_that("Check if missing PNGs are reported", {
+test_that("Check for missing PNGs are reported correctly", {
   tempSaveDir <- withr::local_tempdir()
   dbPath <- test_path("fixtures", "CSL_olmesartan-d6.db")
-  
   expect_snapshot(checkPngAvailability(dbPath, tempSaveDir))
-  # pthDb <- getSpectralLibraryPath("ntsp25.1_msrawfiles")
-  # compList <- extractCompoundList(pthDb)
-  # pthStructures <- "/srv/cifs-mounts/ntsportal/intern/picture_sync"
-  
+  cat("test", file = file.path(tempSaveDir, "VTRAEEWXHOVJFV-XERRXZQWSA-N.png"))
+  cat("test", file = file.path(tempSaveDir, "FFBIRENCNBBTSF-UHFFFAOYSA-O.png"))
+  expect_snapshot(checkPngAvailability(dbPath, tempSaveDir))
+  file.remove(list.files(tempSaveDir, full.names = T))
 })
 
 

@@ -38,7 +38,8 @@ RoxygenNote: 7.3.2
 Remotes:
     github::bafg-bund/ntsworkflow
 Suggests:
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    magick
 SystemRequirements: Python (>= 3.12)
 Encoding: UTF-8
 VignetteBuilder: knitr
