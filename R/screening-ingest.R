@@ -28,7 +28,7 @@ ingest <- function(path) {
     aliasIndexPairs[[pth]] <- executePyIngestModule(recs, dbComm, indexTimeStamp, indexMappingPath)
     cli_progress_update()
   }
-  
+  walk(unlist(aliasIndexPairs), \(x) refreshTable(dbComm, x))
   return(aliasIndexPairs)
 }
 

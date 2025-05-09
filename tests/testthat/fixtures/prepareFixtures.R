@@ -42,3 +42,13 @@ recreateMergedReportSampleAndBlank <- function() {
   saveRDS(mergedReport, test_path("fixtures", "screening-fileScanning", "mergedReportSampleAndBlank.RDS"))
 }
 
+
+tempSaveDir <- withr::local_tempdir()
+
+
+batchDirectory <- file.path(rootDirectoryForTestMsrawfiles, "olmesartan-d6-bisoprolol")
+pathJson <- dbaScreeningSelectedBatches(testIndexName, batchDirectory, tempSaveDir)
+
+file.remove(list.files(realSaveDir, full.names = T))
+file.copy(pathJson, featureRecordExampleJsonPath)
+

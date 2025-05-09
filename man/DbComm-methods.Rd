@@ -7,12 +7,12 @@
 \alias{ping}
 \alias{show,PythonDbComm-method}
 \alias{ping,PythonDbComm-method}
-\title{Test the DB-Connection}
+\title{Get a table as records}
 \usage{
 getTableAsRecords(
   dbComm,
   tableName,
-  queryBlock = list(),
+  searchBlock = list(),
   recordConstructor = newNtspRecord
 )
 
@@ -23,17 +23,17 @@ ping(dbComm)
 \S4method{ping}{PythonDbComm}(dbComm)
 }
 \arguments{
-\item{queryBlock}{list coercible to json for elasticSearch REST API (Query DSL)}
-
 \item{recordConstructor}{function to construct new records}
+
+\item{queryBlock}{list coercible to json for elasticSearch REST API (Query DSL)}
 }
 \value{
-TRUE when connection active
+A list of ntspRecord objects
 
 TRUE when connection active
 }
 \description{
-Test the DB-Connection
+Get a table as records
 
 Test the DB-Connection
 }

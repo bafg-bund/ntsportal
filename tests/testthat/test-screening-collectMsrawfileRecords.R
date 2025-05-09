@@ -1,6 +1,4 @@
 
-
-
 test_that("Records for selected batches are returned", {
   records <- getAllMsrawfilesRecords(testIndexName)
   dirs <- extractDirs(records)
@@ -9,6 +7,9 @@ test_that("Records for selected batches are returned", {
 })
 
 test_that("Unprocessed files can be collected from msrawfiles", {
+  removeExtraTestFile("blah.mzXML")
+  removeExtraTestFile("RH_pos_20220603_no_peaks_test_addRecord.mzXML")
+  
   prepareExampleFeatureIndex(ntspVersion)
   unprocessedBatches <- getUnprocessedMsrawfileBatches(testIndexName, screeningType = "dbasTest")
   expect_false(all(grepl("no_peaks", names(unprocessedBatches))))

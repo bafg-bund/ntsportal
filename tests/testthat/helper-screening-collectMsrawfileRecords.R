@@ -9,8 +9,6 @@ prepareExampleFeatureIndex <- function(ntspVersion) {
   tempDir <- withr::local_tempdir()
   saveRecord(emptyRecord, tempDir)
   indexNames <- ingest(tempDir)
-  dbComm <- getDbComm()
-  refreshTable(dbComm, indexNames[[1]][[1]])
 }
 
 removeExampleFeatureIndex <- function(ntspVersion) {

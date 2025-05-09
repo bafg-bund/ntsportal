@@ -57,6 +57,17 @@ test_that("You can retrieve an index as a tibble", {
   expect_gte(nrow(testTibble), 20)
 })
 
+test_that("Records with different length elements are still coerced into a tibble", {
+  minimalRecords <- list(
+    list(comp_group = c("A", "B")),
+    list(comp_group = "A")
+  )
+  newTib <- convertRecordsToTibble(minimalRecords)
+  expectedTib <- tibble(comp_group = c(list(c("A", "B")), list("A")))
+  expect_identical(newTib, expectedTib)
+})
+
+
 test_that("You can append records to a table (ingest)", {
   dbComm <- getDbComm()
   tableName <- "ntsp_temp"
@@ -71,4 +82,6 @@ test_that("You can append records to a table (ingest)", {
   
   deleteTable(dbComm, tableName)
 })
+
+
 

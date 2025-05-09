@@ -7,9 +7,9 @@
 createAllStructures(databasePath, targetDir)
 }
 \arguments{
-\item{databasePath}{Path to CSL}
+\item{databasePath}{Path to spectral library (sqlite)}
 
-\item{targetDir}{Path to save png of structures}
+\item{targetDir}{Path where the PNGs are stored}
 }
 \value{
 no return value

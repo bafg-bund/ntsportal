@@ -40,3 +40,10 @@ getExampleCslAsRecords <- function() {
     records <- SpecLibRecords$new(test_path("fixtures", "CSL_olmesartan-d6.db"))
   )
 }
+
+removeExtraTestFile <- function(filename) {
+  searchBlock <- list(query = list(regexp = list(filename = filename)))
+  dbComm <- getDbComm()
+  if (getNrow(dbComm, testIndexName, searchBlock) == 1)
+    deleteRow(dbComm, testIndexName, searchBlock)
+}

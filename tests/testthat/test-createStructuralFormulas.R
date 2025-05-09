@@ -6,7 +6,7 @@ test_that("All structures are created", {
   createAllStructures(dbPath, tempSaveDir)
   expect_equal(nrow(compList), length(list.files(tempSaveDir, pattern = "\\.png$")))
   
-  file.remove(list.files(tempSaveDir,full.names = TRUE))
+  file.remove(list.files(tempSaveDir, full.names = TRUE))
   file.remove(tempSaveDir)
 })
 
@@ -49,7 +49,7 @@ test_that("Extracting compound list from database returns a data.frame", {
   expect_length(compList, 8)
   expect_gte(nrow(compList), 1)
   
-  file.remove(list.files(tempSaveDir,full.names = TRUE))
+  file.remove(list.files(tempSaveDir, full.names = TRUE))
   file.remove(tempSaveDir)
 })
 
@@ -57,7 +57,7 @@ test_that("Copy CSL works", {
   tempSaveDir <- withr::local_tempdir()
   importCsl(databasePath = test_path("fixtures", "CSL_olmesartan-d6.db"), targetPath = tempSaveDir)
   expect_true(file.exists(file.path(tempSaveDir, "CSL_olmesartan-d6.db")))
-  file.remove(list.files(tempSaveDir,full.names = TRUE))
+  file.remove(list.files(tempSaveDir, full.names = TRUE))
   file.remove(tempSaveDir)
 })
 

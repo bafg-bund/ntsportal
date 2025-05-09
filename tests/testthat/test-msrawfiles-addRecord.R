@@ -51,5 +51,11 @@ test_that("Adding a file with malformed date results in an error", {
       )
     )
   )
+  
+  dbComm <- getDbComm()
+  numFound <- getNrow(dbComm, testIndexName, list(query = list(
+    regexp = list(path = ".*RH_pos_2206033_no_peaks_test_addRecord_malformedDate.mzXML")
+  )))
+  expect_equal(numFound, 0)
 })
 
