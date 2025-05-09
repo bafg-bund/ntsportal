@@ -1,5 +1,30 @@
 
 
+#' Process a list of msrawfileRecords
+#'
+#' @param records list of msrawfileRecords
+#' @param compsToProcess Character vector of compounds names (Default is all compounds in the spectral library)
+#'
+#' @returns a dbasResult object (list of 7 tables) including peakList, reintegrationResults etc.
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' dbComm <- getDbComm()
+#' recs <- getTableAsRecords(
+#'   dbComm, 
+#'   "ntsp25.1_msrawfiles", 
+#'   searchBlock = list(query = list(regexp = list(filename = "Des_19_.._pos.mzXML"))),
+#'   newMsrawfilesRecord
+#' )
+#' recsBlanks <- getTableAsRecords(
+#'   dbComm, 
+#'   "ntsp25.1_msrawfiles", 
+#'   searchBlock = list(query = list(regexp = list(path = ".*mud_pos/BW.*"))), 
+#'   newMsrawfilesRecord
+#' )
+#' res <- scanBatchDbas(c(recs, recsBlanks), "Methyltriphenylphosphonium")
+#' }
 scanBatchDbas <- function(records, compsToProcess = NULL) {
   reports <- purrr::map(records, fileScanDbas, compsToProcess = compsToProcess)
   reports <- removeEmptyReports(reports)

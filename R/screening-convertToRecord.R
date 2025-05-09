@@ -1,6 +1,26 @@
 
-
+#' Convert a dbasResult to a list of featureRecords
+#' 
 #' @export
+#' @examples
+#' \dontrun{
+#' dbComm <- getDbComm()
+#' recs <- getTableAsRecords(
+#'   dbComm, 
+#'   "ntsp25.1_msrawfiles", 
+#'   searchBlock = list(query = list(regexp = list(filename = "Des_.._.._pos.mzXML"))), 
+#'   newMsrawfilesRecord
+#' )
+#' recsBlanks <- getTableAsRecords(
+#'   dbComm, 
+#'   "ntsp25.1_msrawfiles", 
+#'   searchBlock = list(query = list(regexp = list(path = ".*mud_pos/BW.*"))), 
+#'   newMsrawfilesRecord
+#' )
+#' res <- scanBatchDbas(c(recs, recsBlanks), "Methyltriphenylphosphonium")
+#' featureRecs <- convertToRecord(res, c(recs, recsBlanks))
+#' }
+#' 
 convertToRecord.dbasResult <- function(scanResult, msrawfileRecords) {
   
   msrawfileRecords <- nameRecordsByPath(msrawfileRecords)

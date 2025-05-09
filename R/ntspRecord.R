@@ -1,14 +1,16 @@
 
-
+#' @export
 newNtspRecord <- function(rec = list(), ..., class = character()) {
   stopifnot(is.list(rec))
   structure(rec, ..., class = c(class, "ntspRecord", "list"))
 }
 
+#' @export
 newMsrawfilesRecord <- function(rec = list()) {
   newNtspRecord(rec, class = "msrawfilesRecord")
 }
 
+#' @export
 newFeatureRecord <- function(feature) {
   newNtspRecord(feature, class = "featureRecord")
 }
