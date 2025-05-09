@@ -2,13 +2,16 @@
 % Please edit documentation in R/dbInterface-DbComm.R,
 %   R/dbInterface-PythonDbComm.R
 \docType{methods}
-\name{getTableAsRecords}
+\name{isTable}
+\alias{isTable}
 \alias{getTableAsRecords}
 \alias{ping}
-\alias{show,PythonDbComm-method}
 \alias{ping,PythonDbComm-method}
-\title{Get a table as records}
+\alias{show,PythonDbComm-method}
+\title{Does a table exist?}
 \usage{
+isTable(dbComm, tableName)
+
 getTableAsRecords(
   dbComm,
   tableName,
@@ -18,22 +21,30 @@ getTableAsRecords(
 
 ping(dbComm)
 
-\S4method{show}{PythonDbComm}(object)
-
 \S4method{ping}{PythonDbComm}(dbComm)
+
+\S4method{show}{PythonDbComm}(object)
 }
 \arguments{
+\item{dbComm}{DbComm connection object}
+
+\item{tableName}{Name of table in database}
+
 \item{recordConstructor}{function to construct new records}
 
 \item{queryBlock}{list coercible to json for elasticSearch REST API (Query DSL)}
 }
 \value{
+logical, TRUE if table exists
+
 A list of ntspRecord objects
 
 TRUE when connection active
 }
 \description{
-Get a table as records
+Does a table exist?
+
+Get a table as a list of ntspRecords
 
 Test the DB-Connection
 }
