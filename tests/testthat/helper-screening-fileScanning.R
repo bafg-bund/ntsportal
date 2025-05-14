@@ -17,6 +17,17 @@ getMergedReportSampleAndBlank <- function() {
   readRDS(test_path("fixtures", "screening-fileScanning", "mergedReportSampleAndBlank.RDS"))
 }
 
+getMergedReportTriplicateBatch <- function() {
+  readRDS(test_path("fixtures", "screening-fileScanning", "mergedReportTriplicateBatch.RDS"))
+}
+
+getRecordsDessauBatch <- function() {
+  readRDS(test_path("fixtures", "screening-fileScanning", "recordsDessauBatch.RDS"))
+}
+getMergedReportDessauBatch <- function() {
+  readRDS(test_path("fixtures", "screening-fileScanning", "mergedReportDessauBatch.RDS"))
+}
+
 
 
 getSingleRecordDes_07_01_pos <- function() {

@@ -7,6 +7,7 @@ test_that("A small result can be reformated to a dbasRecord object", {
   expect_s3_class(featureRecord[[1]], "featureRecord")
   expect_true(validateRecord(featureRecord[[1]]))
   checkForAlias(featureRecord[[1]]$dbas_alias_name)
+  expect_contains(names(featureRecord[[1]]), "licence")
 })
 
 test_that("Sample data is added to features", {
@@ -20,7 +21,8 @@ test_that("Record is reduced to selected fields", {
   fields <- fieldsToMergeFromMsrawfiles()
   records <- getOneSampleRecords()
   recordReduced <- reduceRecordToFields(records[[1]], fields)
-  expect_equal(length(recordReduced), 14)
+  expect_equal(length(recordReduced), 15)
+  expect_contains(names(recordReduced), "licence")
 })
 
 test_that("Spectra area added to feature", {

@@ -1,0 +1,14 @@
+citHeader("ntsportal: Functions for building and managing the NTSPortal database. Federal Institute of Hydrology, Koblenz, Germany")
+
+bibentry(
+  bibtype="Article",
+  title="Ein Datenbankmodell für aggregierte Non-Target-Screening-Ergebnisse",
+  journal="Vom Wasser",
+  volume= "119",
+  number= "3",
+  pages="94-96",
+  year="2021",
+  author="Jewell, Kevin S. and Thron, Franziska and Schlüsener, Michael and Kramer, K.  and Scharrenbach, T.  and Fettig, I. and Koschorreck, J. and Schulte, C. and Ternes, Thomas A. and Wick, Arne",
+  textVersion="Jewell, K., Thron, F., Schlüsener, M., Kramer, K., Scharrenbach, T., Fettig, I., Koschorreck, J., Schulte, C., Ternes, T., & Wick, A. (2021). Ein Datenbankmodell für aggregierte Non-Target-Screening-Ergebnisse. Vom Wasser, 119(3), 94-96. https://doi.org/10.1002/vomw.202100020"
+)
+

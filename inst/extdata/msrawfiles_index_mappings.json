@@ -55,7 +55,12 @@
       "dbas_area_threshold": { "type" : "integer" },
       "dbas_use_area": {"type" : "boolean"},
       "dbas_mustFindChromPeak": {"type" : "boolean"},
-      "dbas_ndp_threshold": { "type" : "integer" },
+      "dbas_ndp_threshold": {
+        "type" : "integer", 
+        "meta": {
+          "description": "Threshold for normalized dot product (0-1000)"
+        }
+      },
       "dbas_rtTolReinteg": {"type" : "float"},
       "dbas_mztolu": {"type" : "float"},
       "dbas_mztolu_fine": {"type" : "float"},
@@ -66,9 +71,24 @@
       "dbas_cores_report": { "type" : "integer" },
       "dbas_instr": {"type" : "keyword"},
       "dbas_blank_regex": {"type" : "keyword"},
-      "dbas_minimum_detections": { "type" : "integer" },
-      "dbas_fp": {"type" : "keyword"},
-      "dbas_replicate_regex": {"type" : "keyword"},
+      "dbas_minimum_detections": {
+        "type" : "integer",
+        "meta": {
+          "description": "Minimum detections in batch (otherwise FP)"
+        }
+      },
+      "dbas_fp": {
+        "type" : "keyword",
+        "meta": {
+          "description": "Detections are removed"
+        }
+      },
+      "dbas_replicate_regex": {
+        "type" : "keyword",
+        "meta": {
+          "description": "At least 2 detections in each group (otherwise FP)"
+        }
+      },
       "dbas_build_averages": {"type" : "boolean"},
       "dbas_index_name": {"type" : "keyword"},
       "dbas_alias_name": {"type" : "keyword"},

@@ -4,7 +4,8 @@
 #'
 #' @param records list of msrawfileRecords
 #' @param compsToProcess Character vector of compounds names (Default is all compounds in the spectral library)
-#'
+#' @param showProgress logical. Show progress bar (for interacte use, default false)
+#' 
 #' @returns a dbasResult object (list of 7 tables) including peakList, reintegrationResults etc.
 #' @export
 #'
@@ -25,8 +26,9 @@
 #' )
 #' res <- scanBatchDbas(c(recs, recsBlanks), "Methyltriphenylphosphonium")
 #' }
-scanBatchDbas <- function(records, compsToProcess = NULL) {
-  reports <- purrr::map(records, fileScanDbas, compsToProcess = compsToProcess)
+scanBatchDbas <- function(records, compsToProcess = NULL, showProgress = FALSE) {
+  progBar <- ifelse(showProgress, cli_progress_bar("Processing batch", total = length(records)), "no-progress")
+  reports <- purrr::map(records, fileScanDbas, compsToProcess = compsToProcess, progBar = progBar)
   reports <- removeEmptyReports(reports)
   mergedReport <- mergeReports(reports)
   cleanedReport <- cleanReport(mergedReport, records)
@@ -36,9 +38,10 @@ scanBatchDbas <- function(records, compsToProcess = NULL) {
 }
 
 
-fileScanDbas <- function(msrawfileRecord, compsToProcess = NULL) {
+fileScanDbas <- function(msrawfileRecord, compsToProcess = NULL, progBar = "no-progress") {
   fileScannerDbas <- createScannerDbas(msrawfileRecord)
   fileScannerDbas <- runScanningDbas(fileScannerDbas, compsToProcess)
+  if (grepl("^cli-", progBar)) cli_progress_update(id = progBar)
   fileScannerDbas
 }
 
@@ -150,20 +153,34 @@ removeFalsePositives <- function(report, records) {
   minimumDetections <- getField(records, "dbas_minimum_detections")[!blanks][1]
   replicateRegex <- getField(records, "dbas_replicate_regex")[!blanks][1]
   
-  falsePositives <- unique(c(
-    unlist(getField(records, "dbas_fp")[!blanks][1]),
+  falsePositives <- bind_rows(
+    getFalsePositivesFromRecord(report, records),
     getCompoundsBelowMinimumDetections(report, minimumDetections),
     getCompoundsNoReplicateDetections(report, replicateRegex)
-  ))
+  ) |> distinct() |> tidyr::nest(fileIndices = fileIndex, .by = "compName")
   
-  if (length(falsePositives) > 0) {
-    for (fp in falsePositives) {
-      report$deleteFP(fp)
+  if (nrow(falsePositives) > 0) { # i <- 1
+    for (i in 1:nrow(falsePositives)) {
+      report$deleteFP(
+        pluck(falsePositives, "compName", i),
+        pluck(falsePositives, "fileIndices", i, 1)
+      )
     }
   }
   report
 }
+getFalsePositivesFromRecord <- function(report, records) {
+  files <- basename(report$rawFiles)  # file index is given by report$rawFiles, index needed for Report$deleteFP
+  fpList <- setNames(getField(records, "dbas_fp"), basename(getField(records, "path")))
+  if (length(fpList) > 0) {
+    fpRows <- map(seq_along(files), function(ind) tibble(fileIndex = ind, compName = fpList[[files[ind]]]))
+    bind_rows(fpRows)
+  } else {
+    return(emptyFalsePostivesTibble())
+  }
+}
 
+# NEEDS to be checked, is this correct? ####
 removeDuplicateDetections <- function(report) {
   report$peakList <- report$peakList[report$peakList$peak == "A", ]
   report
@@ -173,34 +190,40 @@ getCompoundsBelowMinimumDetections <- function(report, minimumDetections) {
   if (minimumDetections > 1) {
     timesFound <- by(report$peakList, report$peakList$comp_name, nrow)
     scarce <- which(timesFound < minimumDetections)
-    names(scarce)  
+    tidyr::expand_grid(compName = names(scarce), fileIndex = seq_along(report$rawFiles)) 
   } else {
-    character()
+    return(emptyFalsePostivesTibble())
   }
 }
 
 getCompoundsNoReplicateDetections <- function(report, replicateRegex) {
-  if (is.na(replicateRegex)) {
-    character(0)
-  } else {
-    pl <- report$peakList
-    pl$originalSampName <- stringr::str_replace(pl$samp, replicateRegex, "\\1")
-    replicateCount <- by(pl, list(pl$comp_name, pl$originalSampName), nrow)
-    replicateCount <- array2DF(replicateCount)
-    colnames(replicateCount) <- c("compName", "sampName", "count")
-    replicateCount <- replicateCount[!is.na(replicateCount$count), ]
-    
-    # Take the average number of times a compound is found in each batch,
-    # so if in one replicate set it is only found once, it still doesn't count as an FP
-    batchCount <- data.frame(
-      compName = unique(replicateCount$compName),
-      count = round(tapply(replicateCount$count, replicateCount$compName, mean))
-    )
-    # Hard coded: Comp found at (on average) at least twice in replicates
-    batchCount[batchCount$count < 2, "compName"]
-  }
+  if (is.na(replicateRegex)) return(emptyFalsePostivesTibble())
+  pl <- report$peakList
+  pl$originalSampName <- stringr::str_replace(pl$samp, replicateRegex, "\\1")
+  replicateCount <- by(pl, list(pl$comp_name, pl$originalSampName), nrow) |> array2DF()
+  colnames(replicateCount) <- c("compName", "originalSampName", "count")
+  replicateCount <- replicateCount[!is.na(replicateCount$count), ]
+  if (nrow(replicateCount) == 0) return(emptyFalsePostivesTibble())
+  markAsFp <- replicateCount[replicateCount$count < 2, c("compName", "originalSampName")]
+  if (nrow(markAsFp) == 0) return(emptyFalsePostivesTibble())
+  map2_dfr(
+    markAsFp$compName, 
+    markAsFp$originalSampName, 
+    function(compName, originalSampName) getFileIndices(compName, originalSampName, pl, report$rawFiles)
+  )
 }
 
+getFileIndices <- function(compName, originalSampName, pl, reportRawFiles) {
+  sampNames <- pl[pl$originalSampName == originalSampName, "samp"] |> unique()
+  tibble(
+    compName = compName,
+    fileIndex = which(basename(reportRawFiles) %in% sampNames)
+  )
+}
+
+emptyFalsePostivesTibble <- function() {
+  tibble(compName = character(), fileIndex = numeric())
+}
 reintegrateReport <- function(report) {
   originalReport <- report$copy()
   batchPath <- dirname(report$rawFiles[1])
@@ -225,8 +248,7 @@ convertToDbasResult <- function(report) {
     eicTable = report$EIC,
     intStdResults = report$ISresults
   )
-  # Correct bug in ntsworkflow - integRes$samp is full path rather than sample name
-  results$reintegrationResults$samp <- basename(results$reintegrationResults$samp) 
+  
   results$intStdResults <- results$intStdResults[, c("samp", "IS", "int_h", "int_a")]
   
   results$intStdResults <- dplyr::rename(results$intStdResults, filename = samp, compound_name = IS, intensity = int_h, 

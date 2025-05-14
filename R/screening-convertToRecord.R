@@ -229,7 +229,7 @@ fieldsToMergeFromMsrawfiles <- function() {
     "matrix",
     "data_source",
     "sample_source",
-    "license",
+    "licence",
     "chrom_method",
     "duration",
     "path",

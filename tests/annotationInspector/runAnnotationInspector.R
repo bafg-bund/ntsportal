@@ -12,18 +12,5 @@ res <- scanBatchDbas(c(recs, recsBlanks), "Methyltriphenylphosphonium")
 featureRecs <- convertToRecord(res, c(recs, recsBlanks))
 
 
-userEmail <- "jewell@bafg.de"
-dirTestResults <- "tests/annotationInspector/testResults"
-msrawfileIndexName <- "ntsp25.1_msrawfiles"
 
-dirs <- c(
-  "/beegfs/nts/ntsportal/msrawfiles/dessau/schwebstoff/mud_pos"
-)
-
-dbaScreeningSelectedBatchesSlurm(
-  msrawfileIndex = msrawfileIndexName, 
-  batchDirs = dirs, 
-  saveDirectory = dirTestResults, 
-  email = userEmail
-)
 

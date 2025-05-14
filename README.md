@@ -58,7 +58,7 @@ To cite this work please use the following citation or run
 > Kevin S. Jewell, Ole Lessmann, Franziska Thron, Jonas Skottnik, Iris
 > Tuchscherer, Arne Wick and Thomas A. Ternes (2025). ntsportal: A
 > Non-Target Screening Data Archive and Distribution Tool. R package
-> version 0.2.1.
+> version 25.1
 
 ## Installation
 

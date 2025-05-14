@@ -76,6 +76,15 @@ test_that("False positives are removed", {
   expect_false(is.element("Propranolol", newComps))
 }) 
 
+test_that("Replicate detections are correctly computed", {
+  mergedReport <- getMergedReportDessauBatch()
+  cleanReport <- cleanReport(getMergedReportDessauBatch(), getRecordsDessauBatch())
+  deletedComps <- setdiff(mergedReport$peakList$comp_name, cleanReport$peakList$comp_name)
+  expect_contains(deletedComps, "Olmesartan-d6")
+  expect_contains(mergedReport$peakList$comp_name, "Methyltriphenylphosphonium")
+  expect_contains(cleanReport$peakList$comp_name, "Methyltriphenylphosphonium")
+})
+
 test_that("Test file Des_07_01_pos.mzXML can be processed for Bisoprolol", {
   recordDes_07_01 <- getSingleRecordDes_07_01_pos()
   

@@ -4,12 +4,14 @@
 \alias{scanBatchDbas}
 \title{Process a list of msrawfileRecords}
 \usage{
-scanBatchDbas(records, compsToProcess = NULL)
+scanBatchDbas(records, compsToProcess = NULL, showProgress = FALSE)
 }
 \arguments{
 \item{records}{list of msrawfileRecords}
 
 \item{compsToProcess}{Character vector of compounds names (Default is all compounds in the spectral library)}
+
+\item{showProgress}{logical. Show progress bar (for interacte use, default false)}
 }
 \value{
 a dbasResult object (list of 7 tables) including peakList, reintegrationResults etc.

@@ -15,7 +15,7 @@ Authors@R: c(
              comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany")
              )
 Description: This package provides functionality for building and managing the NTSPortal database
-License: GNU GPL-3.0 (comes with ABSOLUTELY NO WARRANTY)
+License: GNU GPL-3.0
 LazyData: TRUE
 Imports:
     tidyverse,
