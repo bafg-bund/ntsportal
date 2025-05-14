@@ -83,5 +83,19 @@ test_that("You can append records to a table (ingest)", {
   deleteTable(dbComm, tableName)
 })
 
+test_that("A table can be closed", {
+  dbComm <- getDbComm()
+  tableName <- "ntsp_temp"
+  deleteTable(dbComm, tableName)  # in case it already exists
+  createNewTable(dbComm, tableName, "dbas")
+  emptyRecordList <- getEmptyRecord()
+  appendRecords(dbComm, tableName, emptyRecordList)
+  recs <- getTableAsRecords(dbComm, tableName)
+  expect_length(recs, 1)
+  resp <- closeTable(dbComm, tableName)
+  expect_true(resp)
+  expect_error(getTableAsRecords(dbComm, tableName))
+  deleteTable(dbComm, tableName) 
+})
 
 

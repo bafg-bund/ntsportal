@@ -60,6 +60,11 @@ setMethod("deleteTable", "PythonDbComm", function(dbComm, tableName) {
   }
 })
 
+closeTable <- function(dbComm, tableName) {
+  resp <- dbComm@client$indices$close(index = tableName)
+  invisible(resp$body$acknowledged)
+} 
+
 # copyTable ####
 setMethod("copyTable" , "PythonDbComm", function(dbComm, tableName, newTableName, mappingType) {
   createNewTable(dbComm, newTableName, mappingType)
@@ -150,6 +155,7 @@ setMethod("ping", "PythonDbComm", function(dbComm) {
 setMethod("refreshTable", "PythonDbComm", function(dbComm, tableName) {
   invisible(dbComm@dsl$Index(tableName)$refresh(using=dbComm@client))
 })
+
 # replaceValueInField ####
 setMethod("replaceValueInField", "PythonDbComm", function(dbComm, tableName, field, oldValue, newValue) {
   tryCatch({
