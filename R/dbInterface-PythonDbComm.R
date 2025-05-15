@@ -60,6 +60,7 @@ setMethod("deleteTable", "PythonDbComm", function(dbComm, tableName) {
   }
 })
 
+# closeTable ####
 closeTable <- function(dbComm, tableName) {
   resp <- dbComm@client$indices$close(index = tableName)
   invisible(resp$body$acknowledged)
@@ -104,7 +105,7 @@ setMethod("getTableAsRecords", "PythonDbComm", function(dbComm, tableName, searc
   s <- dbComm@dsl$Search(using=dbComm@client, index = tableName)$
     update_from_dict(searchBlock)
   if (s$count() > 1e6)
-    stop("Exceeded the maximum docs that may be retrieved (1e6)")
+    stop("Exceeded the maximum docs that may be retrieved (1e6), refine the query using the searchBlock argument (query DSL)")
   iterate(s$iterate(), function(hit) recordConstructor(hit$to_dict()))
 })
 # getTableAsTibble ####
@@ -158,20 +159,27 @@ setMethod("refreshTable", "PythonDbComm", function(dbComm, tableName) {
 
 # replaceValueInField ####
 setMethod("replaceValueInField", "PythonDbComm", function(dbComm, tableName, field, oldValue, newValue) {
+  setValueInField(dbComm, tableName, field, value = newValue, 
+    searchBlock = list(query = list(term = rlang::list2(!!field := oldValue))))
+})
+
+# setValueInField ####
+setMethod("setValueInField", "PythonDbComm", function(dbComm, tableName, field, value, searchBlock = list()) {
+  searchBlock <- matchAllIfEmpty(searchBlock)
   tryCatch({
     ubq <- dbComm@dsl$UpdateByQuery(using = dbComm@client, index = tableName)$
-      update_from_dict(list(query = list(term = rlang::list2(!!field := oldValue))))$
-      script(source=glue("ctx._source.{field} = params.newValue"), params = list(newValue = newValue))
+      update_from_dict(searchBlock)$
+      script(source=glue("ctx._source.{field} = params.newValue"), params = list(newValue = value))
     resp <- ubq$execute()
   },
-  error = function(cnd) {
-    warning("error in replaceValueInField: ", conditionMessage(cnd))
-  }
+  error = function(cnd)
+    warning("Error in setValueInField: ", conditionMessage(cnd))
   )
   if (resp$success())
     message("Change accepted, ", resp$updated, " documents updated")
   refreshTable(dbComm, tableName)
 })
+
 # show ####
 #' @rdname DbComm-methods
 #' @aliases show,PythonDbComm-method

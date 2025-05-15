@@ -38,9 +38,11 @@ test_that("You can change the value of the dbas_alias_name field", {
   newName <- "ntsp99.9_dbas_unit_tests"
   #newName <- glue("ntsp{ntspVersion}_dbas_unit_tests")  # in case you need to reset
   replaceValueInField(dbComm, testIndexName, field, oldName, newName)
-  n <- dbComm@dsl$Search(using=dbComm@client, index = testIndexName)$query("term", dbas_alias_name = newName)$count()
+  n <- getNrow(dbComm, testIndexName, list(query = list(term = rlang::list2(!!field := newName))))
   expect_gte(n, 20)
   replaceValueInField(dbComm, testIndexName, field, newName, oldName)
+  n2 <- getNrow(dbComm, testIndexName, list(query = list(term = rlang::list2(!!field := oldName))))
+  expect_gte(n2, 20)
 })
 
 test_that("You can retrieve an entire index as records", {
@@ -95,6 +97,19 @@ test_that("A table can be closed", {
   resp <- closeTable(dbComm, tableName)
   expect_true(resp)
   expect_error(getTableAsRecords(dbComm, tableName))
+  deleteTable(dbComm, tableName) 
+})
+
+test_that("A field in a subset of docs can be modified", {
+  dbComm <- getDbComm()
+  tableName <- "ntsp_temp"
+  copyTable(dbComm, testIndexName, tableName, "msrawfiles")
+  qDslSearchBlock <- list(query = list(regexp = list(path = ".*/no-peaks/.*")))
+  setValueInField(dbComm, tableName, "dbas_minimum_detections", 0, qDslSearchBlock)
+  tb <- getTableAsTibble(dbComm, tableName)
+  tbNoPeaks <- filter(tb, grepl("no-peaks", path)) 
+  expect_equal(pluck(tb, "dbas_minimum_detections", 1), 2)
+  expect_equal(pluck(tbNoPeaks, "dbas_minimum_detections", 1), 0)
   deleteTable(dbComm, tableName) 
 })
 

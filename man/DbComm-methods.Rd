@@ -5,6 +5,8 @@
 \name{isTable}
 \alias{isTable}
 \alias{getTableAsRecords}
+\alias{getTableAsTibble}
+\alias{setValueInField}
 \alias{ping}
 \alias{ping,PythonDbComm-method}
 \alias{show,PythonDbComm-method}
@@ -19,6 +21,10 @@ getTableAsRecords(
   recordConstructor = newNtspRecord
 )
 
+getTableAsTibble(dbComm, tableName, searchBlock = list())
+
+setValueInField(dbComm, tableName, field, value, searchBlock = list())
+
 ping(dbComm)
 
 \S4method{ping}{PythonDbComm}(dbComm)
@@ -30,14 +36,20 @@ ping(dbComm)
 
 \item{tableName}{Name of table in database}
 
+\item{searchBlock}{list coercible to json for elasticSearch REST API (Query DSL)}
+
 \item{recordConstructor}{function to construct new records}
 
-\item{queryBlock}{list coercible to json for elasticSearch REST API (Query DSL)}
+\item{field}{table column to change}
+
+\item{value}{value to set in field}
 }
 \value{
 logical, TRUE if table exists
 
 A list of ntspRecord objects
+
+A tibble
 
 TRUE when connection active
 }
@@ -45,6 +57,10 @@ TRUE when connection active
 Does a table exist?
 
 Get a table as a list of ntspRecords
+
+Get a table as a tibble
+
+Set the value of a field in a table
 
 Test the DB-Connection
 }

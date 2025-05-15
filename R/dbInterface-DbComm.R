@@ -30,7 +30,7 @@ setGeneric("getNrow", function(dbComm, tableName, searchBlock = list()) standard
 #' Get a table as a list of ntspRecords 
 #' 
 #' @inheritParams isTable
-#' @param queryBlock list coercible to json for elasticSearch REST API (Query DSL)
+#' @param searchBlock list coercible to json for elasticSearch REST API (Query DSL)
 #' @param recordConstructor function to construct new records
 #'  
 #' @return A list of ntspRecord objects
@@ -43,16 +43,34 @@ setGeneric(
     standardGeneric("getTableAsRecords")
 )
 
+#' Get a table as a tibble
+#' @inheritParams getTableAsRecords
+#' @return A tibble
+#' @export
+#' @docType methods
+#' @rdname DbComm-methods
 setGeneric(
   "getTableAsTibble",
   function(dbComm, tableName, searchBlock = list()) standardGeneric("getTableAsTibble")
 )
 setGeneric("getUniqueValues", function(dbComm, tableName, field, maxLength = 10000) standardGeneric("getUniqueValues"))
 setGeneric("refreshTable", function(dbComm, tableName) standardGeneric("refreshTable"))
+
 setGeneric("replaceValueInField", function(dbComm, tableName, field, oldValue, newValue) standardGeneric("replaceValueInField"))
 
-#' Test the DB-Connection
+#' Set the value of a field in a table
 #' 
+#' @inheritParams getTableAsRecords
+#' @param field table column to change
+#' @param value value to set in field
+#'  
+#' @export
+#' @docType methods
+#' @rdname DbComm-methods
+setGeneric("setValueInField", function(dbComm, tableName, field, value, searchBlock = list()) standardGeneric("setValueInField"))
+
+#' Test the DB-Connection
+#' @inheritParams isTable
 #' @return TRUE when connection active
 #' @export
 #' @docType methods
