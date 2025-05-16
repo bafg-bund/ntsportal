@@ -8,6 +8,7 @@ test_that("A small result can be reformated to a dbasRecord object", {
   expect_true(validateRecord(featureRecord[[1]]))
   checkForAlias(featureRecord[[1]]$dbas_alias_name)
   expect_contains(names(featureRecord[[1]]), "licence")
+  expect_contains(names(featureRecord[[1]]), "date_measurement")
 })
 
 test_that("Sample data is added to features", {

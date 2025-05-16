@@ -233,7 +233,7 @@ fieldsToMergeFromMsrawfiles <- function() {
     "chrom_method",
     "duration",
     "path",
-    "date_measurment",
+    "date_measurement",
     "river",
     "km",
     "gkz",
