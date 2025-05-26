@@ -44,7 +44,10 @@ setMethod("deleteRow", "PythonDbComm", function(dbComm, tableName, searchBlock) 
   refreshTable(dbComm, tableName)
   message(resp$body$deleted, " row(s) deleted")
 })
+
 # deleteTable ####
+#' @rdname deleteTable
+#' @aliases deleteTable,PythonDbComm-method
 setMethod("deleteTable", "PythonDbComm", function(dbComm, tableName) {
   if (isTable(dbComm, tableName)) {
     tryCatch(
@@ -90,6 +93,8 @@ setMethod("getAliasTable" , "PythonDbComm",  function(dbComm, aliasName) {
 
 
 # getNrow ####
+#' @rdname getNrow
+#' @aliases getNrow,PythonDbComm-method
 setMethod("getNrow", "PythonDbComm",function(dbComm, tableName, searchBlock = list()) {
   searchBlock <- matchAllIfEmpty(searchBlock)
   
@@ -140,13 +145,14 @@ setMethod("getUniqueValues", "PythonDbComm", function(dbComm, tableName, field, 
   )
   map_chr(resp$body$aggregations$uniques$buckets, function(x) x$key)
 })
+
 # isTable ####
 setMethod("isTable", "PythonDbComm", function(dbComm, tableName) {
   dbComm@dsl$Index(tableName)$exists(using = dbComm@client)
 })
 
 # ping ####
-#' @rdname DbComm-methods
+#' @rdname ping
 #' @aliases ping,PythonDbComm-method
 setMethod("ping", "PythonDbComm", function(dbComm) {
   dbComm@client$ping()
@@ -181,7 +187,6 @@ setMethod("setValueInField", "PythonDbComm", function(dbComm, tableName, field, 
 })
 
 # show ####
-#' @rdname DbComm-methods
 #' @aliases show,PythonDbComm-method
 setMethod("show", "PythonDbComm", function(object) {
   resp <- object@client$info()
@@ -192,7 +197,6 @@ setMethod("show", "PythonDbComm", function(object) {
     sep = ""
   )
 })
-
 
 viewTable <- function(dbComm, tableName) {
   View(getTableAsTibble(dbComm, tableName))

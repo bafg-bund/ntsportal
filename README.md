@@ -62,38 +62,23 @@ To cite this work please use the following citation or run
 
 ## Installation
 
-### Current installation guidance for pvil-rr (temporary)
+## Installation via Github
 
-1)  Create a gitlab PAT
+1)  Create a Github PAT
 2)  Add it, with the following line, to `~/.Rprofile`
 
 ``` r
-Sys.setenv(GITLAB_PAT = "<...>")
+Sys.setenv(GITHUB_PAT = "<...>")
 ```
 
 3)  Restart R session
-4)  Install ntsworkflow and ntsportal
+4)  Install ntsportal
 
 ``` r
-devtools::install_gitlab(
-  repo = "nts/ntsworkflow",
-  host = "https://gitlab.lan.bafg.de"
-)
-
-devtools::install_gitlab(
-  repo = "nts/ntsportal",
-  host = "https://gitlab.lan.bafg.de"
-)
+remotes::install_github("bafg-bund/ntsportal")
 ```
 
-If that does not work, revert to using the binary file (be aware of the
-current version):
-
-``` r
-install.packages("/beegfs/nts/renv_package_cellar/ntsportal/ntsportal_25.1.tar.gz")
-```
-
-5)  Install python requirements
+5)  Install Python requirements
 
 ``` r
 reticulate::virtualenv_install(requirements = fs::path_package("ntsportal", "pythonElasticComm", "requirements.txt"))

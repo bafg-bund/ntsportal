@@ -13,6 +13,14 @@
         "script": {
           "source": "if (params._source.intensity_internal_standard != null) emit((double)params._source.intensity / (double)params._source.intensity_internal_standard)"
         }
+      },
+      "filename": {
+        "type" : "keyword",
+        "script": "def x=params._source.path.splitOnToken('/'); emit(x[x.length-1])"
+      },
+      "batchname": {
+        "type": "keyword",
+        "script": "def x = params._source.path.splitOnToken('/'); emit(String.join('/', Arrays.asList(x).subList(0,x.length-1)))"
       }
     },
     "properties" : {

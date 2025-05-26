@@ -17,6 +17,7 @@ Authors@R: c(
 Description: This package provides functionality for building and managing the NTSPortal database
 License: GNU GPL-3.0
 LazyData: TRUE
+Depends: R (>= 4.1.0)
 Imports:
     tidyverse,
     logger,
