@@ -39,7 +39,7 @@ test_that("You can create multiple indices", {
   aliasNames <- c("ntsp99.9_dbas_foo", "ntsp99.9_dbas_bar")
   timestamp <- "00000000000000"
   dbComm <- getDbComm()
-  indexMappingPath <- fs::path_package("ntsportal", "extdata")
+  indexMappingPath <- fs::path_package("ntsportal", "mappings")
   pairs <- pyIngestModule$createIndexAddAlias(aliasNames, dbComm@client, timestamp, indexMappingPath)
   expect_true(all(map_lgl(pairs, function(pair) isTable(dbComm, pair[[1]]))))
   expect_true(all(map_lgl(names(pairs), function(aliasName) isTable(dbComm, aliasName))))
@@ -50,7 +50,7 @@ test_that("An error in python results in a error message", {
   jsonPath <- getJsonFilePaths(test_path("fixtures", "featureRecordExampleJson"))
   dbComm <- getDbComm()
   indexTimeStamp <- format(lubridate::now(), "%y%m%d%H%M%S")
-  indexMappingPath <- fs::path_package("ntsportal", "extdata")
+  indexMappingPath <- fs::path_package("ntsportal", "mappings")
   recs <- readJsonToRecords(jsonPath)
   tfile <- withr::local_tempfile()
   log_appender(appender_file(tfile))

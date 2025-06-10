@@ -1,0 +1,120 @@
+{
+  "mappings" : {
+    "_meta": {
+      "type": "ntsportal,dbas",
+      "version": "25.1",
+      "licence": "GNU GPL-3.0"
+    },
+    "dynamic": "strict",
+    "properties" : {
+      "adduct" : {"type" : "keyword", "meta": {"description": "ESI adduct form", "example": "[M+H]+"}},
+      "area" : {"type" : "float", "meta": {"description": "chromatographic peak area"}},
+      "area_internal_standard" : {"type" : "float", "meta": {"description": "chromatographic peak area"}},
+      "cas" : {"type" : "keyword", "meta": {"description": "chemical abstracts service registry number", "example": "95-14-7"}},
+      "chrom_method" : {"type" : "keyword", "meta": {"description": "chromatographic method code", "example": "bfg_nts_rp1"}},
+      "comment" : {"type" : "text", "meta": {"description": "free as text or array of text blocks"}},
+      "comp_group" : {"type" : "keyword", "meta": {"description": "compound usage or classification(s)", "example": "Industrial_process"}},
+      "conc" : {"type" : "float", "meta": {"unit": "ng/L", "description": "estimated concentration"}},
+      "data_source" : {"type" : "keyword", "meta": {"description": "institution responsible for data processing", "example": "bfg"}},
+      "date_measurement" : {
+        "type" : "date",
+        "format" : "yyyy-MM-dd HH:mm:ss",
+        "meta": {"description": "instrumental analysis time"}
+      },
+      "date_import" : {
+        "type" : "date",
+        "format": "yyyy-MM-dd HH:mm:ss",
+        "meta": {"description": "ingest time"}
+      },
+      "dbas_alias_name": {"type": "keyword", "meta": {"description": "index alias name", "example": "ntsp_dbas_bfg"}},
+      "duration" : {"type" : "float", "meta": {"unit": "day", "description": "duration of composite sampling, grab sample: 0"}},
+      "eic" : {
+        "type" : "nested",
+        "properties" : {
+          "int" : {"type" : "float", "meta": {"description": "intensity"}},
+          "time" : {"type" : "short", "meta": {"unit": "s", "description": "chromatographic run time"}}
+        },
+        "enabled": false
+      },
+      "formula" : {"type" : "keyword", "meta": {"description": "molecular formula", "example": "C7H4Cl2O2"}},
+      "gkz" : { "type" : "integer", "meta": {"description": "gewaesserkennzahl of sampling location", "example": "26"}},
+      "inchi" : {"type" : "keyword", "meta": {"description": "international chemical identifier", "example": "InChI=1S/C7H5NS/c1-2-4-7-6(3-1)8-5-9-7/h1-5H"}},
+      "inchikey" : {"type" : "keyword", "meta": {"description": "hash of international chemical identifier", "example": "ILLQTAPXYCRJRB-UHFFFAOYSA-N"}},
+      "instrument": { "type" : "text", "meta": {"description": "instrument type code", "example": "LC-ESI-QTOF TripleTOF 6600 SCIEX"}},
+      "intensity" : {"type" : "float", "meta": {"description": "chromatographic peak height at apex"}},
+      "internal_standard" : {"type" : "keyword", "meta": {"description": "int. std. compound name"}},
+      "intensity_internal_standard" : {"type" : "float", "meta": {"description": "peak intensity (height at apex)"}},
+      "isotopologue" : {"type" : "keyword", "meta": {"description": "isotopic difference to monoisotopic", "example": "37Cl"}},
+      "km": { "type" : "float", "meta": {"description": "river kilometer of sampling location"}},
+      "licence" : {"type" : "keyword", "meta": {"description": "open data licence for data", "example": "dl-de/by-2-0"}},
+      "loc" : {"type" : "geo_point", "meta": {"description": "sampling coordinates (WGS84)"}},
+      "matrix" : {"type" : "keyword", "meta": {"description": "sampling matrix code", "example": "spm"}},
+      "ms1" : {
+        "type" : "nested",
+        "properties" : {
+          "int" : {"type" : "float", "meta": {"description": "centroid intensity"}},
+          "mz" : {"type" : "float", "meta": {"unit": "Da", "description": "mass-to-charge ratio"}}
+        },
+        "enabled": false
+      },
+      "ms2" : {
+        "type" : "nested",
+        "properties" : {
+          "int" : {"type" : "float", "meta": {"description": "centroid intensity"}},
+          "mz" : {"type" : "float", "meta": {"unit": "Da", "description": "mass-to-charge ratio"}}
+        }
+      },
+      "mz" : {"type" : "float", "meta": {"unit": "Da", "description": "mass-to-charge ratio"}},
+      "name" : {"type" : "keyword", "meta": {"description": "compound name(s)"}},
+      "path": {"type" : "keyword", "meta": {"description": "absolute path to measurement file (mzXML, mzML)"}},
+      "pol" : {"type" : "keyword", "meta": {"description": "3-letter ESI polarity mode", "example": "pos"}},
+      "river" : { "type" : "keyword", "meta": {"description": "river name of sampling location (local spelling)", "example": "rhein"}},
+      "rt" : {"type" : "float", "meta": {"unit": "min", "description": "chromatographic retention time at peak apex"}},
+      "rtt" : {
+        "type" : "nested",
+        "properties" : {
+          "method" : {
+            "type" : "keyword", "meta": {"description": "chromatographic method code", "example": "bfg_nts_rp1"}
+          },
+          "predicted" : {
+            "type" : "boolean", "meta": {"description": "is predicted (non-experimental) retention time"}
+          },
+          "rt" : {
+            "type" : "float",
+            "meta": {"unit": "min", "description": "chromatographic retention time at peak apex"}
+          }
+        }
+      },
+      "sample_source" : {"type" : "keyword", "meta": {"description": "institute responsible for sampling", "example": "bful/lfulg saxony"}},
+      "start" : {
+        "type" : "date",
+        "format" : "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||yyyy-MM-dd HH:mm",
+        "meta": {"description": "sampling time (start time for composite)"}
+      },
+      "station" : {"type" : "keyword", "meta": {"description": "sampling location code", "example": "rhein_ko_l"}},
+      "tag": {"type": "keyword", "meta": {"description": "labels to assist searching"}}
+    },
+    "runtime": {
+      "area_relative_to_internal_standard" : {
+        "type": "double",
+        "script": {
+          "source": "if (params._source.area_internal_standard != null) emit((double)params._source.area / (double)params._source.area_internal_standard)"
+        }
+      },
+      "batchname": {
+        "type": "keyword",
+        "script": "def x = params._source.path.splitOnToken('/'); emit(String.join('/', Arrays.asList(x).subList(0,x.length-1)))"
+      },
+      "filename": {
+        "type" : "keyword",
+        "script": "def x=params._source.path.splitOnToken('/'); emit(x[x.length-1])"
+      },
+      "intensity_relative_to_internal_standard" : {
+        "type": "double",
+        "script": {
+          "source": "if (params._source.intensity_internal_standard != null) emit((double)params._source.intensity / (double)params._source.intensity_internal_standard)"
+        }
+      }
+    }
+  }
+}

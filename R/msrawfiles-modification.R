@@ -3,9 +3,9 @@
 createNewIndexForResults <- function(escon, mappingType = "nts", indexName) {
   f <- switch(
     mappingType,
-    nts = fs::path_package("ntsportal", "extdata", "nts_index_mappings.json"),
-    dbas = fs::path_package("ntsportal", "extdata", "dbas_index_mappings.json"),
-    spectral_library = fs::path_package("ntsportal", "extdata", "spectral_library_index_mappings.json"),
+    nts = fs::path_package("ntsportal", "mappings", "nts_index_mappings.json"),
+    dbas = fs::path_package("ntsportal", "mappings", "dbas_index_mappings.json"),
+    spectral_library = fs::path_package("ntsportal", "mappings", "spectral_library_index_mappings.json"),
     stop("unknown mapping type")
   )
   mappings <- jsonlite::read_json(f)

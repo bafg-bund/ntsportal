@@ -1,0 +1,150 @@
+{
+  "mappings" : {
+    "_meta": {
+      "type": "ntsportal,msrawfiles",
+      "version": "25.1",
+      "licence": "GNU GPL-3.0"
+    },
+    "dynamic": "strict",
+    "properties" : {
+      "blank": {"type" : "boolean", "meta": {"description": "is sample a blank"}},
+      "chrom_method" : {"type" : "keyword", "meta": {"description": "chromatographic method code", "example": "bfg_nts_rp1"}},
+      "comment" : {"type" : "text", "meta": {"description": "free as text or array of text blocks"}},
+      "data_source" : {"type" : "keyword", "meta": {"description": "institution responsible for data processing", "example": "bfg"}},
+      "date_import" : {                         
+        "type" : "date",
+        "format" : "epoch_second",
+        "meta": {"description": "ingest time, deprecated"}
+      },
+      "date_ingest" : {
+        "type" : "date",
+        "format" : "yyyy-MM-dd HH:mm:ss",
+        "meta": {"description": "ingest time"}
+      },
+      "date_measurement" : {
+        "type" : "date",
+        "format" : "yyyy-MM-dd HH:mm:ss",
+        "meta": {"description": "instrumental analysis time"}
+      },
+      "dbas_alias_name": {"type" : "keyword"},
+      "dbas_area_threshold": { "type" : "integer" },
+      "dbas_blank_int_factor": { "type" : "integer" },
+      "dbas_build_averages": {"type" : "boolean"},
+      "dbas_cores": { "type" : "integer" },
+      "dbas_cores_report": { "type" : "integer" },
+      "dbas_date_format" : {"type" : "keyword"},
+      "dbas_date_regex" : {"type" : "keyword"},
+      "dbas_fp": {
+        "type" : "keyword",
+        "meta": {"description": "Compound annotations to be removed"}
+      },
+      "dbas_index_name": {"type" : "keyword", "meta": {"description": "deprecated"}},
+      "dbas_is_name"  : {"type" : "keyword"},
+      "dbas_is_table"  : {"type" : "keyword"},
+      "dbas_use_area": {"type" : "boolean"},
+      "dbas_mustFindChromPeak": {"type" : "boolean"},
+      "dbas_mztolu": {"type" : "float"},
+      "dbas_mztolu_fine": {"type" : "float"},
+      "dbas_ndp_threshold": {
+        "type" : "integer", 
+        "meta": {"description": "Minimum normalized dot product MS2 match (0-1000)"}
+      },
+      "dbas_ndp_m": { "type" : "integer" },
+      "dbas_ndp_n": { "type" : "integer" },
+      "dbas_instr": {"type" : "keyword"},
+      "dbas_blank_regex": {"type" : "keyword"},
+      "dbas_minimum_detections": {
+        "type" : "integer",
+        "meta": {
+          "description": "Minimum detections in batch (otherwise FP)"
+        }
+      },
+      "dbas_replicate_regex": {
+        "type" : "keyword",
+        "meta": {
+          "description": "Regular expression to group files into replicates",
+          "example": "(_)[123]_"
+        }
+      },
+      "dbas_rttolm": {"type" : "float"},
+      "dbas_rtTolReinteg": {"type" : "float"},
+      "dbas_station_regex": {"type" : "keyword"},
+      "dbas_spectral_library": {"type" : "keyword", "meta": {"description": "Path to spectral library SQLite file"}},
+      "dbas_spectral_library_sha256": {"type" : "keyword", "meta": {"description": "SHA-256 checksum of library, deprecated"}},
+      "duration" : {"type" : "float", "meta": {"unit": "day", "description": "duration of composite sampling, grab sample: 0"}},
+      "filesize": {"type" : "float", "meta": {"unit": "MB"}}, 
+      "gkz" : { "type" : "integer", "meta": {"description": "gewaesserkennzahl of sampling location", "example": "26"}},
+      "instrument": { "type" : "keyword", "meta": {"description": "instrument type code", "example": "LC-ESI-QTOF TripleTOF 6600 SCIEX"}},
+      "km": { "type" : "float", "meta": {"description": "river kilometer of sampling location"}},
+      "licence" : {"type" : "keyword", "meta": {"description": "open data licence for data", "example": "dl-de/by-2-0"}},
+      "loc" : {"type" : "geo_point", "meta": {"description": "sampling coordinates (WGS84)"}},
+      "matrix" : {"type" : "keyword", "meta": {"description": "sampling matrix code", "example": "spm"}},
+      "nts_mz_min" : {"type" : "float", "meta": {"unit": "Da"}},                                    
+      "nts_mz_max" : {"type" : "float", "meta": {"unit": "Da"}},                                    
+      "nts_mz_step" : {"type" : "float", "meta": {"unit": "Da"}},                                   
+      "nts_rt_min" : {"type" : "float", "meta": {"unit": "min"}},                                     
+      "nts_rt_max" : {"type" : "float", "meta": {"unit": "min"}},                                    
+      "nts_sn" : {"type" : "float"},
+      "nts_int_threshold" : {"type" : "float"},
+      "nts_peak_noise_scans" : {"type" : "float"},
+      "nts_precursor_mz_tol" : {"type" : "float", "meta": {"unit": "ppm"}},                          
+      "nts_peak_width_min" : {"type" : "float", "meta": {"unit": "s"}},                             
+      "nts_peak_width_max" : {"type" : "float", "meta": {"unit": "s"}},                             
+      "nts_max_num_peaks" : {"type" : "float"},
+      "nts_alig_delta_mz" : {"type" : "float", "meta": {"unit": "mDa"}},                             
+      "nts_alig_delta_rt" : {"type" : "float", "meta": {"description": "retention time tolerance (in s) within one batch"}},                             
+      "nts_alig_mz_tol_units" : {"type" : "keyword", "meta": {"best_value": "mDa"}},                      
+      "nts_alig_filter_type": {"type" : "keyword", "meta": {"description": "One of consecutive, replicate, min_features"}},                 
+      "nts_alig_filter_num_consecutive": {"type" : "byte"},
+      "nts_alig_filter_min_features": {"type" : "byte", "meta": {"description": "Min features per replicate set or batch"}},          
+      "nts_alig_filter_num_replicates": {"type" : "byte"},
+      "nts_annotation_threshold_dp_score": {"type" : "short"},                  
+      "nts_annotation_mz_tol": {"type" : "float", "meta": {"unit": "mDa"}},                            
+      "nts_annotation_rt_tol": {"type" : "float", "meta": {"unit": "min"}},                          
+      "nts_annotation_ce_min": {"type" : "short"},
+      "nts_annotation_ce_max": {"type" : "short"},
+      "nts_annotation_ces_min": {"type" : "short"},
+      "nts_annotation_ces_max": {"type" : "short"},
+      "nts_annotation_ms2_mz_tol": {"type" : "float", "meta": {"unit": "mDa"}},                       
+      "nts_annotation_rt_offset": {"type" : "float", "meta": {"unit": "min", "method": "Offset added to DB RT"}},                        
+      "nts_annotation_int_cutoff": {"type" : "float"},
+      "nts_componentization_ppm" : {"type" : "float"},
+      "nts_componentization_rt_tol" : {"type" : "float", "meta": {"unit": "s"}},                  
+      "nts_componentization_rt_tol_l" : {"type" : "float", "meta": {"unit": "s"}},                 
+      "nts_componentization_rt_tol_r" : {"type" : "float", "meta": {"unit": "s"}},                 
+      "nts_componentization_rt_tol_sum" : {"type" : "float", "meta": {"unit": "s"}},                
+      "nts_componentization_dynamic_tolerance" : {"type" : "boolean"},
+      "nts_componen2_mz_tol" : {"type" : "float", "meta": {"unit": "mDa"}},                          
+      "nts_componen2_rt_tol" : {"type" : "float", "meta": {"unit": "s"}},                           
+      "nts_componen2_frac_shape" : {"type" : "float"},                       
+      "nts_componen2_correlation": {"type" : "float", "meta": {"method": "Pearson"}},                       
+      "nts_blank_correction_factor": {"type" : "float"},
+      "nts_eic_extraction_width": {"type" : "float", "meta": {"unit": "mDa"}},                        
+      "nts_index_name": {"type" : "keyword"},
+      "nts_alias_name": {"type" : "keyword"},
+      "nts_spectral_library_sha256": {"type" : "keyword"},
+      "nts_spectral_library": {"type" : "keyword"},
+      "path": {"type" : "keyword", "meta": {"description": "absolute path to measurement file (mzXML, mzML)"}},
+      "pol" : {"type" : "keyword", "meta": {"description": "3-letter ESI polarity mode", "example": "pos"}},
+      "river" : { "type" : "keyword", "meta": {"description": "river name of sampling location (local spelling)", "example": "rhein"}},
+      "sample_source" : {"type" : "keyword", "meta": {"description": "institute responsible for sampling", "example": "bful/lfulg saxony"}},
+      "start" : {
+        "type" : "date",
+        "format" : "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||yyyy-MM-dd HH:mm", 
+        "meta": {"description": "Start of sampling in UTC"}
+      },
+      "station" : {"type" : "keyword", "meta": {"description": "sampling location code", "example": "rhein_ko_l"}},
+      "tag": {"type": "keyword", "meta": {"description": "labels to assist searching"}}
+    },
+    "runtime": {
+      "filename": {
+        "type" : "keyword",
+        "script": "def x=params._source.path.splitOnToken('/'); emit(x[x.length-1])"
+      },
+      "batchname": {
+        "type": "keyword",
+        "script": "def x = params._source.path.splitOnToken('/'); emit(String.join('/', Arrays.asList(x).subList(0,x.length-1)))"
+      }
+    }
+  }
+}

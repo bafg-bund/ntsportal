@@ -13,7 +13,7 @@
 #'
 ingest <- function(path) {
   
-  indexMappingPath <- fs::path_package("ntsportal", "extdata")
+  indexMappingPath <- fs::path_package("ntsportal", "mappings")
   dbComm <- getDbComm()
   indexTimeStamp <- format(lubridate::now(), "%y%m%d%H%M%S")
   

@@ -5,7 +5,10 @@
 #' @description
 #' If credentials are available, will create the "escon" connection object in the 
 #' global environment for use by all functions. Otherwise will ask for input of
-#' credentials (in interactive use).
+#' credentials (in interactive use). This function uses the keyring package to 
+#' store and retrieve credentials. For working on Linux in the console, the 'file'
+#' backend must be used, see https://keyring.r-lib.org/reference/backends.html.
+#' This can be set with Sys.setenv("R_KEYRING_BACKEND" = "file")
 #' 
 #' @export
 #'
@@ -124,7 +127,6 @@ clearRing <- function(ring = "ntsportal") {
     warning(ring, " keyring not found")
   }
 }
-
 
 
 # Copyright 2025 Bundesanstalt für Gewässerkunde

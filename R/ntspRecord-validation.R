@@ -389,11 +389,11 @@ allowedFieldsFeature <- function() {
 }
 
 getMappingsDbas <- function() {
-  jsonlite::read_json(fs::path_package("ntsportal", "extdata", "dbas_index_mappings.json"))$mappings$properties
+  jsonlite::read_json(fs::path_package("ntsportal", "mappings", "dbas_index_mappings.json"))$mappings$properties
 }
 
 getMappingsNts <- function() {
-  jsonlite::read_json(fs::path_package("ntsportal", "extdata", "nts_index_mappings.json"))$mappings$properties
+  jsonlite::read_json(fs::path_package("ntsportal", "mappings", "nts_index_mappings.json"))$mappings$properties
 }
 
 warnBadFields <- function(badFields, parentField = "top-level") {
