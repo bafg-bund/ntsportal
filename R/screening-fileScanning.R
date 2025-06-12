@@ -48,7 +48,7 @@ fileScanDbas <- function(msrawfileRecord, compsToProcess = NULL, progBar = "no-p
 
 createScannerDbas <- function(msrawfileRecord) {
   rec <- msrawfileRecord
-  scanner <- Report$new()
+  scanner <- ntsworkflow::Report$new()
   scanner$addRawFiles(F, rec$path)
   scanner$addIS(F, rec$dbas_is_table)
   scanner$addDB(F, rec$dbas_spectral_library)
