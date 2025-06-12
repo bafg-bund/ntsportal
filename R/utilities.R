@@ -59,7 +59,17 @@ free_gb <- function() {
 #' @param ... further arguments to elastic::Search, asdf argument does not work for now.
 #' @export
 #' @return ElasticSearch API response as a list
-#'
+#' @examples
+#' \dontrun{
+#' connectNtsportal()
+#' res <- esSearchPaged("ntsp25.1_dbas*", searchBody = list(query = list(term = list(station = "mosel_ko_r"))), 
+#'   source = c("name", "inchikey", "pol", "start", "duration", "area"), sort = "mz")
+#' 
+#' # Convert the returned list to a data.frame
+#' temp <- lapply(res$hits$hits, function(x) as.data.frame(x[["_source"]]))
+#' df <- plyr::rbind.fill(temp)
+#' }
+#' 
 esSearchPaged <- function(
     indexName, 
     searchBody = list(query = list(match_all = stats::setNames(list(), character(0)))), 

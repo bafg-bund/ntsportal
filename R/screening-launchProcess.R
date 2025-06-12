@@ -83,8 +83,24 @@ dbaScreeningOneBatch <- function(msrawfileRecords, saveDirectory) {
 #' Three files are created, the records of all files to process, organized into batches (.RDS); the R script which
 #' SLURM needs to run, and the SLURM job file. The command needed to start the process is given as a message (you
 #' may need to switch to a SLURM-enabled server).
-#'
 #' @export
+#' @examples
+#' \dontrun{
+#' userEmail <- "example@bafg.de"
+#' dirResults <- "processingResults"
+#' msrawfileIndexName <- "ntsp25.1_msrawfiles"
+#' library(ntsportal)
+#' connectNtsportal()
+#' file.remove(list.files(dirResults, f = T))
+#'
+#' dbaScreeningSelectedBatchesSlurm(
+#'   msrawfileIndex = msrawfileIndexName,
+#'   batchDirs = "/root/dir/all/msrawfiles",
+#'   saveDirectory = dirResults,
+#'   email = userEmail
+#' )
+#' }
+#'
 dbaScreeningSelectedBatchesSlurm <- function(msrawfileIndex, batchDirs, saveDirectory, email) {
   recordsInBatches <- getSelectedMsrawfileBatches(msrawfileIndex, batchDirs)
   saveFilesSlurm(recordsInBatches, saveDirectory)
