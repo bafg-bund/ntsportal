@@ -17,3 +17,7 @@
 ^ole$
 ^.*\.json$
 ^.git$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$
