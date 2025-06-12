@@ -72,7 +72,7 @@
 #' @examples
 #' \dontrun{
 #' library(ntsportal)
-#' source("~/connect-ntsp.R")
+#' connectNtsportal()
 #' rfindex <- "ntsp_msrawfiles"
 #' paths <- list.files("/beegfs/nts/ntsportal/msrawfiles/ulm/schwebstoff/dou_pos/", "^Ulm.*mzXML$", full.names = TRUE)
 #' templateId <- findTemplateId(rfindex, blank = FALSE, pol = "pos", station = "donau_ul_m", matrix = "spm")
