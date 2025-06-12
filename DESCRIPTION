@@ -23,7 +23,6 @@ Imports:
     logger,
     future,
     fs,
-    shiny,
     yaml,
     jsonlite,
     rjson,

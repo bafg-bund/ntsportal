@@ -5,7 +5,14 @@
 \alias{ntsportal-package}
 \title{ntsportal: NTSPortal database backend. Federal Institute of Hydrology, Koblenz, Germany}
 \description{
-This package provides functionality for building and managing the NTSPortal database
+This package provides functionality for building and managing the NTSPortal database.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://bafg-bund.github.io/ntsportal}
+}
+
 }
 \author{
 \strong{Maintainer}: Kevin S. Jewell \email{jewell@bafg.de} (Federal Institute of Hydrology (BfG) Koblenz, Germany)
