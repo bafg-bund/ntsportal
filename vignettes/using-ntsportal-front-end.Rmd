@@ -1,7 +1,18 @@
 ---
-title: "using-ntsportal-front-end"
-output: html_document
+title: "Using the NTSPortal front-end"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using the NTSPortal front-end}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
 
 
 # Introduction
@@ -35,11 +46,12 @@ The homepage of `ntsportal.bafg.de` has a series of links on the left-hand side 
 - Not all data is visible all at once. The data is automatically trimmed to minimize latency. How much the data is trimmed (or summarized, e.g. by averaging daily intensity to monthly intensity) depends on the visualisation.
 - The data trimming or averaging is done by ElasticSearch at query time. Kibana only receives the trimmed or averaged data from ElasticSearch and displays it.
 - In order to see the data of interest, filter for the datapoints of interest. Kibana provides several different filtering methods:
-  + All dashboards have a search box to filter the data using the KQL syntax. This requires knowledge of the field names and types of the data (See [index mapping](Index-mapping)).
+  + All dashboards have a search box to filter the data using the KQL syntax. This requires knowledge of the field names and types of the data.
   + To the left of the search box is a "+"-button with which filters can be added graphically.
   + To the right of the search box is the time selector, here the data can be filtered by time (sampling time, measurement time or import time, depending on the dashboard)
   + Within some dashboards drop-down menus can be used to filter data
   + Once filters have been set, click "Refresh" to send the query to the database and retrieve the new data.
   + Some plots allow the user to "hide" some datapoints (e.g. by clicking on the legend entry of a time series, the selected series is hidden). Note: This does not fetch new data from the database. If the original query was trimmed to minimize latency, it will remain trimmed.
+
 
 

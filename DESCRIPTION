@@ -39,7 +39,9 @@ Remotes:
     github::bafg-bund/ntsworkflow
 Suggests:
     testthat (>= 3.0.0),
-    magick
+    magick,
+    knitr,
+    rmarkdown
 SystemRequirements: Python (>= 3.12)
 Encoding: UTF-8
 VignetteBuilder: knitr
