@@ -17,8 +17,7 @@ knitr::opts_chunk$set(
 
 # Zugang
 
-Das NTS-Portal ist unter folgendem Link erreichbar:
-<https://ntsportal.bafg.de/>
+Das NTS-Portal ist unter folgendem Link erreichbar: `ntsportal.bafg.de`
 
 Username und Passwort für neue Nutzer können per E-Mail beantragt
 werden:
@@ -74,7 +73,7 @@ Filterungen vornehmen. Hat man bereits, wie in 2.2 beschrieben,
 Filterungen vorgenommen, werden hier direkt die entsprechenden
 Zeitreihen angezeigt. Auch hier kann man mit einem Klick auf die
 Messstelle in der Karte oder durch die Auswahl im Dropdown Menü
-„Station" die angezeigten Daten auf eine Messstelle eingrenzen.
+"Station" die angezeigten Daten auf eine Messstelle eingrenzen.
 
 ![Abbildung Analytical Data \"Time series water\", Anzeige für die gefilterten Substanzen](images/time_series_water_samples.png){width=100%}
 

@@ -1,0 +1,84 @@
+---
+title: "Adding measurement files to msrawfiles"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Adding measurement files to msrawfiles}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+More details are found in `addRawfiles` documentation.
+
+1. First, create a backup of `msrawfiles`. Use the function `createBackupMsrawfiles`, the backup is named `ntsp_msrawfiles_backup_YYYYMMDD`
+2. Find the new measurement files - e.g. with Windows Explorer
+- If necessary, move files in the correct storage location. Currently this is `Z:\G\G2\HRMS\Messdaten` (2025-01-09) 
+- Each batch (measurement sequence) is to be stored in its own directory, do not create directories for a particular sampling location or time.
+
+3. Go to RStudio (open your project for adding rawfiles)
+
+- Get vector of file paths  
+```{r, eval=FALSE}
+paths <- list.files(
+  "/beegfs/nts/ntsportal/msrawfiles/ulm/schwebstoff/dou_pos/", 
+  "^Ulm.*mzXML$", full.names = TRUE)
+```
+- Get the ID of a document to use as a template for those you want to enter either by using the Kibana dev tools console or the following R function:
+```{r, eval=FALSE}
+library(ntsportal)
+connectNtsportal()
+rfindex <- "ntsp25.1_msrawfiles"
+templateId <- findTemplateId(rfindex, blank = FALSE, pol = "pos", station = "donau_ul_m", matrix = "spm")
+```
+- Run `addRawfiles`
+```{r, eval=FALSE}
+addRawfiles(
+  rfindex = rfindex, 
+  templateId = templateId, 
+  newPaths = paths
+)
+```
+
+- Check `add-rawfiles-check.json` (e.g., `start`, `filename`, `pol` and `blank` fields)
+- If you want to make changes to the json, these can be accepted only if you are adding one file (run `addRawfiles` with just one file path)
+- To increase the speed use the `dirMeasurmentFiles` argument to specify where to look for the original measurement file (used to get measurement time since this not always saved in the mzXML file, e.g. when converting wiff files). This has to be in the original file location, since only mzXML files are transfered to beegfs. 
+
+4. At the prompt, enter `y` when okay / `n` when not okay / `c` if you have made changes to the json (remember to save the json beforehand)
+
+# Checking coherency of msrawfiles after completion
+
+Once all uploads are complete, check that the msrawfiles has no errors. This step takes a few minutes, so it is recommended only after all files have been loaded. 
+
+```{r, eval=FALSE}
+ntsportal::checkMsrawfiles()
+```
+# Function description
+
+The function is designed to make adding new files to msrawfiles as quick and error-free as possible.
+
+![Figure: Overall function of the addRawfiles function](images/msrawfiles-addRecord.svg){width=100%}
+
+# Special cases
+
+## The files being added have different measurement locations
+
+The location must be coded in the filename. The field `dbas_station_regex` in the template document is used to find the correct station from existing entries in msrawfiles.
+
+Use `newStation = "filename"` to copy location information from other entries
+```{r, eval=FALSE}
+addRawfiles(rfindex, "eIRBnYkBcjCrX8D7v4H5", newFiles[4:17], newStation = "filename", 
+             dirMeasurmentFiles = "~/messdaten/sachsen/") 
+```
+Example `filename`: `OBF34910_20230821_Zschopau_pos.mzXML`  
+Example `dbas_station_regex`: `^(OBF\\d{5})_`
+
+
+
+
+
+

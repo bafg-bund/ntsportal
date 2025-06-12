@@ -1,0 +1,68 @@
+---
+title: "Station naming conventions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Station naming conventions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# General conventions
+The stations are named as best as possible through the convention `<river>_<location>_<bank>`. The river name uses the local spelling with the complete character set (ß etc.). This enables easier wildcard searching, for example `rhein*` will find all measurement stations on the Rhine river. The location can be either a town, district, or river-km (must be with `km` before, e.g., `donau_km50`, `.` is used for decimals). Numbering of stations along a river is not accepted (either by numbers or letters, e.g., not permitted: `elbe_1`, `lahn_a`. If a code is used for the location, e.g. `jo` for Jochenstein, then this code needs to be added to the table below. The bank indicates on which bank the sample was taken (left: `l`, right: `r`, `m` for middle). Banks are always named in the direction of the flow, for canals see [Teil II Binnenschiffahrtsverordnung](https://elwis.de/DE/Schifffahrtsrecht/Binnenschifffahrtsrecht/BinSchStrO/Zweiter-Teil/Zweiter-Teil-node.html). All text is lower-case without spaces, punctuation or other special characters (`´`, `"`, `,`, etc.).
+
+# Table of station codes  
+[See also Gist](https://gist.github.com/ksjewell/df3f8c0be02a5f0bea7e7e8ab75b0eac)      
+
+|Codierung Messstelle|Beschreibung                                                                                 |
+|--------------------|---------------------------------------------------------------------------------------------|
+|donau_jo_m          |Donau, Stauhaltung Jochenstein, Donau km 2210, Flussmitte                                    |
+|                    | breitengrad: 48.567305                                                                     |
+|                    | laengengrad: 13.604114                                                                     |
+|donau_ul_m          |Donau, oberhalb Illermündung Ulm, Donau km 2593, Flussmitte                                  |
+|                    | breitengrad: 48.336936                                                                     |
+|                    | laengengrad: 9.933709                                                                      |
+|elbe_ba_m           |Elbe, Unterhalb Saalemündung (Barby), Elbe km 296, Flussmitte                                |
+|                    | breitengrad: 51.996668                                                                     |
+|                    | laengengrad: 11.888593                                                                     |
+|elbe_bl_m           |Elbe, Elbmündung in Deutsche Bucht (Blankenese), Elbe km 634, Flussmitte                     |
+|                    | breitengrad: 53.547521                                                                     |
+|                    | laengengrad: 9.800194                                                                      |
+|elbe_cu_m           |Elbe, Landschaftsschutzgebiet Elbe-Aland-Niederung (Cumlosen), Elbe km 470, Flussmitte       |
+|                    | breitengrad: 53.040792                                                                     |
+|                    | laengengrad: 11.636399                                                                     |
+|elbe_tan_l          |Elbe, Tangermünde (WSA Magdeburg), Elbe km 389.0, linkes Ufer                                |
+|                    | breitengrad: 52.549876                                                                     |
+|                    | laengengrad: 11.983321                                                                     |
+|elbe_pr_r           |Elbe, Hafenbecken Prossen, Elbe km 13, rechtes Ufer                                          |
+|                    | breitengrad: 50.927016                                                                     |
+|                    | laengengrad: 14.116322                                                                     |
+|elbe_ze_l           |Elbe, Landschaftsschutzgebiet Zehren, Elbe km 96, linkes Ufer                                |
+|                    | breitengrad: 51.264465                                                                     |
+|                    | laengengrad: 13.402703                                                                     |
+|rhein_bi_l          |Rhein, Messplattform der Internationalen Messstation Bimmen-Lobith, Rhein km 865, linkes Ufer|
+|                    | breitengrad: 51.859995                                                                     |
+|                    | laengengrad: 6.066983                                                                      |
+|rhein_if_m          |Rhein, Schleuse Iffezheim (WSA Freiburg), Rhein km 333.2, Flussmitte                         |
+|                    | breitengrad: 48.830796                                                                     |
+|                    | laengengrad: 8.110804                                                                      |
+|rhein_ko_l          |Rhein, Koblenz, Messstation der BfG, Rhein km 590.4, linkes Ufer                             |
+|                    | breitengrad: 50.349601                                                                     |
+|                    | laengengrad: 7.599691                                                                      |
+|rhein_we_r          |Rhein, YC Weil-Märkt, Rhein km 172.2, rechtes Ufer                                           |
+|                    | breitengrad: 47.601589                                                                     |
+|                    | laengengrad: 7.594340                                                                      |
+|saar_gu_m           |Saar, Schleuse Güdingen, Saar km 92,9, Flussmitte                                            |
+|                    | breitengrad: 49.212001                                                                     |
+|                    | laengengrad: 7.023477                                                                      |
+|saar_re_m           |Saar, Schleuse Rehlingen, Saar km 54.2, Flussmitte                                           |
+|                    | breitengrad: 49.374082                                                                     |
+|                    | laengengrad: 6.698360                                                                      |
+
+Station descriptions: Schulze, T.; Ricking, M. (2005): Abschlussbericht: Entwicklung einer Verfahrensrichtlinie „Sedimente und Schwebstoffe“. Freie Universität Berlin, Umweltbundesamt,  UBA, Berlin. [Link](https://www.umweltbundesamt.de/publikationen/entwicklung-einer-verfahrensrichtlinie-sedimente)

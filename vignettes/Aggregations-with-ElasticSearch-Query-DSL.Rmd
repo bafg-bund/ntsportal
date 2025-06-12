@@ -1,0 +1,287 @@
+---
+title: "Aggregations with ElasticSearch Query DSL"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Aggregations with ElasticSearch Query DSL}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The documentation is extensive: [Aggregations Docs](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations.html). For the NTSPortal schema, see [Structure of NTSPortal](Structure-of-NTSPortal). 
+
+# Aggregation: `terms`
+
+The `terms` aggregation groups the documents returned by the query into buckets according to a keyword or boolean field. 
+
+This code is to search for two stations and split results by station, polarity and blank yes/no via three nested `terms` aggregations. 
+
+```json
+GET ntsp_msrawfiles/_search
+{
+  "query": {
+    "terms": {                 // terms query
+      "station": [
+        "donau_ul_m",
+        "saale_wettin_m"
+      ]
+    }
+  }, 
+  "size": 0,                   // Don't return any documents (just show aggregations)
+  "aggs": {
+    "messstellen": {           // just a variable name you give it (can be anything)
+      "terms": {               // terms aggregation
+        "field": "station"
+      },
+      "aggs": {
+        "polaritaet": {
+          "terms": {           // terms aggregation
+            "field": "pol"
+          },
+          "aggs": {
+            "methoden_blanks": {
+              "terms": {       // terms aggregation
+                "field": "blank"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+Note: The `terms` query and the `terms` aggregation are two different things. The first filters the results by multiple possible values (in a keyword field), the second splits the filtered results (documents) into buckets based on a keyword field. In the example we have three terms aggregations nested in each other, that is to say, each station bucket is again split by polarity and each of those buckets are again split by field blank (boolean).
+ 
+## Overview of all compounds
+
+This aggregation will also show for which polarities and in which matrices each compound is found.
+
+```json
+GET ntsp_dbas*/_search?size=0   // Size is 0, meaning no docs are returned (only aggregations)
+{                             // Since there is no query, all docs are used for the aggregations
+  "aggs": {
+    "comps": {
+      "terms": {
+        "field": "name",
+        "size": 1000           // Default is 10, set higher until “sum_other_doc_count” (see response) is -0-
+      },
+      "aggs": {
+        "pols": {
+          "terms": {
+            "field": "pol"     // There are only 2 polarities, no need to set the size
+          },
+          "aggs": {
+            "matrix": {
+              "terms": {
+                "field": "matrix"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+**Explanations:**  
+`ntsp_dbas*` -- with this index pattern, all indices starting with this character string are selected.  
+`"size": 1000` -- The maximum number of buckets to create. The default is 10. 
+
+# Bucket aggregations and metric aggregations
+Refer to the extensive documentation at elastic.com. For example, here a `term` query is used to filter only for data from suspended particulate matter (spm). The detections are then binned by station name (`terms` bucket aggregation) and for each station the latest file upload time is returned (`max` metric aggregation).
+
+```json
+GET ntsp_msrawfiles/_search
+{
+  "query": {
+    "term": {
+      "matrix": {
+        "value": "spm"
+      }
+    }
+  },
+  "size": 0,
+  "aggs": {
+    "messstellen": {
+      "terms": {
+        "field": "station"
+      },
+      "aggs": {
+        "neuste": {
+          "max": {
+            "field": "date_import"
+          }
+        }
+      }
+    }
+  }
+}
+```
+## Combining aggregations and a `bool` query
+
+The query is for: station: ulm or wettin, blank: not blank and the documents are split by station and polarity
+
+```json
+GET ntsp_msrawfiles/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "terms": {
+            "station": [
+              "donau_ul_m",
+              "saale_wettin_m"
+            ]
+          }
+        },
+        {
+          "term": {
+            "blank": {
+              "value": "false"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "kontrolle": {
+      "terms": {
+        "field": "station"
+      },
+      "aggs": {
+        "polaritaet": {
+          "terms": {
+            "field": "pol"
+          }
+        }
+      }
+    }
+  }, "size": 0
+}
+```
+
+# Aggregation: `geotile_grid` 
+
+Return documents matching a pattern and split results by coordinates (geopoint)
+
+```json
+GET ntsp_msrawfiles/_search
+{
+  "query": {
+    "regexp": {
+      "station": ".*NA"
+    }
+  },
+  "size": 0,
+  "aggs": {
+    "stations": {
+      "terms": {
+        "field": "station"
+      },
+      "aggs": {
+        "locations": {
+          "geotile_grid": {
+            "field": "loc",
+            "precision": 21,
+            "size": 10
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+The precision can be set at maximum value since within a station all coordinates must be exactly the same.
+
+# Aggregation: `cardinality`
+
+The cardinality aggregation counts the number of unique entries in a keyword field. In this example we want to know how many different compounds are found in the database. In this example two aggregations are set in parallel (not nested).
+
+```json
+GET ntsp_dbas_upb/_search             // Index to search
+{
+  "query": {
+    "match_all": {}                 // Match all docs
+  },
+  "size": 0,                        // don't return any docs
+  "aggs": {                         // There are two different aggregations listed here
+    "num_different_comps": {        // Aggregation 1 determines the number of different compounds
+      "cardinality": {    
+        "field": "name",
+        "precision_threshold": 1000 // default is 100, need to set it higher because we have ca. 400
+      }
+    },
+    "comps_buckets": {              // Aggregation 2 splits docs into buckets by compound name
+      "terms": {                    
+        "field": "name",
+        "size": 1000                // default is 10, set higher until “sum_other_doc_count” is -0- (see response)
+      }
+    }
+  }
+}
+
+```
+
+# Filtering buckets by their doc counts
+In this example the buckets are filtered for compounds found 10 or more times in total and then only days on which the compound is found are returned.
+```json
+GET ntsp_dbas_v231006_frame/_search?size=0
+{
+  "query": {
+    "term": {
+      "pol": {
+        "value": "pos"
+      }
+    }
+  },
+  "aggs": {
+    "comps": {
+      "terms": {
+        "field": "name",
+        "size": 1000
+      },
+      "aggs": {
+        "comps_selector": {
+          "bucket_selector": {
+            "buckets_path": {
+              "numSamplesPerComp": "_count"
+            },
+            "script": "params.numSamplesPerComp >= 10"
+          }
+        },
+        "samples": {
+          "date_histogram": {
+            "field": "start",
+            "calendar_interval": "1d"
+          },
+          "aggs": {
+            "days_selector": {
+              "bucket_selector": {
+                "buckets_path": {
+                  "numSamplesPerDay" : "_count"
+                },
+                "script": "params.numSamplesPerDay > 0"
+              }
+            }
+          }
+        }
+      }
+    },
+    "files": {
+      "cardinality": {
+        "field": "filename"
+      }
+    }
+  }
+}
+```

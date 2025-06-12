@@ -1,0 +1,81 @@
+---
+title: "Station naming conventions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Station naming conventions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+Refer to the extensive [documentation for Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html).
+
+For the NTSPortal schema, see [Structure of NTSPortal](Structure-of-NTSPortal).
+
+# Simple search example with the `term` query
+To retrieve all detections from the station "mosel_ko_r" run the following in the dev console:
+
+```json
+GET ntsp_dbas*/_search
+{
+  "query": {
+    "term": {
+      "station": "mosel_ko_r"
+    }
+  }
+}
+```
+
+# Combining search parameters with `bool`
+
+In this example we search for datafiles with: polarity negative, not blanks, at stations ulm or wettin.
+
+```json
+GET ntsp_msrawfiles/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "pol": {
+              "value": "neg"
+            }
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "term": {
+            "blank": {
+              "value": "true"
+            }
+          }
+        }
+      ],
+      "should": [
+        {
+          "term": {
+            "station": {
+              "value": "donau_ul_m"
+            }
+          }
+        },
+        {
+          "term": {
+            "station": {
+              "value": "saale_wettin_m"
+            }
+          }
+        }
+      ], 
+      "minimum_should_match": 1
+    }
+  }
+}
+```
