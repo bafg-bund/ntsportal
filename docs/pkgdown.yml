@@ -2,7 +2,7 @@ pandoc: '3.2'
 pkgdown: 2.1.1
 pkgdown_sha: ~
 articles: {}
-last_built: 2025-06-12T09:03Z
+last_built: 2025-06-12T09:13Z
 urls:
   reference: https://bafg-bund.github.io/ntsportal/reference
   article: https://bafg-bund.github.io/ntsportal/articles
