@@ -1,4 +1,4 @@
-# Copyright 2016-2024 Bundesanstalt für Gewässerkunde
+# Copyright 2025 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
 
 #' DBAS process all measurement files which have not yet been processed
@@ -6,7 +6,7 @@
 #' @description
 #' To determine which files have not yet been processed, the function
 #' collects all directories in msrawfiles and looks in the feature indices
-#' to see which are missing.
+#' to see which are missing. TEMP TEST.
 #' 
 #' @param msrawfileIndex Name of index where processing information is stored
 #' @param saveDirectory Location where SLURM job files should be saved
