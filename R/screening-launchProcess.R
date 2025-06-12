@@ -6,7 +6,7 @@
 #' @description
 #' To determine which files have not yet been processed, the function
 #' collects all directories in msrawfiles and looks in the feature indices
-#' to see which are missing. TEMP TEST. TEMP TEST 2.
+#' to see which are missing.
 #' 
 #' @param msrawfileIndex Name of index where processing information is stored
 #' @param saveDirectory Location where SLURM job files should be saved

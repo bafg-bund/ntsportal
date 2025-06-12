@@ -1,0 +1,45 @@
+---
+title: "using-ntsportal-front-end"
+output: html_document
+---
+
+
+# Introduction
+
+The NTSPortal UI at `ntsportal.bafg.de` is built using the Kibana platform ([Documentation](https://www.elastic.co/docs/explore-analyze/)). This allows interactive viewing of the data. 
+
+## Registration and user access
+Access to ntsportal.bafg.de is currently restricted by IP whitelisting while it is still in development. Only static IP addresses are permitted and these must be white-listed by the BfG. Signing up for access is currently restricted to German government offices. Please contact the BfG for more information or send a request for access to [ntsportal@bafg.de](mailto:ntsportal@bafg.de).
+
+## Structure
+The homepage of `ntsportal.bafg.de` has a series of links on the left-hand side to access different dashboards (pages with different views of the data). The homepage and all linked dashboards are restricted to annotated features, meaning non-target detections for which there was a match in the Collective Spectral Library (CSL). 
+
+# Quick-Start
+
+## Search for a compound in the database and view spatial distribution
+- From the homepage, follow the link "Search for substances". 
+- Initially you will see the full dataset (which your role has access to) 
+- Use the drop-down menus at the top of the screen to filter the data for the compound of interest using a name, formula, CAS registry number, InChI-key, by the compound group or by filtering by m/z.
+- Once selected, the table and map will be filtered for the compound of interest. 
+- By hovering on the name of the compound, a "+" button will appear, which provide “drilldowns” – links to other dashboards to view the selected compound with different data. For example, from here one can view the time series of the selected compound at sites where time series data is available.
+
+## View time series of a compound in daily, monthly, yearly samples
+- There are two dashboards for viewing time series data, one for surface water samples, the other for suspended particulate matter (SPM). 
+- To view time series of compounds found in SPM extracts, follow the link "Time series SPM" from the homepage
+- On the time series SPM page, the user can select a compound from the drop-down menu and then see the changes in the relative peak area of the compound (relative to the internal standard) over time at each station.
+
+# Concepts 
+## How Kibana sees the data 
+- The dashboards are views of the dataset which is available to the current role. 
+- Each user has an assigned role with specific data access rights. 
+- Not all data is visible all at once. The data is automatically trimmed to minimize latency. How much the data is trimmed (or summarized, e.g. by averaging daily intensity to monthly intensity) depends on the visualisation.
+- The data trimming or averaging is done by ElasticSearch at query time. Kibana only receives the trimmed or averaged data from ElasticSearch and displays it.
+- In order to see the data of interest, filter for the datapoints of interest. Kibana provides several different filtering methods:
+  + All dashboards have a search box to filter the data using the KQL syntax. This requires knowledge of the field names and types of the data (See [index mapping](Index-mapping)).
+  + To the left of the search box is a "+"-button with which filters can be added graphically.
+  + To the right of the search box is the time selector, here the data can be filtered by time (sampling time, measurement time or import time, depending on the dashboard)
+  + Within some dashboards drop-down menus can be used to filter data
+  + Once filters have been set, click "Refresh" to send the query to the database and retrieve the new data.
+  + Some plots allow the user to "hide" some datapoints (e.g. by clicking on the legend entry of a time series, the selected series is hidden). Note: This does not fetch new data from the database. If the original query was trimmed to minimize latency, it will remain trimmed.
+
+
