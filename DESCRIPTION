@@ -45,4 +45,4 @@ SystemRequirements: Python (>= 3.12)
 Encoding: UTF-8
 VignetteBuilder: knitr
 Config/testthat/edition: 3
-URL: https://bafg-bund.pages.github.io/ntsportal
+URL: https://bafg-bund.github.io/ntsportal
