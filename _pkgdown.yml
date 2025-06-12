@@ -1,4 +1,19 @@
 url: https://bafg-bund.github.io/ntsportal
 template:
   bootstrap: 5
-
+navbar:
+ components:
+   articles:
+    text: Articles
+    menu:
+    - text: Front end UI
+    - text: Using ntsportal.bafg.de1
+      href: articles/using-ntsportal-front-end.html
+    - text: Kurzanleitung zur ersten Nutzung
+      href: articles/Kurzanleitung-zur-ersten-Nutzung.html
+    - text: Dashboard development
+      href: articles/Dashboard-development.html
+    - text: -------
+    - text: Using the Search API
+    - text: Using API in R
+      href: articles/Using-API-in-R.html
