@@ -41,7 +41,22 @@
     <li><a class="dropdown-item" href="articles/Dashboard-development.html">Dashboard development</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Using the Search API</h6></li>
-    <li><a class="dropdown-item" href="articles/Using-API-in-R.html">Using API in R</a></li>
+    <li><a class="dropdown-item" href="articles/Searching-with-ElasticSearch-Query-DSL.html">Searching with Query DSL</a></li>
+    <li><a class="dropdown-item" href="articles/Aggregations-with-ElasticSearch-Query-DSL.html">Aggregations with Query DSL</a></li>
+    <li><a class="dropdown-item" href="articles/Using-API-in-R.html">Using the Search API in R</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Database structure and algorithms</h6></li>
+    <li><a class="dropdown-item" href="articles/Structure-of-NTSPortal.html">DB Schema</a></li>
+    <li><a class="dropdown-item" href="articles/Library-screening.html">Library Screening</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Database management</h6></li>
+    <li><a class="dropdown-item" href="articles/Add-measurement-file-to-msrawfiles.html">Adding measurement files to msrawfiles</a></li>
+    <li><a class="dropdown-item" href="articles/Modify-documents-using-API.html">Modifying documents via the API</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Naming conventions</h6></li>
+    <li><a class="dropdown-item" href="articles/Station-naming.html">Station naming</a></li>
+    <li><a class="dropdown-item" href="articles/Measurement-file-naming-conventions.html">Measurement file naming</a></li>
+    <li><a class="dropdown-item" href="articles/Chromatographic-methods.html">Chromatographic methods naming</a></li>
   </ul>
 </li>
       </ul>
@@ -102,7 +117,7 @@
 <li>Install Python requirements</li>
 </ol>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/virtualenv-tools.html" class="external-link">virtualenv_install</a></span><span class="op">(</span>requirements <span class="op">=</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path_package.html" class="external-link">path_package</a></span><span class="op">(</span><span class="st">"ntsportal"</span>, <span class="st">"pythonElasticComm"</span>, <span class="st">"requirements.txt"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu">virtualenv_install</span><span class="op">(</span>requirements <span class="op">=</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path_package.html" class="external-link">path_package</a></span><span class="op">(</span><span class="st">"ntsportal"</span>, <span class="st">"pythonElasticComm"</span>, <span class="st">"requirements.txt"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">

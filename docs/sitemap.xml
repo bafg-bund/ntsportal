@@ -1,10 +1,10 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://bafg-bund.github.io/ntsportal/404.html</loc></url>
-<url><loc>https://bafg-bund.github.io/ntsportal/LICENSE-text.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/articles/Add-measurement-file-to-msrawfiles.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/articles/Aggregations-with-ElasticSearch-Query-DSL.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/articles/Chromatographic-methods.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/articles/Dashboard-development.html</loc></url>
+<url><loc>https://bafg-bund.github.io/ntsportal/articles/index.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/articles/Kurzanleitung-zur-ersten-Nutzung.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/articles/Library-screening.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/articles/Measurement-file-naming-conventions.html</loc></url>
@@ -13,13 +13,10 @@
 <url><loc>https://bafg-bund.github.io/ntsportal/articles/Station-naming.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/articles/Structure-of-NTSPortal.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/articles/Using-API-in-R.html</loc></url>
-<url><loc>https://bafg-bund.github.io/ntsportal/articles/index.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/articles/using-ntsportal-front-end.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/authors.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/index.html</loc></url>
-<url><loc>https://bafg-bund.github.io/ntsportal/reference/DbComm-class.html</loc></url>
-<url><loc>https://bafg-bund.github.io/ntsportal/reference/PythonDbComm-class.html</loc></url>
-<url><loc>https://bafg-bund.github.io/ntsportal/reference/PythonDbComm.html</loc></url>
+<url><loc>https://bafg-bund.github.io/ntsportal/LICENSE-text.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/reference/addRawfiles.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/reference/changeAliasAddress.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/reference/changeMsrawfileFilename.html</loc></url>
@@ -34,6 +31,7 @@
 <url><loc>https://bafg-bund.github.io/ntsportal/reference/dbaScreeningOneBatch.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/reference/dbaScreeningSelectedBatches.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/reference/dbaScreeningSelectedBatchesSlurm.html</loc></url>
+<url><loc>https://bafg-bund.github.io/ntsportal/reference/DbComm-class.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/reference/deleteTable.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/reference/esSearchPaged.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/reference/es_error_handler.html</loc></url>
@@ -49,6 +47,8 @@
 <url><loc>https://bafg-bund.github.io/ntsportal/reference/ntsportal-package.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/reference/ntsportal.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/reference/ping.html</loc></url>
+<url><loc>https://bafg-bund.github.io/ntsportal/reference/PythonDbComm-class.html</loc></url>
+<url><loc>https://bafg-bund.github.io/ntsportal/reference/PythonDbComm.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/reference/removeRedundantPngs.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/reference/resetConnectionCredentials.html</loc></url>
 <url><loc>https://bafg-bund.github.io/ntsportal/reference/scanBatchDbas.html</loc></url>

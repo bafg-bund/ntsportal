@@ -4,7 +4,8 @@
     "properties": {
       "time_added" : {
         "type" : "date",
-        "format" : "yyyy-MM-dd HH:mm:ss"
+        "format" : "yyyy-MM-dd HH:mm:ss", 
+        "meta": {"description": "Time of entry into CSL"}
       },
       "cas" : {"type" : "keyword"},
       "name" : {"type" : "keyword"},
@@ -21,13 +22,13 @@
       },
       "mz" : {"type" : "float"},
       "tag": {"type": "keyword"},
-      "inchi" : {"type" : "keyword"},
+      "inchi" : {"type" : "keyword", "meta": {"description": "international chemical identifier", "example": "InChI=1S/C7H5NS/c1-2-4-7-6(3-1)8-5-9-7/h1-5H"}},
       "formula" : {"type" : "keyword"},
-      "smiles" : {"type" : "keyword"},
+      "smiles" : {"type" : "keyword", "meta": {"description": "SMILES line notation for compound structure"}},
       "comment": {"type": "text"},
-      "pol" : {"type" : "keyword"},
-      "isotopologue" : {"type" : "keyword"},
-      "adduct" : {"type" : "keyword"},
+      "pol" : {"type" : "keyword", "meta": {"description": "3-letter ESI polarity mode", "example": "pos"}},
+      "isotopologue" : {"type" : "keyword", "meta": {"description": "isotopic difference to monoisotopic", "example": "37Cl"}},
+      "adduct" : {"type" : "keyword", "meta": {"description": "ESI adduct form", "example": "[M+H]+"}},
       "rtt" : {
         "type" : "nested",
         "properties" : {
@@ -41,18 +42,19 @@
             "type" : "boolean"
           },
           "rt" : {
-            "type" : "float"
+            "type" : "float", 
+            "meta": {"unit": "min", "description": "chromatographic retention time at peak apex"}
           }
         }
       },
-      "inchikey" : {"type" : "keyword"},
+      "inchikey" : {"type" : "keyword", "meta": {"description": "hash of international chemical identifier", "example": "ILLQTAPXYCRJRB-UHFFFAOYSA-N"}},
       "mw" : {"type" : "float"},
-      "ce" : {"type" : "float"},
-      "ces" : {"type" : "float"},
+      "ce" : {"type" : "float", "meta": {"description": "Collision energy"}},
+      "ces" : {"type" : "float", "meta": {"description": "Collision energy spread"}},
       "instrument": {"type" : "keyword"},
-      "ionisation": {"type" : "keyword"},
-      "ce_unit": {"type" : "keyword"},
-      "frag_type": {"type" : "keyword"},
+      "ionisation": {"type" : "keyword", "meta": {"description": "Type of LC-MS interface used"}},
+      "ce_unit": {"type" : "keyword", "meta": {"description": "Collision energy units"}},
+      "frag_type": {"type" : "keyword", "meta": {"description": "Type of fragmentation for this spectrum"}},
       "comp_group": {"type" : "keyword"},
       "data_source": {"type" : "keyword"},
       "licence" : {"type" : "keyword"}
