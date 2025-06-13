@@ -1,8 +1,21 @@
 pandoc: '3.2'
-pkgdown: 2.1.1
+pkgdown: 2.1.3
 pkgdown_sha: ~
-articles: {}
-last_built: 2025-06-12T09:13Z
+articles:
+  Add-measurement-file-to-msrawfiles: Add-measurement-file-to-msrawfiles.html
+  Aggregations-with-ElasticSearch-Query-DSL: Aggregations-with-ElasticSearch-Query-DSL.html
+  Chromatographic-methods: Chromatographic-methods.html
+  Dashboard-development: Dashboard-development.html
+  Kurzanleitung-zur-ersten-Nutzung: Kurzanleitung-zur-ersten-Nutzung.html
+  Library-screening: Library-screening.html
+  Measurement-file-naming-conventions: Measurement-file-naming-conventions.html
+  Modify-documents-using-API: Modify-documents-using-API.html
+  Searching-with-ElasticSearch-Query-DSL: Searching-with-ElasticSearch-Query-DSL.html
+  Station-naming: Station-naming.html
+  Structure-of-NTSPortal: Structure-of-NTSPortal.html
+  Using-API-in-R: Using-API-in-R.html
+  using-ntsportal-front-end: using-ntsportal-front-end.html
+last_built: 2025-06-12T15:09Z
 urls:
   reference: https://bafg-bund.github.io/ntsportal/reference
   article: https://bafg-bund.github.io/ntsportal/articles
