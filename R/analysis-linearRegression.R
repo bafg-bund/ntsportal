@@ -2,11 +2,11 @@
 
 #' Update the "analysis" table for spm dashboard
 #' 
-#' The analysis table shows slope of the linear regression model for each compound at each station for yearly composite samples
-#' This can is only computed for yearly composite samples of SPM in the upb dbas index
+#' The analysis table shows slope of the linear regression model for each compound at each station for yearly composite 
+#' samples. This can is only computed for yearly composite samples of SPM in the `dbas_upb` index
 #'
 #' @param sourceTableName Table in ntsportal which should be analyzed (only dbas_upb)
-#'
+#' 
 #' @export
 updateLinearRegressionTable <- function(sourceTableName) {
   dbComm <- getDbComm()
@@ -27,8 +27,8 @@ computeLinearRegression <- function(sourceTableName, queryBlock = list()) {
   resp <- dbComm@client$search(
     index = sourceTableName, 
     query = queryBlock,
-    aggs=getAggsForRegressionAnalysis(), 
-    size=0
+    aggs = getAggsForRegressionAnalysis(), 
+    size = 0
   )
   
   res <- resp$body

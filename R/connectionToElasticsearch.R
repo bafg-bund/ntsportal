@@ -13,7 +13,7 @@
 #' @export
 #'
 connectNtsportal <- function() {
-  checkSystemRing() # Bug in keyring, there must be a system ring
+  checkSystemRing()  # strange behavior in keyring, there must be a system ring
   if (haveCred()) {
     createEscon()
   } else if (!haveRing() && interactive()) {

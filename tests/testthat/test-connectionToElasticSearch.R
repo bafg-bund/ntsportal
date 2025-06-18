@@ -4,8 +4,12 @@
 
 test_that("You can connect to elasticsearch from the keychain and create escon", {
   # The test user "ntsportal_test_user" was created for this test
-  if (haveRing("test"))
+  if (haveRing("test")) {
+    keyring::key_delete("ntsportal-user", keyring = "test")
+    keyring::key_delete("ntsportal-pwd", keyring = "test")
     clearRing("test")
+  }
+    
   if (haveRing("system"))
     clearRing("system")
   
@@ -20,6 +24,8 @@ test_that("You can connect to elasticsearch from the keychain and create escon",
   
   expect_true(exists("escon", where = .GlobalEnv))
   rm(escon, pos = .GlobalEnv)
+  keyring::key_delete("ntsportal-user", keyring = "test")
+  keyring::key_delete("ntsportal-pwd", keyring = "test")
   clearRing("test")
 })
 

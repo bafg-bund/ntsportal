@@ -105,7 +105,8 @@ setMethod("getNrow", "PythonDbComm",function(dbComm, tableName, searchBlock = li
 
 
 # getTableAsRecords ####
-setMethod("getTableAsRecords", "PythonDbComm", function(dbComm, tableName, searchBlock = list(), recordConstructor = newNtspRecord) {
+setMethod("getTableAsRecords", "PythonDbComm", function(dbComm, tableName, searchBlock = list(), 
+                                                        recordConstructor = newNtspRecord) {
   searchBlock <- matchAllIfEmpty(searchBlock)
   s <- dbComm@dsl$Search(using=dbComm@client, index = tableName)$
     update_from_dict(searchBlock)
@@ -113,6 +114,7 @@ setMethod("getTableAsRecords", "PythonDbComm", function(dbComm, tableName, searc
     stop("Exceeded the maximum docs that may be retrieved (1e6), refine the query using the searchBlock argument (query DSL)")
   iterate(s$iterate(), function(hit) recordConstructor(hit$to_dict()))
 })
+
 # getTableAsTibble ####
 setMethod("getTableAsTibble", "PythonDbComm", function(dbComm, tableName, searchBlock = list()) {
   recs <- getTableAsRecords(dbComm, tableName, searchBlock)

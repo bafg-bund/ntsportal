@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-Measurement files are processed using the library screening algorithm known as DBAS. All the parameters for processing, as well as the location of the necessary input files, are stored in the `msrawfiles` index. The output is stored in a dbas index. See [naming conventions of indices](https://github.com/bafg-bund/ntsportal/wiki/Structure-of-NTSPortal#index-naming-conventions).
+Measurement files are processed using the library screening algorithm known as DBAS. All the parameters for processing, as well as the location of the necessary input files, are stored in the `msrawfiles` index. The output is stored in a `dbas` index. See [naming conventions of indices](articles/Structure-of-NTSPortal.html).
 
 # Reprocessing all datafiles in msrawfiles index
 
@@ -26,11 +26,11 @@ After additions have been made to the spectral library all datafiles must be rep
 
 ## Connecting to ElasticSearch cluster
 
-Connection within the BfG is achieved in R using the `connectNtsp()` function. This will use the stored credentials (stored in `keyring` with the file back-end) to build the connection (connection details are used to create the `escon` interface for use with the R-package `elastic` or are used to build the `PythonDbComm` interface).
+Connection within the BfG is achieved in R using `connectNtsportal()`. This will use the stored credentials to build the connection (the `PythonDbComm` interface).
 
 ## General workflow
 
-The HRMS measurement files are stored in the filesystem in directories representing batches (measurement sequences). The msrawfiles index is used to manage the metadata. Each file has a record which contains information such as file location, sampling information and processing parameters.
+The HRMS measurement files are stored in the filesystem in directories representing batches (measurement sequences). The `msrawfiles` index is used to manage the metadata. Each file has a record which contains information such as file path, sampling and acquisition information and processing parameters.
 
 The msrawfile-records are used to control the processing workflow. Once the workflow is complete, the data is saved as a json file in the format needed for Elasticsearch ingest. The ingest is done in a separate step.
 
@@ -38,9 +38,9 @@ The msrawfile-records are used to control the processing workflow. Once the work
 
 ### Process launching
 
-The user runs a function to start the screening either locally or via SLURM. In this function the batches to process are either selected by passing specific directories either by listing them directly or by giving a root directory.
+The user runs a `dbaScreening*` function to start the screening either locally or via SLURM. In `dbaScreeningSelectedBatchesSlurm()` (the most commonly used) specific directories (i.e. batches) containing the measurement files are passed either by listing them directly or by giving a root directory.
 
-Alternatively the user can process any "new" batches
+Alternatively the user can process any "new" batches using `dbaScreeningUnprocessedBatchesSlurm()`.
 
 #### Processing using the workflow manager SLURM
 

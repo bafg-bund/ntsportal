@@ -20,7 +20,7 @@ navbar:
     - text: Aggregations with Query DSL
       href: articles/Aggregations-with-ElasticSearch-Query-DSL.html
     - text: Using the Search API in R
-      href: articles/Using-API-in-R.html
+      href: articles/Connecting-to-NTSPortal-API.html
     - text: --------
     - text: Database structure and algorithms
     - text: DB Schema
@@ -41,3 +41,7 @@ navbar:
       href: articles/Measurement-file-naming-conventions.html
     - text: Chromatographic methods naming
       href: articles/Chromatographic-methods.html
+   news:
+    text: News
+    href: news/index.html
+    

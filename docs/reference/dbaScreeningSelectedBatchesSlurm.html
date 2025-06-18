@@ -21,7 +21,7 @@ The function will create necessary files for submission of the job to the workfl
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><h6 class="dropdown-header" data-toc-skip>Front end UI</h6></li>
-    <li><a class="dropdown-item" href="../articles/using-ntsportal-front-end.html">Using ntsportal.bafg.de1</a></li>
+    <li><a class="dropdown-item" href="../articles/using-ntsportal-front-end.html">Using ntsportal.bafg.de</a></li>
     <li><a class="dropdown-item" href="../articles/Kurzanleitung-zur-ersten-Nutzung.html">Kurzanleitung zur ersten Nutzung</a></li>
     <li><a class="dropdown-item" href="../articles/Dashboard-development.html">Dashboard development</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -43,6 +43,7 @@ The function will create necessary files for submission of the job to the workfl
     <li><a class="dropdown-item" href="../articles/Measurement-file-naming-conventions.html">Measurement file naming</a></li>
     <li><a class="dropdown-item" href="../articles/Chromatographic-methods.html">Chromatographic methods naming</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
@@ -106,7 +107,7 @@ may need to switch to a SLURM-enabled server).</p>
 <span class="r-in"><span><span class="va">userEmail</span> <span class="op">&lt;-</span> <span class="st">"example@bafg.de"</span></span></span>
 <span class="r-in"><span><span class="va">dirResults</span> <span class="op">&lt;-</span> <span class="st">"processingResults"</span></span></span>
 <span class="r-in"><span><span class="va">msrawfileIndexName</span> <span class="op">&lt;-</span> <span class="st">"ntsp25.1_msrawfiles"</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">ntsportal</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bafg-bund.github.io/ntsportal">ntsportal</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="connectNtsportal.html">connectNtsportal</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.remove</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">dirResults</span>, f <span class="op">=</span> <span class="cn">T</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>

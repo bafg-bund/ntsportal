@@ -27,19 +27,22 @@ The mapping code and field descriptions for the different tables:
 # Index naming conventions
 
 The indices are named using the convention:  
-`ntsp<version number>_index_<optional specification, e.g. 'analysis'>_<index type, e.g. 'dbas'>_v<ingest time  'YYMMDDHHmmSS'>_<project or institute, e.g. 'bfg'>`  
+`ntsp<version number>_index_<index type>_v<ingest time 'YYMMDDHHmmSS'>_<project or institute>`
+
 For example: `ntsp25.1_index_analysis_dbas_v240215101520_bfg`, `ntsp25.1_index_nts_v240316101520_lanuv`
 
 There are defined codes for project or institute.
 
-The exception is the msrawfiles index, since there is only one and there is no alias, this is just called `ntsp25.1_msrawfiles`.
+## Exceptions
+For the index types `msrawfiles` and `spectral_library` there is only one index and there is no alias, so are just called `ntsp25.1_msrawfiles` or `ntsp25.1_spectral_library`.
 
 Each other index type can have any number of indices, for a particular project, institute or other subset of data.
 
 # Aliases
 
 ElasticSearch uses aliases to make accessing an index easier. These names are designed to be shorter and not to change. They point to an index. The aliases have the following naming convention:  
-`ntsp<version number>_<optional specification, e.g. 'analysis'>_<index type, e.g. 'dbas'>_<project or institute, e.g. 'bfg'>`  
+`ntsp<version number>_<index type>_<project or institute>`
+
 For example: `ntsp25.1_dbas_bfg`
 
 The alias will point to the current version of the index. This way, several versions of an index can be maintained concurrently for testing and backup purposes.
@@ -54,15 +57,15 @@ It is important that alias names are not a subset of each other or indices. So t
 
 The following table shows some examples of the naming conventions
 
-|Index|Alias|Data view|Comment|
-|-----|-----|---------|-------|
-|ntsp25.1_index_dbas_v240418101520_bfg|ntsp25.1_dbas_bfg|ntsp25.1_dbas*||
-|ntsp25.1_index_dbas_v240422101520_bfg|ntsp25.1_dbas_bfg|ntsp25.1_dbas*||
-|ntsp25.1_spectral_library|-|ntsp25.1_spectral_library*|There is currently no institute/project specific library|
-|ntsp25.1_index_analysis_dbas_v240418101520_upb|ntsp25.1_analysis_dbas_upb|ntsp25.1_analysis_dbas*||
-|ntsp25.1_msrawfiles|-|ntsp25.1_msrawfiles*||
-|ntsp25.1_index_is_dbas_v240218101520_bfg|ntsp25.1_is_dbas_bfg|ntsp25.1_is_dbas*||
-|ntsp25.1_index_nts_v240428101520_unit_tests|ntsp25.1_nts_unit_tests|||
-|ntsp25.1_index_test_dbas_v250408101520_bfg|ntsp25.1_test_dbas_bfg|ntsp25.1_test_dbas*|see kibanaIntegrationTests|
+|Index|Alias|Data view|
+|-----|-----|---------|
+|ntsp25.1_index_dbas_v240418101520_bfg|ntsp25.1_dbas_bfg|ntsp25.1_dbas*|
+|ntsp25.1_index_dbas_v240422101520_bfg|ntsp25.1_dbas_bfg|ntsp25.1_dbas*|
+|ntsp25.1_spectral_library|-|ntsp25.1_spectral_library*|
+|ntsp25.1_index_analysis_dbas_v240418101520_upb|ntsp25.1_analysis_dbas_upb|ntsp25.1_analysis_dbas*|
+|ntsp25.1_msrawfiles|-|ntsp25.1_msrawfiles*|
+|ntsp25.1_index_is_dbas_v240218101520_bfg|ntsp25.1_is_dbas_bfg|ntsp25.1_is_dbas*|
+|ntsp25.1_index_nts_v240428101520_unit_tests|ntsp25.1_nts_unit_tests|-|
+|ntsp25.1_index_test_dbas_v250408101520_bfg|ntsp25.1_test_dbas_bfg|ntsp25.1_test_dbas*|
 
 

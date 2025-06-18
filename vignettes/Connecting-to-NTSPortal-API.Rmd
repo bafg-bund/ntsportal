@@ -1,0 +1,68 @@
+---
+title: "Connecting to the NTSPortal Elasticsearch Search API from R or Python"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using the NTSPortal Elasticsearch Search API in R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# API Connection, getting started
+
+The API is called from `elastic.bafg.de`. Users must 1) have been granted API access (please send a request to `ntsportal@bafg.de`) and 2) must have created an API key for themselves at `ntsportal.bafg.de` (Menu->Management->Stack Management->Security->API keys, 'control security privileges' must be checked")
+
+The API documentation is found [here](https://www.elastic.co/docs/api/doc/elasticsearch/). Detailed documentation is available for the different search languages offered, e.g. [Query DSL](https://www.elastic.co/docs/reference/query-languages/querydsl). 
+
+# Introduction
+
+The R-package *elastic* allows calls to the ElasticSearch API from within R and the json data is returned as a `list` or a `data.frame`. The list can then be reformatted as a `data.frame` for analysis in R. The best way to get started is to test your query in the kibana Dev Tools console and then copy the query into R and run the command from there. Since *elastic* is no longer maintained, the recommended method is to use the Python *elasticsearch* or *elasticsearch-dsl* modules from within R using *reticulate*. The `PythonDbComm` class uses this.
+
+## Storing of user credentials
+
+`ntsportal::connectNtsportal()` stores and retrieves the NTSPortal user credentials, it uses `keyring` to store the username and password. 
+
+## Ignoring SSL verification
+
+This is not recommended, but if there is a certificate error, you can turn off SSL verification:
+
+### Using R package `elastic`
+```{r, eval=FALSE}
+escon <- elastic::connect(
+  host = 'xxxx.bafg.de', 
+  port = XXX, user=ec$user, 
+  pwd  = ec$pwd,
+  transport_schema = "https",
+  ssl_verifypeer = FALSE
+)
+```
+
+### using python
+```{python, eval=FALSE}
+from elasticsearch import Elasticsearch
+def getDbClient(username, password, hostUrl):
+  es_client = Elasticsearch(
+        hosts=hostUrl,
+        basic_auth=(username, password),
+        verify_certs=False
+  )
+  return es_client
+```
+
+# Checking your IP address
+
+To check the IP from which you are trying to connect:
+
+```{r, eval=FALSE}
+library(rjson)
+fromJSON(readLines("http://api.hostip.info/get_json.php", warn=F))$ip
+```
+
+
+

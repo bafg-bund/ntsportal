@@ -103,6 +103,7 @@ test_that("A table can be closed", {
 test_that("A field in a subset of docs can be modified", {
   dbComm <- getDbComm()
   tableName <- "ntsp_temp"
+  deleteTable(dbComm, tableName)  # in case it already exists
   copyTable(dbComm, testIndexName, tableName, "msrawfiles")
   qDslSearchBlock <- list(query = list(regexp = list(path = ".*/no-peaks/.*")))
   setValueInField(dbComm, tableName, "dbas_minimum_detections", 0, qDslSearchBlock)

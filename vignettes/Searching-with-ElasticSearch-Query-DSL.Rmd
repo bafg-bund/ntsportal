@@ -1,5 +1,5 @@
 ---
-title: "Station naming conventions"
+title: "Using the Elasticsearch Search API with Query DSL for retrieving documents"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Station naming conventions}
@@ -13,27 +13,106 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-Refer to the extensive [documentation for Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html).
 
-For the NTSPortal schema, see [Structure of NTSPortal](Structure-of-NTSPortal).
+The Elasticsearch search API is available in the Dev Tools console in Kibana or via the API at `elastic.bafg.de`.  Refer to the extensive [documentation for Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html). For the NTSPortal schema, see [Structure of NTSPortal](Structure-of-NTSPortal).
 
 # Simple search example with the `term` query
-To retrieve all detections from the station "mosel_ko_r" run the following in the dev console:
+A very simple example is shown to show the structure of a query. This example retrieves all detections from the station "mosel_ko_r".
+
+## Using the Kibana Dev Tools console
 
 ```json
-GET ntsp_dbas*/_search
+GET ntsp25.1_dbas*/_search
 {
   "query": {
     "term": {
-      "station": "mosel_ko_r"
+      "station": "mosel_139"
     }
   }
 }
 ```
+## using curl
+
+```bash
+curl -X GET "https://<hostname>:<port>/ntsp25.1_dbas*/_search" \
+     -H 'Content-Type: application/json' \
+     -H 'Authorization: ApiKey <sectret>' \
+     -d'
+{
+  "query": {
+    "term": {
+      "station": "mosel_139"
+    }
+  }
+}'
+```
+
+## Using ntsportal
+
+```{r, eval = FALSE}
+library(ntsportal)
+connectNtsportal()
+dbComm <- getDbComm()
+tb <- getTableAsTibble(
+  dbComm, 
+  tableName = "ntsp25.1_dbas*", 
+  searchBlock = list(
+    query = list(
+      term = list(
+        station = "mosel_139"
+      )
+    )
+  )
+)
+```
+
+`getTableAsTibble()` implements the Python `elasticsearch-dsl` package in the back-end.
+
+## Using Python 
+
+### Using `elasticsearch` package
+
+```{python, eval=FALSE}
+from elasticsearch import Elasticsearch
+client = Elasticsearch(hosts="https://hosturl.mydomain.de", api_key="<secret>")
+response = client.search(
+  index="ntsp25.1_dbas*", 
+  body={
+    "query": {
+      "term": {
+        "station": "mosel_139"
+        }
+      }
+    }
+)
+```
+
+### Using `elasticsearch-dsl` package
+
+This is the recommended method for programming in Python and is the basis for the `getTable*` functions in `ntsportal`.
+
+```{python, eval=FALSE}
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search
+client = Elasticsearch(hosts="https://hosturl.mydomain.de", api_key="<secret>")
+s = Search(using=client, index="ntsp25.1_dbas*").update_from_dict(
+  {
+    "query":{
+      "term":{
+        "station": "mosel_139"
+      }
+    }
+  }
+)
+for hit in s.iterate():
+  print(hit.to_dict())
+```
+
+Note: This example uses `elasticsearch 8.17.2` and `elasticsearch-dsl 8.17.1`. In newer versions, `elasticsearch-dsl` is integrated into `elasticsearch`. 
 
 # Combining search parameters with `bool`
 
-In this example we search for datafiles with: polarity negative, not blanks, at stations ulm or wettin.
+The search query is usually more complex than in the example above. In this example we search for datafiles with polarity negative, not blanks, at stations ulm or wettin.
 
 ```json
 GET ntsp_msrawfiles/_search
@@ -78,4 +157,37 @@ GET ntsp_msrawfiles/_search
     }
   }
 }
+```
+
+## Paginating search results, selecting fields and converting to a `data.frame` in R.
+
+In this example, we are retrieving all the documents from the measurement station "mosel_ko_r" (Moselle, Koblenz, right bank), but only select certain fields. Using the Dev Tools console, we make the following request:
+
+```json
+GET ntsp25.1_dbas*/_search
+{
+  "query": {
+    "term": {
+      "station": {
+        "value": "mosel_ko_r"
+      }
+    }
+  },
+  "_source": ["name", "inchikey", "pol", "start", "duration", 
+              "area", "area_is", "area_normalized"]
+}
+```
+
+The response shows that the total number of hits is greater than or equal to (gte) 10000 (max documents reached). Therefore, we can not retrieve all documents with one request and must [paginate search results](https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html).
+
+The function `ntsportal::esSearchPaged()` works similarly to `elastic::Search` but will paginate the results. The response list is then transformed to a `data.frame`. Note: `esSearchPaged()` is deprecated in favor of `getTableAsTibble()`.
+
+```{r, eval=FALSE}
+connectNtsportal()
+res <- esSearchPaged("ntsp25.1_dbas*", searchBody = list(query = list(term = list(station = "mosel_ko_r"))), 
+   source = c("name", "inchikey", "pol", "start", "duration", "area"), sort = "mz")
+ 
+# Convert the returned list to a data.frame
+temp <- lapply(res$hits$hits, function(x) as.data.frame(x[["_source"]]))
+df <- plyr::rbind.fill(temp)
 ```
