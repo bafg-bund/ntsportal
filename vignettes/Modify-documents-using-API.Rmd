@@ -1,0 +1,121 @@
+---
+title: "Modifying documents using the Update By Query API"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Modifying documents using the Update By Query API}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+# Overwrite a value
+
+IMPORTANT: Always run the query by itself first using `GET <INDEX>/_search` and check that results are correct. Then copy the query to the POST statement.
+
+Be careful when copying code from a previous command to change all the necessary values.
+
+Use the [update by query API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-update-by-query).
+
+Example:
+
+```plaintext
+GET <INDEX>/_search
+{
+  "query": {
+    "term": {
+      "station": "NAME1"
+    }
+  }
+}
+
+POST <INDEX>/_update_by_query
+{
+  "query": {
+    "term": {
+      "station": "NAME1"
+    }
+  },
+  "script" : "ctx._source.station = 'NAME2'"
+}
+```
+
+## Overwrite a field via a Painless script
+
+In this case we want to change the station name by adding a prefix to a part of the existing station name.
+
+Note: The third debug statement is active in the code below. `+` is used for string concatination. To declare a string you must use `String`. And to split a string by a character use the string method `splitOnToken`. This produces an array.
+
+```plaintext
+GET <INDEX>/_search
+{
+  "query" : {
+    "regexp": {
+      "station": "ow_.*"
+    }
+  },
+  "aggs": {
+    "stations": {
+      "terms": {
+        "field": "station",
+        "size": 11
+      }
+    }
+  },
+  "size": 0
+}
+
+POST <INDEX>/_update_by_query
+{
+  "query" : {
+    "regexp": {
+      "station": "OW_\\d+"
+    }
+  },
+  "script": {
+    "source": """
+      // Debug.explain(params.new_prefix);
+      // Debug.explain(params.newPrefix + ctx._source.station.splitOnToken('_')[1]);
+      String newName = params.newPrefix + ctx._source.station.splitOnToken('_')[1];
+      Debug.explain(newName)
+      ctx._source.station = newName;
+      """,
+    "params": {
+      "newPrefix": "ow_hess_ried_"
+    }
+  }
+}
+```
+
+# Create or append to array
+
+If an entry should be treated as an array (multiple entries), such as the `tag` or `comment` fields, then these need to be explicitly saved as arrays. The following script will test if an entry exists and if not will create an array. If there already is an entry (array or not) it will make it an array and append the new value. The field and values to change are given in the `params` field of the script.
+
+```plaintext
+POST <INDEX>/_update_by_query
+{
+  "query": {
+    <query code>
+  },
+  "script": {
+    "params": {
+      "fieldToChange": "comment",
+      "newValue": "Instrument name: Sediment TOF"
+    },
+    "source": """
+      if (ctx._source[params.fieldToChange] == null) {
+        ctx._source[params.fieldToChange] = [params.newValue];
+      } else if (!(ctx._source[params.fieldToChange] instanceof List)) {
+        ctx._source[params.fieldToChange] = [ctx._source[params.fieldToChange]];
+        ctx._source[params.fieldToChange].add(params.newValue);
+      } else {
+        ctx._source[params.fieldToChange].add(params.newValue)
+      }
+      """
+  }
+}
+```

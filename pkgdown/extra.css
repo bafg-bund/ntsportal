@@ -1,0 +1,37 @@
+#tocnav ul.nav li a {
+    font-weight: bold;
+}
+
+#tocnav ul.nav li ul.nav li a {
+    margin-left: 15px;
+    padding-left: 15px;
+    font-weight: normal;
+}
+
+.navbar-right li a {
+    padding: 1px 0 1px;
+    margin: 0;
+}
+
+.row {
+    padding-top: 2%;
+}
+
+.fa.fa-github {
+    font-size: 30px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+}
+
+.text-muted {
+    color: #002B54 !important;
+}
+
+.bfglogo {
+     opacity: 0.7;
+}
+
+.bfglogo:hover {
+     opacity: 1;
+}

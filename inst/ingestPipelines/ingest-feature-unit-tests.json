@@ -1,0 +1,70 @@
+{
+  "processors": [
+    {
+      "enrich": {
+        "policy_name": "add-file-metadata-unit-tests",
+        "field": "path",
+        "max_matches": "1",
+        "target_field": "file_metadata"
+      }
+    },
+    {
+      "script": {
+        "description": "move file_metadata to top-level fields",
+        "source": "
+          if (ctx.file_metadata != null) {
+            if (ctx.file_metadata.start != null) {
+              ctx.start = ctx.file_metadata.start;
+            }
+            if (ctx.file_metadata.pol != null) {
+              ctx.pol = ctx.file_metadata.pol;
+            }
+            if (ctx.file_metadata.matrix != null) {
+              ctx.matrix = ctx.file_metadata.matrix;
+            }
+            if (ctx.file_metadata.data_source != null) {
+              ctx.data_source = ctx.file_metadata.data_source;
+            }
+            if (ctx.file_metadata.sample_source != null) {
+              ctx.sample_source = ctx.file_metadata.sample_source;
+            }
+            if (ctx.file_metadata.licence != null) {
+              ctx.licence = ctx.file_metadata.licence;
+            }
+            if (ctx.file_metadata.chrom_method != null) {
+              ctx.chrom_method = ctx.file_metadata.chrom_method;
+            }
+            if (ctx.file_metadata.duration != null) {
+              ctx.duration = ctx.file_metadata.duration;
+            }
+            if (ctx.file_metadata.date_measurement != null) {
+              ctx.date_measurement = ctx.file_metadata.date_measurement;
+            }
+            if (ctx.file_metadata.river != null) {
+              ctx.river = ctx.file_metadata.river;
+            }
+            if (ctx.file_metadata.km != null) {
+              ctx.km = ctx.file_metadata.km;
+            }
+            if (ctx.file_metadata.gkz != null) {
+              ctx.gkz = ctx.file_metadata.gkz;
+            }
+            if (ctx.file_metadata.tag != null) {
+              ctx.tag = ctx.file_metadata.tag;
+            }
+            if (ctx.file_metadata.comment != null) {
+              ctx.comment = ctx.file_metadata.comment;
+            }
+            if (ctx.file_metadata.station != null) {
+              ctx.station = ctx.file_metadata.station;
+            }
+            if (ctx.file_metadata.loc != null) {
+              ctx.loc = ctx.file_metadata.loc;
+            }
+            ctx.remove('file_metadata');
+          }
+        "
+      }
+    }
+  ]
+}

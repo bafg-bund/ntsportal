@@ -1,0 +1,24 @@
+---
+title: "Chromatographic methods"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Chromatographic methods}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Keyword descriptions for `chrom_method` field.
+
+| Keyword    | Description                                                          |
+|------------|------------------------------------------------|
+|bfg_nts_rp1|Chromatographic method used for most BfG data. Further information can be found in [Nürenberg et al (2015)](https://doi.org/10.1016/j.chroma.2015.11.014).|
+|lw_nts_rp1 |Chromatographic method used for data from LW|
+|lanuv_nts|Chromatographic method used for data from LANUV|
+

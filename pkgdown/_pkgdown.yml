@@ -1,0 +1,71 @@
+url: http://r.bafg.de/
+template:
+  bootstrap: 5
+  bootswatch: yeti
+  bslib:
+    fg: "rgb(0, 43, 84)"
+    bg: "rgb(255, 255, 255)"
+    base_font: {google: "Inter"}
+    code_font: {google: "JetBrains Mono"}
+    enable-rounded: FALSE
+    primary: "#002B54"
+    secondary: "#328CCC"
+    success: "#7BBA40"
+    info: "#9C9894"
+    warning: "#CF9194"
+    danger: "#75384A"
+    code-bg: "#EDEBE7"
+navbar:
+  left:
+    - text: Articles
+      menu:
+      - text: Front end UI
+      - text: Using ntsportal.bafg.de
+        href: articles/using-ntsportal-front-end.html
+      - text: Kurzanleitung zur ersten Nutzung
+        href: articles/Kurzanleitung-zur-ersten-Nutzung.html
+      - text: Dashboard development
+        href: articles/Dashboard-development.html
+      - text: -------
+      - text: Using the Search API
+      - text: Searching with Query DSL
+        href: articles/Searching-with-ElasticSearch-Query-DSL.html
+      - text: Aggregations with Query DSL
+        href: articles/Aggregations-with-ElasticSearch-Query-DSL.html
+      - text: Using the Search API in R
+        href: articles/Connecting-to-NTSPortal-API.html
+      - text: --------
+      - text: Database structure and algorithms
+      - text: Structure of NTSPortal
+        href: articles/Structure-of-NTSPortal.html
+      - text: Library Screening
+        href: articles/Library-screening.html
+      - text: --------
+      - text: Database management
+      - text: Adding measurement files to msrawfiles
+        href: articles/Add-measurement-file-to-msrawfiles.html
+      - text: Modifying documents via the API
+        href: articles/Modify-documents-using-API.html
+      - text: --------
+      - text: Naming conventions
+      - text: Station naming
+        href: articles/Station-naming.html
+      - text: Measurement file naming
+        href: articles/Measurement-file-naming-conventions.html
+      - text: Chromatographic methods naming
+        href: articles/Chromatographic-methods.html
+    - text: Reference
+      href: reference/index.html
+    - text: News
+      href: news/index.html
+  right:
+    - text: BfG
+      href: https://www.bafg.de
+      aria-label: BfG Website
+    - icon: fa-github
+      href: https://github.com/bafg-bund/ntsportal
+      aria-label: View source code on github.com  
+footer:
+  structure: 
+    left: built_with
+    right: developed_by

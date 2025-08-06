@@ -1,0 +1,88 @@
+
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit README.Rmd -->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# ntsportal
+
+The goal of the R-package *ntsportal* is to provide the backend for the NTSPortal database and online dashboards for non-target-screening data (based on LC-HRMS measurements) of surface waters. NTSPortal is designed to process measurement files and make the processed data available via an API and through online dashboards. The dashboards allow searching, data analysis and visualization. For detailed statistical analysis, the API can be used for accessing the data in Python or R scripts. The system currently uses [Elasticsearch](https://www.elastic.co/docs/get-started) for storing and searching the data. This R-package is used for processing and managing the data and search engine. The functions for data processing use [ntsworkflow](https://github.com/bafg-bund/ntsworkflow). For further information on the structure and internal design of NTSPortal please refer to the documentation.
+
+Access to the internally managed NTSPortal database is available upon request. Please contact the Federal Institute of Hydrology at ntsportal@bafg.de. This repository includes the back-end code for publication purposes and does not include the environmental data.
+
+## Project Funding
+
+The project was initiated by a research funding grant by the Federal Environment Agency (UBA, "Online Portal: Non-Target-Screening für die Umweltüberwachung der Zukunft" REFOPLAN 3720222010) and continued funding is provided by the research grant REFOPLAN 3723222020 ("Weiterentwicklung des Online Portals für die Umweltbeobactung der Zukunft"). Additional funding is provided by the Federal Ministry of Transport (BMV) and the Federal Ministry of the Environment (BMU).
+
+## License
+
+Copyright 2025 Bundesanstalt für Gewässerkunde (Federal Institute of Hydrology)
+
+ntsportal is free software: you can redistribute it and/or modify it under the 
+terms of the GNU General Public License as published by the Free Software 
+Foundation, either version 3 of the License, or (at your option) any 
+later version.
+
+ntsportal is distributed in the hope that it will be useful, but WITHOUT ANY 
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along 
+with ntsportal. If not, see <https://www.gnu.org/licenses/>.
+
+If you use the package or any derivative thereof, please cite the work, see `citation("ntsportal")`.
+
+## Installation
+
+NTSPortal is a conglomerate of many systems (see Structure of NTSPortal). This guide describes the installation of the R-package ntsportal (the back-end processing and management tool).
+
+### Installation via Github
+
+1) Create a Github PAT
+2) Add it, with the following line, to `~/.Rprofile`
+
+```{r, eval=FALSE}
+Sys.setenv(GITHUB_PAT = "<...>")
+```
+3) Restart R session
+4a) Confirm that Python and a virtual environment is available
+
+```{r, eval=FALSE}
+reticulate::virtualenv_exists()
+```
+
+If there are errors, check that `reticulate` is installed and the virtual environment is activated (in RStudio under Project or Global options). If no virtual environment is available, use `reticulate::virtualenv_create()`.
+
+4) Install ntsportal
+
+```{r, eval=FALSE}
+remotes::install_github("bafg-bund/ntsportal")
+```
+
+5) Install Python packages
+
+```{r, eval=FALSE}
+reticulate::virtualenv_install(requirements = fs::path_package("ntsportal", "pythonElasticComm", "requirements.txt"))
+```
+
+If not already created, this command will create the "r-reticulate" Python virtual environment and install packages. 
+
+6) Setup connection to Elasticsearch
+
+```{r, eval=FALSE}
+library(ntsportal)
+options(ntsportal.elasticsearchHostUrl = "https://my.elastic.cluster")
+connectNtsportal()  # first time: enter username and password
+ping(getDbComm())
+```
+

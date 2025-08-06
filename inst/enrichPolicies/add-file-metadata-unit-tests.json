@@ -1,0 +1,25 @@
+{
+  "match": {
+    "indices": "ntsp25.2_msrawfiles_unit_tests", 
+    "match_field": "path",
+    "enrich_fields": [
+      "start",
+      "pol",
+      "matrix",
+      "data_source",
+      "sample_source",
+      "licence",
+      "chrom_method",
+      "duration",
+      "date_measurement",
+      "river",
+      "km",
+      "gkz",
+      "tag",
+      "comment",
+      "dbas_alias_name",
+      "station",
+      "loc"
+    ]
+  }
+}

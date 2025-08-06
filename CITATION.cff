@@ -1,0 +1,55 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Jewell"
+  given-names: "Kevin Sean"
+  orcid: "https://orcid.org/0000-0002-0758-0541"
+- family-names: "Prodöhl"
+  given-names: "Franziska"
+- family-names: "Ehlig"
+  given-names: "Björn"
+- family-names: "Skottnik"
+  given-names: "Jonas"
+- family-names: "Lessmann"
+  given-names: "Ole"
+- family-names: "Hermes"
+  given-names: "Nina"
+- family-names: "Wick"
+  given-names: "Arne"
+title: "ntsportal - Functions for building and managing the NTSPortal database"
+version: 25.1
+doi: 10.5281/zenodo.1234
+date-released: 2025-05-27
+url: "https://github.com/bafg-bund/ntsportal"
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Jewell"
+    given-names: "Kevin Sean"
+    orcid: "https://orcid.org/0000-0002-0758-0541"
+  - family-names: "Thron"
+    given-names: "Franziska"
+  - family-names: "Schlüsener"
+    given-names: "Michael P."
+  - family-names: "Kramer"
+    given-names: "Kasjen"
+  - family-names: "Scharrenbach"
+    given-names: "Thomas"
+  - family-names: "Fettig"
+    given-names: "Ina"
+  - family-names: "Koschorreck"
+    given-names: "Jan"
+  - family-names: "Schulte"
+    given-names: "Christian"
+  - family-names: "Ternes"
+    given-names: "Thomas T."
+  - family-names: "Wick"
+    given-names: "Arne"
+  doi: "10.1002/vomw.202100020"
+  journal: "Vom Wasser"
+  start: 94 # First page number
+  end: 96 # Last page number
+  title: "Ein Datenbankmodell für aggregierte Non-Target-Screening-Ergebnisse"
+  issue: 3
+  volume: 119
+  year: 2021

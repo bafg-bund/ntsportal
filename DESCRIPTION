@@ -1,0 +1,52 @@
+Package: ntsportal
+Type: Package
+Title: ntsportal - Functions for building and managing the NTSPortal database
+Version: 25.2
+Authors@R: c(
+             person(c("Kevin", "S."), "Jewell", email = "jewell@bafg.de", role = "cre",
+             comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany"),
+             person("Ole", "Lessmann", email = "lessmann@bafg.de", role = "aut",
+             comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany"),
+             person("Jonas", "Skottnik", email = "skottnik@bafg.de", role = "ctb",
+             comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany"),
+             person("Franziska", "Prodöhl", email = "prodoehl@bafg.de", role = "ctb",
+             comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany"),
+             person("Nina", "Hermes", email = "hermes@bafg.de", role = "ctb",
+             comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany"),
+             person("Arne", "Wick", email = "wick@bafg.de", role = "rev",
+             comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany")
+             )
+Description: This package provides functionality for building and managing the NTSPortal database.
+License: GNU GPL-3.0
+LazyData: TRUE
+Depends: R (>= 4.1.0)
+Imports:
+    tidyverse,
+    logger,
+    future,
+    fs,
+    yaml,
+    jsonlite,
+    glue,
+    keyring,
+    reticulate,
+    elastic,
+    digest,
+    rlang,
+    lubridate,
+    cli,
+    RJSONIO
+RoxygenNote: 7.3.2
+Remotes:
+    github::bafg-bund/ntsworkflow
+Suggests:
+    testthat (>= 3.0.0),
+    magick,
+    knitr,
+    rmarkdown,
+    pkgdown
+SystemRequirements: Python (>= 3.12)
+Encoding: UTF-8
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+URL: https://github.com/bafg-bund/ntsportal
