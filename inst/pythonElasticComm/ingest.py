@@ -5,8 +5,6 @@ import json
 from elasticsearch import exceptions
 from elasticsearch.helpers import streaming_bulk, BulkIndexError
 import math
-import datetime
-
 
 def testPrint():
     print("Print message from python", flush=True)
@@ -14,16 +12,10 @@ def testPrint():
 def ingestRecords(recs, client, indexTimeStamp, indexMappingPath, pipeline=None):
     """Ingests json documents into Elasticsearch grouped by unique alias name. For each unique alias name a respective
      target index with timestamp is created and the alias is assigned."""
-    print(datetime.datetime.now().strftime("%H:%M:%S"))
-    print("starting", flush=True)
     uniqueAliasNames = set(rec['dbas_alias_name'] for rec in recs)
-    print(datetime.datetime.now().strftime("%H:%M:%S"))
-    print("got alias names", flush=True)
     # Create dbas/nts indices in Elasticsearch based on alias names
     targetIndexAliasPairs = createIndexAddAlias(uniqueAliasNames, client, indexTimeStamp, indexMappingPath)
-    print(datetime.datetime.now().strftime("%H:%M:%S"))
-    print("created indices and starting ingest", flush=True)
-    # Ingest data to target indeces in Elasticsearch
+    # Ingest data to target indices in Elasticsearch
     ingestToIndices(targetIndexAliasPairs, recs, client, pipeline)
     return targetIndexAliasPairs
 

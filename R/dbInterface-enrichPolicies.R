@@ -55,6 +55,11 @@ testForEnrichPolicy <- function(policyName) {
   length(res$body$policies[[1]]) == 1  
 }
 
+#' Refresh an existing enrich policy
+#' @param policyName Name of policy
+#' @param asBackgroundTask Boolean, should it run in the background?
+#' @return Task ID
+#' @export
 executeEnrichPolicy <- function(policyName, asBackgroundTask = TRUE) {
   dbComm <- getDbComm()
   res <- dbComm@client$enrich$execute_policy(name = policyName, wait_for_completion=!asBackgroundTask)

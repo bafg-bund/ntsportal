@@ -18,6 +18,8 @@
 #' @export
 #'
 ingest <- function(path, ingestPipeline = NULL) {
+  if (!testForPipeline(ingestPipeline))
+    stop("Ingest pipeline ", ingestPipeline, " does not exist")
   indexMappingPath <- fs::path_package("ntsportal", "mappings")
   dbComm <- getDbComm()
   indexTimeStamp <- format(lubridate::now(), "%y%m%d%H%M%S")
@@ -34,6 +36,8 @@ ingest <- function(path, ingestPipeline = NULL) {
     cli_progress_update()
   }
   walk(unlist(aliasIndexPairs), \(x) refreshTable(dbComm, x))
+  taskId <- executeEnrichPolicy("date-import-policy")
+  message("Refreshed date-import-policy with task id: ", taskId)
   return(aliasIndexPairs)
 }
 
