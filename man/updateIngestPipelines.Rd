@@ -2,10 +2,10 @@
 % Please edit documentation in R/dbInterface-ingestPipelines.R
 \name{updateIngestPipelines}
 \alias{updateIngestPipelines}
-\title{Update all ingest policies on the elasticsearch cluster}
+\title{Update Ingest Pipelines needed for ntsportal on the elasticsearch cluster}
 \usage{
 updateIngestPipelines()
 }
 \description{
-Update all ingest policies on the elasticsearch cluster
+Update Ingest Pipelines needed for ntsportal on the elasticsearch cluster
 }
