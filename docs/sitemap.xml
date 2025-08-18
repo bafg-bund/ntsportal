@@ -13,13 +13,13 @@
 <url><loc>http://r.bafg.de/articles/Searching-with-ElasticSearch-Query-DSL.html</loc></url>
 <url><loc>http://r.bafg.de/articles/Station-naming.html</loc></url>
 <url><loc>http://r.bafg.de/articles/Structure-of-NTSPortal.html</loc></url>
-<url><loc>http://r.bafg.de/articles/Using-API-in-R.html</loc></url>
 <url><loc>http://r.bafg.de/articles/using-ntsportal-front-end.html</loc></url>
 <url><loc>http://r.bafg.de/authors.html</loc></url>
 <url><loc>http://r.bafg.de/index.html</loc></url>
 <url><loc>http://r.bafg.de/LICENSE-text.html</loc></url>
 <url><loc>http://r.bafg.de/news/index.html</loc></url>
 <url><loc>http://r.bafg.de/reference/addRawfiles.html</loc></url>
+<url><loc>http://r.bafg.de/reference/addValueToArray.html</loc></url>
 <url><loc>http://r.bafg.de/reference/changeAliasAddress.html</loc></url>
 <url><loc>http://r.bafg.de/reference/changeMsrawfileFilename.html</loc></url>
 <url><loc>http://r.bafg.de/reference/changeMsrawfilePath.html</loc></url>
@@ -40,6 +40,7 @@
 <url><loc>http://r.bafg.de/reference/deleteTable.html</loc></url>
 <url><loc>http://r.bafg.de/reference/esSearchPaged.html</loc></url>
 <url><loc>http://r.bafg.de/reference/es_error_handler.html</loc></url>
+<url><loc>http://r.bafg.de/reference/executeEnrichPolicy.html</loc></url>
 <url><loc>http://r.bafg.de/reference/findTemplateId.html</loc></url>
 <url><loc>http://r.bafg.de/reference/getDbComm.html</loc></url>
 <url><loc>http://r.bafg.de/reference/getNrow.html</loc></url>
@@ -55,10 +56,13 @@
 <url><loc>http://r.bafg.de/reference/PythonDbComm-class.html</loc></url>
 <url><loc>http://r.bafg.de/reference/PythonDbComm.html</loc></url>
 <url><loc>http://r.bafg.de/reference/removeRedundantPngs.html</loc></url>
+<url><loc>http://r.bafg.de/reference/removeValueFromArray.html</loc></url>
 <url><loc>http://r.bafg.de/reference/resetConnectionCredentials.html</loc></url>
 <url><loc>http://r.bafg.de/reference/scanBatchDbas.html</loc></url>
 <url><loc>http://r.bafg.de/reference/setCredNonInteractive.html</loc></url>
 <url><loc>http://r.bafg.de/reference/setValueInField.html</loc></url>
+<url><loc>http://r.bafg.de/reference/updateEnrichPolicies.html</loc></url>
+<url><loc>http://r.bafg.de/reference/updateIngestPipelines.html</loc></url>
 <url><loc>http://r.bafg.de/reference/updateLinearRegressionTable.html</loc></url>
 <url><loc>http://r.bafg.de/reference/updateSpectralLibrary.html</loc></url>
 <url><loc>http://r.bafg.de/reference/validateRecord.html</loc></url>
