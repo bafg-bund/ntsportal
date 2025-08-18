@@ -377,10 +377,8 @@ getNestedFields <- function() {
 }
 
 allowedFieldsFeature <- function() {
-  allowed <- union(
-    names(getMappingsDbas()),
-    names(getMappingsNts())
-  )
+  allowed <- names(getMappingsDbas())
+  
   c(allowed, "dbas_alias_name")
 }
 
@@ -388,9 +386,6 @@ getMappingsDbas <- function() {
   jsonlite::read_json(fs::path_package("ntsportal", "mappings", "dbas_index_mappings.json"))$mappings$properties
 }
 
-getMappingsNts <- function() {
-  jsonlite::read_json(fs::path_package("ntsportal", "mappings", "nts_index_mappings.json"))$mappings$properties
-}
 
 warnBadFields <- function(badFields, parentField = "top-level") {
   badFieldsString <- paste(badFields, collapse = ", ")

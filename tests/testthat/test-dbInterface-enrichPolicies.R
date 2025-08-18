@@ -1,7 +1,7 @@
 
 
 test_that("You can create a test enrich policy and execute it", {
-  testPolicyName <- "date-import-policy-unit-test"
+  testPolicyName <- "date-import-policy-unit-tests"
   if (testForEnrichPolicy(testPolicyName)) 
     deleteEnrichPolicy(testPolicyName)
   createEnrichPolicy(testPolicyName)

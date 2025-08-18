@@ -1,5 +1,5 @@
 
-#' Update all ingest policies on the elasticsearch cluster
+#' Update Ingest Pipelines needed for ntsportal on the elasticsearch cluster
 #' @export
 updateIngestPipelines <- function() {
   pipelineNames <- getIngestPipelineNames()
