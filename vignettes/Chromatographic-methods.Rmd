@@ -22,3 +22,5 @@ knitr::opts_chunk$set(
 |lw_nts_rp1 |Chromatographic method used for data from LW|
 |lanuv_nts|Chromatographic method used for data from LANUV|
 
+<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- This file is part of ntsportal -->

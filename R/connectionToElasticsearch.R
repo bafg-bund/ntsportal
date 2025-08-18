@@ -29,7 +29,7 @@ connectNtsportal <- function() {
 }
 
 #' Create connection with new credentials
-#' @description For use when stored creditials need to be changed.
+#' @description For use when stored credentials need to be changed.
 #' @export
 resetConnectionCredentials <- function() {
   clearRing()

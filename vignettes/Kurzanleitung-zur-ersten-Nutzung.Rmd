@@ -92,3 +92,6 @@ Dieser Bereich ist ähnlich aufgebaut wie „Time series water" und
 kann auf die gleiche Weise verwendet werden.
 
 ![Abbildung Analytical Data \"Time series SPM\", Anzeige für die gefilterten Substanzen](images/time_series_spm_samples.png){width=100%}
+
+<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- This file is part of ntsportal -->

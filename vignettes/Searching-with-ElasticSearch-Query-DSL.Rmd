@@ -191,3 +191,6 @@ res <- esSearchPaged("ntsp25.2_dbas*", searchBody = list(query = list(term = lis
 temp <- lapply(res$hits$hits, function(x) as.data.frame(x[["_source"]]))
 df <- plyr::rbind.fill(temp)
 ```
+
+<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- This file is part of ntsportal -->

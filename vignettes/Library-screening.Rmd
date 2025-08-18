@@ -90,3 +90,5 @@ The RDS files are imported into NTSPortal with `ingest()`, which calls the Elast
 
 ![Figure: Details of `ingest()`](images/screening-ingest.svg){width=100%}
 
+<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- This file is part of ntsportal -->

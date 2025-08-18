@@ -119,3 +119,6 @@ POST <INDEX>/_update_by_query
   }
 }
 ```
+
+<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- This file is part of ntsportal -->

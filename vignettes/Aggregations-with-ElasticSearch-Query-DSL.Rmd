@@ -277,3 +277,6 @@ GET ntsp_dbas_v231006_frame/_search?size=0
   }
 }
 ```
+
+<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- This file is part of ntsportal -->

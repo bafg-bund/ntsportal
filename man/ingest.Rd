@@ -2,21 +2,21 @@
 % Please edit documentation in R/screening-ingest.R
 \name{ingest}
 \alias{ingest}
-\title{Ingest of RDS files into Elasticsearch}
+\title{Ingest featureRecords into Elasticsearch}
 \usage{
-ingest(path, ingestPipeline = NULL)
+ingest(path, ingestPipeline = "ingest-feature")
 }
 \arguments{
 \item{path}{Path to single RDS file or directory with RDS files.}
 
-\item{ingestPipeline}{ID of ingest pipeline to use (default is none used)}
+\item{ingestPipeline}{ID of ingest pipeline to use (default is "ingest-feature" pipeline)}
 }
 \value{
 list with one top-level entry per batch (RDS file). The second level has one entry per
 alias and this contains a character vector of the index name associated with that alias.
 }
 \description{
-The processing output is an RDS file for each batch (or more than one for large batches). These
+The screening processing output is an RDS file for each batch (or more than one for large batches). These
 are ingested into NTSPortal Elasticsearch.
 }
 \details{

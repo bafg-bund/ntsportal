@@ -108,7 +108,5 @@ Example `filename`: `OBF34910_20230821_Zschopau_pos.mzXML`
 Example `dbas_station_regex`: `^(OBF\\d{5})_`
 
 
-
-
-
-
+<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- This file is part of ntsportal -->

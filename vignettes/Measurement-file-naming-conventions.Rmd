@@ -102,3 +102,5 @@ Example:
 | Wettin | Wett_JJ_X_pol.\* | saale_wettin_m | saw_pol |
 | Zehren | Zeh_JJ_X_pol.\* | elbe_ze_l | elz_pol |
 
+<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- This file is part of ntsportal -->

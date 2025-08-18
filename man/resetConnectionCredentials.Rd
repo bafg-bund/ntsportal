@@ -7,5 +7,5 @@
 resetConnectionCredentials()
 }
 \description{
-For use when stored creditials need to be changed.
+For use when stored credentials need to be changed.
 }

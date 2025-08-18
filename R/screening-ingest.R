@@ -1,12 +1,12 @@
 
 
-#' Ingest of RDS files into Elasticsearch
+#' Ingest featureRecords into Elasticsearch
 #' 
-#' The processing output is an RDS file for each batch (or more than one for large batches). These
+#' The screening processing output is an RDS file for each batch (or more than one for large batches). These
 #' are ingested into NTSPortal Elasticsearch.
 #' 
 #' @param path Path to single RDS file or directory with RDS files.
-#' @param ingestPipeline ID of ingest pipeline to use (default is none used)
+#' @param ingestPipeline ID of ingest pipeline to use (default is "ingest-feature" pipeline)
 #' 
 #' @details
 #' \strong{Ingest pipelines}
@@ -17,7 +17,7 @@
 #' alias and this contains a character vector of the index name associated with that alias.
 #' @export
 #'
-ingest <- function(path, ingestPipeline = NULL) {
+ingest <- function(path, ingestPipeline = "ingest-feature") {
   if (!testForPipeline(ingestPipeline))
     stop("Ingest pipeline ", ingestPipeline, " does not exist")
   indexMappingPath <- fs::path_package("ntsportal", "mappings")

@@ -66,3 +66,5 @@ The nested fields (see field mappings) are queried with `field: {field : value }
 1. For custom filters, once these have been set, the user must "Refresh" to send the query to the database and retrieve the new data. This is done automatically when using the drop-down menus. 
 2. Some plots allow the user to "toggle-hide" datapoints (e.g. by clicking on the legend entry of a time series, the selected series is hidden). This does not fetch new data from the database. If the original query was truncated, it will remain such.
 
+<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- This file is part of ntsportal -->

@@ -9,7 +9,7 @@ msrawfileIndexName <- "ntsp25.2_msrawfiles_unit_tests"
 library(ntsportal)
 connectNtsportal()
 file.remove(list.files(dirTestResults, f = T))
-
+#resetConnectionCredentials()
 dirs <- c(
   "/beegfs/nts/ntsportal/msrawfiles/unit_tests/olmesartan-d6-bisoprolol/"
 )

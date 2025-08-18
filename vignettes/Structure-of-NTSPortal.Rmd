@@ -81,4 +81,6 @@ The following table shows some examples of the naming conventions
 |ntsp25.2_index_nts_v240428101520_unit_tests|ntsp25.2_nts_unit_tests|-|
 |ntsp25.2_index_test_dbas_v250408101520_bfg|ntsp25.2_test_dbas_bfg|ntsp25.2_test_dbas*|
 
+<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- This file is part of ntsportal -->
 

@@ -66,3 +66,6 @@ The stations are named as best as possible through the convention `<river>_<loca
 |                    | laengengrad: 6.698360                                                                      |
 
 Station descriptions: Schulze, T.; Ricking, M. (2005): Abschlussbericht: Entwicklung einer Verfahrensrichtlinie „Sedimente und Schwebstoffe“. Freie Universität Berlin, Umweltbundesamt,  UBA, Berlin. [Link](https://www.umweltbundesamt.de/publikationen/entwicklung-einer-verfahrensrichtlinie-sedimente)
+
+<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- This file is part of ntsportal -->
