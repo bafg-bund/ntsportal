@@ -1,0 +1,49 @@
+{
+  "mappings" : {
+    "_meta": {
+      "type": "ntsportal,nondetect_dbas",
+      "version": "25.2",
+      "licence": "GNU GPL-3.0"
+    },
+    "dynamic": "strict",
+    "properties" : {
+      
+      "chrom_method" : {"type" : "keyword", "meta": {"description": "chromatographic method code", "example": "bfg_nts_rp1"}},
+      "comment" : {"type" : "text", "meta": {"description": "free as text or array of text blocks"}},
+      "data_source" : {"type" : "keyword", "meta": {"description": "institution responsible for data processing", "example": "bfg"}},
+      "date_measurement" : {
+        "type" : "date",
+        "format" : "yyyy-MM-dd HH:mm:ss",
+        "meta": {"description": "instrumental analysis time"}
+      },
+      "date_import" : {
+        "type" : "date",
+        "format": "yyyy-MM-dd HH:mm:ss",
+        "meta": {"description": "ingest time"}
+      },
+      "dbas_alias_name": {"type": "keyword", "meta": {"description": "index alias name", "example": "ntsp_dbas_bfg"}},
+      "duration" : {"type" : "float", "meta": {"unit": "day", "description": "duration of composite sampling, grab sample: 0"}},
+      "gkz" : { "type" : "integer", "meta": {"description": "gewaesserkennzahl of sampling location", "example": "26"}},
+      "instrument": { "type" : "text", "meta": {"description": "instrument type code", "example": "LC-ESI-QTOF TripleTOF 6600 SCIEX"}},
+      
+      "km": { "type" : "float", "meta": {"description": "river kilometer of sampling location"}},
+      "licence" : {"type" : "keyword", "meta": {"description": "open data licence for data", "example": "dl-de/by-2-0"}},
+
+      "loc" : {"type" : "geo_point", "meta": {"description": "sampling coordinates (WGS84)"}},
+      "matrix" : {"type" : "keyword", "meta": {"description": "sampling matrix code", "example": "spm"}},
+     
+      "name" : {"type" : "keyword", "meta": {"description": "compound name(s)"}},
+      "path": {"type" : "keyword", "meta": {"description": "absolute path to measurement file (mzXML, mzML)"}},
+      "pol" : {"type" : "keyword", "meta": {"description": "3-letter ESI polarity mode", "example": "pos"}},
+      "river" : { "type" : "keyword", "meta": {"description": "river name of sampling location (local spelling)", "example": "rhein"}},
+      "sample_source" : {"type" : "keyword", "meta": {"description": "institute responsible for sampling", "example": "bful/lfulg saxony"}},
+      "start" : {
+        "type" : "date",
+        "format" : "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||yyyy-MM-dd HH:mm",
+        "meta": {"description": "sampling time (start time for composite)"}
+      },
+      "station" : {"type" : "keyword", "meta": {"description": "sampling location code", "example": "rhein_ko_l"}},
+      "tag": {"type": "keyword", "meta": {"description": "labels to assist searching"}}
+    }
+  }
+}

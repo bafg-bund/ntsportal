@@ -1,5 +1,10 @@
 {
   "mappings": {
+    "_meta": {
+      "type": "ntsportal,analysis_dbas",
+      "version": "25.2",
+      "licence": "GNU GPL-3.0"
+    },
     "dynamic": "strict",
     "properties": {
       "lm": {

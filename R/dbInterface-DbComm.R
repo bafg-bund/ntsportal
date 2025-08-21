@@ -70,6 +70,11 @@ setGeneric(
   function(dbComm, tableName, searchBlock = list(), fields = "*") standardGeneric("getTableAsTibble")
 )
 
+#' Get unique values in a field of a table
+#' @inheritParams addValueToArray
+#' @param maxLength maximum number of fields
+#' @return a vector
+#' @export
 setGeneric("getUniqueValues", function(dbComm, tableName, field, maxLength = 10000) standardGeneric("getUniqueValues"))
 setGeneric("refreshTable", function(dbComm, tableName) standardGeneric("refreshTable"))
 

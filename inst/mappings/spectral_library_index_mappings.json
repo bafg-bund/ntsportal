@@ -60,6 +60,14 @@
       "comp_group": {"type" : "keyword", "meta": {"description": "compound usage or classification(s)", "example": "Industrial_process"}},
       "data_source": {"type" : "keyword", "meta": {"description": "institution responsible for data processing", "example": "bfg"}},
       "licence" : {"type" : "keyword", "meta": {"description": "open data licence for data", "example": "dl-de/by-2-0"}}
+    },
+    "runtime": {
+      "esi_ion_spec": {
+        "type": "keyword",
+        "script": {
+          "source": "emit(doc['name'].value +'_'+ doc['pol'].value +'_'+ doc['adduct'].value +'_'+ doc['isotopologue'].value)"
+        }
+      }
     }
   }
 }

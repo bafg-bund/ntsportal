@@ -136,6 +136,12 @@
         "script": {
           "source": "if (params._source.library_rt != null) emit((double)params._source.rt - (double)params._source.library_rt)"
         }
+      },
+      "esi_ion_spec": {
+        "type": "keyword",
+        "script": {
+          "source": "emit(doc['name'].value +'_'+ doc['pol'].value +'_'+ doc['adduct'].value +'_'+ doc['isotopologue'].value)"
+        }
       }
     }
   }
