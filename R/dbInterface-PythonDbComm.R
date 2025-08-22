@@ -136,9 +136,12 @@ setMethod(
   searchBlock <- matchAllIfEmpty(searchBlock)
   s <- dbComm@dsl$Search(using=dbComm@client, index = tableName)$
     update_from_dict(searchBlock)$source(fields = fields)
+  message(s$count(), " records will be retrieved")
   if (s$count() > 1e6)
     stop("Exceeded the maximum docs that may be retrieved (1e6), refine the query using the searchBlock argument (query DSL)")
-  reticulate::iterate(s$iterate(), function(hit) recordConstructor(hit$to_dict()))
+  reticulate::iterate(s$iterate(), function(hit) {
+    recordConstructor(hit$to_dict())
+  })
 })
 
 # getTableAsTibble ####
