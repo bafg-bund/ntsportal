@@ -48,14 +48,7 @@ NTSPortal is a conglomerate of many systems (see Structure of NTSPortal). This g
 
 ### Installation via Github
 
-1) Create a Github PAT
-2) Add it, with the following line, to `~/.Rprofile`
-
-```{r, eval=FALSE}
-Sys.setenv(GITHUB_PAT = "<...>")
-```
-3) Restart R session
-4a) Confirm that Python and a virtual environment is available
+1) Confirm that Python and a virtual environment is available
 
 ```{r, eval=FALSE}
 reticulate::virtualenv_exists()
@@ -63,13 +56,13 @@ reticulate::virtualenv_exists()
 
 If there are errors, check that `reticulate` is installed and the virtual environment is activated (in RStudio under Project or Global options). If no virtual environment is available, use `reticulate::virtualenv_create()`.
 
-4) Install ntsportal
+2) Install ntsportal
 
 ```{r, eval=FALSE}
 remotes::install_github("bafg-bund/ntsportal")
 ```
 
-5) Install Python packages
+3) Install Python packages
 
 ```{r, eval=FALSE}
 reticulate::virtualenv_install(requirements = fs::path_package("ntsportal", "pythonElasticComm", "requirements.txt"))
@@ -77,7 +70,7 @@ reticulate::virtualenv_install(requirements = fs::path_package("ntsportal", "pyt
 
 If not already created, this command will create the "r-reticulate" Python virtual environment and install packages. 
 
-6) Setup connection to Elasticsearch
+4) Setup connection to Elasticsearch
 
 ```{r, eval=FALSE}
 library(ntsportal)
