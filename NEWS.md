@@ -8,7 +8,7 @@
   compatibility issues). RDS files for ingest must contain `ntsportal-featureRecord` in the name.
 * Added new fields to `dbas` tables: `score_ms2_match` which gives the ms² match score (0-1000). This is used in the 
   "Spectra of Annotated Features" dashboard to show a) the number of MS² matches in a dataset and b) the distribution of
-  MS² matching scores (histogram); `esi_ion_spec` which is the concatenation of `name`, `pol`, `adduct` and `isotopologue`
+  MS² matching scores (histogram); `esi_ion_spec` (runtime field) which is the concatenation of `name`, `pol`, `adduct` and `isotopologue`
 * Sample metadata is added to `dbas` documents during ingest (enrich policy in ingest pipeline, similar to a join). This
   is to reduce redundancy in output RDS files. See `inst/enrichPolicies` and `inst/ingestPipelines`. The user is 
   required to update the enrich policies prior to ingest with `updateEnrichPolicies()`. Several functions were added to
