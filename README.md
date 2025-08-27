@@ -18,10 +18,11 @@ the data and search engine. The functions for data processing use
 information on the structure and internal design of NTSPortal please
 refer to the documentation.
 
-Access to the internally managed NTSPortal database is available upon
-request. Please contact the Federal Institute of Hydrology at
-<ntsportal@bafg.de>. This repository includes the back-end code for
-publication purposes and does not include the environmental data.
+Access to the internally managed NTSPortal database is available for
+research institutions and government agencies upon request. Please
+contact the Federal Institute of Hydrology at <ntsportal@bafg.de>. This
+repository includes the back-end code for publication purposes and does
+not include the environmental data.
 
 ## Project Funding
 
