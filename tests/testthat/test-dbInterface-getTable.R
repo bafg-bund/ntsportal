@@ -30,5 +30,7 @@ test_that("You can get a tibble from and ES|QL", {
   testTbl <- getTableByEsql("FROM ntsp25.1_dbas* | WHERE station == \"mosel_139\" | KEEP mz, station | LIMIT 10")
   expect_s3_class(testTbl, "tbl_df")
   expect_gte(nrow(testTbl), 10)
+  expect_type(testTbl$mz, "double")
+  expect_type(testTbl$station, "character")
   expect_length(testTbl, 2)
 })
