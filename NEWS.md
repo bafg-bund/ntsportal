@@ -1,4 +1,12 @@
 
+# ntsportal 25.3
+
+## Major changes (backend and frontend)
+
+* Replaced `getTableAsTibble()` with `getTableByQuery()` and `getTableByEsql()`. Both return a `tibble`.
+The former uses the *Query DSL* format (passed as a `list`). The latter allows the user to send
+ES|QL statements for queries and computing statistics, see the "Discover" page at ntsportal.bafg.de for
+more information.
 
 # ntsportal 25.2
 

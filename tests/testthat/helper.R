@@ -15,6 +15,10 @@ checkForAlias <- function(record) {
   expect_match(record$dbas_alias_name, "ntsp\\d{2}\\.\\d+_dbas_unit_tests")
 }
 
+getRecordsSampleAndBlank <- function() {
+  getOneSampleRecords()
+}
+
 getOneSampleRecords <- function() {
   recs <- getMsrawfilesTestRecords()
   keep(recs, \(rec) grepl("KO_06_1_pos|BL_1_pos", rec$path))

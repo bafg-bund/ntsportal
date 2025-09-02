@@ -1,14 +1,23 @@
 
 
 getSelectedMsrawfileBatches <- function(msrawfilesIndex, batchDirs) {
-  allRecords <- getAllMsrawfilesRecords(msrawfilesIndex)
-  recordsToProcess <- getSelectedRecords(allRecords, batchDirs)
-  splitRecordsByDir(recordsToProcess)
+  newBatchDirs <- getAllBatchesInDir(msrawfilesIndex, batchDirs)
+  map(newBatchDirs, \(batchName) getSelectedMsrawfileBatch(msrawfilesIndex, batchName))
 }
 
-getSelectedRecords <- function(allRecords, dirsToKeep) {
-  dirsToKeep <- normalizePath(list.dirs(dirsToKeep)) 
-  purrr::keep(allRecords, function(record) dirname(record$path) %in% dirsToKeep)
+getSelectedMsrawfileBatch <- function(msrawfilesIndex, batchName) {
+  queryDsl <- list(query = list(term = list(batchname = batchName)))
+  getTableAsRecords(getDbComm(), msrawfilesIndex, searchBlock =  queryDsl, sortField = "start", 
+                    recordConstructor = newMsrawfilesRecord)
+}
+
+getAllBatchesInDir <- function(msrawfilesIndex, batchDirs) {
+  dirsToKeep <- list_c(map(batchDirs, \(x) normalizePath(list.dirs(x))))
+  keep(dirsToKeep, \(x) isBatchDir(msrawfilesIndex, x))
+}
+
+isBatchDir <- function(msrawfilesIndex, batchDir) {
+  getNrow(getDbComm(), msrawfilesIndex, searchBlock = list(query = list(term = list(batchname = batchDir)))) > 0
 }
 
 getUnprocessedMsrawfileBatches <- function(msrawfilesIndex, screeningType) {
@@ -24,10 +33,6 @@ getAllMsrawfilesRecords <- function(msrawfilesIndex) {
   getTableAsRecords(dbComm, msrawfilesIndex, recordConstructor = newMsrawfilesRecord)
 }
 
-getRecordsFromHits <- function(hitsArray, className) {
-  lapply(hitsArray, function(x) structure(x[["_source"]], class = className))
-}
-
 getUnprocessedRecords <- function(allRecords, screeningType, ntspVersion) {
   indexToCheck <- switch(screeningType,
     nts = glue("ntsp{ntspVersion}_nts*"),
@@ -41,15 +46,7 @@ getUnprocessedRecords <- function(allRecords, screeningType, ntspVersion) {
   purrr::keep(allRecords, function(rec) dirname(rec$path) %in% dirsWithUnprocessed)
 }
 
-splitRecordsByDir <- function(recsToProcess) {
-  paths <- getField(recsToProcess, "path")
-  if (length(paths) > 0) {
-    dirs <- dirname(getField(recsToProcess, "path"))
-  } else {
-    dirs <- character(0)
-  }
-  split(recsToProcess, dirs)
-}
+
 
 extractDirs <- function(allRecords) {
   unique(dirname(getField(allRecords, "path")))

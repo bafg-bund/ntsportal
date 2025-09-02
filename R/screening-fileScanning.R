@@ -190,11 +190,11 @@ getCompoundsNoReplicateDetections <- function(report, replicateRegex) {
   if (nrow(replicateCount) == 0) return(emptyFalsePostivesTibble())
   markAsFp <- replicateCount[replicateCount$count < 2, c("compName", "originalSampName")]
   if (nrow(markAsFp) == 0) return(emptyFalsePostivesTibble())
-  map2_dfr(
+  list_rbind(map2(
     markAsFp$compName, 
     markAsFp$originalSampName, 
     function(compName, originalSampName) getFileIndices(compName, originalSampName, pl, report$rawFiles)
-  )
+  ))
 }
 
 getFileIndices <- function(compName, originalSampName, pl, reportRawFiles) {

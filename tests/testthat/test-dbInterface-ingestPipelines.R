@@ -5,7 +5,6 @@ test_that("You can create and delete an ingest pipeline", {
     deleteIngestPipeline(pipelineName)
   createIngestPipeline(pipelineName)
   expect_true(testForPipeline(pipelineName))
-  deleteIngestPipeline(pipelineName)
 })
 
 test_that("You can read an ingest pipeline", {

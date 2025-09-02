@@ -50,24 +50,15 @@ setGeneric("getNrow", function(dbComm, tableName, searchBlock = list()) standard
 #' make a subclass, e.g., to make `msrawfilesRecord`s use `newMsrawfilesRecord`. The default makes the generic `ntspRecord`.
 #' @inheritParams getNrow
 #' @param fields Fields to include in the response, wildcards are permitted, default is all fields.
+#' @param sortField field by which to sort the results, length-one character (optionally preceded by '-') or list, see
+#'   https://elasticsearch-dsl.readthedocs.io/en/stable/api.html#elasticsearch_dsl.Search.sort
 #' @param recordConstructor function to construct new records
 #' @return A `list` of `ntspRecord` objects
 #' @export
 setGeneric(
   "getTableAsRecords", 
-  function(dbComm, tableName, searchBlock = list(), fields = "*", recordConstructor = newNtspRecord) 
+  function(dbComm, tableName, searchBlock = list(), fields = "*", sortField = "no-sort", recordConstructor = newNtspRecord) 
     standardGeneric("getTableAsRecords")
-)
-
-#' Get a table as a tibble
-#' @description Works similarly to `getTableAsRecords()` but reformats the `ntspRecords` into a `tibble`. 
-#' @inheritParams getTableAsRecords
-#' @return A tibble
-#' @seealso \link{`getTableAsRecords`}
-#' @export
-setGeneric(
-  "getTableAsTibble",
-  function(dbComm, tableName, searchBlock = list(), fields = "*") standardGeneric("getTableAsTibble")
 )
 
 #' Get unique values in a field of a table

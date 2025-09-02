@@ -38,19 +38,16 @@ test_that("Unprocessed directories are returned", {
 })
 
 test_that("One can provide a root directory to select batches", {
-  allRecords <- getMsrawfilesTestRecords()
-  allRecordsAgain <- getSelectedRecords(allRecords, rootDirectoryForTestMsrawfiles)
-  expect_equal(allRecords, allRecordsAgain)
+  batchesTest <- getAllBatchesInDir(testIndexName, rootDirectoryForTestMsrawfiles)
+  expect_length(batchesTest, 4)
 })
 
 test_that("One can provide multiple directories", {
-  allRecords <- getMsrawfilesTestRecords()
   dirs <- c(
     file.path(rootDirectoryForTestMsrawfiles, "olmesartan-d6"),
     file.path(rootDirectoryForTestMsrawfiles, "olmesartan-d6-bisoprolol")
   )
-  
-  filteredRecords <- getSelectedRecords(allRecords, dirs)
-  expect_lt(length(filteredRecords), length(allRecords))
+  batchNames <- getAllBatchesInDir(testIndexName, dirs)
+  expect_length(batchNames, 2)
 })
 

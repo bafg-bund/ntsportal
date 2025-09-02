@@ -174,6 +174,15 @@ testConnection <- function() {
     stop("Unable to connect to elasticSearch")
 }
 
+splitRecordsByDir <- function(recsToProcess) {
+  paths <- getField(recsToProcess, "path")
+  if (length(paths) > 0) {
+    dirs <- dirname(getField(recsToProcess, "path"))
+  } else {
+    dirs <- character(0)
+  }
+  split(recsToProcess, dirs)
+}
 
 # Copyright 2025 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

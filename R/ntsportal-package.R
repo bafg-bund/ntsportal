@@ -11,7 +11,23 @@
 #' @import logger
 #' @import future
 #' @importFrom glue glue
-#' @import purrr
+#' @importFrom purrr map
+#' @importFrom purrr map2
+#' @importFrom purrr map_lgl
+#' @importFrom purrr map_chr
+#' @importFrom purrr map_int
+#' @importFrom purrr map_dbl
+#' @importFrom purrr pmap_int
+#' @importFrom purrr map_at
+#' @importFrom purrr walk
+#' @importFrom purrr walk2
+#' @importFrom purrr pluck
+#' @importFrom purrr reduce
+#' @importFrom purrr keep
+#' @importFrom purrr list_rbind
+#' @importFrom purrr list_c
+#' @importFrom tibble as_tibble
+#' @importFrom tibble as_tibble_row
 #' @import methods
 #' @import R6
 #' @import cli

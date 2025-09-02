@@ -290,19 +290,35 @@ fieldsToCheckUniformAllSamples <- function() {
     "dbas_fp",
     
     # nts processing
-    "nts_spectral_library"
+    "nts_spectral_library",
+    "nts_alig_delta_mz",
+    "nts_alig_delta_rt",
+    "nts_alig_mz_tol_units",
+    "nts_blank_correction_factor"
+    
   )
 }
 
 fieldsToCheckUniformEnvSamples <- function() {
   c(
-    # dbas Processing
+    # dbas processing
     "dbas_replicate_regex",
     "dbas_build_averages",
     
     # nts processing
+    "nts_alig_filter_type",
+    "nts_alig_filter_num_consecutive",
     "nts_alig_filter_min_features",
-    "nts_alig_filter_type"
+    "nts_annotation_threshold_dp_score",
+    "nts_annotation_mz_tol",
+    "nts_annotation_rt_tol",
+    "nts_annotation_ce_min",
+    "nts_annotation_ce_max",
+    "nts_annotation_ces_min",
+    "nts_annotation_ces_max",
+    "nts_annotation_ms2_mz_tol",
+    "nts_annotation_rt_offset",
+    "nts_annotation_int_cutoff"
   )
 }
 
@@ -376,9 +392,19 @@ getNestedFields <- function() {
   names(purrr::keep(mappings, function(x) x$type == "nested"))
 }
 
+getAllTableTypes <- function() {
+  allMappings <- list.files(fs::path_package("ntsportal", "mappings"))
+  stringr::str_match(allMappings, "^(.*)_index_mappings.json")[,2]
+}
+
+getAllNestedFields <- function() {
+  mappings <- map(getAllTableTypes(), getMappings)
+  nestedMappings <- map(mappings, \(mapping) names(purrr::keep(mapping, \(x) x$type == "nested")))
+  unique(unlist(nestedMappings))
+}
+
 allowedFieldsFeature <- function() {
   allowed <- names(getMappingsDbas())
-  
   c(allowed, "dbas_alias_name")
 }
 
@@ -386,6 +412,9 @@ getMappingsDbas <- function() {
   jsonlite::read_json(fs::path_package("ntsportal", "mappings", "dbas_index_mappings.json"))$mappings$properties
 }
 
+getMappings <- function(tableType) {
+  jsonlite::read_json(fs::path_package("ntsportal", "mappings", glue("{tableType}_index_mappings.json")))$mappings$properties
+}
 
 warnBadFields <- function(badFields, parentField = "top-level") {
   badFieldsString <- paste(badFields, collapse = ", ")

@@ -9,9 +9,7 @@ getRecordsTripicateBatch <- function() {
   allBatches[[grep("unit_tests/olmesartan-d6-bisoprolol", names(allBatches))]]
 }
 
-getRecordsSampleAndBlank <- function() {
-  getOneSampleRecords()
-}
+
 
 getMergedReportSampleAndBlank <- function() {
   readRDS(test_path("fixtures", "screening-fileScanning", "mergedReportSampleAndBlank.RDS"))

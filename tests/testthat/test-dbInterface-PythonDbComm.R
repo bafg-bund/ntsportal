@@ -52,24 +52,25 @@ test_that("You can retrieve an entire index as records", {
   expect_gte(length(records), 20)
 })
 
-test_that("You can retrieve an index of two fields as a tibble", {
+test_that("You can retrieve records sorted by a field or fields", {
   dbComm <- getDbComm()
-  testTibble <- getTableAsTibble(dbComm, testIndexName, fields = c("path", "start"))
-  expect_s3_class(testTibble, "tbl_df")
-  expect_gte(nrow(testTibble), 20)
-  expect_length(testTibble, 2)
+  records <- getTableAsRecords(dbComm, testIndexName, fields = "start")
+  startValsUnsorted <- map_chr(records, \(rec) rec$start)
+  records <- getTableAsRecords(dbComm, testIndexName, fields = "start", sortField = "start")
+  startValsSorted <- map_chr(records, \(rec) rec$start)
+  records <- getTableAsRecords(dbComm, testIndexName, fields = "start", sortField = "-start")
+  startValsSortedInverse <- map_chr(records, \(rec) rec$start)
+  records <- getTableAsRecords(dbComm, testIndexName, fields = "start", sortField = list(start = list(order = "desc")))
+  startValsSortedUsingList <- map_chr(records, \(rec) rec$start)
+  records <- getTableAsRecords(dbComm, testIndexName, fields = "start", sortField = list(batchname = list(order = "asc"), start = list(order = "desc")))
+  startValsSortedUsingListMultiSort <- map_chr(records, \(rec) rec$start)
+  
+  expect_setequal(startValsUnsorted, startValsSorted)
+  expect_false(identical(startValsUnsorted, startValsSorted))
+  expect_false(identical(startValsSorted, startValsSortedInverse))
+  expect_equal(startValsSortedUsingList, startValsSortedInverse)
+  expect_false(identical(startValsSortedUsingList, startValsSortedUsingListMultiSort))
 })
-
-test_that("Records with different length elements are still coerced into a tibble", {
-  minimalRecords <- list(
-    list(comp_group = c("A", "B")),
-    list(comp_group = "A")
-  )
-  newTib <- convertRecordsToTibble(minimalRecords)
-  expectedTib <- tibble(comp_group = c(list(c("A", "B")), list("A")))
-  expect_identical(newTib, expectedTib)
-})
-
 
 test_that("You can append records to a table (ingest)", {
   dbComm <- getDbComm()
@@ -123,7 +124,7 @@ test_that("A field in a subset of docs can be modified", {
   copyTable(dbComm, testIndexName, tableName, "msrawfiles")
   qDslSearchBlock <- list(query = list(regexp = list(path = ".*/no-peaks/.*")))
   setValueInField(dbComm, tableName, "dbas_minimum_detections", 0, qDslSearchBlock)
-  tb <- getTableAsTibble(dbComm, tableName)
+  tb <- getTableByQuery(tableName)
   tbNoPeaks <- filter(tb, grepl("no-peaks", path)) 
   expect_equal(pluck(tb, "dbas_minimum_detections", 1), 2)
   expect_equal(pluck(tbNoPeaks, "dbas_minimum_detections", 1), 0)
@@ -154,16 +155,16 @@ test_that("Removing a non-existing value from an array results in no change", {
 test_that("You can add a value to an array", {
   dbComm <- getDbComm()
   q <- list(query = list(regexp = list(path = ".*KO_06_1.*")))
-  tb <- getTableAsTibble(dbComm, testIndexName, searchBlock = q, fields = "dbas_fp")
+  tb <- getTableByQuery(testIndexName, searchBlock = q, fields = "dbas_fp")
   originalFp <- pluck(tb, "dbas_fp", 1)
 
   addValueToArray(dbComm, testIndexName, searchBlock = q, field = "dbas_fp", value = "BarBarBar")
-  tb2 <- getTableAsTibble(dbComm, testIndexName, searchBlock = q, fields = "dbas_fp")
+  tb2 <- getTableByQuery(testIndexName, searchBlock = q, fields = "dbas_fp")
   newFp <- pluck(tb2, "dbas_fp", 1)
   expect_equal(setdiff(newFp, originalFp), "BarBarBar")
   
   removeValueFromArray(dbComm, testIndexName, searchBlock = q, field = "dbas_fp", value = "BarBarBar")
-  tb3 <- getTableAsTibble(dbComm, testIndexName, searchBlock = q, fields = "dbas_fp")
+  tb3 <- getTableByQuery(testIndexName, searchBlock = q, fields = "dbas_fp")
   cleanedFp <- pluck(tb3, "dbas_fp", 1)
   expect_equal(cleanedFp, originalFp)
 })
