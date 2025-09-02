@@ -67,7 +67,7 @@ getTableByEsql <- function(esql) {
   newTbl <- list_rbind(
     map(responseBody$values, \(x) {
       names(x) <- colNames
-      xConcatenated <- map(x, \(el) paste(el, collapse = ", "))
+      xConcatenated <- map(x, \(el) ifelse(length(el) == 1, el, paste(el, collapse = ", ")))
       as_tibble_row(xConcatenated)
     })
   )
