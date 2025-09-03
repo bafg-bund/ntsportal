@@ -373,7 +373,7 @@ checkUnnestedFields <- function(record) {
 }
 
 checkNestedFields <- function(record) {
-  nestedFields <- getNestedFields()
+  nestedFields <- getNestedFieldsDbas()
   all(vapply(nestedFields, checkNestedField, logical(1), record = record))
 }
 
@@ -387,7 +387,7 @@ checkNestedField <- function(record, fieldName) {
   all(fieldsOk)
 }
 
-getNestedFields <- function() {
+getNestedFieldsDbas <- function() {
   mappings <- getMappingsDbas()
   names(purrr::keep(mappings, function(x) x$type == "nested"))
 }

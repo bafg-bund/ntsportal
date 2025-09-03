@@ -16,31 +16,36 @@ getTableByQuery <- function(tableName, searchBlock = list(), fields = "*", sortF
 }
 
 convertRecordsToTibble <- function(recs, progBar = cli_progress_bar()) {
-  unitaryFields <- getUnitaryFields(recs)
+  allFields <- getAllFieldsInRecs(recs)
+  unitaryFields <- getUnitaryFields(allFields, recs)
+  nestedFields <- getNestedFields(allFields)
   tibbleRowsList <- map(recs, \(rec) {
     cli_progress_update(id = progBar)
-    getTibbleRow(rec, unitaryFields)
+    getTibbleRow(rec, unitaryFields, nestedFields)
   })
   list_rbind(tibbleRowsList)
 } 
 
-getUnitaryFields <- function(recs) {
-  fields <- reduce(map(recs, names), union)
+getAllFieldsInRecs <- function(recs) {
+  reduce(map(recs, names), union)
+}
+getUnitaryFields <- function(fields, recs) {
   fieldLengths <- map(recs, \(rec) map_int(fields, \(f) length(rec[[f]])))
   fields[pmap_int(fieldLengths, max) == 1]
 }
-
-getTibbleRow <- function(rec, unitaryFields) {
-  rec <- convertNestedFieldsToTibble(rec)
+getNestedFields <- function(fields) {
+  fields[fields %in% getAllNestedFields()]
+}
+getTibbleRow <- function(rec, unitaryFields, nestedFields) {
+  if (length(nestedFields) > 0)
+    rec <- convertNestedFieldsToTibble(rec, nestedFields)
   unclass(rec) |> 
     tibble::enframe() |> 
     tidyr::pivot_wider() |> 
     tidyr::unnest(cols = any_of(unitaryFields))
 }
 
-convertNestedFieldsToTibble <- function(rec) {
-  allFields <- names(rec)
-  nestedFields <- allFields[allFields %in% getAllNestedFields()]
+convertNestedFieldsToTibble <- function(rec, nestedFields) {
   for (field in nestedFields)
     rec[[field]] <- list_rbind(map(rec[[field]], as_tibble))
   rec
