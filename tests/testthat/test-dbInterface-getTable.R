@@ -34,3 +34,13 @@ test_that("You can get a tibble from and ES|QL", {
   expect_type(testTbl$station, "character")
   expect_length(testTbl, 2)
 })
+
+test_that("An ESQL with null values can still be loaded", {
+  testTbl <- getTableByEsql('FROM ntsp25.2_dbas* | 
+WHERE station == "mosel_ko_r" AND name == "Bentazone" |
+WHERE start >= "2022-08-10" AND start <= "2022-08-12" |
+KEEP name, start, area_internal_standard')
+  expect_type(testTbl$area_internal_standard, "double")
+  expect_true(any(is.na(testTbl$area_internal_standard)))
+  expect_length(testTbl, 3)
+})
