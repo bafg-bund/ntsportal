@@ -1,20 +1,16 @@
 ---
 title: "Document field descriptions for NTSPortal"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{table-mappings}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: html_document
 ---
 
-```{r, include=FALSE}
+```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 ```
 
-```{r setup, include=FALSE}
+```{r, include = FALSE}
 library(ntsportal)
 ```
 

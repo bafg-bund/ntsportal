@@ -38,6 +38,8 @@ navbar:
       - text: Database structure and algorithms
       - text: Structure of NTSPortal
         href: articles/Structure-of-NTSPortal.html
+      - text: Table mappings (database schema)
+        href: articles/table-mappings.html
       - text: Library Screening
         href: articles/Library-screening.html
       - text: --------

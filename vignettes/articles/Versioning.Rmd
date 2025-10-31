@@ -2,7 +2,7 @@
 title: "Versioning of NTSPortal"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Versioning in NTSPortal}
+  %\VignetteIndexEntry{Versioning of NTSPortal}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
