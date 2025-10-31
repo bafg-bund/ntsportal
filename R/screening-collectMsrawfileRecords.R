@@ -1,14 +1,10 @@
 
 
-getSelectedMsrawfileBatches <- function(msrawfilesIndex, batchDirs) {
-  newBatchDirs <- getAllBatchesInDir(msrawfilesIndex, batchDirs)
-  map(newBatchDirs, \(batchName) getSelectedMsrawfileBatch(msrawfilesIndex, batchName))
-}
-
-getSelectedMsrawfileBatch <- function(msrawfilesIndex, batchName) {
-  queryDsl <- list(query = list(term = list(batchname = batchName)))
-  getTableAsRecords(getDbComm(), msrawfilesIndex, searchBlock =  queryDsl, sortField = "start", 
-                    recordConstructor = newMsrawfilesRecord)
+getSelectedMsrawfileBatches <- function(msrawfilesIndex, rootDirs) {
+  batchNames <- getAllBatchesInDir(msrawfilesIndex, rootDirs)
+  if (length(batchNames) == 0)
+    stop("No batches found in dir ", paste(rootDirs, collapse = ", "))
+  map(batchNames, \(batchName) getSelectedMsrawfileBatch(msrawfilesIndex, batchName))
 }
 
 getAllBatchesInDir <- function(msrawfilesIndex, batchDirs) {
@@ -18,6 +14,12 @@ getAllBatchesInDir <- function(msrawfilesIndex, batchDirs) {
 
 isBatchDir <- function(msrawfilesIndex, batchDir) {
   getNrow(getDbComm(), msrawfilesIndex, searchBlock = list(query = list(term = list(batchname = batchDir)))) > 0
+}
+
+getSelectedMsrawfileBatch <- function(msrawfilesIndex, batchName) {
+  queryDsl <- list(query = list(term = list(batchname = batchName)))
+  getTableAsRecords(getDbComm(), msrawfilesIndex, searchBlock =  queryDsl, sortField = "start", 
+                    recordConstructor = newMsrawfilesRecord)
 }
 
 getUnprocessedMsrawfileBatches <- function(msrawfilesIndex, screeningType) {
@@ -35,9 +37,8 @@ getAllMsrawfilesRecords <- function(msrawfilesIndex) {
 
 getUnprocessedRecords <- function(allRecords, screeningType, ntspVersion) {
   indexToCheck <- switch(screeningType,
-    nts = glue("ntsp{ntspVersion}_nts*"),
-    dbas = glue("ntsp{ntspVersion}_dbas*"),
-    dbasTest = glue("ntsp{ntspVersion}_dbas_unit_tests*"),
+    feature = glue("ntsp{ntspVersion}_feature*"),
+    feature_test = glue("ntsp{ntspVersion}_feature_unit_tests*"),
     stop("screeningType unknown")
   )
   allDirs <- extractDirs(allRecords)

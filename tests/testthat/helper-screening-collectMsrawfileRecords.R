@@ -8,12 +8,12 @@ prepareExampleFeatureIndex <- function(ntspVersion) {
   emptyRecord <- convertToRecord(emptyResult, list(getRecordNoPeaks()))
   tempDir <- withr::local_tempdir()
   saveRecord(emptyRecord, tempDir)
-  indexNames <- ingest(tempDir)
+  indexNames <- ingestFeatureRecords(tempDir)
 }
 
 removeExampleFeatureIndex <- function(ntspVersion) {
   dbComm <- getDbComm()
-  tableNames <- getAliasTable(dbComm, glue("ntsp{ntspVersion}_dbas_unit_tests"))
+  tableNames <- getAliasTable(dbComm, glue("ntsp{ntspVersion}_feature_unit_tests"))
   
   if (tableNames[1] == "")
     return(NULL)

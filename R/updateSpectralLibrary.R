@@ -17,7 +17,7 @@ updateSpectralLibrary <- function(rfTableName, specLibTableName) {
 
 getSpectralLibraryPath <- function(rfIndexName) {
   dbComm <- getDbComm()
-  pth <- getUniqueValues(dbComm, rfIndexName, "dbas_spectral_library")
+  pth <- getUniqueValues(dbComm, rfIndexName, "spectral_library_path")
   stopifnot(length(pth) == 1)
   pth
 }

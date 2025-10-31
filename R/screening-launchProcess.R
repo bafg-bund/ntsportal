@@ -9,33 +9,39 @@
 #' @export
 dbaScreeningNewBatches <- function(msrawfileIndex, saveDirectory, numParallel = 1) {
   recordsInBatches <- getUnprocessedMsrawfileRecords(msrawfileIndex, "dbas")
-  dbaScreeningBatches(msrawfileRecordsInBatches, saveDirectory, numParallel)
+  screeningBatches(msrawfileRecordsInBatches, saveDirectory, numParallel, screeningType = "dbas")
 }
 
 #' DBAS process selected measurement files via batch directory
 #' @description Choose which batches to process by selecting the directory where the measurement files are stored. 
 #' @inheritParams dbaScreeningNewBatches
+#' @param screeningType either 'dbas' or 'nts' for library screening and non-target-screening, respectively
 #' @param batchDirs Directory of measurement files (recursive, multiple permitted)
 #' @export
-dbaScreeningSelectedBatches <- function(msrawfileIndex, batchDirs, saveDirectory, numParallel = 1) {
+screeningSelectedBatches <- function(msrawfileIndex, batchDirs, saveDirectory, numParallel = 1, screeningType = "dbas") {
+  stopifnot(screeningType %in% c("dbas", "nts"))
   msrawfileRecordsInBatches <- getSelectedMsrawfileBatches(msrawfileIndex, batchDirs)
-  dbaScreeningBatches(msrawfileRecordsInBatches, saveDirectory, numParallel)
+  screeningBatches(msrawfileRecordsInBatches, saveDirectory, numParallel, screeningType)
 }
 
-dbaScreeningBatches <- function(msrawfileRecordsInBatches, saveDirectory, numParallel) {
+screeningBatches <- function(msrawfileRecordsInBatches, saveDirectory, numParallel, screeningType) {
   checkQualityBatchList(msrawfileRecordsInBatches)
   if (numParallel == 1) {
-    dbaScreeningSerial(msrawfileRecordsInBatches, saveDirectory)
+    screeningSerial(msrawfileRecordsInBatches, saveDirectory, screeningType)
   } else {
-    dbaScreeningParallel(msrawfileRecordsInBatches, saveDirectory, numParallel = numParallel)
+    screeningParallel(msrawfileRecordsInBatches, saveDirectory, numParallel = numParallel, screeningType)
   }
 }
 
-dbaScreeningSerial <- function(msrawfileRecordsInBatches, saveDirectory) {
-  purrr::map_chr(msrawfileRecordsInBatches, dbaScreeningOneBatch, saveDirectory = saveDirectory)
+screeningSerial <- function(msrawfileRecordsInBatches, saveDirectory, screeningType) {
+  purrr::map_chr(
+    msrawfileRecordsInBatches, 
+    switch(screeningType, dbas = dbaScreeningOneBatch, nts = ntScreeningOneBatch), 
+    saveDirectory = saveDirectory
+  )
 }
 
-dbaScreeningParallel <- function(msrawfileRecordsInBatches, saveDirectory, numParallel = 6) {
+screeningParallel <- function(msrawfileRecordsInBatches, saveDirectory, numParallel = 6, screeningType) {
   if (rstudioapi::isAvailable()) {
     future::plan(multisession, workers = numParallel)
   } else {
@@ -43,7 +49,7 @@ dbaScreeningParallel <- function(msrawfileRecordsInBatches, saveDirectory, numPa
   }
   filePaths <- furrr::future_map(
     msrawfileRecordsInBatches,
-    dbaScreeningOneBatch, 
+    switch(screeningType, dbas = dbaScreeningOneBatch, nts = ntScreeningOneBatch), 
     saveDirectory = saveDirectory, 
     .options = furrr::furrr_options(seed = NULL)
   )
@@ -53,7 +59,7 @@ dbaScreeningParallel <- function(msrawfileRecordsInBatches, saveDirectory, numPa
 
 #' Process one batch of measurement files by DBAS
 #' @description Perform file scanning (DBAS), convert the result to the NTSPortal `featureRecord` format and save it
-#' to as a JSON.  
+#' to RDS.  
 #' @inheritParams dbaScreeningNewBatches
 #' @export
 dbaScreeningOneBatch <- function(msrawfileRecords, saveDirectory) {
@@ -62,10 +68,21 @@ dbaScreeningOneBatch <- function(msrawfileRecords, saveDirectory) {
   saveRecord(featureRecordsBatch, saveDirectory)
 }
 
+#' Process one batch of measurement files by NTS
+#' @description Perform file scanning (NTS), convert the result to the NTSPortal `featureRecord` format and save it
+#' to RDS.  
+#' @inheritParams dbaScreeningNewBatches
+#' @export
+ntScreeningOneBatch <- function(msrawfileRecords, saveDirectory) {
+  resultBatch <- scanBatchNts(msrawfileRecords)
+  featureRecordsBatch <- convertToRecord(resultBatch)
+  saveRecord(featureRecordsBatch, saveDirectory)
+}
+
 #' Process batches (DBAS) using SLURM by selecting directories
 #' @description Choose which batches to process by selecting the directory where the measurement files are stored. 
 #' `dbaScreeningSelectedBatchesSlurm()` will create necessary files for submission of the job to the workflow manager SLURM.
-#' @inheritParams dbaScreeningSelectedBatches
+#' @inheritParams screeningSelectedBatches
 #' @param saveDirectory Location where SLURM job files should be saved
 #' @param email Address for SLURM notifications
 #'
@@ -83,7 +100,7 @@ dbaScreeningOneBatch <- function(msrawfileRecords, saveDirectory) {
 #' connectNtsportal()
 #' file.remove(list.files(dirResults, f = T))
 #'
-#' dbaScreeningSelectedBatchesSlurm(
+#' screeningSelectedBatchesSlurm(
 #'   msrawfileIndex = msrawfileIndexName,
 #'   batchDirs = "/root/dir/all/msrawfiles",
 #'   saveDirectory = dirResults,
@@ -91,45 +108,31 @@ dbaScreeningOneBatch <- function(msrawfileRecords, saveDirectory) {
 #' )
 #' }
 #'
-dbaScreeningSelectedBatchesSlurm <- function(msrawfileIndex, batchDirs, saveDirectory, email) {
+screeningSelectedBatchesSlurm <- function(msrawfileIndex, batchDirs, saveDirectory, email, screeningType = "dbas") {
+  stopifnot(screeningType %in% c("dbas", "nts"))
   recordsInBatches <- getSelectedMsrawfileBatches(msrawfileIndex, batchDirs)
   checkQualityBatchList(recordsInBatches)
   saveFilesSlurm(recordsInBatches, saveDirectory)
-  slurmJobFile <- file.path(saveDirectory, "arrayDbaScreening.sbatch")
+  slurmJobFile <- file.path(saveDirectory, "arrayScreening.sbatch")
   
-  addInfoToJob(slurmJobFile, saveDirectory, email, length(recordsInBatches))
+  addInfoToJob(slurmJobFile, saveDirectory, email, length(recordsInBatches), screeningType)
   
   submitCommand <- glue::glue("sbatch {slurmJobFile}")
   message("Files are prepared, run \n$ ", submitCommand, "\non a SLURM-enabled terminal")
 }
 
-#' Process new batches (DBAS) using SLURM
-#' @description Only new batches are selected, see `dbaScreeningNewBatches()`. The function creates 
-#' the necessary file to submit the processing job to a SLURM workload manager. See `dbaScreeningSelectedBatchesSlurm()`
-#' @inheritParams dbaScreeningSelectedBatchesSlurm
-#' @export
-dbaScreeningUnprocessedBatchesSlurm <- function(msrawfileIndex, saveDirectory, email) {
-  recordsInBatches <- getUnprocessedMsrawfileBatches(msrawfileIndex, screeningType = "dbas")
-  checkQualityBatchList(recordsInBatches)
-  saveFilesSlurm(recordsInBatches, saveDirectory)
-  slurmJobFile <- file.path(saveDirectory, "arrayDbaScreening.sbatch")
-  
-  addInfoToJob(slurmJobFile, saveDirectory, email, length(recordsInBatches))
-  
-  submitCommand <- glue::glue("sbatch {slurmJobFile}")
-  message("Files are prepared, run \n$ ", submitCommand, "\non a Slurm-enabled terminal")
-}
 
 saveFilesSlurm <- function(recordsInBatches, saveDirectory) {
   saveRDS(recordsInBatches, file.path(saveDirectory, "recordsInBatches.RDS"))
-  file.copy(fs::path_package("ntsportal", "scripts", "arrayDbaScreening.sbatch"), saveDirectory)
-  file.copy(fs::path_package("ntsportal", "scripts", "dbaScreeningSlurm.R"), saveDirectory)
+  file.copy(fs::path_package("ntsportal", "scripts", "arrayScreening.sbatch"), saveDirectory)
+  file.copy(fs::path_package("ntsportal", "scripts", "screeningSlurm.R"), saveDirectory)
 }
 
-addInfoToJob <- function(jobFile, saveDirectory, email, numberOfBatches) {
+addInfoToJob <- function(jobFile, saveDirectory, email, numberOfBatches, screeningType) {
   addTextToJob(jobFile, "RVarDir", saveDirectory)
   addTextToJob(jobFile, "RVarEmail", email)
   addTextToJob(jobFile, "RVarNumBatches", numberOfBatches)
+  addTextToJob(jobFile, "RVarScreeningType", screeningType)
 }
 
 addTextToJob <- function(jobFile, variableName, value) {

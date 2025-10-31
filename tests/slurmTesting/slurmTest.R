@@ -26,7 +26,7 @@ stopifnot(length(list.files(dirTestResults)) == 3)
 # User must manually submit job on SLURM terminal
 
 # Once processing complete:
-indexNames <- ingest(dirTestResults)
+indexNames <- ingestFeatureRecords(dirTestResults)
 
 # Cleanup
 dbComm <- getDbComm()

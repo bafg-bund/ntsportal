@@ -28,6 +28,7 @@
 #' @importFrom purrr list_c
 #' @importFrom tibble as_tibble
 #' @importFrom tibble as_tibble_row
+#' @importFrom tibble tibble
 #' @import methods
 #' @import R6
 #' @import cli

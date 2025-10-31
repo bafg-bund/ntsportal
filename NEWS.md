@@ -1,12 +1,35 @@
 
 # ntsportal 25.3
 
-## Major changes (backend and frontend)
+## Major changes (backend)
 
-* Replaced `getTableAsTibble()` with `getTableByQuery()` and `getTableByEsql()`. Both return a `tibble`.
-The former uses the *Query DSL* format (passed as a `list`). The latter allows the user to send
-ES|QL statements for queries and computing statistics, see the "Discover" page at ntsportal.bafg.de for
+* Changed table names of screening results tables from `ntsp25.3_dbas*` to `ntsp25.3_feature*`. These tables include
+both DBAS and NTS processing results.
+* New processing method "nts" to record unknown features (no CSL annotation). Unknown features are added to feature
+tables. Unknown features are currently not aligned/grouped, i.e., there is no `name` field. This will be added in a 
+future version.
+* Replaced `getTableAsTibble()` with `getTableByQuery()` and `getTableByEsql()`. Both return a `tbl_df`, AKA "tibble"
+(an extension of `data.frame`). The former uses the *Query DSL* format (passed as a `list`). The latter allows the user
+to send ES|QL statements for queries and computing statistics, see the "Discover" page at `https://ntsportal.bafg.de` for
 more information.
+* Time series notes (annotations) to indicate unavoidable changes in analytical or processing methods
+* Moved to Quarto vignette builder and added mapping descriptions to documentation website.
+
+## Major changes (frontend)
+* Additions for better interpretation of the confidence in detections
+  + "MS² available" annotation on time series 
+  + Distribution of MS² similarity scores in "Spectra of annotated features" dashboard
+* The results of the "nts" processing workflow can be viewed in the "Unknowns overview" dashboard
+
+## Minor changes (backend)
+
+* Changed field type to `integer`, `half_float` or `scaled_float` for better data compression. Modified fields: 
+`area`, `intensity`, `area_internal_standard`, `intensity_internal_standard`, `rt`, `eic.int`, `eic.time`, `ms1.int`, 
+`ms2.int`
+* Changed `duration` field to `keyword`. The field now uses ISO 8601 time duration format.
+* Changed name of `ingest()` to `ingestFeatureRecords()` since this function only has this specific purpose. All other 
+ingesting is done by `appendRecords()`
+
 
 # ntsportal 25.2
 
@@ -14,7 +37,8 @@ more information.
 
 * Added new fields to `dbas` tables: `score_ms2_match` which gives the ms² match score (0-1000). This is used in the 
   "Spectra of Annotated Features" dashboard to show a) the number of MS² matches in a dataset and b) the distribution of
-  MS² matching scores (histogram); `esi_ion_spec` (runtime field) which is the concatenation of `name`, `pol`, `adduct` and `isotopologue`
+  MS² matching scores (histogram); `esi_ion_spec` (runtime field) which is the concatenation of `name`, `pol`, `adduct` 
+  and `isotopologue`
 * Fixed bug whereby peak areas were overwritten with peak intensities
 * ntsportal is now available on Github under the GPL-3.0 licence (https://github.com/bafg-bund/ntsportal)
 

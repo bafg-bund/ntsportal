@@ -76,7 +76,7 @@ test_that("You can append records to a table (ingest)", {
   dbComm <- getDbComm()
   tableName <- "ntsp_temp"
   deleteTable(dbComm, tableName)  # in case it already exists
-  createNewTable(dbComm, tableName, "dbas")
+  createNewTable(dbComm, tableName, "feature")
   emptyRecordList <- getEmptyRecord()
   appendRecords(dbComm, tableName, emptyRecordList)
   
@@ -91,7 +91,7 @@ test_that("You can ingest a large number of documents quickly", {
   dbComm <- getDbComm()
   tableName <- "ntsp_temp"
   deleteTable(dbComm, tableName)  # in case it already exists
-  createNewTable(dbComm, tableName, "dbas")
+  createNewTable(dbComm, tableName, "feature")
   prds <- list.files(test_path("fixtures", "featureRecordExampleRds"), f = T)
   recs <- readRDS(prds)
   recs <- lapply(recs, unclass)
@@ -106,7 +106,7 @@ test_that("A table can be closed", {
   dbComm <- getDbComm()
   tableName <- "ntsp_temp"
   deleteTable(dbComm, tableName)  # in case it already exists
-  createNewTable(dbComm, tableName, "dbas")
+  createNewTable(dbComm, tableName, "feature")
   emptyRecordList <- getEmptyRecord()
   appendRecords(dbComm, tableName, emptyRecordList)
   recs <- getTableAsRecords(dbComm, tableName)

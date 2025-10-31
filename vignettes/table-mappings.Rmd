@@ -1,0 +1,83 @@
+---
+title: "Document field descriptions for NTSPortal"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{table-mappings}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, include=FALSE}
+library(ntsportal)
+```
+
+The following tables contain descriptions for all fields in NTSPortal tables. The dot-notation is used to refer to nested
+fields.
+
+# `msrawfiles` tables
+
+These tables hold metadata and processing settings for each raw MS measurement file (mzXML file) in NTSPortal.
+
+```{r, echo=FALSE}
+knitr::kable(
+  makeMappingsTbl("msrawfiles"),
+  caption = "Field descriptions for `msrawfiles` documents",
+  align = rep("l", 5)
+)
+```
+
+# `feature` tables
+
+These table hold processing results ("dbas" and "nts" processing). They are a list of non-target "features" or 
+chromatographic peaks with associated metadata.
+
+```{r, echo=FALSE}
+knitr::kable(
+  makeMappingsTbl("feature"),
+  caption = "Field descriptions for `feature` documents",
+  align = rep("l", 5)
+)
+```
+
+# `analysis_dbas` tables
+
+These tables hold results of summary statistics for `feature` tables (currently only for "dbas" processing).
+
+```{r, echo=FALSE}
+knitr::kable(
+  makeMappingsTbl("analysis_dbas"),
+  caption = "Field descriptions for `analysis_dbas` documents",
+  align = rep("l", 5)
+)
+```
+
+# `spectral_library` tables
+
+These documents hold a copy of the [Collective Spectral Library (CSL)](https://doi.org/10.5281/zenodo.16901589).
+
+```{r, echo=FALSE}
+knitr::kable(
+  makeMappingsTbl("spectral_library"),
+  caption = "Field descriptions for `spectral_library` documents",
+  align = rep("l", 5)
+)
+```
+
+# `nondetect_dbas` tables
+
+These documents hold non-detects by file, i.e., which compounds of the CSL were not detected in a measurement file.
+
+```{r, echo=FALSE}
+knitr::kable(
+  makeMappingsTbl("nondetect_dbas"),
+  caption = "Field descriptions for `nondetect_dbas` documents",
+  align = rep("l", 5)
+)
+```

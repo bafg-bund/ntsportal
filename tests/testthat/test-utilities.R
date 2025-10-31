@@ -18,5 +18,10 @@ test_that("Connection fails", {
   )
 })
 
+test_that("You can create tables of all mappings", {
+  tableTypes <- getNtsportalTableTypes()
+  expect_no_error(map(tableTypes, makeMappingsTbl))
+})
+
 # Copyright 2025 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

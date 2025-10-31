@@ -3,7 +3,9 @@
 #' @description Works similarly to `getTableAsRecords()` but reformats the `ntspRecords` into a `tibble`.
 #' @inheritParams getTableAsRecords
 #' @details The records can take a long time to reformat, use the searchBlock and fields arguments to 
-#' refine the search as much as possible thereby reducing the size of the data.
+#' refine the search as much as possible thereby reducing the size of the data. Nested fields are coerced
+#' to list columns of tibbles. Array fields are coerced to character columns with elements concatenated 
+#' with pipe "|"
 #' @return A tibble
 #' @seealso \link{`getTableAsRecords`}
 #' @seealso \link{`getTableByEsql`}
@@ -17,11 +19,11 @@ getTableByQuery <- function(tableName, searchBlock = list(), fields = "*", sortF
 
 convertRecordsToTibble <- function(recs, progBar = cli_progress_bar()) {
   allFields <- getAllFieldsInRecs(recs)
-  unitaryFields <- getUnitaryFields(allFields, recs)
   nestedFields <- getNestedFields(allFields)
+  arrayFields <- getArrayFields(setdiff(allFields, nestedFields), recs)
   tibbleRowsList <- map(recs, \(rec) {
     cli_progress_update(id = progBar)
-    getTibbleRow(rec, unitaryFields, nestedFields)
+    getTibbleRow(rec, nestedFields, arrayFields)
   })
   list_rbind(tibbleRowsList)
 } 
@@ -29,26 +31,40 @@ convertRecordsToTibble <- function(recs, progBar = cli_progress_bar()) {
 getAllFieldsInRecs <- function(recs) {
   reduce(map(recs, names), union)
 }
-getUnitaryFields <- function(fields, recs) {
-  fieldLengths <- map(recs, \(rec) map_int(fields, \(f) length(rec[[f]])))
-  fields[pmap_int(fieldLengths, max) == 1]
-}
+
 getNestedFields <- function(fields) {
   fields[fields %in% getAllNestedFields()]
 }
-getTibbleRow <- function(rec, unitaryFields, nestedFields) {
-  if (length(nestedFields) > 0)
-    rec <- convertNestedFieldsToTibble(rec, nestedFields)
-  unclass(rec) |> 
-    tibble::enframe() |> 
-    tidyr::pivot_wider() |> 
-    tidyr::unnest(cols = any_of(unitaryFields))
+
+getArrayFields <- function(fields, recs) {
+  fieldLengths <- map(recs, \(rec) map_int(fields, \(f) length(rec[[f]])))
+  fields[pmap_int(fieldLengths, max) > 1]
+}
+
+getTibbleRow <- function(rec, nestedFields, arrayFields) {
+  if (length(nestedFields) > 0) {
+    recNoNested <- rec[-which(names(rec) %in% nestedFields)]
+    recNoNested <- arrayFieldsToList(recNoNested, arrayFields)
+    rowNoNested <- unclass(recNoNested) |> as_tibble_row()
+    rowNested <- convertNestedFieldsToTibble(rec, nestedFields)
+    cbind(rowNoNested, rowNested)
+  } else {
+    rec <- arrayFieldsToList(rec, arrayFields)
+    unclass(rec) |> as_tibble_row()
+  }
+}
+
+arrayFieldsToList <- function(rec, arrayFields) {
+  for (field in arrayFields)
+    rec[[field]] <- list(rec[[field]])
+  rec
 }
 
 convertNestedFieldsToTibble <- function(rec, nestedFields) {
+  newRec <- list()
   for (field in nestedFields)
-    rec[[field]] <- list_rbind(map(rec[[field]], as_tibble))
-  rec
+    newRec[[field]] <- list(list_rbind(map(rec[[field]], as_tibble)))
+  tibble::tibble_row(!!!newRec)
 }
 
 viewTable <- function(tableName) {
@@ -70,9 +86,12 @@ getTableByEsql <- function(esql) {
   responseBody <- dbComm@client$esql$query(query=esql)$body
   colNames <- map_chr(responseBody$columns, \(x) x$name)
   newTbl <- list_rbind(
-    map(responseBody$values, \(x) {
+    test <- map(responseBody$values, \(x) {
       names(x) <- colNames
-      xConcatenated <- map(x, \(el) ifelse(length(el) == 1, el, paste(el, collapse = ", ")))
+      xConcatenated <- map(
+        x, 
+        \(el) ifelse(is.null(el), NA, ifelse(length(el) == 1, el, paste(el, collapse = ", ")))
+      )
       as_tibble_row(xConcatenated)
     })
   )

@@ -3,7 +3,7 @@ source("tests/testthat/helper.R")
 # Create new msrawfiles_unit_tests index
 createNewMsrawfileUnitTestsIndex <- function() {
   dbComm <- getDbComm()
-  copyTable(dbComm, tableName = "ntsp25.1_msrawfiles_unit_tests", newTableName = testIndexName, mappingType = "msrawfiles")
+  copyTable(dbComm, tableName = "ntsp25.3_msrawfiles_unit_tests", newTableName = testIndexName, mappingType = "msrawfiles")
   changeAllDbasAliasNames(msrawfilesName = testIndexName, version = ntspVersion)
 }
 
@@ -18,35 +18,36 @@ buildMsrawfilesAllRecords <- function() {
 buildOneSampleDbasResult <- function() {
   records <- getOneSampleRecords()
   result <- scanBatchDbas(records)
-  saveRDS(result, test_path("fixtures", "screening-convertToRecord", "oneSampleDbasResult.RDS"))
-}
-
-
-
-buildAllRecordsFlat <- function() {
-  dbComm <- getDbComm()
-  allRecords <- getTableAsRecords(dbComm, testIndexName, recordConstructor = newMsrawfilesRecord)
+  saveRDS(result, test_path("fixtures", "screening-dbasConvertToRecord", "oneSampleDbasResult.RDS"))
 }
 
 recreateReportForCleaning <- function() {
   reports <- purrr::map(getRecordsTripicateBatch(), fileScanDbas)
   reports <- removeEmptyReports(reports)
   mergedReport <- mergeReports(reports)
-  saveRDS(mergedReport, test_path("fixtures", "screening-fileScanning", "reportForCleaning.RDS"))
+  saveRDS(mergedReport, test_path("fixtures", "screening-dbasFileScanning", "reportForCleaning.RDS"))
 }
 
 recreateMergedReportSampleAndBlank <- function() {
   reports <- purrr::map(getRecordsSampleAndBlank(), fileScanDbas)
   reports <- removeEmptyReports(reports)
   mergedReport <- mergeReports(reports)
-  saveRDS(mergedReport, test_path("fixtures", "screening-fileScanning", "mergedReportSampleAndBlank.RDS"))
+  saveRDS(mergedReport, test_path("fixtures", "screening-dbasFileScanning", "mergedReportSampleAndBlank.RDS"))
 }
 
-createMergedReportTriplicateBatch <- function() {
-  reports <- purrr::map(getRecordsTripicateBatch(), fileScanDbas)
-  reports <- removeEmptyReports(reports)
-  mergedReport <- mergeReports(reports)
-  saveRDS(mergedReport, test_path("fixtures", "screening-fileScanning", "mergedReportTriplicateBatch.RDS"))
+
+createNtsResultSampleAndBlank <- function() {
+  testBatchRecords <- getRecordsSampleAndBlank()
+  testNtsResults <- scanBatchNts(testBatchRecords)  
+  saveRDS(testNtsResults, test_path("fixtures", "screening-nts", "ntsResultSampleAndBlank.RDS"))
+}
+
+createNtsResultBisoprololBatch <- function() {
+  batchDirectory <- file.path(rootDirectoryForTestMsrawfiles, "olmesartan-d6-bisoprolol")
+  recs <- getMsrawfilesTestRecords()
+  recs <- keep(recs, \(rec) grepl(batchDirectory, rec$path))
+  testNtsResults <- scanBatchNts(recs)
+  saveRDS(testNtsResults, test_path("fixtures", "screening-nts", "ntsResultBisoprololBatch.RDS"))
 }
 
 createMergedReportDessauBatch <- function() {
@@ -71,17 +72,22 @@ createMergedReportDessauBatch <- function() {
   mergedReport$MS1 <- data.frame()
   mergedReport$MS2 <- data.frame()
   mergedReport$EIC <- data.frame()
-  saveRDS(mergedReport, test_path("fixtures", "screening-fileScanning", "mergedReportDessauBatch.RDS"))
-  saveRDS(recs2, test_path("fixtures", "screening-fileScanning", "recordsDessauBatch.RDS"))
+  saveRDS(mergedReport, test_path("fixtures", "screening-dbasFileScanning", "mergedReportDessauBatch.RDS"))
+  saveRDS(recs2, test_path("fixtures", "screening-dbasFileScanning", "recordsDessauBatch.RDS"))
 }
 
 # Create featureRecordExampleRds ####
 tempSaveDir <- withr::local_tempdir()
+pathToFixturesDir <- test_path("fixtures", "featureRecordExampleRds")
+file.remove(list.files(pathToFixturesDir, full.names = T))
+file.remove(pathToFixturesDir)
 batchDirectory <- file.path(rootDirectoryForTestMsrawfiles, "olmesartan-d6-bisoprolol")
-pathRds <- dbaScreeningSelectedBatches(testIndexName, batchDirectory, tempSaveDir)
-dir.create(test_path("fixtures", "featureRecordExampleRds"))
+pathRds <- screeningSelectedBatches(testIndexName, batchDirectory, tempSaveDir)
+dir.create(pathToFixturesDir)
 file.copy(pathRds, test_path("fixtures", "featureRecordExampleRds"))
 file.remove(list.files(tempSaveDir, full.names = T))
+# Test the result
+test <- readRDS(list.files(pathToFixturesDir, full.names = T))
 
 # Copyright 2025 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

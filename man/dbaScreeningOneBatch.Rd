@@ -11,5 +11,5 @@ dbaScreeningOneBatch(msrawfileRecords, saveDirectory)
 }
 \description{
 Perform file scanning (DBAS), convert the result to the NTSPortal `featureRecord` format and save it
-to as a JSON.
+to RDS.
 }

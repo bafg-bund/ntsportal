@@ -17,7 +17,7 @@ test_that("A small CSL can be converted to a list of records", {
 })
 
 test_that("A small CSL can be sent to elastic", {
-  tempTable <- "ntsp25.2_spectral_library_unit_tests"
+  tempTable <- glue("ntsp{ntspVersion}_spectral_library_unit_tests")
   records <- getExampleCslAsRecords()
   ingestSpectralLibrary(records, tempTable)
   dbComm <- getDbComm()

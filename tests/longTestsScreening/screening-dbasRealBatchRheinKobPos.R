@@ -1,10 +1,14 @@
 
 
-# nohup Rscript tests/longTestsScreening/screening-dbasRealBatchRheinKobPos.R &> tests/longTestsScreening/testResultsSerial/rheinKobPos.log &
+# nohup Rscript screening-dbasRealBatchRheinKobPos.R &> dbasRheinKobPos.log &
 library(ntsportal)
-tempSaveDir <- "tests/longTestsScreening/testResults/"
+tempSaveDir <- "testResults-dbasRheinKobPos"
+unlink(tempSaveDir, recursive = T)
+dir.create(tempSaveDir)
 index <- "ntsp25.2_msrawfiles"
 batchDirectory <- "/beegfs/nts/ntsportal/msrawfiles/koblenz/wasser/2021/202105/pos/"
 connectNtsportal()
-dbaScreeningSelectedBatches(index, batchDirectory, tempSaveDir)
-
+startTime <- Sys.time()
+screeningSelectedBatches(index, batchDirectory, tempSaveDir)
+endTime <- Sys.time()
+message("Time needed to processes files: ", round(difftime(endTime, startTime, units = "mins")), " min")

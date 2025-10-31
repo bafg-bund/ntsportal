@@ -2,7 +2,7 @@
 connectNtsportal()
 
 rootDirectoryForTestMsrawfiles <- "/beegfs/nts/ntsportal/msrawfiles/unit_tests"
-ntspVersion <- "25.2"
+ntspVersion <- "25.3"
 
 testIndexName <- glue("ntsp{ntspVersion}_msrawfiles_unit_tests")
 
@@ -12,7 +12,7 @@ getEmptyRecord <- function() {
 }
 
 checkForAlias <- function(record) {
-  expect_match(record$dbas_alias_name, "ntsp\\d{2}\\.\\d+_dbas_unit_tests")
+  expect_match(record$feature_table_alias, "ntsp\\d{2}\\.\\d+_feature_unit_tests")
 }
 
 getRecordsSampleAndBlank <- function() {

@@ -22,7 +22,8 @@ Access to the internally managed NTSPortal database is available for
 research institutions and government agencies upon request. Please
 contact the Federal Institute of Hydrology at <ntsportal@bafg.de>. This
 repository includes the back-end code for publication purposes and does
-not include the environmental data.
+not include the environmental data. See the [documentation
+website](https://docs.ntsportal.bafg.de) for more information.
 
 ## Project Funding
 

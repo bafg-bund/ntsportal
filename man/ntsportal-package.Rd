@@ -3,9 +3,9 @@
 \docType{package}
 \name{ntsportal-package}
 \alias{ntsportal-package}
-\title{ntsportal: ntsportal - Functions for building and managing the NTSPortal database}
+\title{ntsportal: ntsportal - a database for non-target-screening of surface water}
 \description{
-This package provides functionality for building and managing the NTSPortal database.
+Provides functionality for building and managing the NTSPortal database.
 }
 \seealso{
 Useful links:

@@ -86,7 +86,7 @@ The list of `featureRecord` objects from one batch are saved in an RDS file (usi
 
 Before ingesting documents, the user must ensure that the enrich policies and ingest pipelines are up to date. This is done with `updateEnrichPolicies()`, which will synchronize Elasticsearch with the current enrich policies and ingest pipelines needed for ntsportal.
 
-The RDS files are imported into NTSPortal with `ingest()`, which calls the Elasticsearch bulk ingest API via Python. The user runs `ingest()` separately after processing is complete. The ingest includes a pipeline (`ingest-feature`) which enriches each document with sample metadata found in `msrawfiles`. These are the fields such as sampling location and sampling time, `loc` and `start` fields, respectively. 
+The RDS files are imported into NTSPortal with `ingestFeatureRecords()`, which calls the Elasticsearch bulk ingest API via Python. The user runs `ingestFeatureRecords()` separately after processing is complete. The ingest includes a pipeline (`ingest-feature`) which enriches each document with sample metadata found in `msrawfiles`. These are the fields such as sampling location and sampling time, `loc` and `start` fields, respectively. 
 
 ![Figure: Details of `ingest()`](images/screening-ingest.svg){width=100%}
 

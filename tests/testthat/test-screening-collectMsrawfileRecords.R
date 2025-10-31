@@ -11,7 +11,7 @@ test_that("Unprocessed files can be collected from msrawfiles", {
   removeExtraTestFile("RH_pos_20220603_no_peaks_test_addRecord.mzXML")
   
   prepareExampleFeatureIndex(ntspVersion)
-  unprocessedBatches <- getUnprocessedMsrawfileBatches(testIndexName, screeningType = "dbasTest")
+  unprocessedBatches <- getUnprocessedMsrawfileBatches(testIndexName, screeningType = "feature_test")
   expect_false(all(grepl("no_peaks", names(unprocessedBatches))))
   expect_true(any(grepl("olmesartan-d6-bisoprolol", names(unprocessedBatches))))
   expect_s3_class(unprocessedBatches[[1]][[1]], "msrawfilesRecord")
@@ -32,7 +32,7 @@ test_that("splitRecordsByDir works with length 0 input", {
 
 test_that("Unprocessed directories are returned", {
   records <- getAllMsrawfilesRecords(testIndexName)
-  records <- getUnprocessedRecords(records, "dbasTest", ntspVersion = ntspVersion)
+  records <- getUnprocessedRecords(records, "feature_test", ntspVersion = ntspVersion)
   expect_length(records, 20)
   expect_s3_class(records[[1]], "msrawfilesRecord")
 })

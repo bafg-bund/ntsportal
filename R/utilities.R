@@ -163,9 +163,13 @@ build_es_query_for_ids <- function(ids, toShow) {
 }
 
 getMapping <- function(mappingType) {
-  stopifnot(mappingType %in% c("dbas", "msrawfiles", "nts", "analysis_dbas", "spectral_library", "nondetect_dbas"))
+  stopifnot(mappingType %in% getNtsportalTableTypes())
   pth <- fs::path_package("ntsportal", "mappings", glue("{mappingType}_index_mappings.json"))
   jsonlite::read_json(pth)
+}
+
+getNtsportalTableTypes <- function() {
+  c("feature", "msrawfiles", "analysis_dbas", "spectral_library", "nondetect_dbas")
 }
 
 testConnection <- function() {
@@ -182,6 +186,41 @@ splitRecordsByDir <- function(recsToProcess) {
     dirs <- character(0)
   }
   split(recsToProcess, dirs)
+}
+
+# Turn mappings into a tibble for documentation
+
+
+#' Turn mappings into a tibble for documentation
+#'
+#' @param mappingType name of mapping type, e.g. "feature"
+#'
+#' @returns tbl_df of mappings with metadata
+#' @export
+makeMappingsTbl <- function(mappingType) {
+  m <- getMapping(mappingType)
+  properties <- m$mappings$properties
+  mainLevel <- tibble(
+    field = names(properties),
+    type = map_chr(properties, \(p) p$type),
+    description = map_chr(properties, \(p) ifelse(is.null(p$meta$description), "", p$meta$description)),
+    unit = map_chr(properties, \(p) ifelse(is.null(p$meta$unit), "", p$meta$unit)),
+    example = map_chr(properties, \(p) ifelse(is.null(p$meta$example), "", p$meta$example))
+  )
+  nestedFields <- mainLevel[mainLevel$type == "nested", "field", drop = T]
+  nestedLevel <- list_rbind(map(nestedFields, \(f) getTableNestedField(f, properties)))
+  rbind(mainLevel, nestedLevel) |> arrange(field)
+}
+
+getTableNestedField <- function(parentField, properties) {
+  propertiesNested <- properties[[parentField]]$properties
+  tibble(
+    field = paste0(parentField, ".", names(propertiesNested)),
+    type = map_chr(propertiesNested, \(p) p$type),
+    description = map_chr(propertiesNested, \(p) ifelse(is.null(p$meta$description), "", p$meta$description)),
+    unit = map_chr(propertiesNested, \(p) ifelse(is.null(p$meta$unit), "", p$meta$unit)),
+    example = map_chr(propertiesNested, \(p) ifelse(is.null(p$meta$example), "", p$meta$example))
+  )
 }
 
 # Copyright 2025 Bundesanstalt für Gewässerkunde

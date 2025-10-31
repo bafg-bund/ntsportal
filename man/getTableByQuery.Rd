@@ -29,7 +29,9 @@ Works similarly to `getTableAsRecords()` but reformats the `ntspRecords` into a 
 }
 \details{
 The records can take a long time to reformat, use the searchBlock and fields arguments to 
-refine the search as much as possible thereby reducing the size of the data.
+refine the search as much as possible thereby reducing the size of the data. Nested fields are coerced
+to list columns of tibbles. Array fields are coerced to character columns with elements concatenated 
+with pipe "|"
 }
 \seealso{
 \link{`getTableAsRecords`}

@@ -22,3 +22,5 @@
 ^pkgdown$
 ^\.github$
 ^_build.R$
+^vignettes/*_files$
+^vignettes/articles$

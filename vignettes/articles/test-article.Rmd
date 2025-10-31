@@ -1,0 +1,12 @@
+---
+title: "test-article"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+this is just a test article in Rmarkdown.

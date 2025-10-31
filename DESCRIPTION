@@ -1,7 +1,7 @@
 Package: ntsportal
 Type: Package
-Title: ntsportal - Functions for building and managing the NTSPortal database
-Version: 25.2
+Title: ntsportal - a database for non-target-screening of surface water
+Version: 25.3
 Authors@R: c(
              person(c("Kevin", "S."), "Jewell", email = "jewell@bafg.de", role = "cre",
              comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany"),
@@ -16,7 +16,7 @@ Authors@R: c(
              person("Arne", "Wick", email = "wick@bafg.de", role = "rev",
              comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany")
              )
-Description: This package provides functionality for building and managing the NTSPortal database.
+Description: Provides functionality for building and managing the NTSPortal database.
 License: GNU GPL-3.0
 LazyData: TRUE
 Depends: R (>= 4.1.0)
@@ -35,8 +35,9 @@ Imports:
     rlang,
     lubridate,
     cli,
-    RJSONIO
-RoxygenNote: 7.3.2
+    RJSONIO,
+    zoo
+RoxygenNote: 7.3.3
 Remotes:
     github::bafg-bund/ntsworkflow
 Suggests:
@@ -50,3 +51,4 @@ Encoding: UTF-8
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 URL: https://github.com/bafg-bund/ntsportal
+Config/Needs/website: rmarkdown

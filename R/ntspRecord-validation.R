@@ -161,7 +161,7 @@ patternFoundReplicateRegex <- function(rec) {
 defineRequiredFieldsAnySample <- function() {
   c(
     "path",
-    "dbas_spectral_library",
+    "spectral_library_path",
     "dbas_is_table",
     "dbas_area_threshold",
     "dbas_rttolm",
@@ -177,7 +177,7 @@ defineRequiredFieldsAnySample <- function() {
     "chrom_method",
     "matrix",
     "data_source",
-    "dbas_alias_name",
+    "feature_table_alias",
     "blank",
     "sample_source",
     "nts_alig_filter_min_features"
@@ -192,7 +192,7 @@ defineRequiredFieldsEnvSample <- function() {
 
 defineRequiredFilesAnySample <- function() {
   c(
-    "dbas_spectral_library",
+    "spectral_library_path",
     "dbas_is_table",
     "path"
   )
@@ -284,8 +284,6 @@ fieldsToCheckUniformAllSamples <- function() {
     "dbas_blank_regex",
     "dbas_is_table",
     "dbas_is_name",
-    "dbas_index_name",
-    "dbas_alias_name",
     "dbas_minimum_detections",
     "dbas_fp",
     
@@ -294,8 +292,10 @@ fieldsToCheckUniformAllSamples <- function() {
     "nts_alig_delta_mz",
     "nts_alig_delta_rt",
     "nts_alig_mz_tol_units",
-    "nts_blank_correction_factor"
+    "nts_blank_correction_factor",
     
+    # ingest
+    "feature_table_alias"
   )
 }
 
@@ -303,7 +303,6 @@ fieldsToCheckUniformEnvSamples <- function() {
   c(
     # dbas processing
     "dbas_replicate_regex",
-    "dbas_build_averages",
     
     # nts processing
     "nts_alig_filter_type",
@@ -373,13 +372,13 @@ checkUnnestedFields <- function(record) {
 }
 
 checkNestedFields <- function(record) {
-  nestedFields <- getNestedFieldsDbas()
+  nestedFields <- getNestedFieldsFeatureTable()
   all(vapply(nestedFields, checkNestedField, logical(1), record = record))
 }
 
 
 checkNestedField <- function(record, fieldName) {
-  nestedNames <- names(getMappingsDbas()[[fieldName]]$properties)
+  nestedNames <- names(getMappingProperties("feature")[[fieldName]]$properties)
   fieldsOk <- vapply(names(record[[fieldName]]), function(x) x %in% nestedNames, logical(1))
   if (!all(fieldsOk)) {
     warnBadFields(names(record[[fieldName]])[!fieldsOk], parentField = fieldName)
@@ -387,8 +386,8 @@ checkNestedField <- function(record, fieldName) {
   all(fieldsOk)
 }
 
-getNestedFieldsDbas <- function() {
-  mappings <- getMappingsDbas()
+getNestedFieldsFeatureTable <- function() {
+  mappings <- getMappingProperties("feature")
   names(purrr::keep(mappings, function(x) x$type == "nested"))
 }
 
@@ -398,27 +397,22 @@ getAllTableTypes <- function() {
 }
 
 getAllNestedFields <- function() {
-  mappings <- map(getAllTableTypes(), getMappings)
-  nestedMappings <- map(mappings, \(mapping) names(purrr::keep(mapping, \(x) x$type == "nested")))
-  unique(unlist(nestedMappings))
+  fieldsAllMappings <- map(getAllTableTypes(), getMappingProperties)
+  nestedFieldsAllMappings <- map(fieldsAllMappings, \(fields) names(keep(fields, \(x) x$type == "nested")))
+  unique(unlist(nestedFieldsAllMappings))
 }
 
 allowedFieldsFeature <- function() {
-  allowed <- names(getMappingsDbas())
-  c(allowed, "dbas_alias_name")
-}
-
-getMappingsDbas <- function() {
-  jsonlite::read_json(fs::path_package("ntsportal", "mappings", "dbas_index_mappings.json"))$mappings$properties
-}
-
-getMappings <- function(tableType) {
-  jsonlite::read_json(fs::path_package("ntsportal", "mappings", glue("{tableType}_index_mappings.json")))$mappings$properties
+  names(getMappingProperties("feature"))
 }
 
 warnBadFields <- function(badFields, parentField = "top-level") {
   badFieldsString <- paste(badFields, collapse = ", ")
   warning("Fields in ", parentField, " field which should not be there: ", badFieldsString)
+}
+
+getMappingProperties <- function(mappingType) {
+  getMapping(mappingType)$mappings$properties
 }
 
 # Copyright 2025 Bundesanstalt für Gewässerkunde

@@ -17,7 +17,7 @@ test_that("A dummy record can be added to msrawfiles", {
   )
   
   importedRecord <- jsonlite::read_json(list.files(saveDir, f = T))
-  expect_length(importedRecord[[1]], 83)
+  expect_length(importedRecord[[1]], 82)
   recs <- getTableAsRecords(dbComm, testIndexName, list(query = list(
     regexp = list(path = ".*RH_pos_20220603_no_peaks_test_addRecord.mzXML")
   )))
