@@ -88,14 +88,10 @@ getTableByEsql <- function(esql) {
   newTbl <- list_rbind(
     test <- map(responseBody$values, \(x) {
       names(x) <- colNames
-<<<<<<< HEAD
       xConcatenated <- map(
         x, 
         \(el) ifelse(is.null(el), NA, ifelse(length(el) == 1, el, paste(el, collapse = ", ")))
       )
-=======
-      xConcatenated <- map(x, \(el) ifelse(length(el) == 1, el, ifelse(is.null(el), NA, paste(el, collapse = ", "))))
->>>>>>> 2c899615613d9673949597f27080b8524e157f44
       as_tibble_row(xConcatenated)
     })
   )
