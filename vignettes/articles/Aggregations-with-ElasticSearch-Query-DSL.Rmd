@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-The documentation is extensive: [Aggregations Docs](https://www.elastic.co/docs/explore-analyze/query-filter/aggregations). For the NTSPortal schema, see [Structure of NTSPortal](Structure-of-NTSPortal). 
+The documentation is extensive: [Aggregations Docs](https://www.elastic.co/docs/explore-analyze/query-filter/aggregations). For the NTSPortal schema, see [Structure of NTSPortal](articles/structure-and-table-naming.html). 
 
 # Aggregation: `terms`
 

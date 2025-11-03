@@ -1,10 +1,6 @@
 ---
-title: "Library screening"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Library screening}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+title: "Processing by library screening"
+output: html_document
 ---
 
 ```{r, include = FALSE}
@@ -16,11 +12,11 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-Measurement files are processed using the library screening algorithm known as DBAS. All the parameters for processing, as well as the location of the necessary input files, are stored in the `msrawfiles` index. The output is stored in a `dbas` index. See [naming conventions of indices](articles/Structure-of-NTSPortal.html).
+Measurement files are processed using the library screening algorithm known as DBAS (database assisted screening), described here, as well as [non-target screening](articles/processing-by-non-target-screening.html). All the parameters for processing, as well as the location of the necessary input files, are stored in the `msrawfiles` index. The output of DBAS processing stored in a `feature` index. See [naming conventions of indices](articles/structure-and-table-naming.html).
 
 # Reprocessing all datafiles in msrawfiles index
 
-After additions have been made to the spectral library all datafiles must be reprocessed. After making necessary changes to the `msrawfiles` table, processing can be started with the various `dbaScreening*` functions depending on where the processing should take place (locally, server etc.). For example, `dbaScreeningSelectedBatchesSlurm()` is used to begin processing using the SLURM workload manager.
+After additions have been made to the spectral library all datafiles must be reprocessed. After making necessary changes to the `msrawfiles` table, processing can be started with the various `screening*` functions depending on where the processing should take place (locally, server etc.). For example, `screeningSelectedBatchesSlurm()` is used to begin processing using the SLURM workload manager.
 
 # Overview of processing algorithm
 
@@ -40,7 +36,7 @@ The `msrawfile`-records are used to control the processing workflow. Once the wo
 
 ### Process launching
 
-The user runs one of several `dbaScreening*` functions to start the processing either locally or via SLURM. In `dbaScreeningSelectedBatchesSlurm()` (the most commonly used) specific directories (i.e. batches) containing the measurement files are passed either by listing them directly or by giving a root directory. Alternatively, the user can process any "new" batches using `dbaScreeningUnprocessedBatchesSlurm()` (Section [Collecting msrawfile records](#collecting-msrawfile-records)).
+The user runs one of several `screening*` functions to start the processing either locally or via SLURM. In `screeningSelectedBatchesSlurm()` (the most commonly used) specific directories (i.e. batches) containing the measurement files are passed either by listing them directly or by giving a root directory. `dbas` is the default `screeningType` in these functions. Alternatively, the user can process any "new" batches using `dbaScreeningNewBatches()` (Section [Collecting msrawfile records](#collecting-msrawfile-records)).
 
 #### Processing using the workflow manager SLURM
 
@@ -49,7 +45,7 @@ To run the screening via SLURM, first the necessary job files are be created. Th
 ![Figure: The workflow manager SLURM can be used for processing](images/screening-slurmJobSubmission.svg){width=100%}
 
 ### Collecting msrawfile records {#sec-collectingMsrawfileRecords}
-In `dbaScreeningUnprocessedBatchesSlurm()`, new batches are selected by looking at all `dbas` indices and comparing the files found (identified by the `path` field) to the files found in `msrawfiles`. Any batches in `msrawfiles` not yet found in any `dbas` index are selected for processing.
+In `dbaScreeningNewBatches()`, new batches are selected by looking at all `dbas` indices and comparing the files found (identified by the `path` field) to the files found in `msrawfiles`. Any batches in `msrawfiles` not yet found in any `dbas` index are selected for processing.
 
 The `msrawfiles` records are loaded and checks performed before the scanning process begins. Output is a list of batches of `ntsportal::msrawfilesRecord`s. 
 
@@ -57,7 +53,7 @@ The `msrawfiles` records are loaded and checks performed before the scanning pro
 
 
 ### File-wise scanning
-The measurement files are scanned for compounds in the spectral library and the results are cleaned. The result is one `dbasResult` object for the batch (`list` of `data.frame`s containing peak information for the whole batch). 
+The measurement files are scanned for compounds in the collective spectral library (CSL) and the results are cleaned. The result is one `dbasResult` object for the batch (`list` of `data.frame`s containing peak information for the whole batch). 
 
 Table: `dbasResult` class
 

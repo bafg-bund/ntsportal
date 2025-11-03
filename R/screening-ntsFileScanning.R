@@ -1,4 +1,10 @@
 
+#' Scan files by non-target-screening processing
+#'
+#' @param msrawfilesRecords Files to process as a `list` of `msrawfileRecord`s
+#' @param forNtsworkflow logical, should the results be prepared for the ntsworkflow non-target app?
+#'
+#' @returns an `ntsResult` object with the tables `peakList`, `sampleList`, `alignmentTable`, `annotationTable`
 scanBatchNts <- function(msrawfilesRecords, forNtsworkflow = FALSE) {
   peakPickingResults <- purrr::map(msrawfilesRecords, getPeakPickingResult)
   peakPickingFails <- getPeakPickingFails(peakPickingResults)

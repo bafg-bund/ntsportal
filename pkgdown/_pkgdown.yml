@@ -37,11 +37,13 @@ navbar:
       - text: --------
       - text: Database structure and algorithms
       - text: Structure of NTSPortal
-        href: articles/Structure-of-NTSPortal.html
+        href: articles/structure-and-table-naming.html
       - text: Table mappings (database schema)
         href: articles/table-mappings.html
-      - text: Library Screening
-        href: articles/Library-screening.html
+      - text: Processing by library screening
+        href: articles/processing-by-library-screening.html
+      - text: Processing by non-target screening
+        href: articles/processing-by-non-target-screening.html
       - text: --------
       - text: Database management
       - text: Adding measurement files to msrawfiles

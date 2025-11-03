@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-The Elasticsearch search API is available in the Dev Tools console in Kibana or via the API at `elastic.bafg.de`.  Refer to the extensive [documentation for Query DSL](https://www.elastic.co/docs/explore-analyze/query-filter/languages/querydsl). For the NTSPortal schema, see [Structure of NTSPortal](Structure-of-NTSPortal).
+The Elasticsearch search API is available in the Dev Tools console in Kibana or via the API at `elastic.bafg.de`.  Refer to the extensive [documentation for Query DSL](https://www.elastic.co/docs/explore-analyze/query-filter/languages/querydsl). For the NTSPortal schema, see [Structure of NTSPortal](articles/structure-and-table-naming.html).
 
 # Simple search example with the `term` query
 A very simple example is shown to show the structure of a query. This example retrieves all detections from the station "mosel_ko_r".

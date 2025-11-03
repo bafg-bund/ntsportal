@@ -13,7 +13,8 @@ Both return a `tbl_df`, AKA "tibble" (an extension of `data.frame`). The former 
 (passed as a `list`). The latter allows the user to send ES|QL statements for queries and computing statistics, see the
 "Discover" page at `https://ntsportal.bafg.de` for more information.
 * Documentation website now [online](http://docs.ntsportal.bafg.de).
-* Added new article "Document field descriptions for NTSPortal".
+* Added new articles "Document field descriptions for NTSPortal" and "Processing by non-target screening" to the
+documentation.
 
 ## Major changes (frontend)
 * Additions for better interpretation of the confidence in detections
