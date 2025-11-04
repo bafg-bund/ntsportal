@@ -5,22 +5,22 @@
 
 * Changed table names of screening results tables from `ntsp25.3_dbas*` to `ntsp25.3_feature*`. These tables include
 both DBAS and NTS processing results.
-* New processing method "nts" to record unknown features (no CSL annotation). Unknown features are added to feature
+* New processing method "NTS" to record unknown features (no CSL annotation). Unknown features are added to `feature`
 tables. Unknown features are currently not aligned/grouped, i.e., there is no `name` field. This will be added in a 
 future version.
 * For the search API client in R, replaced `getTableAsTibble()` with `getTableByQuery()` and `getTableByEsql()`. 
 Both return a `tbl_df`, AKA "tibble" (an extension of `data.frame`). The former uses the *Query DSL* format 
-(passed as a `list`). The latter allows the user to send ES|QL statements for queries and computing statistics, see the
-"Discover" page at `https://ntsportal.bafg.de` for more information.
-* Documentation website now [online](http://docs.ntsportal.bafg.de).
-* Added new articles "Document field descriptions for NTSPortal" and "Processing by non-target screening" to the
-documentation.
+(passed as a `list`). The latter allows the user to send ES|QL statements (as text) for queries and computing 
+statistics, see the "Discover" page at `https://ntsportal.bafg.de` for more information.
+* The documentation website now [online](https://docs.ntsportal.bafg.de/).
+* Two new articles "Document field descriptions for NTSPortal" and "Processing by non-target screening" were added to
+the documentation.
 
 ## Major changes (frontend)
 * Additions for better interpretation of the confidence in detections
   + "MS² available" annotation on time series 
   + Distribution of MS² similarity scores in "Spectra of annotated features" dashboard
-* The results of the "nts" processing workflow can be viewed in the "Unknowns overview" dashboard
+* The results of the NTS processing workflow can be viewed in the "Unknowns overview" dashboard
 * Time series now include notes (annotations) to indicate unavoidable changes in analytical or processing methods
 
 ## Minor changes (backend)
@@ -28,10 +28,12 @@ documentation.
 * Changed field type to `integer`, `half_float` or `scaled_float` for better data compression. Modified fields: 
 `area`, `intensity`, `area_internal_standard`, `intensity_internal_standard`, `rt`, `eic.int`, `eic.time`, `ms1.int`, 
 `ms2.int`
-* Changed `duration` field to `keyword`. The field now uses ISO 8601 time duration format.
+* Changed `duration` field to `keyword`. The field now uses ISO 8601 time duration format, see 
+[documentation.](https://docs.digi.com/resources/documentation/digidocs/90001488-13/reference/r_iso_8601_duration_format.htm)
 * Changed name of `ingest()` to `ingestFeatureRecords()` since this function only has this specific purpose. All other 
 ingesting is done by `appendRecords()`
-* Vignette documentation moved from vignettes to pkgdown articles.
+* Vignette documentation moved from vignettes to pkgdown articles, which are available on the documentation website 
+(to reduce installation size). 
 
 # ntsportal 25.2
 

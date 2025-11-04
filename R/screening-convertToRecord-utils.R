@@ -1,4 +1,7 @@
-
+#' Convert the result of file scanning to a list of feature records
+#' Compound and sample metadata, including spectra are collected from the `scanResult`, from the linked raw measurement
+#' files, or from `msrawfileRecords`
+#' @export
 convertToRecord <- function(scanResult, ...) {
   UseMethod("convertToRecord")
 }

@@ -1,6 +1,6 @@
 
-#' Convert a `dbasResult` to a `list` of `featureRecord`s
-#' @description The results of DBAS file scanning (`scanResult`) are converted to the NTSPortal `featureRecord` format.
+#' Convert the results of DBAS processing to a list of feature records
+#' @description The results of DBAS file scanning (`dbasResult`) are converted to the NTSPortal `featureRecord` format.
 #' Compound and sample metadata are collected from the `msrawfileRecords` argument and the spectral library (CSL).
 #' @rdname convertToRecord
 #' @examples

@@ -38,7 +38,7 @@ navbar:
       - text: Database structure and algorithms
       - text: Structure of NTSPortal
         href: articles/structure-and-table-naming.html
-      - text: Table mappings (database schema)
+      - text: Document field descriptions for NTSPortal
         href: articles/table-mappings.html
       - text: Processing by library screening
         href: articles/processing-by-library-screening.html

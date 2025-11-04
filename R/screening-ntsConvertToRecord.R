@@ -1,8 +1,13 @@
 
 #' Convert a `ntsResult` to a `list` of `featureRecord`s
-#' @description The results of DBAS file scanning (`scanResult`) are converted to the NTSPortal `featureRecord` format.
-#' Compound and sample metadata are collected from the `msrawfileRecords` argument and the spectral library (CSL).
+#' @description The results of NTS file scanning (`ntsResult`) are converted to the NTSPortal `featureRecord` format.
 #' @rdname convertToRecord
+#' @examples
+#' \dontrun{
+#'   testMsrawfilesRecords <- getRecordsSampleAndBlank()
+#'   testNtsResults <- scanBatchNts(testMsrawfilesRecords)
+#'   features <- convertToRecord(testNtsResults)  
+#' }
 #' @export
 convertToRecord.ntsResult <- function(scanResult) {
   scanResult <- removeAnnotated(scanResult)

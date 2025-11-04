@@ -15,19 +15,20 @@ message("Build website")
 pkgdown::build_site(".", preview = FALSE, new_process = TRUE)
 
 # Make changes to html files
-files <- list.files(path = public, pattern = "*[.]html",
+files <- list.files(path = public, pattern = "*\\.html",
                     all.files = TRUE, full.names = FALSE, recursive = TRUE,
                     ignore.case = FALSE, include.dirs = TRUE, no.. = FALSE)
 
-for (a_file in files) {
-  
+for (a_file in files) {  # a_file <- files[1]
   x <- readLines(paste0(public, a_file))
   
   # Add imprint to footer
-  y <- gsub('Developed by Kevin S. Jewell, Ole Lessmann.',
-            paste0('Developed by Kevin S. Jewell, Ole Lessmann, Jonas Skottnik, Franziska Prodöhl, Nina Hermes, Arne Wick. <a href="https',
-                   '://www.bafg.de/EN/Service/Imprint/imprint_node.html"',
-                   '>Imprint</a>.'), x)
+  y <- gsub(
+    'Developed by Kevin S\\. Jewell, Ole Lessmann\\.',
+     paste0('Developed by Kevin S. Jewell, Ole Lessmann, Jonas Skottnik, Franziska Prodöhl, Nina Hermes, ',  
+     'Arne Wick. <a href="https://www.bafg.de/DE/Service/Impressum/impressum_node.html">Imprint</a>.'), 
+     x
+  )
   
   # remove the prefix "technical report" in references
   z <- gsub('Technical Report ', '', y)
