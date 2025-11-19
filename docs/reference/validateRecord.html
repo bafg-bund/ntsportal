@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Validate that a `*record` is correctly formated — validateRecord • ntsportal</title>
+<title>Validate that a `*record` is correctly formatted — validateRecord • ntsportal</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Inter-0.4.10/font.css" rel="stylesheet">
@@ -13,9 +13,9 @@
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<meta property="og:title" content="Validate that a `*record` is correctly formated — validateRecord">
-<meta name="description" content="Checks are run for conisitency and the files are present on disc.">
-<meta property="og:description" content="Checks are run for conisitency and the files are present on disc.">
+<meta property="og:title" content="Validate that a `*record` is correctly formatted — validateRecord">
+<meta name="description" content="Checks are run for consistency and the associated files (if any) are present on disc.">
+<meta property="og:description" content="Checks are run for consistency and the associated files (if any) are present on disc.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -49,7 +49,7 @@
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Database structure and algorithms</h6></li>
     <li><a class="dropdown-item" href="../articles/structure-and-table-naming.html">Structure of NTSPortal</a></li>
-    <li><a class="dropdown-item" href="../articles/table-mappings.html">Table mappings (database schema)</a></li>
+    <li><a class="dropdown-item" href="../articles/table-mappings.html">Document field descriptions for NTSPortal</a></li>
     <li><a class="dropdown-item" href="../articles/processing-by-library-screening.html">Processing by library screening</a></li>
     <li><a class="dropdown-item" href="../articles/processing-by-non-target-screening.html">Processing by non-target screening</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -78,19 +78,22 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Validate that a `*record` is correctly formated</h1>
+      <h1>Validate that a `*record` is correctly formatted</h1>
       <small class="dont-index">Source: <a href="https://github.com/bafg-bund/ntsportal/blob/HEAD/R/ntspRecord-validation.R" class="external-link"><code>R/ntspRecord-validation.R</code></a></small>
       <div class="d-none name"><code>validateRecord.Rd</code></div>
     </div>
 
     <div class="ref-description section level2">
-    <p>Checks are run for conisitency and the files are present on disc.</p>
+    <p>Checks are run for consistency and the associated files (if any) are present on disc.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a>
 </h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">validateRecord</span><span class="op">(</span><span class="va">record</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'dbasMsrawfilesRecord'</span></span>
+<span><span class="fu">validateRecord</span><span class="op">(</span><span class="va">record</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'msrawfilesRecord'</span></span>
 <span><span class="fu">validateRecord</span><span class="op">(</span><span class="va">record</span><span class="op">)</span></span>
@@ -105,7 +108,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
 <div class="pkgdown-footer-right">

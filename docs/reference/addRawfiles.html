@@ -49,7 +49,7 @@
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Database structure and algorithms</h6></li>
     <li><a class="dropdown-item" href="../articles/structure-and-table-naming.html">Structure of NTSPortal</a></li>
-    <li><a class="dropdown-item" href="../articles/table-mappings.html">Table mappings (database schema)</a></li>
+    <li><a class="dropdown-item" href="../articles/table-mappings.html">Document field descriptions for NTSPortal</a></li>
     <li><a class="dropdown-item" href="../articles/processing-by-library-screening.html">Processing by library screening</a></li>
     <li><a class="dropdown-item" href="../articles/processing-by-non-target-screening.html">Processing by non-target screening</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -188,16 +188,16 @@ station. see details</p></dd>
   name. If neither town nor km is known, use the convention &lt;river&gt;_&lt;description&gt; where description is some
   indication of the location.</p>
 <p><strong>Adding sample time information (`start` field)</strong></p>
-<p>Using "filename" means that the sample time is extracted from the filename. The field `dbas_date_regex` is used to
-  find the date of the sample from the file name. It works in conjunction with `dbas_date_format`. `dbas_date_regex`
-  extracts the text, while `dbas_date_format` tells R how to interpret the text. For example, the file name
-  `RH_pos_20170101.mzXML` uses the date_regex `"([20]*\d6)"` and date_format `"ymd"`. The `dbas_date_regex` uses
+<p>Using "filename" means that the sample time is extracted from the filename. The field `start_date_regex` is used to
+  find the date of the sample from the file name. It works in conjunction with `start_date_format`. `start_date_regex`
+  extracts the text, while `start_date_format` tells R how to interpret the text. For example, the file name
+  `RH_pos_20170101.mzXML` uses the date_regex `"([20]*\d6)"` and date_format `"ymd"`. The `start_date_regex` uses
   the tidyverse regular expression syntax and the `stringr::str_match` function to extract the text referring to the
   date. The brackets indicate the text to extract and these can be surrounded by anchors. It is also possible to have
   multiple brackets, the text in multiple brackets will be combined before parsing. For example the file
   `UEBMS_2024_002_Main_Kahl_Jan_pos_DDA.mzXML` can be parsed with date_regex `_(20\d2)_.*_(\w3)_pos` and
   date_format `ym`.</p>
-<p>`dbas_date_format` may be one of `"ymd"`, `"dmy"`, `"ym"` for year-month and `"yy"` for just the year. The date
+<p>`start_date_format` may be one of `"ymd"`, `"dmy"`, `"ym"` for year-month and `"yy"` for just the year. The date
   parsing is done by `lubridate`.</p>
 <p><strong>Making manual changes</strong></p>
 <p>Manual changes can be made to the json but only if one document is added (this is to minimize errors). Select "c"
@@ -249,7 +249,7 @@ station. see details</p></dd>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
 <div class="pkgdown-footer-right">

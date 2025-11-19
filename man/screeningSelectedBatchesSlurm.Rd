@@ -17,20 +17,21 @@ screeningSelectedBatchesSlurm(
 
 \item{batchDirs}{Directory of measurement files (recursive, multiple permitted)}
 
-\item{saveDirectory}{Location where SLURM job files should be saved}
+\item{saveDirectory}{Location where files will be saved. Directory will be created. Warning: files may be 
+overwritten if the directory already exists}
 
-\item{email}{Address for SLURM notifications}
+\item{email}{Email recipient for SLURM notifications}
 
 \item{screeningType}{either 'dbas' or 'nts' for library screening and non-target-screening, respectively}
 }
 \description{
 Choose which batches to process by selecting the directory where the measurement files are stored. 
-`dbaScreeningSelectedBatchesSlurm()` will create necessary files for submission of the job to the workflow manager SLURM.
+It will create the necessary files for submission of the job to the workflow manager SLURM in `saveDirectory`.
 }
 \details{
 Three files are created, the records of all files to process, organized into batches (.RDS); the R script which
-SLURM needs to run, and the SLURM job file (.sbatch). The command needed to start the process is given as a message (you
-may need to switch to a SLURM-enabled server).
+SLURM needs to run, and the SLURM job file (`.sbatch`). The command needed to start the process is given as a 
+message (you may need to switch to a SLURM-enabled server).
 }
 \examples{
 \dontrun{

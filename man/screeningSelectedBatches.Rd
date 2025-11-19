@@ -17,7 +17,8 @@ screeningSelectedBatches(
 
 \item{batchDirs}{Directory of measurement files (recursive, multiple permitted)}
 
-\item{saveDirectory}{Location where results should be saved}
+\item{saveDirectory}{Location where files will be saved. Directory will be created. Warning: files may be 
+overwritten if the directory already exists}
 
 \item{numParallel}{For local parallel processing via future}
 

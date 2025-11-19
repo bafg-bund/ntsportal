@@ -60,8 +60,10 @@
 <url><loc>https://docs.ntsportal.bafg.de/reference/removeRedundantPngs.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/removeValueFromArray.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/resetConnectionCredentials.html</loc></url>
+<url><loc>https://docs.ntsportal.bafg.de/reference/scanBatch.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/scanBatchDbas.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/scanBatchNts.html</loc></url>
+<url><loc>https://docs.ntsportal.bafg.de/reference/screeningOneBatch.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/screeningSelectedBatches.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/screeningSelectedBatchesSlurm.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/setCredNonInteractive.html</loc></url>
