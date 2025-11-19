@@ -162,6 +162,10 @@ build_es_query_for_ids <- function(ids, toShow) {
   invisible(T)
 }
 
+getMappingProperties <- function(mappingType) {
+  getMapping(mappingType)$mappings$properties
+}
+
 getMapping <- function(mappingType) {
   stopifnot(mappingType %in% getNtsportalTableTypes())
   pth <- fs::path_package("ntsportal", "mappings", glue("{mappingType}_index_mappings.json"))
@@ -178,6 +182,21 @@ testConnection <- function() {
     stop("Unable to connect to elasticSearch")
 }
 
+getField <- function(listRecords, fieldName, quiet = FALSE) {
+  if (!fieldAvailable(listRecords, fieldName)) {
+    if (!quiet)
+      message("Field ", fieldName, " not found in any docs")
+    return(rep(NA, length(listRecords)))
+  } 
+  values <- lapply(listRecords, getValueOrEmpty, field = fieldName)
+  sizes <- vapply(values, length, numeric(1))
+  if (all(sizes == 1)) {
+    unname(unlist(values))
+  } else {
+    unname(values)
+  }
+}
+
 splitRecordsByDir <- function(recsToProcess) {
   paths <- getField(recsToProcess, "path")
   if (length(paths) > 0) {
@@ -188,9 +207,6 @@ splitRecordsByDir <- function(recsToProcess) {
   split(recsToProcess, dirs)
 }
 
-# Turn mappings into a tibble for documentation
-
-
 #' Turn mappings into a tibble for documentation
 #'
 #' @param mappingType name of mapping type, e.g. "feature"
@@ -200,26 +216,41 @@ splitRecordsByDir <- function(recsToProcess) {
 makeMappingsTbl <- function(mappingType) {
   m <- getMapping(mappingType)
   properties <- m$mappings$properties
-  mainLevel <- tibble(
+  mainLevel <- makeTblFromPropertiesList(properties)
+  
+  nestedFields <- mainLevel[mainLevel$type == "nested", "field", drop = T]
+  nestedLevel <- mainLevel[0, ]
+  if (length(nestedFields) > 0)
+    nestedLevel <- list_rbind(map(nestedFields, \(f) makeTblNestedField(f, properties)))
+  
+  runTimeLevel <- mainLevel[0, ]
+  runtime <- m$mappings$runtime
+  if (!is.null(runtime)) 
+    runTimeLevel <- makeTblRuntimeFields(runtime)
+  
+  rbind(mainLevel, nestedLevel, runTimeLevel) |> arrange(field)
+}
+
+makeTblNestedField <- function(parentField, properties) {
+  propertiesNested <- properties[[parentField]]$properties
+  newTbl <- makeTblFromPropertiesList(propertiesNested)
+  newTbl$field <- paste0(parentField, ".", newTbl$field)
+  newTbl
+}
+
+makeTblRuntimeFields <- function(runtimeProperties) {
+  newTbl <- makeTblFromPropertiesList(runtimeProperties)
+  newTbl$type <- paste(newTbl$type, "(runtime)")
+  newTbl
+}
+
+makeTblFromPropertiesList <- function(properties) {
+  tibble(
     field = names(properties),
     type = map_chr(properties, \(p) p$type),
     description = map_chr(properties, \(p) ifelse(is.null(p$meta$description), "", p$meta$description)),
     unit = map_chr(properties, \(p) ifelse(is.null(p$meta$unit), "", p$meta$unit)),
     example = map_chr(properties, \(p) ifelse(is.null(p$meta$example), "", p$meta$example))
-  )
-  nestedFields <- mainLevel[mainLevel$type == "nested", "field", drop = T]
-  nestedLevel <- list_rbind(map(nestedFields, \(f) getTableNestedField(f, properties)))
-  rbind(mainLevel, nestedLevel) |> arrange(field)
-}
-
-getTableNestedField <- function(parentField, properties) {
-  propertiesNested <- properties[[parentField]]$properties
-  tibble(
-    field = paste0(parentField, ".", names(propertiesNested)),
-    type = map_chr(propertiesNested, \(p) p$type),
-    description = map_chr(propertiesNested, \(p) ifelse(is.null(p$meta$description), "", p$meta$description)),
-    unit = map_chr(propertiesNested, \(p) ifelse(is.null(p$meta$unit), "", p$meta$unit)),
-    example = map_chr(propertiesNested, \(p) ifelse(is.null(p$meta$example), "", p$meta$example))
   )
 }
 

@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit README.Rmd -->
 
-# ntsportal
+# ntsportal v25.3
 
 The goal of the R-package *ntsportal* is to provide the backend for the
 NTSPortal database and online dashboards for non-target-screening data
@@ -15,15 +15,15 @@ system currently uses
 searching the data. This R-package is used for processing and managing
 the data and search engine. The functions for data processing use
 [ntsworkflow](https://github.com/bafg-bund/ntsworkflow). For further
-information on the structure and internal design of NTSPortal please
-refer to the documentation.
+information on the structure and internal design of NTSPortal, please
+refer to the [documentation](https://docs.ntsportal.bafg.de).
 
 Access to the internally managed NTSPortal database is available for
 research institutions and government agencies upon request. Please
-contact the Federal Institute of Hydrology at <ntsportal@bafg.de>. This
-repository includes the back-end code for publication purposes and does
-not include the environmental data. See the [documentation
-website](https://docs.ntsportal.bafg.de) for more information.
+contact the Federal Institute of Hydrology at <ntsportal@bafg.de>. The
+[repository](https://github.com/bafg-bund/ntsportal) includes the
+back-end code for publication purposes and does not include the
+environmental data.
 
 ## Project Funding
 

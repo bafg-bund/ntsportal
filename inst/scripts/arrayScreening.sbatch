@@ -53,7 +53,7 @@ echo "=========================================="
 echo ""
 
 
-Rscript RVarDir/screeningSlurm.R RVarScreeningType RVarDir/recordsInBatches.RDS $SLURM_ARRAY_TASK_ID
+Rscript RVarDir/screeningSlurm.R RVarDir/recordsInBatches.RDS $SLURM_ARRAY_TASK_ID
 
 
 echo -e "------------------------------------------ \n"

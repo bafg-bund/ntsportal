@@ -12,11 +12,12 @@ future version.
 Both return a `tbl_df`, AKA "tibble" (an extension of `data.frame`). The former uses the *Query DSL* format 
 (passed as a `list`). The latter allows the user to send ES|QL statements (as text) for queries and computing 
 statistics, see the "Discover" page at `https://ntsportal.bafg.de` for more information.
-* The documentation website now [online](https://docs.ntsportal.bafg.de/).
+* The documentation website is now [online](https://docs.ntsportal.bafg.de/).
 * Two new articles "Document field descriptions for NTSPortal" and "Processing by non-target screening" were added to
 the documentation.
 
 ## Major changes (frontend)
+
 * Additions for better interpretation of the confidence in detections
   + "MS² available" annotation on time series 
   + Distribution of MS² similarity scores in "Spectra of annotated features" dashboard
@@ -33,7 +34,29 @@ the documentation.
 * Changed name of `ingest()` to `ingestFeatureRecords()` since this function only has this specific purpose. All other 
 ingesting is done by `appendRecords()`
 * Vignette documentation moved from vignettes to pkgdown articles, which are available on the documentation website 
-(to reduce installation size). 
+(to reduce installation size).
+* Open data licence changed to CC BY 4.0
+* Field names in `msrawfiles` documents have changed to accommodate NTS processing.
+  - `dbas_blank_regex` to `blank_regex`
+  - `dbas_date_format` to `start_date_format`
+  - `dbas_date_regex` to `start_date_regex`
+  - `dbas_is_name` to `internal_standard`
+  - `dbas_replicate_regex` to `replicate_regex`
+  - `dbas_instr` to `csl_instruments_allowed`
+  - `dbas_spectral_library` to `spectral_library_path`
+* Fields removed from `msrawfiles`
+  - `dbas_use_area`
+  - `nts_spectral_library_sha256`
+  - `dbas_mustFindChromPeak`
+  - `dbas_build_averages`
+  - `dbas_cores_report`
+  - `dbas_cores`
+  - `nts_spectral_library`
+  - `dbas_spectral_library_sha256`
+  - `nts_index_name`
+  - `nts_alias_name`
+  - `dbas_alias_name`
+  - `nts_alig_mz_tol_units`
 
 # ntsportal 25.2
 

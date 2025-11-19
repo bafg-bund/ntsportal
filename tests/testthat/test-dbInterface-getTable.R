@@ -41,6 +41,21 @@ test_that("Numeric arrays are coerced to characters", {
   expect_identical(newTib, expectedTib)
 })
 
+test_that("Records with missing fields are filled with NAs", {
+  minimalRecordsNum <- list(
+    list(field1 = 1),
+    list(field1 = 1, field2 = 1)
+  )
+  newTblNum <- convertRecordsToTibble(minimalRecordsNum)
+  expect_true(is.na(newTblNum[1, "field2", drop = T]))
+  minimalRecordsChar <- list(
+    list(field1 = "A"),
+    list(field1 = "A", field2 = "A")
+  )
+  newTblChar <- convertRecordsToTibble(minimalRecordsChar)
+  expect_true(is.na(newTblChar[1, "field2", drop = T]))
+})
+
 test_that("You can get a tibble from and ES|QL", {
   testTbl <- getTableByEsql("FROM ntsp25.2_dbas* | WHERE station == \"mosel_139\" | KEEP mz, station | LIMIT 10")
   expect_s3_class(testTbl, "tbl_df")

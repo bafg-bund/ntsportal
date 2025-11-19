@@ -2,9 +2,9 @@
 
 
 test_that("A sample and blank can be scanned", {
-  recordsBatch <- getRecordsSampleAndBlank()
+  recordsBatch <- getOneSampleRecords("dbas")
   startTime <- Sys.time()
-  results <- scanBatchDbas(recordsBatch)
+  results <- scanBatch(recordsBatch)
   endTime <- Sys.time()
   message("Time needed to processes sample and blank: ", round(difftime(endTime, startTime, units = "secs")), " s")
   expect_true(nrow(results$peakList) > 0)
@@ -13,12 +13,11 @@ test_that("A sample and blank can be scanned", {
 })
 
 test_that("A file with no peaks returns an empty result", {
-  record <- getRecordNoPeaks()
-  results <- scanBatchDbas(list(record))
+  recordBatch <- getRecordBatchNoPeaks("dbas")
+  results <- scanBatch(recordBatch)
   expect_equal(nrow(results$peakList), 0)
   expect_s3_class(results, "dbasResult")
 })
-
 
 test_that("An empty report is removed from a list of reports", {
   report <- getMergedReportSampleAndBlank()
@@ -56,10 +55,9 @@ test_that("A failed reintegration returns the original report", {
   withr::deferred_run()
 })
 
-
 test_that("Blank correction works for sample and blank", {
   report <- getMergedReportSampleAndBlank()
-  records <- getRecordsSampleAndBlank()
+  records <- getOneSampleRecords("dbas")
   peaksBeforeCorrection <- nrow(report$peakList)
   report <- blankCorrectionDbas(report, records)
   peaksAfterCorrection <- nrow(report$peakList)
@@ -86,16 +84,16 @@ test_that("Replicate detections are correctly computed", {
 })
 
 test_that("Test file Des_07_01_pos.mzXML can be processed for Bisoprolol", {
-  recordDes_07_01 <- getSingleRecordDes_07_01_pos()
+  batchDes0701 <- getSingleRecordBatchDes0701pos("dbas")
   
-  fileResult <- fileScanDbas(msrawfileRecord = recordDes_07_01[[1]], compsToProcess = "Bisoprolol")
+  fileResult <- fileScanDbas(msrawfileRecord = batchDes0701[[1]], compsToProcess = "Bisoprolol")
   
   expect_s4_class(fileResult, "Report")
   expect_equal(fileResult$peakList$comp_name, "Bisoprolol")
 })
 
 test_that("Test file with no peaks can be processed", {
-  recordNoPeak <- getRecordNoPeaks()
+  recordNoPeak <- getMsrawfilesRecordNoPeaks("dbas")
   with_log_threshold(
     report <- fileScanDbas(msrawfileRecord = recordNoPeak, compsToProcess = "Bisoprolol"),
     threshold = OFF
@@ -105,7 +103,7 @@ test_that("Test file with no peaks can be processed", {
 
 test_that("If a scanning result is an error, it returns an empty report", {
   local_mocked_bindings(placeholderToSetMockingFunctions = function(...) stop("Test error"))
-  recordNoPeak <- getRecordNoPeaks()
+  recordNoPeak <- getMsrawfilesRecordNoPeaks("dbas")
   resultsReport <- fileScanDbas(msrawfileRecord = recordNoPeak, compsToProcess = "Bisoprolol")
   expect_equal(nrow(resultsReport$peakList), 0)
   withr::deferred_run()
@@ -113,7 +111,7 @@ test_that("If a scanning result is an error, it returns an empty report", {
 
 test_that("If a scanning result is a try-error, it returns an empty report", {
   local_mocked_bindings(placeholderToSetMockingFunctions = function(...) try(stop("Test error")))
-  recordNoPeak <- getRecordNoPeaks()
+  recordNoPeak <- getMsrawfilesRecordNoPeaks("dbas")
   resultsReport <- fileScanDbas(msrawfileRecord = recordNoPeak, compsToProcess = "Bisoprolol")
   expect_equal(nrow(resultsReport$peakList), 0)
   withr::deferred_run()
@@ -121,12 +119,11 @@ test_that("If a scanning result is a try-error, it returns an empty report", {
 
 test_that("If a scanning result is NULL, it returns an empty report", {
   local_mocked_bindings(placeholderToSetMockingFunctions = function(...) NULL)
-  recordNoPeak <- getRecordNoPeaks()
+  recordNoPeak <- getMsrawfilesRecordNoPeaks("dbas")
   resultsReport <- fileScanDbas(msrawfileRecord = recordNoPeak, compsToProcess = "Bisoprolol")
   expect_equal(nrow(resultsReport$peakList), 0)
   withr::deferred_run()
 })
-
 
 test_that("Getting non existent field returns an NA vector", {
   records <- getRecordsTripicateBatch()

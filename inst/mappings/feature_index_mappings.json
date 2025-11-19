@@ -42,7 +42,7 @@
       "inchikey" : {"type" : "keyword", "meta": {"description": "hash of international chemical identifier", "example": "ILLQTAPXYCRJRB-UHFFFAOYSA-N"}},
       "instrument": { "type" : "text", "meta": {"description": "instrument type code", "example": "LC-ESI-QTOF TripleTOF 6600 SCIEX"}},
       "intensity" : {"type" : "integer", "meta": {"description": "chromatographic peak height at apex"}},
-      "internal_standard" : {"type" : "keyword", "meta": {"description": "int. std. compound name"}},
+      "internal_standard" : {"type" : "keyword", "meta": {"description": "int. std. compound name", "example": "Bezafibrate-d6"}},
       "intensity_internal_standard" : {"type" : "integer", "meta": {"description": "peak intensity (height at apex)"}},
       "isotopologue" : {"type" : "keyword", "meta": {"description": "isotopic difference to monoisotopic", "example": "37Cl"}},
       "km": { "type" : "half_float", "meta": {"description": "river kilometer of sampling location"}},
@@ -109,39 +109,46 @@
         "type": "double",
         "script": {
           "source": "if (params._source.area_internal_standard != null) emit((double)params._source.area / (double)params._source.area_internal_standard)"
-        }
+        },
+        "meta": {"description": "area/area_internal_standard"}
       },
       "batchname": {
         "type": "keyword",
-        "script": "def x = params._source.path.splitOnToken('/'); emit(String.join('/', Arrays.asList(x).subList(0,x.length-1)))"
+        "script": "def x = params._source.path.splitOnToken('/'); emit(String.join('/', Arrays.asList(x).subList(0,x.length-1)))",
+        "meta": {"description": "Leading directories of path field", "example": "/beegfs/nts/ntsportal/msrawfiles/unit_tests"}
       },
       "filename": {
         "type" : "keyword",
-        "script": "def x=params._source.path.splitOnToken('/'); emit(x[x.length-1])"
+        "script": "def x=params._source.path.splitOnToken('/'); emit(x[x.length-1])",
+        "meta": {"description": "Basename of path field", "example": "KO_06_1_pos.mzXML"}
       },
       "intensity_relative_to_internal_standard" : {
         "type": "double",
         "script": {
           "source": "if (params._source.intensity_internal_standard != null) emit((double)params._source.intensity / (double)params._source.intensity_internal_standard)"
-        }
+        },
+        "meta": {"description": "intensity/intensity_internal_standard"}
       },
       "mz_difference_to_library" : {
         "type": "double",
         "script": {
           "source": "if (params._source.library_mz != null) emit((double)params._source.mz - (double)params._source.library_mz)"
-        }
+        },
+        "meta": {"description": "m/z error", "unit": "Da"}
       },
       "rt_difference_to_library" : {
         "type": "double",
         "script": {
           "source": "if (params._source.library_rt != null) emit((double)params._source.rt - (double)params._source.library_rt)"
-        }
+        },
+        "meta": {"description": "Ret. time error", "unit": "minutes"}
       },
       "esi_ion_spec": {
         "type": "keyword",
         "script": {
           "source": "emit(doc['name'].value +'_'+ doc['pol'].value +'_'+ doc['adduct'].value +'_'+ doc['isotopologue'].value)"
-        }
+        },
+        "meta": {"description": "Concatination of name, pol, adduct, isotopologue", "example": "1,3-Dicyclohexylurea_pos_[M+H]+_monoisotopic"}
       }
     }
   }

@@ -2,19 +2,17 @@
 
 # Variables to be changed #################
 userEmail <- "jewell@bafg.de"
-dirTestResults <- "tests/slurmTesting/testResults"
-msrawfileIndexName <- "ntsp25.2_msrawfiles_unit_tests"
+dirTestResults <- "tests/slurmTesting/testResults-dbas-olmesartan-d6-bisoprolol"
+msrawfileIndexName <- "ntsp25.3_msrawfiles_unit_tests"
 ###########################################
 
 library(ntsportal)
-connectNtsportal()
 file.remove(list.files(dirTestResults, f = T))
-#resetConnectionCredentials()
 dirs <- c(
   "/beegfs/nts/ntsportal/msrawfiles/unit_tests/olmesartan-d6-bisoprolol/"
 )
 
-dbaScreeningSelectedBatchesSlurm(
+screeningSelectedBatchesSlurm(
   msrawfileIndex = msrawfileIndexName, 
   batchDirs = dirs, 
   saveDirectory = dirTestResults, 

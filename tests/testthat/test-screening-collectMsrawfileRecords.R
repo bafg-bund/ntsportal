@@ -1,41 +1,32 @@
 
-test_that("Records for selected batches are returned", {
-  records <- getAllMsrawfilesRecords(testIndexName)
-  dirs <- extractDirs(records)
-  selectedRecords <- getSelectedMsrawfileBatches(testIndexName, dirs[3])
+test_that("Records for selected batches are returned (DBAS)", {
+  records <- getMsrawfilesTestRecords("dbas")
+  dirs <- unique(dirname(map_chr(records, \(x) x$path)))
+  selectedBatch <- getSelectedMsrawfileBatches(testIndexName, dirs[3], "dbas")
+  expect_equal(dirname(selectedBatch[[1]][[1]]$path), dirs[3])
+  expect_s3_class(selectedBatch[[1]], "dbasMsrawfilesBatch")
+  expect_s3_class(selectedBatch[[1]][[1]], c("dbasMsrawfilesRecord", "msrawfilesRecord", "ntspRecord"))
+  selectedBatches <- getSelectedMsrawfileBatches(testIndexName, dirs[2:3], "dbas")
+  expect_length(selectedBatches, 2)
+})
+
+test_that("Records for selected batches are returned (NTS)", {
+  records <- getMsrawfilesTestRecords("nts")
+  dirs <- unique(dirname(map_chr(records, \(x) x$path)))
+  selectedRecords <- getSelectedMsrawfileBatches(testIndexName, dirs[3], "nts")
+  expect_s3_class(selectedRecords[[1]], "ntsMsrawfilesBatch")
+  expect_s3_class(selectedRecords[[1]][[1]], c("ntsMsrawfilesRecord", "msrawfilesRecord", "ntspRecord"))
+})
+
+test_that("No records are returned for missing directory", {
+  records <- getMsrawfilesTestRecords("dbas")
+  dirs <- unique(dirname(map_chr(records, \(x) x$path)))
+  expect_error(suppressWarnings(getSelectedMsrawfileBatches(testIndexName, "foo", "dbas")))
+  expect_warning(selectedRecords <- getSelectedMsrawfileBatches(testIndexName, c(dirs[3], "foo"), "dbas"))
   expect_equal(dirname(selectedRecords[[1]][[1]]$path), dirs[3])
+  expect_warning(selectedRecords <- getSelectedMsrawfileBatches(testIndexName, c(dirs[3], test_path("fixtures")), "dbas"))
 })
 
-test_that("Unprocessed files can be collected from msrawfiles", {
-  removeExtraTestFile("blah.mzXML")
-  removeExtraTestFile("RH_pos_20220603_no_peaks_test_addRecord.mzXML")
-  
-  prepareExampleFeatureIndex(ntspVersion)
-  unprocessedBatches <- getUnprocessedMsrawfileBatches(testIndexName, screeningType = "feature_test")
-  expect_false(all(grepl("no_peaks", names(unprocessedBatches))))
-  expect_true(any(grepl("olmesartan-d6-bisoprolol", names(unprocessedBatches))))
-  expect_s3_class(unprocessedBatches[[1]][[1]], "msrawfilesRecord")
-  expect_equal(length(unprocessedBatches), 3)
-  
-  removeExampleFeatureIndex(ntspVersion)
-})
-
-test_that("File directories can be optained from test index", {
-  dirnames <- getDirsInFeatureIndex(testIndexName)
-  expect_length(dirnames, 4)
-})
-
-test_that("splitRecordsByDir works with length 0 input", {
-  records <- splitRecordsByDir(list())
-  expect_length(records, 0)
-})
-
-test_that("Unprocessed directories are returned", {
-  records <- getAllMsrawfilesRecords(testIndexName)
-  records <- getUnprocessedRecords(records, "feature_test", ntspVersion = ntspVersion)
-  expect_length(records, 20)
-  expect_s3_class(records[[1]], "msrawfilesRecord")
-})
 
 test_that("One can provide a root directory to select batches", {
   batchesTest <- getAllBatchesInDir(testIndexName, rootDirectoryForTestMsrawfiles)

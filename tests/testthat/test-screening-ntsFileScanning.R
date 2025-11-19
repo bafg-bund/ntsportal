@@ -1,8 +1,8 @@
 
 test_that("You can process a batch for nts", {
-  testBatchRecords <- getRecordsSampleAndBlank()
+  testBatchRecords <- getOneSampleRecords("nts")
   startTime <- Sys.time()
-  testNtsResults <- scanBatchNts(testBatchRecords)  
+  testNtsResults <- scanBatch(testBatchRecords)  
   endTime <- Sys.time()
   message("Time needed to processes sample and blank: ", round(difftime(endTime, startTime, units = "secs")), " s")  # 18 sec
   expect_s3_class(testNtsResults, "ntsResult")
@@ -15,7 +15,7 @@ test_that("You can process a batch for nts", {
 })
 
 test_that("You can create a peakPickingResult from a small file", {
-  testRec <- getSingleRecordDes_07_01_pos()
+  testRec <- getSingleRecordBatchDes0701pos("nts")
   testResult <- getPeakPickingResult(testRec[[1]])
   expect_lt(object.size(testResult), 2e5)
   expect_equal(ncol(testResult$finishedPeakList), 35)
@@ -23,7 +23,7 @@ test_that("You can create a peakPickingResult from a small file", {
 })
 
 test_that("A peakPickingResult from an empty file is empty", {
-  testRec <- getRecordNoPeaks()
+  testRec <- getMsrawfilesRecordNoPeaks("nts")
   testResult <- getPeakPickingResult(testRec)
   expect_equal(nrow(testResult$finishedPeakList), 0)
 })

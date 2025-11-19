@@ -2,7 +2,12 @@
 
     Code
       try(screeningSelectedBatches(testIndexName, "foo", "bar"))
+    Message
+      bar already exists, files may be overwritten
+    Condition
+      Warning in `warnNonExistentDirs()`:
+      The following directories do not exist: foo
     Output
-      Error in getSelectedMsrawfileBatches(msrawfileIndex, batchDirs) : 
+      Error in getSelectedMsrawfileBatches(msrawfileIndex, batchDirs, screeningType) : 
         No batches found in dir foo
 

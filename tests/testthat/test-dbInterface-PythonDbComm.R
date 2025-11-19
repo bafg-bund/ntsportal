@@ -8,7 +8,8 @@ test_that("You can connect to elasticsearch with the python client", {
 test_that("You can copy a table", {
   dbComm <- getDbComm()
   dummyIndex <- "ntsp_foobar"
-  
+  if (isTable(dbComm, dummyIndex))
+    deleteTable(dbComm, dummyIndex)
   copyTable(dbComm, testIndexName, dummyIndex, "msrawfiles")
   n <- dbComm@dsl$Search(using=dbComm@client, index = dummyIndex)$count()
   
@@ -26,6 +27,12 @@ test_that("You can get all the unique values in a field", {
   expect_contains(rivers, "rhein")
 })
 
+test_that("You can get unique values of a runtime field", {
+  dbComm <- getDbComm()
+  batches <- getUniqueValues(dbComm, testIndexName, "batchname")
+  expect_length(batches, 4)
+})
+
 test_that("You can change the value of a field", {
   dbComm <- getDbComm()
   expect_no_error(replaceValueInField(dbComm, testIndexName, "river", "rhein", "rhein"))
@@ -33,9 +40,9 @@ test_that("You can change the value of a field", {
 
 test_that("You can change the value of the dbas_alias_name field", {
   dbComm <- getDbComm()
-  field <- "dbas_alias_name"
+  field <- "feature_table_alias"
   oldName <- getUniqueValues(dbComm, testIndexName, field)
-  newName <- "ntsp99.9_dbas_unit_tests"
+  newName <- "ntsp99.9_feature_unit_tests"
   #newName <- glue("ntsp{ntspVersion}_dbas_unit_tests")  # in case you need to reset
   replaceValueInField(dbComm, testIndexName, field, oldName, newName)
   n <- getNrow(dbComm, testIndexName, list(query = list(term = rlang::list2(!!field := newName))))
@@ -77,7 +84,7 @@ test_that("You can append records to a table (ingest)", {
   tableName <- "ntsp_temp"
   deleteTable(dbComm, tableName)  # in case it already exists
   createNewTable(dbComm, tableName, "feature")
-  emptyRecordList <- getEmptyRecord()
+  emptyRecordList <- getEmptyFeatureRecord()
   appendRecords(dbComm, tableName, emptyRecordList)
   
   resp <- getTableAsRecords(dbComm, tableName)
@@ -107,7 +114,7 @@ test_that("A table can be closed", {
   tableName <- "ntsp_temp"
   deleteTable(dbComm, tableName)  # in case it already exists
   createNewTable(dbComm, tableName, "feature")
-  emptyRecordList <- getEmptyRecord()
+  emptyRecordList <- getEmptyFeatureRecord()
   appendRecords(dbComm, tableName, emptyRecordList)
   recs <- getTableAsRecords(dbComm, tableName)
   expect_length(recs, 1)

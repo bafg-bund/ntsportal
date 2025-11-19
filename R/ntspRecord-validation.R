@@ -4,17 +4,30 @@
 
 #' Check `msrawfiles` for validity
 #' @description Checks the `msrawfiles` table according to the current validation routine.
-#' @param indexName default: ntsp_msrawfiles
+#' @param indexName default: ntspXX.X_msrawfiles
 #' @return TRUE if checks passed
 #' @export
 checkMsrawfiles <- function(indexName = "ntsp25.2_msrawfiles") {
   if (!grepl("msrawfiles", indexName))
     stop("This function is intended only for msrawfiles-type indices")
-  dbComm <- getOption("ntsportal.dbComm")()
-  allRecords <- getTableAsRecords(dbComm, indexName, recordConstructor = newMsrawfilesRecord)
+  runMsrawfileChecksForProcessingType("dbas")
+  runMsrawfileChecksForProcessingType("nts")
+}
+
+runMsrawfileChecksForProcessingType <- function(screeningType) {
+  allRecords <- getTableAsRecords(
+    getDbComm(), msrawfilesIndex, 
+    searchBlock = list(query = list(terms = list(batchname = batchNames))), sortField = "start", 
+    fields = c(msrawfilesFieldsForProcessing(screeningType), msrawfileFieldsForValidation()),
+    recordConstructor = switch(screeningType, dbas = newDbasMsrawfilesRecord, nts = newNtsMsrawfilesRecord)
+  )
   validateRecordsMsrawfiles(allRecords)
-  recordsInBatches <- splitRecordsByDir(allRecords)
+  recordsInBatches <- recordsToBatches(allRecords)
   checkQualityBatchList(recordsInBatches)
+}
+
+msrawfileFieldsForValidation <- function() {
+    "blank_regex"
 }
 
 validateRecordsMsrawfiles <- function(records) {
@@ -29,23 +42,28 @@ validateRecordsMsrawfiles <- function(records) {
   }
 }
 
-#' Validate that a `*record` is correctly formated
-#' @description Checks are run for conisitency and the files are present on disc. 
+#' Validate that a `*record` is correctly formatted
+#' @description Checks are run for consistency and the associated files (if any) are present on disc.
 #' @export
 validateRecord <- function(record) {
   UseMethod("validateRecord")
 }
 
+#' Check validity of `dbasMsrawfilesRecord`
+#' @rdname validateRecord
+#' @export
+validateRecord.dbasMsrawfilesRecord <- function(record) {
+  all(correctIsTablePolarity(record), NextMethod())
+}
+
 #' Check validity of `msrawfilesRecord`
 #' @rdname validateRecord
-#' @method validateRecord msrawfilesRecord
 #' @export
 validateRecord.msrawfilesRecord <- function(record) {
   all(
     fieldsExistForSampleType(record),
     filesExist(record),
     correctRawfileLocation(record$path),
-    correctIsTablePolarity(record),
     correctReplicateRegex(record),
     correctBlankRegex(record)
   )
@@ -56,17 +74,27 @@ noDuplicatedFilenames <- function(records) {
 }
 
 fieldsExistForSampleType <- function(rec) {
-  fieldsFound <- fieldsExist(defineRequiredFieldsAnySample(), rec)
-  if (!rec$blank) {
-    fieldsFoundEnv <- fieldsExist(defineRequiredFieldsEnvSample(), rec)
-    fieldsFound <- append(fieldsFound, fieldsFoundEnv)
-  }
+  fieldsFound <- fieldsExist(defineRequiredFieldsAnySample(rec), rec)
   all(fieldsFound)  
 }
 
+fieldsExist <- function(fields, rec) {
+  all(purrr::map_lgl(fields, checkFieldExists, rec = rec))
+}
+
+
 filesExist <- function(rec) {
-  fields <- defineRequiredFilesAnySample()
+  fields <- defineRequiredFilesAnySample(rec)
   all(purrr::map_lgl(fields, checkFileExists, rec = rec))
+}
+
+checkFieldExists <- function(field, rec) {
+  if (field %in% names(rec)) {
+    TRUE
+  } else {
+    warning(field, " doesn't exist in file ", rec$path)
+    FALSE
+  }
 }
 
 correctRawfileLocation <- function(path) {
@@ -96,8 +124,8 @@ correctIsTablePolarity <- function(rec) {
 }
 
 correctReplicateRegex <- function(rec) {
-  if ("dbas_replicate_regex" %in% names(rec)) {
-    if (bracketsReplicateRegex(rec$dbas_replicate_regex))
+  if ("replicate_regex" %in% names(rec)) {
+    if (bracketsReplicateRegex(rec$replicate_regex))
       patternFoundReplicateRegex(rec) else FALSE
   } else {
     TRUE
@@ -105,28 +133,16 @@ correctReplicateRegex <- function(rec) {
 }
 
 correctBlankRegex <- function(rec) {
-  regexMatch <- grepl(rec$dbas_blank_regex, basename(rec$path))
+  regexMatch <- grepl(rec$blank_regex, basename(rec$path))
   isBlank <- rec$blank
   if ((regexMatch && isBlank) || (!regexMatch && !isBlank)) {
     TRUE
   } else {
-    warning("File blank regex and filename mismatch: ", rec$path, " and ", rec$dbas_blank_regex)
+    warning("File blank regex and filename mismatch: ", rec$path, " and ", rec$blank_regex)
     FALSE
   }
 }
 
-fieldsExist <- function(fields, rec) {
-  all(purrr::map_lgl(fields, checkFieldExists, rec = rec))
-}
-
-checkFieldExists <- function(field, rec) {
-  if (field %in% names(rec)) {
-    TRUE
-  } else {
-    warning(field, " doesn't exist in file ", rec$path)
-    FALSE
-  }
-}
 
 checkFileExists <- function(field, rec) {
   if (file.exists(rec[[field]])) {
@@ -147,167 +163,46 @@ bracketsReplicateRegex <- function(replicateRegex) {
 }
 
 patternFoundReplicateRegex <- function(rec) {
-  regex <- rec$dbas_replicate_regex
+  regex <- rec$replicate_regex
   fileName <- basename(rec$path)
   reducedFileName <- stringr::str_replace(fileName, regex, "\\1")
   if (nchar(reducedFileName) < nchar(fileName)) {
     TRUE
   } else {
-    warning("Pattern not found in dbas_replicate_regex for file ", rec$path)
+    warning("Pattern not found in replicate_regex for file ", rec$path)
     FALSE
   }
 }
 
-defineRequiredFieldsAnySample <- function() {
+#' @export
+defineRequiredFieldsAnySample <- function(record) {
+  UseMethod("defineRequiredFieldsAnySample")
+}
+
+#' @export
+defineRequiredFieldsAnySample.ntsMsrawfilesRecord <- function(record) {
   c(
-    "path",
-    "spectral_library_path",
-    "dbas_is_table",
-    "dbas_area_threshold",
-    "dbas_rttolm",
-    "dbas_mztolu",
-    "dbas_mztolu_fine",
-    "dbas_ndp_threshold",
-    "dbas_rtTolReinteg",
-    "date_measurement",
-    "dbas_ndp_m",
-    "dbas_ndp_n",
-    "dbas_instr",
-    "pol",
-    "chrom_method",
-    "matrix",
-    "data_source",
-    "feature_table_alias",
-    "blank",
-    "sample_source",
-    "nts_alig_filter_min_features"
-  )
-}
-
-defineRequiredFieldsEnvSample <- function() {
-  c(
-    "duration"
-  )
-}
-
-defineRequiredFilesAnySample <- function() {
-  c(
-    "spectral_library_path",
-    "dbas_is_table",
-    "path"
-  )
-}
-
-
-# Check batch quality ####
-checkQualityBatchList <- function(recordsInBatches) {
-  batchesOk <- purrr::map_lgl(recordsInBatches, checkQualityBatch)
-  if (!all(batchesOk))
-    stop("Quality check batches failed")
-  invisible(batchesOk)
-}
-
-checkQualityBatch <- function(records) {
-  batchOk <- all(
-    validateRecordsMsrawfiles(records),
-    allFieldsUniform(records),
-    blanksPresent(records),
-    enoughSamplesForMinFeatures(records)
-  )
-  batchOk
-}
-
-allFieldsUniform <- function(records) {
-  uniformAll <- eachFieldUniform(records, fieldsToCheckUniformAllSamples())
-  
-  recordsEnvSamples <- purrr::discard(records, getField(records, "blank"))
-  uniformEnv <- eachFieldUniform(recordsEnvSamples, fieldsToCheckUniformEnvSamples()) 
-  
-  uniform <- c(uniformAll, uniformEnv)
-  
-  if (!all(uniform)) {
-    badFields <- names(uniform)[which(!uniform)] 
-    for (f in badFields)
-      ununiformFieldWarning(records, f)
-    FALSE
-  } else {
-    TRUE
-  }
-}
-
-blanksPresent <- function(records) {
-  if (!any(getField(records, "blank"))) {
-    badBatchWarning(records, "No blank found")
-    FALSE
-  } else {
-    TRUE
-  }
-}
-
-enoughSamplesForMinFeatures <- function(records) {
-  minFeat <- getField(records, "nts_alig_filter_min_features")[1]
-  if (minFeat > length(records)) {
-    badBatchWarning(records, "Not enough samples for minimum features filter")
-    FALSE
-  } else {
-    TRUE
-  }
-}
-
-eachFieldUniform <- function(records, fields) {
-  vapply(fields, fieldUniform, logical(1), records = records)
-}
-
-fieldUniform <- function(records, fieldToCheck) {
-  if (!all(fieldExistsRecords(records, fieldToCheck)))
-    return(TRUE)
-  allEntries <- getField(records, fieldToCheck)
-  length(unique(allEntries)) == 1
-}
-
-fieldExistsRecords <- function(records, fieldToCheck) {
-  suppressWarnings(purrr::map_lgl(records, checkFieldExists, field = fieldToCheck))
-}
-
-fieldsToCheckUniformAllSamples <- function() {
-  c(
-    # Sampling
-    "duration",
-    "matrix",
-    
-    # Data acquisition
-    "pol",
-    "data_source",
-    "chrom_method",
-    
-    # dbas Processing
-    "dbas_blank_regex",
-    "dbas_is_table",
-    "dbas_is_name",
-    "dbas_minimum_detections",
-    "dbas_fp",
-    
-    # nts processing
-    "nts_spectral_library",
+    "nts_alig_filter_min_features",
+    "nts_mz_min",
+    "nts_mz_max",
+    "nts_mz_step",
+    "nts_rt_min",
+    "nts_rt_max",
+    "nts_sn",
+    "nts_int_threshold",
+    "nts_peak_noise_scans",
+    "nts_precursor_mz_tol",
+    "nts_peak_width_min",
+    "nts_peak_width_max",
+    "nts_max_num_peaks",
+    "nts_componentization_ppm",
+    "nts_componentization_rt_tol",
+    "nts_componentization_rt_tol_l",
+    "nts_componentization_rt_tol_r",
+    "nts_componentization_rt_tol_sum",
+    "nts_componentization_dynamic_tolerance",
     "nts_alig_delta_mz",
     "nts_alig_delta_rt",
-    "nts_alig_mz_tol_units",
-    "nts_blank_correction_factor",
-    
-    # ingest
-    "feature_table_alias"
-  )
-}
-
-fieldsToCheckUniformEnvSamples <- function() {
-  c(
-    # dbas processing
-    "dbas_replicate_regex",
-    
-    # nts processing
-    "nts_alig_filter_type",
-    "nts_alig_filter_num_consecutive",
-    "nts_alig_filter_min_features",
     "nts_annotation_threshold_dp_score",
     "nts_annotation_mz_tol",
     "nts_annotation_rt_tol",
@@ -317,18 +212,60 @@ fieldsToCheckUniformEnvSamples <- function() {
     "nts_annotation_ces_max",
     "nts_annotation_ms2_mz_tol",
     "nts_annotation_rt_offset",
-    "nts_annotation_int_cutoff"
+    "nts_annotation_int_cutoff",
+    NextMethod()
   )
 }
 
-ununiformFieldWarning <- function(records, field) {
-  badBatchWarning(records, "field not uniform")
-  warning("Error in field ", field)
+#' @export
+defineRequiredFieldsAnySample.dbasMsrawfilesRecord <- function(record) {
+  c(
+    "dbas_is_table",
+    "dbas_area_threshold",
+    "dbas_rttolm",
+    "dbas_mztolu",
+    "dbas_mztolu_fine",
+    "dbas_ndp_threshold",
+    "dbas_rtTolReinteg",
+    "dbas_ndp_m",
+    "dbas_ndp_n",
+    NextMethod()
+  )
 }
 
-badBatchWarning <- function(records, reason) {
-  batchName <- dirname(getField(records, "path")[1])
-  warning(reason, " in batch ", batchName)
+#' @export
+defineRequiredFieldsAnySample.msrawfilesRecord <- function(record) {
+  c(
+    "csl_instruments_allowed",
+    "path",
+    "spectral_library_path",
+    "pol",
+    "chrom_method",
+    "feature_table_alias",
+    "internal_standard",
+    "blank"
+  )
+}
+
+#' @export
+defineRequiredFilesAnySample <- function(record) {
+  UseMethod("defineRequiredFilesAnySample")
+}
+
+#' @export
+defineRequiredFilesAnySample.dbasMsrawfilesRecord <- function(record) {
+  c(
+    "dbas_is_table",
+    NextMethod()
+  )
+}
+
+#' @export
+defineRequiredFilesAnySample.msrawfilesRecord <- function(record) {
+  c(
+    "spectral_library_path",
+    "path"
+  )
 }
 
 
@@ -409,10 +346,6 @@ allowedFieldsFeature <- function() {
 warnBadFields <- function(badFields, parentField = "top-level") {
   badFieldsString <- paste(badFields, collapse = ", ")
   warning("Fields in ", parentField, " field which should not be there: ", badFieldsString)
-}
-
-getMappingProperties <- function(mappingType) {
-  getMapping(mappingType)$mappings$properties
 }
 
 # Copyright 2025 Bundesanstalt für Gewässerkunde

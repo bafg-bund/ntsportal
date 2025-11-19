@@ -8,34 +8,35 @@
 #' dbComm <- getDbComm()
 #' recs <- getTableAsRecords(
 #'   dbComm, 
-#'   "ntsp25.2_msrawfiles", 
+#'   "ntsp25.3_msrawfiles", 
 #'   searchBlock = list(query = list(regexp = list(filename = "Des_.._.._pos.mzXML"))), 
-#'   newMsrawfilesRecord
+#'   newDbasMsrawfilesRecord
 #' )
 #' recsBlanks <- getTableAsRecords(
 #'   dbComm, 
-#'   "ntsp25.2_msrawfiles", 
+#'   "ntsp25.3_msrawfiles", 
 #'   searchBlock = list(query = list(regexp = list(path = ".*mud_pos/BW.*"))), 
-#'   newMsrawfilesRecord
+#'   newDbasMsrawfilesRecord
 #' )
-#' res <- scanBatchDbas(c(recs, recsBlanks), "Methyltriphenylphosphonium")
-#' featureRecs <- convertToRecord(res, c(recs, recsBlanks))
+#' dbasBatch <- recordsToOneBatch(c(recs, recsBlanks))
+#' dbasRes <- scanBatch(dbasBatch, "Methyltriphenylphosphonium")
+#' featureRecs <- convertToRecord(dbasRes, dbasBatch)
 #' }
 #' @export
-convertToRecord.dbasResult <- function(scanResult, msrawfileRecords) {
+convertToRecord.dbasResult <- function(scanResult, msrawfilesBatch) {
   
-  msrawfileRecords <- nameRecordsByPath(msrawfileRecords)
+  msrawfilesBatch <- nameRecordsByPath(msrawfilesBatch)
   
   features <- getAreasOfFeatures(scanResult)
   
   if (length(features) == 0)
-    return(makeEmptyRecordWithPath(msrawfileRecords))
+    return(makeEmptyRecordWithPath(msrawfilesBatch))
     
-  specLibPath <- getField(msrawfileRecords, "spectral_library_path")[1]
+  specLibPath <- getField(msrawfilesBatch, "spectral_library_path")[1]
   features <- addCompoundInfo(features, specLibPath)
   
-  features <- addIntStdData(features, scanResult, msrawfileRecords)
-  features <- addSampleInfo(features, msrawfileRecords)
+  features <- addIntStdData(features, scanResult, msrawfilesBatch)
+  features <- addSampleInfo(features, msrawfilesBatch)
   features <- addSpectraToFeatures(scanResult, features)
   features <- cleanUpFeatures(features)
   features
@@ -96,7 +97,7 @@ addIntStdData <- function(features, scanResult, msrawfileRecords) {
 }
 
 addIntStdName <- function(features, msrawfileRecords) {
-  nameIntStd <- getField(msrawfileRecords, "dbas_is_name")[1]
+  nameIntStd <- getField(msrawfileRecords, "internal_standard")[1]
   lapply(features, function(rec) {rec$internal_standard <- nameIntStd; rec})
 }
 

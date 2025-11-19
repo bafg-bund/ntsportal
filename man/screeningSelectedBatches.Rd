@@ -2,7 +2,7 @@
 % Please edit documentation in R/screening-launchProcess.R
 \name{screeningSelectedBatches}
 \alias{screeningSelectedBatches}
-\title{DBAS process selected measurement files via batch directory}
+\title{Process measurement files in selected batch directories}
 \usage{
 screeningSelectedBatches(
   msrawfileIndex,

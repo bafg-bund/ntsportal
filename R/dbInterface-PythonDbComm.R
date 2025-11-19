@@ -139,7 +139,7 @@ setMethod(
   if (is.list(sortField) || sortField != "no-sort") 
     s <- s$sort(sortField)
   if (s$count() > 1e7)
-    stop("Exceeded the maximum rows that may be retrieved (1e7), refine the query using the searchBlock argument (query DSL)")
+    stop("Exceeded the maximum rows that may be retrieved (1e7), refine the query using the searchBlock argument (Query DSL)")
   progBar <- cli_progress_bar("Retrieving", total = s$count())
   message(s$count(), " rows will be retrieved from table ", tableName)
   reticulate::iterate(s$iterate(), function(hit) {

@@ -2,7 +2,7 @@
 % Please edit documentation in R/screening-launchProcess.R
 \name{screeningSelectedBatchesSlurm}
 \alias{screeningSelectedBatchesSlurm}
-\title{Process batches (DBAS) using SLURM by selecting directories}
+\title{Process batches using SLURM by selecting directories}
 \usage{
 screeningSelectedBatchesSlurm(
   msrawfileIndex,
@@ -48,5 +48,4 @@ screeningSelectedBatchesSlurm(
   email = userEmail
 )
 }
-
 }

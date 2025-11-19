@@ -5,7 +5,7 @@
 prepareExampleFeatureIndex <- function(ntspVersion) {
   removeExampleFeatureIndex(ntspVersion)
   emptyResult <- convertToDbasResult(emptyReport())
-  emptyRecord <- convertToRecord(emptyResult, list(getRecordNoPeaks()))
+  emptyRecord <- convertToRecord(emptyResult, list(getMsrawfilesRecordNoPeaks("dbas")))
   tempDir <- withr::local_tempdir()
   saveRecord(emptyRecord, tempDir)
   indexNames <- ingestFeatureRecords(tempDir)

@@ -1,7 +1,8 @@
 
 
 test_that("A small result can be reformated to a dbasRecord object", {
-  featureRecord <- getFeatureRecord()
+  rr <- getOneSampleDbasResultAndRecords()
+  featureRecord <- convertToRecord(rr$dbasResult, rr$records)
   expect_contains(names(featureRecord[[1]]), c("mz", "rt", "intensity", "ms2", "feature_table_alias", "csl_experiment_id"))
   expect_s3_class(featureRecord[[1]], "featureRecord")
   expect_true(validateRecord(featureRecord[[1]]))
@@ -19,7 +20,7 @@ test_that("Sample data is added to features", {
 
 test_that("Record is reduced to selected fields", {
   fields <- fieldsToMergeFromMsrawfiles()
-  records <- getOneSampleRecords()
+  records <- getOneSampleRecords("dbas")
   recordReduced <- reduceRecordToFields(records[[1]], fields)
   expect_equal(length(recordReduced), 1)
   expect_contains(names(recordReduced), "feature_table_alias")
@@ -41,7 +42,7 @@ test_that("MS2 matching score can be read for a peak ID", {
 })
 
 test_that("An empty result is converted to an empty record", {
-  record <- getEmptyRecord()
+  record <- getEmptyFeatureRecord()
   expect_equal(length(record), 1)
   expect_s3_class(record[[1]], "featureRecord")
   expect_match(record[[1]]$path, "msrawfiles/unit_tests/.*\\.mzX?ML$")
@@ -60,7 +61,7 @@ test_that("Internal standard name, intensity and area is added to record", {
 
 test_that("If the internal standard is not found, there is no addition of area and intensity to the doc", {
   resultAndRecords <- getOneSampleDbasResultAndRecords()
-  resultAndRecords$records[[1]]$dbas_is_name <- "Foobar"
+  resultAndRecords$records[[1]]$internal_standard <- "Foobar"
   testRecordList <- convertToRecord(resultAndRecords$dbasResult, resultAndRecords$records)
   
   expect_contains(names(testRecordList[[1]]), "internal_standard")

@@ -1,15 +1,20 @@
 
-#' Convert a `ntsResult` to a `list` of `featureRecord`s
+#' Convert a result of NTS processing to a list of feature records
 #' @description The results of NTS file scanning (`ntsResult`) are converted to the NTSPortal `featureRecord` format.
+#' Annotated features (matching a substance in the spectral library) are removed. 
 #' @rdname convertToRecord
+#' @returns a `list` of `featureRecord`s
+#' @details
+#' This method does not use `msrawfilesBatch` but it needs to be in the method definition for polymorphism, 
+#' e.g. in `screeningOneBatch()`.
 #' @examples
 #' \dontrun{
 #'   testMsrawfilesRecords <- getRecordsSampleAndBlank()
-#'   testNtsResults <- scanBatchNts(testMsrawfilesRecords)
+#'   testNtsResults <- scanBatch(testMsrawfilesRecords)
 #'   features <- convertToRecord(testNtsResults)  
 #' }
 #' @export
-convertToRecord.ntsResult <- function(scanResult) {
+convertToRecord.ntsResult <- function(scanResult, msrawfilesBatch = NA) {
   scanResult <- removeAnnotated(scanResult)
   scanResult <- removeBlankFiles(scanResult)
   

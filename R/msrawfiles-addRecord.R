@@ -42,17 +42,17 @@
 #' 
 #'   \strong{Adding sample time information (`start` field)}
 #'   
-#'   Using "filename" means that the sample time is extracted from the filename. The field `dbas_date_regex` is used to
-#'   find the date of the sample from the file name. It works in conjunction with `dbas_date_format`. `dbas_date_regex`
-#'   extracts the text, while `dbas_date_format` tells R how to interpret the text. For example, the file name
-#'   `RH_pos_20170101.mzXML` uses the date_regex `"([20]*\\d{6})"` and date_format `"ymd"`. The `dbas_date_regex` uses
+#'   Using "filename" means that the sample time is extracted from the filename. The field `start_date_regex` is used to
+#'   find the date of the sample from the file name. It works in conjunction with `start_date_format`. `start_date_regex`
+#'   extracts the text, while `start_date_format` tells R how to interpret the text. For example, the file name
+#'   `RH_pos_20170101.mzXML` uses the date_regex `"([20]*\\d{6})"` and date_format `"ymd"`. The `start_date_regex` uses
 #'   the tidyverse regular expression syntax and the `stringr::str_match` function to extract the text referring to the
 #'   date. The brackets indicate the text to extract and these can be surrounded by anchors. It is also possible to have
 #'   multiple brackets, the text in multiple brackets will be combined before parsing. For example the file
 #'   `UEBMS_2024_002_Main_Kahl_Jan_pos_DDA.mzXML` can be parsed with date_regex `_(20\\d{2})_.*_(\\w{3})_pos` and
 #'   date_format `ym`.
 #'
-#'   `dbas_date_format` may be one of `"ymd"`, `"dmy"`, `"ym"` for year-month and `"yy"` for just the year. The date
+#'   `start_date_format` may be one of `"ymd"`, `"dmy"`, `"ym"` for year-month and `"yy"` for just the year. The date
 #'   parsing is done by `lubridate`.
 #'   
 #'   \strong{Making manual changes}
@@ -260,11 +260,11 @@ checkTemplateRecord <- function(newPaths, templateRec, promptBeforeIngest) {
       checkResult <- addError(checkResult, "More than one file added with different polarity to template")
   }
   
-  dateFormat <- templateRec$dbas_date_format
+  dateFormat <- templateRec$start_date_format
   if (!is.element(dateFormat, c("ymd", "dmy", "yy", "ym"))) {
-    message("Unknown dbas_date_format ", dateFormat, " in template")
+    message("Unknown start_date_format ", dateFormat, " in template")
     if (length(newPaths) > 1 || !promptBeforeIngest)
-      checkResult <- addError(checkResult, "More than one file added with invalid dbas_date_format in template")
+      checkResult <- addError(checkResult, "More than one file added with invalid start_date_format in template")
   }
   
   if (!validateRecord(templateRec)) {
@@ -282,8 +282,8 @@ checkDateParsing <- function(newPaths, templateRec, promptBeforeIngest) {
     basename(newPaths),
     getStartFromFilenameAsDate,
     lubridate::ymd(19700101),
-    dateRegex = templateRec$dbas_date_regex,
-    dateFormat = templateRec$dbas_date_format
+    dateRegex = templateRec$start_date_regex,
+    dateFormat = templateRec$start_date_format
   )
   if (any(is.na(newDates))) {
     badFiles <- newPaths[is.na(newDates)]
@@ -334,7 +334,7 @@ addPolToRecord <- function(rec) {
 
 addStartToRecord <- function(rec, newStart) {
   if (newStart == "filename") {
-    rec$start <- getFormatedStartFromFilename(basename(rec$path), rec$dbas_date_regex, rec$dbas_date_format)
+    rec$start <- getFormatedStartFromFilename(basename(rec$path), rec$start_date_regex, rec$start_date_format)
   } else {
     rec$start <- getFixedStart(newStart)
   }

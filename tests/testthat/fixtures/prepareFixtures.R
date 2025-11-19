@@ -13,11 +13,24 @@ buildMsrawfilesAllRecords <- function() {
   dbComm <- getDbComm()
   allRecords <- getTableAsRecords(dbComm, testIndexName, recordConstructor = newMsrawfilesRecord)
   saveRDS(allRecords, test_path("fixtures", "msrawfilesTestRecords", "allRecords.RDS"))
+  recordsNoClass <- lapply(allRecords, unclass)
+  saveRDS(recordsNoClass, test_path("fixtures", "msrawfilesTestRecords", "allRecordsNoClass.RDS"))
+  allRecordsDbas <- getTableAsRecords(
+    dbComm, testIndexName, recordConstructor = newDbasMsrawfilesRecord, 
+    fields = c(msrawfilesFieldsForProcessing("dbas"), msrawfileFieldsForValidation())
+  )
+  saveRDS(allRecordsDbas, test_path("fixtures", "msrawfilesTestRecords", "allDbasMsrawfileRecords.RDS"))
+  allRecordsNts <- getTableAsRecords(
+    dbComm, testIndexName, recordConstructor = newNtsMsrawfilesRecord, 
+    fields = c(msrawfilesFieldsForProcessing("nts"), msrawfileFieldsForValidation())
+  )
+  saveRDS(allRecordsNts, test_path("fixtures", "msrawfilesTestRecords", "allNtsMsrawfileRecords.RDS"))
 }
 
 buildOneSampleDbasResult <- function() {
-  records <- getOneSampleRecords()
-  result <- scanBatchDbas(records)
+  records <- getOneSampleRecords("dbas")
+  records <- newDbasMsrawfilesBatch(records)
+  result <- scanBatch(records)
   saveRDS(result, test_path("fixtures", "screening-dbasConvertToRecord", "oneSampleDbasResult.RDS"))
 }
 
@@ -28,17 +41,17 @@ recreateReportForCleaning <- function() {
   saveRDS(mergedReport, test_path("fixtures", "screening-dbasFileScanning", "reportForCleaning.RDS"))
 }
 
-recreateMergedReportSampleAndBlank <- function() {
-  reports <- purrr::map(getRecordsSampleAndBlank(), fileScanDbas)
+recreateMergedReportSampleAndBlankDbas <- function() {
+  reports <- purrr::map(getOneSampleRecords("dbas"), fileScanDbas)
   reports <- removeEmptyReports(reports)
   mergedReport <- mergeReports(reports)
   saveRDS(mergedReport, test_path("fixtures", "screening-dbasFileScanning", "mergedReportSampleAndBlank.RDS"))
 }
 
 
-createNtsResultSampleAndBlank <- function() {
-  testBatchRecords <- getRecordsSampleAndBlank()
-  testNtsResults <- scanBatchNts(testBatchRecords)  
+createResultSampleAndBlankNts <- function() {
+  testBatchRecords <- getOneSampleRecords("nts")
+  testNtsResults <- scanBatch(testBatchRecords)  
   saveRDS(testNtsResults, test_path("fixtures", "screening-nts", "ntsResultSampleAndBlank.RDS"))
 }
 
@@ -55,7 +68,7 @@ createMergedReportDessauBatch <- function() {
   dbComm <- getDbComm()
   recs <- getTableAsRecords(
     dbComm,
-    "ntsp25.2_msrawfiles",
+    "ntsp25.3_msrawfiles",
     list(query = list(regexp = list(path = ".*dessau.*/mud_pos/.*"))),
     newMsrawfilesRecord
   )
@@ -65,6 +78,7 @@ createMergedReportDessauBatch <- function() {
   walk2(filePaths, newPaths, \(x, y) subsetMzxml(x, y, c(7,8)))
   newPaths <- normalizePath(newPaths)
   recs2 <- map2(recs, newPaths, \(x, y) {x$path <- y; x})
+  recs2 <- newDbasMsrawfilesBatch(recs2)
   progBar <- cli_progress_bar("Processing batch", total = length(recs2))
   reports <- purrr::map(recs2, fileScanDbas, progBar = progBar)
   reports <- removeEmptyReports(reports)

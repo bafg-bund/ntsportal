@@ -1,11 +1,14 @@
 
-#' Scan files by non-target-screening processing
-#'
-#' @param msrawfilesRecords Files to process as a `list` of `msrawfileRecord`s
+#' Scan measurement files for all features
+#' @description The  mzXML measurment files are scanned for all features using the NTS algorithm. The spectral library
+#' is used to annotated known features. The parameters for NTS and file locations (measurement files and 
+#' spectral library) are stored in are stored the `ntsMsrawfilesBatch` object.
+#' @param msrawfilesBatch object inheriting `msrawfilesBatch` (`list` of `msrawfilesRecord`s)
 #' @param forNtsworkflow logical, should the results be prepared for the ntsworkflow non-target app?
-#'
+#' @rdname scanBatch
+#' @export
 #' @returns an `ntsResult` object with the tables `peakList`, `sampleList`, `alignmentTable`, `annotationTable`
-scanBatchNts <- function(msrawfilesRecords, forNtsworkflow = FALSE) {
+scanBatch.ntsMsrawfilesBatch <- function(msrawfilesRecords, forNtsworkflow = FALSE) {
   peakPickingResults <- purrr::map(msrawfilesRecords, getPeakPickingResult)
   peakPickingFails <- getPeakPickingFails(peakPickingResults)
   peakPickingResults <- peakPickingResults[!peakPickingFails]
@@ -29,7 +32,7 @@ scanBatchNts <- function(msrawfilesRecords, forNtsworkflow = FALSE) {
     return(getEmptyNtsResult(msrawfilesRecords))
   annotationTable <- getAnnotationTable(sampleList, peaklist, grouped, datenList, recFirstUnknown)
   
-  intStdName <- recFirstUnknown$dbas_is_name
+  intStdName <- recFirstUnknown$internal_standard
   sampleList <- addIntStdPeaksToSampleList(sampleList, annotationTable, grouped, intStdName)
   
   if (any(sampleList$sampleType == "Blank")) {
@@ -123,7 +126,7 @@ filterAlignmentTable <- function(grouped, sampleList, idsOfUnknowns, recFirstUnk
         alignment = grouped,
         samples = idsOfUnknowns,
         sampleList = sampleList,
-        regexp = recFirstUnknown$dbas_replicate_regex,
+        regexp = recFirstUnknown$replicate_regex,
         least = recFirstUnknown$nts_alig_filter_min_features
       )
     },
@@ -168,7 +171,7 @@ getAnnotationTable <- function(sampleList, peaklist, grouped, datenList, recFirs
       recFirstUnknown$nts_annotation_ces_min,
       recFirstUnknown$nts_annotation_ces_max
     ),
-    instrument = unlist(recFirstUnknown$dbas_instr),
+    instrument = unlist(recFirstUnknown$csl_instruments_allowed),
     mztolu_ms2 = recFirstUnknown$nts_annotation_ms2_mz_tol / 1000,
     rtoffset = recFirstUnknown$nts_annotation_rt_offset,
     intCutData = recFirstUnknown$nts_annotation_int_cutoff,

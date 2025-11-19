@@ -7,7 +7,7 @@
 checkMsrawfiles(indexName = "ntsp25.2_msrawfiles")
 }
 \arguments{
-\item{indexName}{default: ntsp_msrawfiles}
+\item{indexName}{default: ntspXX.X_msrawfiles}
 }
 \value{
 TRUE if checks passed

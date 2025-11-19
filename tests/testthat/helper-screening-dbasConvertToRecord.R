@@ -1,18 +1,13 @@
 
 
-getFeatureRecord <- function() {
-  getFeatureRecordAndMsrawfileRecord()$featureRecord
-}
-
-getFeatureRecordAndMsrawfileRecord <- function() {
+getFeatureRecordAndMsrawfileRecordDbas <- function() {
   rr <- getOneSampleDbasResultAndRecords()
-  #debugonce(getAreasOfFeatures)
   featureRecord <- convertToRecord(rr$dbasResult, rr$records)
   list(featureRecord = featureRecord, msrawfileRecord = rr$records)
 }
 
 getOneSampleDbasResultAndRecords <- function() {
-  records <- getOneSampleRecords()
+  records <- getOneSampleRecords("dbas")
   result <- readRDS(test_path("fixtures", "screening-dbasConvertToRecord", "oneSampleDbasResult.RDS"))
   list(dbasResult = result, records = records)
 }
@@ -20,7 +15,7 @@ getOneSampleDbasResultAndRecords <- function() {
 
 
 getFeatureRecordAndMsrawfileRecordNoSampleData <- function() {
-  rr <- getFeatureRecordAndMsrawfileRecord()
+  rr <- getFeatureRecordAndMsrawfileRecordDbas()
   fieldsToRemove <- intersect(names(rr$featureRecord[[1]]), fieldsToMergeFromMsrawfiles())
   rr$featureRecord[[1]] <- removeFieldsFromRecord(rr$featureRecord[[1]], fieldsToRemove)
   rr$msrawfileRecord <- nameRecordsByPath(rr$msrawfileRecord)
@@ -28,7 +23,7 @@ getFeatureRecordAndMsrawfileRecordNoSampleData <- function() {
 }
 
 getFeatureRecordAndMsrawfileRecordNoSpectra <- function() {
-  rr <- getFeatureRecordAndMsrawfileRecord()
+  rr <- getFeatureRecordAndMsrawfileRecordDbas()
   fieldsToRemove <- c("ms1", "ms2", "eic")
   rr$featureRecord[[1]] <- removeFieldsFromRecord(rr$featureRecord[[1]], fieldsToRemove)
   rr$msrawfileRecord <- nameRecordsByPath(rr$msrawfileRecord)

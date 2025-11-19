@@ -1,13 +1,19 @@
+#' Extract features from measurement files with an algorithm
+#' @export
+scanBatch <- function(msrawfilesBatch, ...) {
+  UseMethod("scanBatch")
+}
 
 #' Scan measurement files for known compounds
 #' @description The spectral library is used to scan mzXML measurment files for compounds using the DBAS algorithm.
-#' The parameters for DBAS and file locations (measurement files and spectral library) are stored in the `msrawfileRecord`s 
-#' passed to the `records` argument. 
-#' @param records `list` of `msrawfileRecord`s
+#' The parameters for DBAS and file locations (measurement files and spectral library) are stored the `dbasMsrawfilesBatch`
+#' object.
+#' @param msrawfilesBatch object inheriting `msrawfilesBatch` (`list` of `msrawfilesRecord`s)
 #' @param compsToProcess Character vector of compounds names to include in the scanning (default is all compounds in the spectral library)
 #' @param showProgress Logical, show progress bar? (for interacte use, default false)
 #' @returns a `dbasResult` (`list` of 7 tables) including `peakList`, `reintegrationResults` etc.
 #' @export
+#' @rdname scanBatch
 #' @examples
 #' \dontrun{
 #' dbComm <- getDbComm()
@@ -15,22 +21,23 @@
 #'   dbComm, 
 #'   "ntsp25.2_msrawfiles", 
 #'   searchBlock = list(query = list(regexp = list(filename = "Des_19_.._pos.mzXML"))),
-#'   newMsrawfilesRecord
+#'   newDbasMsrawfilesRecord
 #' )
 #' recsBlanks <- getTableAsRecords(
 #'   dbComm, 
 #'   "ntsp25.2_msrawfiles", 
 #'   searchBlock = list(query = list(regexp = list(path = ".*mud_pos/BW.*"))), 
-#'   newMsrawfilesRecord
+#'   newDbasMsrawfilesRecord
 #' )
-#' res <- scanBatchDbas(c(recs, recsBlanks), "Methyltriphenylphosphonium")
+#' newBatch <- newDbasMsrawfilesBatch(c(recs, recsBlanks))
+#' res <- scanBatch(newBatch, "Methyltriphenylphosphonium")
 #' }
-scanBatchDbas <- function(records, compsToProcess = NULL, showProgress = FALSE) {
-  progBar <- ifelse(showProgress, cli_progress_bar("Processing batch", total = length(records)), "no-progress")
-  reports <- purrr::map(records, fileScanDbas, compsToProcess = compsToProcess, progBar = progBar)
+scanBatch.dbasMsrawfilesBatch <- function(msrawfilesBatch, compsToProcess = NULL, showProgress = FALSE) {
+  progBar <- ifelse(showProgress, cli_progress_bar("Processing batch", total = length(msrawfilesBatch)), "no-progress")
+  reports <- purrr::map(msrawfilesBatch, fileScanDbas, compsToProcess = compsToProcess, progBar = progBar)
   reports <- removeEmptyReports(reports)
   mergedReport <- mergeReports(reports)
-  cleanedReport <- cleanReport(mergedReport, records)
+  cleanedReport <- cleanReport(mergedReport, msrawfilesBatch)
   reintegratedReport <- reintegrateReport(cleanedReport)
   dbasResults <- convertToDbasResult(reintegratedReport)
   dbasResults
@@ -59,7 +66,7 @@ createScannerDbas <- function(msrawfileRecord) {
   scanner$changeSettings("rtTolReinteg", rec$dbas_rtTolReinteg)
   scanner$changeSettings("ndp_m", rec$dbas_ndp_m)
   scanner$changeSettings("ndp_n", rec$dbas_ndp_n)
-  scanner$changeSettings("instr", unlist(rec$dbas_instr))
+  scanner$changeSettings("instr", unlist(rec$csl_instruments_allowed))
   scanner$changeSettings("pol", rec$pol)
   scanner$changeSettings("numcores", 1)
   scanner$changeSettings("chromatography", rec$chrom_method)
@@ -136,7 +143,7 @@ removeFalsePositives <- function(report, records) {
   # These fields are uniform in the records so just take the first non blank
   blanks <- getField(records, "blank")
   minimumDetections <- getField(records, "dbas_minimum_detections")[!blanks][1]
-  replicateRegex <- getField(records, "dbas_replicate_regex")[!blanks][1]
+  replicateRegex <- getField(records, "replicate_regex", quiet = TRUE)[!blanks][1]
   
   falsePositives <- bind_rows(
     getFalsePositivesFromRecord(report, records),
@@ -154,6 +161,7 @@ removeFalsePositives <- function(report, records) {
   }
   report
 }
+
 getFalsePositivesFromRecord <- function(report, records) {
   files <- basename(report$rawFiles)  # file index is given by report$rawFiles, index needed for Report$deleteFP
   fpList <- setNames(getField(records, "dbas_fp"), basename(getField(records, "path")))
@@ -249,20 +257,6 @@ emptyReport <- function() {
   ntsworkflow::Report$new()
 }
 
-getField <- function(listRecords, fieldName) {
-  if (!fieldAvailable(listRecords, fieldName)) {
-    message("Field ", fieldName, " not found in any docs")
-    return(rep(NA, length(listRecords)))
-  } 
-  values <- lapply(listRecords, getValueOrEmpty, field = fieldName)
-  sizes <- vapply(values, length, numeric(1))
-  if (all(sizes == 1)) {
-    unname(unlist(values))
-  } else {
-    unname(values)
-  }
-}
-
 fieldAvailable <- function(listRecords, fieldName) {
   any(vapply(listRecords, function(x) fieldName %in% names(x), logical(1)))
 }
@@ -272,6 +266,8 @@ getValueOrEmpty <- function(record, field) {
   if (is.null(temp))
     NA else temp
 }
+
+
 
 # Copyright 2025 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

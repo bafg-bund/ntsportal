@@ -6,8 +6,18 @@ newNtspRecord <- function(rec = list(), ..., class = character()) {
 }
 
 #' @export
-newMsrawfilesRecord <- function(rec = list()) {
-  newNtspRecord(rec, class = "msrawfilesRecord")
+newMsrawfilesRecord <- function(rec = list(), ..., class = character()) {
+  newNtspRecord(rec, class = c(class, "msrawfilesRecord"))
+}
+
+#' @export
+newDbasMsrawfilesRecord <- function(rec = list()) {
+  newMsrawfilesRecord(rec, class = "dbasMsrawfilesRecord")
+}
+
+#' @export
+newNtsMsrawfilesRecord <- function(rec = list()) {
+  newMsrawfilesRecord(rec, class = "ntsMsrawfilesRecord")
 }
 
 #' @export
@@ -26,6 +36,18 @@ print.ntspRecord <- function(x, ...) {
 print.msrawfilesRecord <- function(x, ...) {
   cat("msrawfilesRecord\n")
   cat("file path: ", x$path, "\n", sep = "")
+  NextMethod()
+}
+
+#' @export
+print.dbasMsrawfilesRecord <- function(x, ...) {
+  cat("msrawfilesRecord for DBAS processing\n")
+  NextMethod()
+}
+
+#' @export
+print.ntsMsrawfilesRecord <- function(x, ...) {
+  cat("msrawfilesRecord for NTS processing\n")
   NextMethod()
 }
 

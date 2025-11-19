@@ -1,14 +1,17 @@
 
 test_that("nt-screening for a small batch produces an RDS with peaks", {
   tempSaveDir <- withr::local_tempdir()
-  recs <- getOneSampleRecords()
+  batchDirectory <- file.path(rootDirectoryForTestMsrawfiles, "olmesartan-d6-bisoprolol")
   startTime <- Sys.time()
-  resultPath <- ntScreeningOneBatch(recs, tempSaveDir)
+  pathRds <- screeningSelectedBatches(testIndexName, batchDirectory, tempSaveDir, screeningType = "nts")
   endTime <- Sys.time()
-  message("Time needed to processes files: ", round(difftime(endTime, startTime, units = "secs")), " s")
+  message("Time needed to processes batch nts: ", round(difftime(endTime, startTime, units = "secs")), " s")
   expect_length(list.files(tempSaveDir), 1)
-  featureRecs <- readRDS(resultPath)
-  expect_true(all(map_int(featureRecs, \(x) x$area_internal_standard) == 42956))
+  featureRecs <- readRDS(pathRds)
+  expect_true(all(map_lgl(featureRecs, \(x) fieldsExist(c("mz", "rt", "path", "area", "area_internal_standard", "eic"), x))))
+  expect_false("name" %in% unique(list_c(map(featureRecs, names))))
+  expect_true(all(map_lgl(featureRecs, \(x) is.null(x$name))))
+  expect_true(all(map_lgl(featureRecs, \(x) x$mz > 100)))
 })
 
 test_that("Dba-screening for a small batch produces an RDS with peaks", {
@@ -51,6 +54,7 @@ test_that("Dba-screening for two batches runs in parallel", {
   file.remove(tempSaveDir)
 })
 
+
 test_that("DBA-Screening array job file and records in batches are produced", {
   tempSaveDir <- withr::local_tempdir()
   
@@ -67,7 +71,12 @@ test_that("DBA-Screening array job file and records in batches are produced", {
   expect_match(linesJobFile[6], "testEmail@test.de")
   expect_match(linesJobFile[4], tempSaveDir)
   expect_match(linesJobFile[56], tempSaveDir)
-  expect_match(linesJobFile[56], "dbas")
+  
+  oneMsrawfilesBatch <- readRDS(file.path(tempSaveDir, "recordsInBatches.RDS"))[[1]]
+  expect_s3_class(oneMsrawfilesBatch, "dbasMsrawfilesBatch")
+  oneMsrawfilesRec <- oneMsrawfilesBatch[[1]]
+  expect_s3_class(oneMsrawfilesRec, "dbasMsrawfilesRecord")
+  expect_contains(names(oneMsrawfilesRec), c("chrom_method", "dbas_area_threshold"))
   
   file.remove(list.files(tempSaveDir, full.names = T))
   file.remove(tempSaveDir)
@@ -75,18 +84,26 @@ test_that("DBA-Screening array job file and records in batches are produced", {
 
 test_that("NT-Screening array job file and records in batches are produced", {
   tempSaveDir <- withr::local_tempdir()
-  
+  testEmail <- "testEmail@test.de"
   screeningSelectedBatchesSlurm(
     msrawfileIndex=testIndexName, 
     batchDirs=file.path(rootDirectoryForTestMsrawfiles, "olmesartan-d6-bisoprolol"), 
     saveDirectory=tempSaveDir,
-    email="testEmail@test.de",
+    email=testEmail,
     screeningType = "nts"
   )
   
   expect_length(list.files(tempSaveDir),3)
   linesJobFile <- readLines(file.path(tempSaveDir, "arrayScreening.sbatch"))
-  expect_match(linesJobFile[56], "nts")
+  expect_equal(sum(grepl(tempSaveDir, linesJobFile)), 3)
+  expect_equal(sum(grepl("screeningSlurm.R", linesJobFile)), 1)
+  expect_equal(sum(grepl(testEmail, linesJobFile)), 1)
+  
+  oneMsrawfilesBatch <- readRDS(file.path(tempSaveDir, "recordsInBatches.RDS"))[[1]]
+  expect_s3_class(oneMsrawfilesBatch, "ntsMsrawfilesBatch")
+  oneMsrawfilesRec <- oneMsrawfilesBatch[[1]]
+  expect_s3_class(oneMsrawfilesRec, "ntsMsrawfilesRecord")
+  expect_contains(names(oneMsrawfilesRec), c("chrom_method", "nts_mz_step"))
   
   file.remove(list.files(tempSaveDir, full.names = T))
   file.remove(tempSaveDir)
