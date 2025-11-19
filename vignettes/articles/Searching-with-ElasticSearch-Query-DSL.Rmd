@@ -74,15 +74,32 @@ tb <- getTableAsTibble(
 
 ```{python, eval=FALSE}
 from elasticsearch import Elasticsearch
-client = Elasticsearch(hosts="https://hosturl.mydomain.de", api_key="<secret>")
-response = client.search(
-  index="ntsp25.2_dbas*", 
-  body={
-    "query": {
-      "term": {
-        "station": "mosel_139"
-        }
-      }
+client = Elasticsearch(hosts="https://elastic.bafg.de", api_key= os.environ.get("ELASTICSEARCH_API_KEY"))
+response  = client.search(
+    index="ntsp25.2_dbas*",
+    body= {
+               "query": {
+                    "exists": {
+                        "field": "name"
+                    }
+                },
+                "aggs": {
+                    "all_names": {
+                            "terms": {
+                            "field": "name",
+                            "size": 950
+                            },
+                        "aggs": {
+                            "metadata": {
+                                "top_hits": {
+                                "size": 1,
+                                "_source": ["name", "cas", "inchikey"]
+                                }
+                            }
+                        }
+                    }
+                },
+                "size": 0
     }
 )
 ```
