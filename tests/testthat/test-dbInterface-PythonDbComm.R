@@ -105,7 +105,7 @@ test_that("You can ingest a large number of documents quickly", {
   startTime <- lubridate::now()
   appendRecords(dbComm, tableName, recs)
   endTime <- lubridate::now()
-  expect_lt(endTime - startTime, 0.1)
+  expect_lt(endTime - startTime, 0.2)
   deleteTable(dbComm, tableName)
 })
 

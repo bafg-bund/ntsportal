@@ -66,11 +66,20 @@ test_that("You can get a tibble from and ES|QL", {
 })
 
 test_that("An ESQL with null values can still be loaded", {
-  testTbl <- getTableByEsql('FROM ntsp25.2_dbas* | 
-WHERE station == "mosel_ko_r" AND name == "Bentazone" |
-WHERE start >= "2022-08-10" AND start <= "2022-08-12" |
-KEEP name, start, area_internal_standard')
-  expect_type(testTbl$area_internal_standard, "double")
+  db <- getDbComm()
+  tempTableName <- "ntsp_foobar"
+  if (isTable(db, tempTableName))
+    deleteTable(db, tempTableName)
+  newRecs <- list(
+    list(mz = 100.1, rt = 2.0, area_internal_standard = 10),
+    list(mz = 100.1, rt = 2.0)
+  )
+  createNewTable(db, tempTableName, "feature")
+  appendRecords(db, tempTableName, newRecs)
+  
+  testTbl <- getTableByEsql('FROM ntsp_foobar | KEEP mz, rt, area_internal_standard')
+  expect_type(testTbl$area_internal_standard, "integer")
   expect_true(any(is.na(testTbl$area_internal_standard)))
   expect_length(testTbl, 3)
+  deleteTable(db, tempTableName)
 })

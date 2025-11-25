@@ -3,10 +3,10 @@
 test_that("A dummy record can be added to msrawfiles", {
   dbComm <- getDbComm()
   testFile <- test_path("fixtures", "msrawfiles-addRecord", "RH_pos_20220603_no_peaks_test_addRecord.mzXML")
-  templateIdFromMsrawfilesIndex <- "VNSTWpABQ5NoSyLHKzdl"
+  templateIdFromMsrawfilesIndex <- "2_4OtZoBibkECSgfkVjC"
   saveDir <- withr::local_tempdir()
   suppressMessages(
-    idAdded <- addRawfiles(
+    addRawfiles(
       rfIndex = testIndexName, 
       templateId = templateIdFromMsrawfilesIndex,
       newPaths = testFile, 
@@ -18,19 +18,16 @@ test_that("A dummy record can be added to msrawfiles", {
   
   importedRecord <- jsonlite::read_json(list.files(saveDir, f = T))
   expect_length(importedRecord[[1]], 79)
-  recs <- getTableAsRecords(dbComm, testIndexName, list(query = list(
-    regexp = list(path = ".*RH_pos_20220603_no_peaks_test_addRecord.mzXML")
-  )))
+  queryForTestRecord <-  list(query = list(regexp = list(path = ".*RH_pos_20220603_no_peaks_test_addRecord.mzXML")))
+  recs <- getTableAsRecords(dbComm, testIndexName, queryForTestRecord)
   pathResult <- recs[[1]]$path
   expect_equal(normalizePath(testFile), pathResult)
   startResult <- recs[[1]]$start
   expect_equal(startResult, "2022-06-03")
-  deleteRow(dbComm, testIndexName, list(query = list(ids = list(values = idAdded))))
+  deleteRow(dbComm, testIndexName, queryForTestRecord)
   file.remove(list.files(saveDir, f = T))
   refreshTable(dbComm, testIndexName)
-  numFound <- getNrow(dbComm, testIndexName, list(query = list(
-    regexp = list(path = ".*msrawfiles-addRecord/RH_pos_20220603_no_peaks_test_addRecord.mzXML")
-  )))
+  numFound <- getNrow(dbComm, testIndexName, queryForTestRecord)
   expect_equal(numFound, 0)
 })
 

@@ -9,7 +9,8 @@ def getDbClient(username, password, hostUrl):
   es_client = Elasticsearch(
         hosts=hostUrl,
         basic_auth=(username, password),
-        verify_certs=False
+        verify_certs=False,
+        http_compress=True
   )
   return es_client
 

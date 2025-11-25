@@ -15,6 +15,7 @@ statistics, see the "Discover" page at `https://ntsportal.bafg.de` for more info
 * The documentation website is now [online](https://docs.ntsportal.bafg.de/).
 * Two new articles "Document field descriptions for NTSPortal" and "Processing by non-target screening" were added to
 the documentation.
+* Open data licence changed to CC BY 4.0
 
 ## Major changes (frontend)
 
@@ -35,7 +36,6 @@ the documentation.
 ingesting is done by `appendRecords()`
 * Vignette documentation moved from vignettes to pkgdown articles, which are available on the documentation website 
 (to reduce installation size).
-* Open data licence changed to CC BY 4.0
 * Field names in `msrawfiles` documents have changed to accommodate NTS processing.
   - `dbas_blank_regex` to `blank_regex`
   - `dbas_date_format` to `start_date_format`

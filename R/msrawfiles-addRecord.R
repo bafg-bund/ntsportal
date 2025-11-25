@@ -174,19 +174,11 @@ addRawfiles <- function(
     },
     stop("Unknown input, aborting.")
   )
-  createEscon()
-  ids <- character()
-  for (doci in newRecords) {
-    response <- elastic::docs_create(escon, rfIndex, body = doci)
-    ids <- append(ids, response[["_id"]])
-  }
-  idString <- paste(shQuote(ids, type = "cmd"), collapse = ", ")
-  idString <- paste0(idString, "\n")
-  message("Documents were uploaded with the IDs")
-  message(idString)
   
-  dbComm <- getDbComm()
-  refreshTable(dbComm, rfIndex)
+  appendRecords(getDbComm(), rfIndex, newRecords)
+  ids <- getIdsNewRecords(rfIndex, newRecords)
+  message("Documents were uploaded with the IDs")
+  message(quoteAndComma(ids))
 
   timesFound <- vapply(newPaths, filenameCountInIndex, numeric(1), rfIndex = rfIndex)
   
@@ -200,50 +192,40 @@ addRawfiles <- function(
   invisible(ids)
 }
 
+
 checkArgumentValidity <- function(rfIndex, templateId, newPaths, newStart, newStation, newStationList) {
   checkResult <- TRUE
-  
   if (length(templateId) != 1) {
     checkResult <- addError(checkResult, "Only one templateId allowed")
   }
-  
   if (!grepl("^ntsp.*msrawfiles.*", rfIndex)) {
     checkResult <- addError(checkResult, "Index name is incorrect or does not follow convention")
   }
-  
   fileFound <- vapply(newPaths, file.exists, logical(1))
-  
   if (!all(fileFound)) {
     checkResult <- addError(checkResult, "Files not found")
   }
-  
   if (anyDuplicated(newPaths)) {
     checkResult <- addError(checkResult, "There are duplicated filepaths")
   }
-  
   fileKind <- vapply(newPaths, grepl, pattern = "\\.mzX?ML$", logical(1))
   if (!all(fileKind)) {
     checkResult <- addError(checkResult, "Files are not all .mzXML or .mzML files")
   }
-  
   filePol <- getPolFromPaths(newPaths)
   if (length(filePol) != 1) {
     checkResult <- addError(checkResult, "Only one polarity allowed per batch")
   }
-  
   if (!(newStart == "filename" || grepl("^\\d{8}$", newStart))) {
     checkResult <- addError(checkResult, "'newStart' must be 'filename' or a fixed date in the form 'yyyymmdd'")
   }
-  
   if (!is.element(newStation, c("same_as_template", "filename", "newStationList"))) {
     checkResult <- addError(checkResult, "newStation must be 'same_as_template' or 'filename' or a list 
             with the elements station, loc and optionally river and km")
   } 
-  
   if (!validateStationList(newStationList)) {
     checkResult <- addError(checkResult, "'newStationList' is malformed, check documentation")
   }
-  
   stopIfAnyErrors(checkResult)
 }
 
@@ -559,6 +541,17 @@ getPolFromPaths <- function(newPaths) {
 getPolFromPath <- function(path) {
   stringr::str_extract(basename(path), "pos|neg")
 }
+
+getIdsNewRecords <- function(tableName, newRecs) {
+  paths <- map_chr(newRecs, \(x) x$path)
+  pathsString <- quoteAndComma(paths)
+  idTable <- getTableByEsql(glue("FROM {tableName} [METADATA _id] | WHERE path IN ({pathsString}) | KEEP _id"))
+  idTable |> pull("_id")
+}
+
+quoteAndComma <- function(charVec) {
+  paste(shQuote(charVec, type = "cmd"), collapse = ", ")
+} 
 
 addError <- function(checkResult, warningText) {
   warning(warningText, call. = FALSE)
