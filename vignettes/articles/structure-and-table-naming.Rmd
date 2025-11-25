@@ -16,6 +16,24 @@ The NTSPortal system is made up of many components which can be grouped into thr
 
 ![Figure: Dependency diagram of the NTSPortal system](images/dependencyDiagram.svg){width=100%}
 
+`ntsportal` is tested with the following versions of each software component. Only the upper level dependencies are listed.
+
+|Software Component|Version|Description|
+|:-----------------|:------|:----------------------------------------------|
+|R|4.5.2|High level scripting, db management|
+|Python|3.12.11|Interface to Elasticsearch using Python package "elasticsearch"|
+|Elasticsearch|8.18.8|Database and search engine|
+|Kibana|8.18.8|Content management system|
+|ntsworkflow|0.2.9|R package for processing|
+|xcms|4.8.0|R package for interfacing with mzXML files|
+|Spectral library (CSL)|25.5|Library for MS2 spectra|
+|Vega, vega-lite|v5|Custom graphics in Kibana|
+|rJava|1.0-11|R package interface to Java|
+|Java|1.8.0_472|openJDK is used for Java|
+|Rocky Linux|8.10|Operating system for servers|
+
+: Table: Versions of software components
+
 # Hardware architecture
 
 The hardware components used to run NTSPortal can be similarly categorized as the software. The core component of NTSPortal is a high-performance computing cluster (HPC) used for measurement file processing. This system consists of 7 compute nodes each with 64 CPUs and 503 GB of memory. The HPC is controlled by the HPC control server. Measurement files are stored on a network attached storage (NAS), which is synchronized with a fast, SSD-based storage (BeeGFS). The data management component consists of a separate server (R-server) and a 3-node cluster running Elasticsearch (containerized). The visualization component is accomplished with a server hosting the dashboards (Kibana). All traffic to and from the Internet runs through a reverse proxy for IT security reasons. All servers are virtualized and run Rocky Linux 8.10 and the Elasticsearch cluster, R and Kibana servers run on an HCI (hyper-converged infrastructure).
@@ -61,8 +79,6 @@ An example of a data view is: `ntsp25.3_feature*`. This data view will access bo
 
 It is important that alias names are not a subset of each other or indices. So, for example, the `ntsp_is_dbas` alias is correct while `ntsp_dbas_is` is incorrect. This is because this second alias would also match the data view `ntsp_dbas*` and therefore the internal standard data would appear together with the results.  
 
-The following table shows some examples of the naming conventions
-
 |Index|Alias|Data view|
 |-----|-----|---------|
 |ntsp25.3_index_feature_v240418101520_bfg|ntsp25.3_feature_bfg|ntsp25.3_feature*|
@@ -72,6 +88,8 @@ The following table shows some examples of the naming conventions
 |ntsp25.3_msrawfiles|-|ntsp25.3_msrawfiles*|
 |ntsp25.3_index_is_dbas_v240218101520_bfg|ntsp25.3_is_dbas_bfg|ntsp25.3_is_dbas*|
 |ntsp25.3_index_test_dbas_v250408101520_bfg|ntsp25.3_test_dbas_bfg|ntsp25.3_test_dbas*|
+
+: Table: Examples of table/index naming conventions
 
 <!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
 <!-- This file is part of ntsportal -->
