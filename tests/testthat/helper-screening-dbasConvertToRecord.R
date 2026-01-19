@@ -36,3 +36,22 @@ removeFieldsFromRecord <- function(rec, fieldsToRemove) {
   }
   rec
 }
+getDbasScanResultDuplicatePeaks <- function() {
+  fldr <- file.path("fixtures", "screening-dbasConvertToRecord")
+  readRDS(test_path(fldr, "scanResultOneSampleWithDuplicatePeaks.RDS"))
+}
+getDbasBatchDuplicatePeaks <- function() {
+  fldr <- file.path("fixtures", "screening-dbasConvertToRecord")
+  readRDS(test_path(fldr, "msrawfilesBatchOneSampleWithDuplicatePeaks.RDS"))
+}
+dbasScanResultWithMultiHitGapFilledPeaks <- function() {
+  msrBatch <- getDbasBatchDuplicatePeaks()
+  msrBatch <- msrBatch[c(1,1)]
+  msrBatch[[2]]$path <- "/blah/foobar.mzXML"
+  msrBatch <- newDbasMsrawfilesBatch(msrBatch)
+  sr <- getDbasScanResultDuplicatePeaks()
+  sr$reintegrationResults <- sr$reint[c(1,2,3,1,2),]
+  sr$reintegrationResults[c(4,5), "samp"] <-  "foobar.mzXML"
+  sr$rawFilePaths <- c(sr$raw[1], "/blah/foobar.mzXML") 
+  list(scanResult = sr, batch = msrBatch)
+}

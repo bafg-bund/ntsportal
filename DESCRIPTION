@@ -36,7 +36,8 @@ Imports:
     lubridate,
     cli,
     RJSONIO,
-    zoo
+    zoo,
+    stringi
 RoxygenNote: 7.3.3
 Remotes:
     github::bafg-bund/ntsworkflow

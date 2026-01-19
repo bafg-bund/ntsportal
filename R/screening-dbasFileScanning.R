@@ -242,9 +242,9 @@ convertToDbasResult <- function(report) {
   )
   
   results$intStdResults <- results$intStdResults[, c("samp", "IS", "int_h", "int_a")]
-  
   results$intStdResults <- dplyr::rename(results$intStdResults, filename = samp, compound_name = IS, intensity = int_h, 
                                          area = int_a)
+  
   class(results) <- "dbasResult"
   results
 }

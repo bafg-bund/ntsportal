@@ -7,7 +7,6 @@ createNewMsrawfileUnitTestsIndex <- function() {
   changeAllDbasAliasNames(msrawfilesName = testIndexName, version = ntspVersion)
 }
 
-
 # deleteIndex(testIndexName)
 buildMsrawfilesAllRecords <- function() {
   dbComm <- getDbComm()
@@ -102,6 +101,25 @@ file.copy(pathRds, test_path("fixtures", "featureRecordExampleRds"))
 file.remove(list.files(tempSaveDir, full.names = T))
 # Test the result
 test <- readRDS(list.files(pathToFixturesDir, full.names = T))
+
+
+# Create duplicate feature test (4 and 5 Benzotriazole, Olmesartan) for dbasConvertToRecord
+library(ntspQaTools)
+fldr <- file.path("fixtures", "screening-dbasConvertToRecord")
+measFilePath <- test_path(fldr, "OBF39601_20221114_Dorfbach_Oberschindmaas_neg_45benz.mzXML")
+subsetMzxml("/beegfs/nts/ntsportal/msrawfiles/sachsen/neg/paket33/OBF39601_20221114_Dorfbach_Oberschindmaas_neg.mzXML",
+            measFilePath, c(6.8, 7.5))
+msRec <- getTableAsRecords(
+  getDbComm(), 
+  "ntsp25.3_msrawfiles", 
+  searchBlock = list(query = list(term = list(filename = "OBF39601_20221114_Dorfbach_Oberschindmaas_neg.mzXML"))),
+  recordConstructor = newDbasMsrawfilesRecord
+)
+msRec[[1]]$path <- normalizePath(measFilePath)
+msrBatch <- newDbasMsrawfilesBatch(msRec)
+saveRDS(msrBatch, test_path(fldr, "msrawfilesBatchOneSampleWithDuplicatePeaks.RDS"))
+res1 <- scanBatch(msrBatch)
+saveRDS(res1, test_path(fldr, "scanResultOneSampleWithDuplicatePeaks.RDS"))
 
 # Copyright 2025 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

@@ -8,6 +8,14 @@ both DBAS and NTS processing results.
 * New processing method "NTS" to record unknown features (no CSL annotation). Unknown features are added to `feature`
 tables. Unknown features are currently not aligned/grouped, i.e., there is no `name` field. This will be added in a 
 future version.
+* Multiple library screening hits currently produce duplicate features with different entries in the fields with 
+compound annotation metadata (`name`, `cas`, `adduct`, etc.). These duplicate features are now linked by the `multi_hit_id` 
+field (duplicate features have the same ID), which allows easier removal of duplicate features in data processing scripts.
+* The compound annotation metadata (`name`, `cas`, `adduct`, etc.) is added to the `compound_annotation` table (nested field).
+This allows multiple annotations per feature in the case of multiple library screening hits. The duplication of multi-hit
+features (see preceding point) is currently still necessary for search in the Kibana front-end. In a future version, the
+duplication will be removed and the top-level compound annotation fields (`name`, etc.) will be deprecated in favor 
+of the nested fields (`compound_annotation.name`, etc.). 
 * For the search API client in R, replaced `getTableAsTibble()` with `getTableByQuery()` and `getTableByEsql()`. 
 Both return a `tbl_df`, AKA "tibble" (an extension of `data.frame`). The former uses the *Query DSL* format 
 (passed as a `list`). The latter allows the user to send ES|QL statements (as text) for queries and computing 

@@ -9,6 +9,10 @@ test_that("A small result can be reformated to a dbasRecord object", {
   differenceIntArea <- featureRecord[[1]]$area - featureRecord[[1]]$intensity
   expect_gt(differenceIntArea, 100)
   checkForAlias(featureRecord[[1]])
+  expect_length(featureRecord[[1]]$compound_annotation, 1)
+  annotationTableCols <- names(featureRecord[[1]]$compound_annotation[[1]])
+  expect_contains(annotationTableCols, "score_ms2_match")
+  expect_contains(annotationTableCols, "mz_diff_lib")
 })
 
 test_that("Sample data is added to features", {
@@ -67,4 +71,85 @@ test_that("If the internal standard is not found, there is no addition of area a
   expect_contains(names(testRecordList[[1]]), "internal_standard")
   expect_equal(testRecordList[[1]]$internal_standard, "Foobar")
   expect_false(is.element("area_internal_standard", names(testRecordList[[1]])))
+})
+
+test_that("Annotation quality information is added to records", {
+  scanRes1 <- getDbasScanResultDuplicatePeaks()
+  msrBatch <- getDbasBatchDuplicatePeaks()
+  recs <- convertToRecord(scanRes1, msrBatch)
+  expect_gt(recs[[1]]$score_ms2_match, 400)
+  expect_lt(recs[[1]]$mz_diff_lib, 50)
+  expect_lt(recs[[1]]$rt_diff_lib, 1.5)
+  
+  # case 2, gap filled peaks
+  dbasResult <- dbasScanResultWithMultiHitGapFilledPeaks()
+  sr <- dbasResult$scanResult
+  msrBatch <- dbasResult$batch
+  recs2 <- convertToRecord(sr, msrBatch)
+  expect_false(is.element("mz_diff_lib", names(recs2[[3]])))
+})
+
+test_that("If a peak has duplicate annotations, they are grouped as multihits and all annotations are included", {
+  # Case 1) 2 duplicate, 1 unitary
+  scanRes1 <- getDbasScanResultDuplicatePeaks()
+  msrBatch <- getDbasBatchDuplicatePeaks()
+  recs1 <- convertToRecord(scanRes1, msrBatch)
+  expect_length(recs1, 3)
+  expect_length(recs1[[1]]$name, 1)
+  expect_length(recs1[[2]]$compound_annotation, 2)
+  expect_contains(names(recs1[[2]]), "multi_hit_id")
+  expect_type(recs1[[2]]$multi_hit_id, "character")
+  
+  # Case 2) 2 unitary
+  scanRes2 <- getDbasScanResultDuplicatePeaks()
+  scanRes2$peakList <- scanRes2$peakList[c(1,3), ]
+  scanRes2$peakList <- transform(scanRes2$peakList, duplicate = NA)
+  scanRes2$reintegrationResults <- scanRes2$reintegrationResults[c(1,3), ]
+  recs2 <- convertToRecord(scanRes2, msrBatch)
+  expect_length(recs2, 2)
+  expect_length(recs2[[1]]$name, 1)
+  expect_true("multi_hit_id" %in% names(recs2[[1]]))
+  expect_length(recs2[[1]]$compound_annotation, 1)
+  
+  # Case 3) 3 duplicate, 1 unitary
+  scanRes3 <- getDbasScanResultDuplicatePeaks()
+  scanRes3$peakList <- scanRes3$peakList[c(1,2,3,1), ]
+  scanRes3$peakList[4, "comp_name"] <- "Diclofenac"
+  scanRes3$peakList[4, "peakID"] <- 9
+  scanRes3$reintegrationResults <- scanRes3$reintegrationResults[c(1,2,3,1), ]
+  scanRes3$reintegrationResults[4, "comp_name"] <- "Diclofenac"
+  recs3 <- convertToRecord(scanRes3, msrBatch)
+  expect_length(recs3, 4)
+  expect_length(recs3[[2]]$compound_annotation, 3)
+  expect_contains(map_chr(recs3[[2]]$compound_annotation, \(x) x$name), "Diclofenac")
+  
+  # Case 4) 2 duplicate, 2 duplicate, 1 unitary
+  scanRes4 <- getDbasScanResultDuplicatePeaks()
+  scanRes4$peakList <- scanRes4$peakList[c(1,2,3,1,2), ]
+  scanRes4$peakList[c(4,5), "comp_name"] <- c("Diclofenac", "Sitagliptin")
+  scanRes4$peakList[c(4,5), "peakID"] <- c(8, 9)
+  scanRes4$peakList[c(4,5), "duplicate"] <- 2
+  scanRes4$reintegrationResults <- scanRes4$reintegrationResults[c(1,2,3,1,2), ]
+  scanRes4$reintegrationResults[4, "comp_name"] <- "Diclofenac"
+  scanRes4$reintegrationResults[5, "comp_name"] <- "Sitagliptin"
+  recs4 <- convertToRecord(scanRes4, msrBatch)
+  expect_length(recs4, 5)
+  expect_length(recs4[[1]]$name, 1)
+  expect_length(recs4[[2]]$name, 1)
+  expect_length(recs4[[4]]$name, 1)
+  multiHitIds <- unique(map_chr(recs4, \(x) x$multi_hit_id))
+  expect_length(multiHitIds, 3)
+  expect_true(all(nchar(multiHitIds) == 10))
+  expect_contains(map_chr(recs4[[4]]$compound_annotation, \(x) x$name), "Diclofenac")
+  expect_contains(map_chr(recs4[[4]]$compound_annotation, \(x) x$name), "Sitagliptin")
+})
+
+test_that("If there are gap-filled multihit peaks these are also linked", {
+  dbasResult <- dbasScanResultWithMultiHitGapFilledPeaks()
+  sr <- dbasResult$scanResult
+  msrBatch <- dbasResult$batch
+  recs <- convertToRecord(sr, msrBatch)
+  expect_length(recs, 5)
+  multihits <- unique(map_chr(recs, \(x) x$multi_hit_id))
+  expect_length(multihits, 3)
 })

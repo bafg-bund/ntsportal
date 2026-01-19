@@ -279,6 +279,7 @@ validateRecord.featureRecord <- function(record) {
     isNestedFieldAList(record, "ms2"),
     isNestedFieldAList(record, "eic"),
     isNestedFieldAList(record, "loc"),
+    isNestedFieldAList(record, "compound_annotation"),
     checkFieldsAllowed(record)
   )
 }

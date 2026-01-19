@@ -3,12 +3,12 @@
 test_that("A dummy record can be added to msrawfiles", {
   dbComm <- getDbComm()
   testFile <- test_path("fixtures", "msrawfiles-addRecord", "RH_pos_20220603_no_peaks_test_addRecord.mzXML")
-  templateIdFromMsrawfilesIndex <- "2_4OtZoBibkECSgfkVjC"
+  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "water", duration = "P1D", station = "rhein_ko_l")
   saveDir <- withr::local_tempdir()
   suppressMessages(
     addRawfiles(
       rfIndex = testIndexName, 
-      templateId = templateIdFromMsrawfilesIndex,
+      templateId = templateId,
       newPaths = testFile, 
       dirMeasurmentFiles = test_path("fixtures", "msrawfiles-addRecord"),
       prompt = F,

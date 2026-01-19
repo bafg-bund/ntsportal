@@ -570,9 +570,12 @@ stopIfAnyErrors <- function(checkResult) {
 
 getTemplateRecord <- function(rfIndex, templateId) {
   dbComm <- getDbComm()
+  sb <- list(query = list(ids = list(values = templateId)))
+  if (getNrow(dbComm, rfIndex, sb) == 0)
+    stop("ID: ", templateId, " not found in ", rfIndex)
   getTableAsRecords(
     dbComm = dbComm, tableName = rfIndex, 
-    searchBlock = list(query = list(ids = list(values = templateId))), 
+    searchBlock = sb, 
     recordConstructor = newMsrawfilesRecord
   )[[1]]
 }

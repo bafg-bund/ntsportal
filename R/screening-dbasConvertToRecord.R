@@ -34,7 +34,7 @@ convertToRecord.dbasResult <- function(scanResult, msrawfilesBatch) {
     
   specLibPath <- getField(msrawfilesBatch, "spectral_library_path")[1]
   features <- addCompoundInfo(features, specLibPath)
-  
+  features <- addAnnotationTable(features)
   features <- addIntStdData(features, scanResult, msrawfilesBatch)
   features <- addSampleInfo(features, msrawfilesBatch)
   features <- addSpectraToFeatures(scanResult, features)
@@ -44,8 +44,29 @@ convertToRecord.dbasResult <- function(scanResult, msrawfilesBatch) {
 
 #' @export
 getAreasOfFeatures.dbasResult <- function(scanResult) {
-  features <- scanResult$reintegrationResults[, c("samp", "comp_name", "adduct", "isotopologue",
+  featuresTable <- scanResult$reintegrationResults[, c("samp", "comp_name", "adduct", "isotopologue",
                                                   "int_h", "int_a", "real_mz", "real_rt_min")]
+  featuresTable <- cleanUpFeaturesTable(featuresTable)
+  featuresTableWithPath <- addPathToFeaturesTable(featuresTable, scanResult)
+  featuresTableWithMulti <- addMultiHitGroupToFeaturesTable(featuresTableWithPath, scanResult)
+  featuresTableWithQc <- addAnnotationQualityToFeaturesTable(featuresTableWithMulti, scanResult$peakList)
+  createFeaturesListFromFeaturesTable(featuresTableWithQc)
+}
+
+addAnnotationQualityToFeaturesTable <- function(ft, pl) {
+  pl <- rename(pl, name = comp_name, rt_diff_lib = rt_error_min, mz_diff_lib = mz_error_mDa, score_ms2_match = score)
+  ft <- mutate(ft, samp = basename(path))
+  ft <- addUniquePeakSpecToTable(ft)
+  pl <- addUniquePeakSpecToTable(pl)
+  left_join(ft, select(pl, peakSpec, score_ms2_match, rt_diff_lib, mz_diff_lib), by = "peakSpec") |> 
+    select(-peakSpec, -samp)
+}
+
+addUniquePeakSpecToTable <- function(df) {
+  mutate(df, peakSpec = paste(name, adduct, isotopologue, samp, sep = "|"))
+}
+
+cleanUpFeaturesTable <- function(features) {
   features$real_mz <- round(features$real_mz, 4)
   colnames(features) <- gsub("^comp_name$", "name", colnames(features))
   colnames(features) <- gsub("^int_a$", "area", colnames(features))
@@ -55,13 +76,54 @@ getAreasOfFeatures.dbasResult <- function(scanResult) {
   colnames(features) <- gsub("^real_rt_min$", "rt", colnames(features))
   rownames(features) <- NULL
   features$intensity <- as.integer(features$intensity)
+  features
+}
+
+addPathToFeaturesTable <- function(features, scanResult) {
   allFilePaths <- data.frame(path = scanResult$rawFilePaths, filename = basename(scanResult$rawFilePaths))
   featuresWithPath <- merge(features, allFilePaths, by = "filename")
   featuresWithPath$filename <- NULL
+  featuresWithPath
+}
+
+addMultiHitGroupToFeaturesTable <- function(featsTbl, scanRes) {
+  featsTbl <- mergeFeatsTblPeakListForMultiHits(featsTbl, scanRes$peakList)
+  featsTbl <- addMultiHitIdCol(featsTbl)
+  as.data.frame(featsTbl)
+}
+
+mergeFeatsTblPeakListForMultiHits <- function(ft, pl) {
+  pl <- rename(pl, name = comp_name)
+  ft <- addIonSpecToTable(ft)
+  pl <- addIonSpecToTable(pl)
+  left_join(ft, select(pl, ionSpec, duplicate), by = "ionSpec") |> select(-ionSpec)
+}
+
+addIonSpecToTable <- function(df) {
+  mutate(df, ionSpec = paste(name, adduct, isotopologue, sep = "|"))
+}
+
+addMultiHitIdCol <- function(ft) {
+  ft <- mutate(ft, multi_hit_id = ifelse(is.na(duplicate), NA, paste0(shortHash(path), duplicate))) |> 
+    select(-duplicate)
+  numUnitary <- sum(is.na(ft$multi_hit_id))
+  if (numUnitary > 0)
+    ft$multi_hit_id[is.na(ft$multi_hit_id)] <- randomString(numUnitary)
+  ft
+}
+
+randomString <- function(x) {
+  stringi::stri_rand_strings(n = x, length = 10)
+}
+
+shortHash <- function(x) {
+  substr(Vectorize(rlang::hash)(x), 1, 9)
+}
+
+createFeaturesListFromFeaturesTable <- function(featuresWithPath) {
   featureList <- split(featuresWithPath, seq_len(nrow(featuresWithPath))) 
   featureList <- lapply(featureList, as.list)
-  featureList <- unname(featureList)
-  featureList
+  unname(featureList)
 }
 
 addCompoundInfo <- function(features, specLibPath) {
@@ -74,9 +136,10 @@ addCompoundInfo <- function(features, specLibPath) {
     select(name.x, name.y) %>% 
     rename(compname = name.x, groupname = name.y) %>% 
     collect()
+  DBI::dbDisconnect(specLibConn)
   
   features <- lapply(features, function(doc) {
-    if("name" %in% names(doc) && !is.na(doc$name)) {
+    if ("name" %in% names(doc) && !is.na(doc$name)) {
       doc[["cas"]] <- filter(comptab, name == !!doc$name) %>% pull(CAS)
       doc[["inchi"]] <- filter(comptab, name == !!doc$name) %>% pull(inchi)
       doc[["inchikey"]] <- filter(comptab, name == !!doc$name) %>% pull(inchikey)
@@ -87,8 +150,36 @@ addCompoundInfo <- function(features, specLibPath) {
     }
     doc
   })
-  DBI::dbDisconnect(specLibConn)
+  
   features
+}
+
+addAnnotationTable <- function(features) {
+  allGroups <- map_chr(features, \(x) x$multi_hit_id)
+  multiHitsInGroups <- split(features, allGroups)
+  multiHitsInGroups <- map(multiHitsInGroups, addAnnotationTableToMultiHitGroup)
+  unname(unlist(multiHitsInGroups, recursive = FALSE))
+}
+
+addAnnotationTableToMultiHitGroup <- function(multiHitGroup) {
+  annotList <- dfToList(createMultiHitAnnotationTable(multiHitGroup))
+  map(multiHitGroup, \(rec) {rec$compound_annotation <- annotList; rec})
+}
+
+createMultiHitAnnotationTable <- function(multiHitGroup) {
+  compNames <- map_chr(multiHitGroup, \(rec) rec$name)
+  cass <- map_chr(multiHitGroup, \(rec) rec$cas)
+  inchis <- map_chr(multiHitGroup, \(rec) rec$inchi)
+  inchikeys <- map_chr(multiHitGroup, \(rec) rec$inchikey)
+  adducts <- map_chr(multiHitGroup, \(rec) rec$adduct)
+  isotops <- map_chr(multiHitGroup, \(rec) rec$isotopologue)
+  formulas <- map_chr(multiHitGroup, \(rec) rec$formula)
+  ms2scores <- map_dbl(multiHitGroup, \(rec) rec$score_ms2_match)
+  mzDiffs <- map_dbl(multiHitGroup, \(rec) rec$mz_diff_lib)
+  rtDiffs <- map_dbl(multiHitGroup, \(rec) rec$rt_diff_lib)
+  data.frame(name = compNames, cas = cass, inchi = inchis, inchikey = inchikeys, adduct = adducts, 
+             isotopologue = isotops, formula = formulas, score_ms2_match = ms2scores, mz_diff_lib = mzDiffs, 
+             rt_diff_lib = rtDiffs)
 }
 
 addIntStdData <- function(features, scanResult, msrawfileRecords) {
@@ -138,7 +229,6 @@ normalizeArea <- function(feature) {
 #' @export
 addSpectraToFeatures.dbasResult <- function(scanResult, features) { 
   for (featNum in seq_along(features)) {
-    features[[featNum]]
     peakId <- getPeakIdForFeature(features[[featNum]], scanResult$peakList)
     if (length(peakId) == 0 || !is.numeric(peakId))
       next
@@ -154,7 +244,7 @@ addSpectraToFeatures.dbasResult <- function(scanResult, features) {
     
     if (isSpecChromAvailable(peakId, scanResult$ms2Table)) {
       features[[featNum]]$ms2 <- getMs2FromScanResult(scanResult, peakId)
-      features[[featNum]]$score_ms2_match <- getScoreMs2Match(peakId, scanResult)
+      #features[[featNum]]$score_ms2_match <- getScoreMs2Match(peakId, scanResult)
       features[[featNum]]$csl_experiment_id <- getLibExpId(peakId, scanResult)
     }
   }
