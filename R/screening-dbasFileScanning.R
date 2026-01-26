@@ -151,7 +151,7 @@ removeFalsePositives <- function(report, records) {
     getCompoundsNoReplicateDetections(report, replicateRegex)
   ) |> distinct() |> tidyr::nest(fileIndices = fileIndex, .by = "compName")
   
-  if (nrow(falsePositives) > 0) { # i <- 1
+  if (nrow(falsePositives) > 0) { 
     for (i in 1:nrow(falsePositives)) {
       report$deleteFP(
         pluck(falsePositives, "compName", i),
@@ -189,15 +189,18 @@ getCompoundsBelowMinimumDetections <- function(report, minimumDetections) {
 }
 
 getCompoundsNoReplicateDetections <- function(report, replicateRegex) {
-  if (is.na(replicateRegex)) return(emptyFalsePostivesTibble())
+  if (is.na(replicateRegex)) 
+    return(emptyFalsePostivesTibble())
   pl <- report$peakList
   pl$originalSampName <- stringr::str_replace(pl$samp, replicateRegex, "\\1")
   replicateCount <- by(pl, list(pl$comp_name, pl$originalSampName), nrow) |> array2DF()
   colnames(replicateCount) <- c("compName", "originalSampName", "count")
   replicateCount <- replicateCount[!is.na(replicateCount$count), ]
-  if (nrow(replicateCount) == 0) return(emptyFalsePostivesTibble())
+  if (nrow(replicateCount) == 0) 
+    return(emptyFalsePostivesTibble())
   markAsFp <- replicateCount[replicateCount$count < 2, c("compName", "originalSampName")]
-  if (nrow(markAsFp) == 0) return(emptyFalsePostivesTibble())
+  if (nrow(markAsFp) == 0) 
+    return(emptyFalsePostivesTibble())
   list_rbind(map2(
     markAsFp$compName, 
     markAsFp$originalSampName, 
