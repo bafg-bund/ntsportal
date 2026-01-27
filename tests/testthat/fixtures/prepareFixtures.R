@@ -103,7 +103,8 @@ file.remove(list.files(tempSaveDir, full.names = T))
 test <- readRDS(list.files(pathToFixturesDir, full.names = T))
 
 
-# Create duplicate feature test (4 and 5 Benzotriazole, Olmesartan) for dbasConvertToRecord
+# Create duplicate feature test (4 and 5 Benzotriazole, Olmesartan) for dbasConvertToRecord ####
+
 library(ntspQaTools)
 fldr <- file.path("fixtures", "screening-dbasConvertToRecord")
 measFilePath <- test_path(fldr, "OBF39601_20221114_Dorfbach_Oberschindmaas_neg_45benz.mzXML")
@@ -121,8 +122,26 @@ saveRDS(msrBatch, test_path(fldr, "msrawfilesBatchOneSampleWithDuplicatePeaks.RD
 res1 <- scanBatch(msrBatch)
 saveRDS(res1, test_path(fldr, "scanResultOneSampleWithDuplicatePeaks.RDS"))
 
-# Create test for replicate injection filter (getCompoundsNoReplicateDetections)
+# Get example data from Bimmen testing replicate injection filter ####
+paths <- c(
+  "/beegfs/nts/ntsportal/msrawfiles/bimmen/schwebstoff/rhb_pos/B14_pos1.mzXML",
+  "/beegfs/nts/ntsportal/msrawfiles/bimmen/schwebstoff/rhb_pos/B14_pos2.mzXML",
+  "/beegfs/nts/ntsportal/msrawfiles/bimmen/schwebstoff/rhb_pos/B14_pos3.mzXML",
+  "/beegfs/nts/ntsportal/msrawfiles/bimmen/schwebstoff/rhb_pos/B21_pos1.mzXML",
+  "/beegfs/nts/ntsportal/msrawfiles/bimmen/schwebstoff/rhb_pos/B21_pos2.mzXML",
+  "/beegfs/nts/ntsportal/msrawfiles/bimmen/schwebstoff/rhb_pos/B21_pos3.mzXML"
+)
+msri <- "ntsp25.3_msrawfiles"
+recs <- getTableAsRecords(getDbComm(), tableName = msri, searchBlock =  list(query = list(terms = list(path = paths))), 
+                          recordConstructor = newDbasMsrawfilesRecord)
+nbatch <- newDbasMsrawfilesBatch(recs)
+saveRDS(nbatch, "tests/testthat/fixtures/screening-dbasFileScanning/batchBimmen.RDS")
+reports <- purrr::map(nbatch, fileScanDbas, compsToProcess = c("3-Phenylpyridine", "Benzyl-triethylammonium"))
+reports <- removeEmptyReports(reports)
+mergedReport <- mergeReports(reports)
+reintegratedReport <- reintegrateReport(mergedReport)
+saveRDS(reintegratedReport, "tests/testthat/fixtures/screening-dbasFileScanning/reintegratedReportBimmen.RDS")
 
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

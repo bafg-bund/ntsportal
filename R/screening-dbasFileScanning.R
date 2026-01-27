@@ -37,9 +37,9 @@ scanBatch.dbasMsrawfilesBatch <- function(msrawfilesBatch, compsToProcess = NULL
   reports <- purrr::map(msrawfilesBatch, fileScanDbas, compsToProcess = compsToProcess, progBar = progBar)
   reports <- removeEmptyReports(reports)
   mergedReport <- mergeReports(reports)
-  cleanedReport <- cleanReport(mergedReport, msrawfilesBatch)
-  reintegratedReport <- reintegrateReport(cleanedReport)
-  dbasResults <- convertToDbasResult(reintegratedReport)
+  reintegratedReport <- reintegrateReport(mergedReport)
+  cleanedReport <- cleanReport(reintegratedReport, msrawfilesBatch)
+  dbasResults <- convertToDbasResult(cleanedReport)
   dbasResults
 }
 
@@ -191,20 +191,22 @@ getCompoundsBelowMinimumDetections <- function(report, minimumDetections) {
 getCompoundsNoReplicateDetections <- function(report, replicateRegex) {
   if (is.na(replicateRegex)) 
     return(emptyFalsePostivesTibble())
-  pl <- report$peakList
-  pl$originalSampName <- stringr::str_replace(pl$samp, replicateRegex, "\\1")
-  replicateCount <- by(pl, list(pl$comp_name, pl$originalSampName), nrow) |> array2DF()
+  ir <- report$integRes
+  ir$originalSampName <- stringr::str_replace(ir$samp, replicateRegex, "\\1")
+  replicateCount <- by(ir, list(ir$comp_name, ir$originalSampName), nrow) |> array2DF()
   colnames(replicateCount) <- c("compName", "originalSampName", "count")
   replicateCount <- replicateCount[!is.na(replicateCount$count), ]
   if (nrow(replicateCount) == 0) 
     return(emptyFalsePostivesTibble())
+  # Regardless of the number of replicates, if compound is found at least twice, it's not added to FP list
   markAsFp <- replicateCount[replicateCount$count < 2, c("compName", "originalSampName")]
   if (nrow(markAsFp) == 0) 
     return(emptyFalsePostivesTibble())
   list_rbind(map2(
     markAsFp$compName, 
     markAsFp$originalSampName, 
-    function(compName, originalSampName) getFileIndices(compName, originalSampName, pl, report$rawFiles)
+    function(compName, originalSampName) 
+      getFileIndices(compName, originalSampName, ir, report$rawFiles)
   ))
 }
 

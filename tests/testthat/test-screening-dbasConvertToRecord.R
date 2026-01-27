@@ -86,7 +86,8 @@ test_that("Annotation quality information is added to records", {
   sr <- dbasResult$scanResult
   msrBatch <- dbasResult$batch
   recs2 <- convertToRecord(sr, msrBatch)
-  expect_false(is.element("mz_diff_lib", names(recs2[[3]])))
+  gapFilledRecs <- recs2[map_lgl(recs2, \(x) grepl("foobar", x$path))]
+  expect_disjoint(names(gapFilledRecs[[1]]), "mz_diff_lib")
 })
 
 test_that("If a peak has duplicate annotations, they are grouped as multihits and all annotations are included", {
