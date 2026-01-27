@@ -145,6 +145,16 @@ test_that("When non unitary field missing in one record the ruturn value is a li
   expect_true(is.na(values[[2]]))
 })
 
+test_that("Removing compounds with no replicate detections works for level 1 and level 2 annotations", {
+  testReportBim <- ntsworkflow::loadReport(F, test_path("fixtures", "screening-dbasFileScanning", "reintegratedReportBimmen.RDS"))
+  testRecordsBim <- test_path("fixtures", "screening-dbasFileScanning", "testRecordBimmen.RDS")
+  cleanedReport <- cleanReport(testReportBim, testRecordsBim)
+  dbasResult <- convertToDbasResult(cleanedReport)
+  reint <- dbasResult$reintegrationResults
+  expect_contains(reint$comp_name, "Benzyl-triethylammonium")
+  expect_false(is.element(reint$comp_name, "3-Phenylpyridine"))
+})
+
 # Copyright 2025 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
 

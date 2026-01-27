@@ -121,5 +121,8 @@ saveRDS(msrBatch, test_path(fldr, "msrawfilesBatchOneSampleWithDuplicatePeaks.RD
 res1 <- scanBatch(msrBatch)
 saveRDS(res1, test_path(fldr, "scanResultOneSampleWithDuplicatePeaks.RDS"))
 
+# Create test for replicate injection filter (getCompoundsNoReplicateDetections)
+
+
 # Copyright 2025 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
