@@ -1,12 +1,10 @@
 
 test_that("You can connect to elasticsearch with the python client", {
-  dbComm <- getDbComm()
   expect_no_error(show(dbComm))
   expect_true(ping(dbComm))
 })
 
 test_that("You can copy a table", {
-  dbComm <- getDbComm()
   dummyIndex <- "ntsp_foobar"
   if (isTable(dbComm, dummyIndex))
     deleteTable(dbComm, dummyIndex)
@@ -20,7 +18,6 @@ test_that("You can copy a table", {
 
 
 test_that("You can get all the unique values in a field", {
-  dbComm <- getDbComm()
   paths <- getUniqueValues(dbComm, testIndexName, "path")
   expect_gte(length(paths), 20)
   rivers <- getUniqueValues(dbComm, testIndexName, "river")
@@ -28,13 +25,11 @@ test_that("You can get all the unique values in a field", {
 })
 
 test_that("You can get unique values of a runtime field", {
-  dbComm <- getDbComm()
   batches <- getUniqueValues(dbComm, testIndexName, "batchname")
   expect_length(batches, 4)
 })
 
 test_that("You can change the value of a field", {
-  dbComm <- getDbComm()
   expect_no_error(replaceValueInField(dbComm, testIndexName, "river", "rhein", "rhein"))
 })
 
@@ -139,12 +134,10 @@ test_that("A field in a subset of docs can be modified", {
 })
 
 test_that("Adding a value to a non-array field causes and error", {
-  dbComm <- getDbComm()
   expect_error(addValueToArray(dbComm, testIndexName, "licence", "foo"))
 })
 
 test_that("Adding an already existing value to an array results in no change", {
-  dbComm <- getDbComm()
   recs <- getTableAsRecords(dbComm, testIndexName, fields = "dbas_fp")
   addValueToArray(dbComm, testIndexName, "dbas_fp", "Olmesartan-d6")
   recs2 <- getTableAsRecords(dbComm, testIndexName, fields = "dbas_fp")
@@ -152,7 +145,6 @@ test_that("Adding an already existing value to an array results in no change", {
 })
 
 test_that("Removing a non-existing value from an array results in no change", {
-  dbComm <- getDbComm()
   recs <- getTableAsRecords(dbComm, testIndexName, fields = "dbas_fp")
   removeValueFromArray(dbComm, testIndexName, "dbas_fp", "foo")
   recs2 <- getTableAsRecords(dbComm, testIndexName, fields = "dbas_fp")
@@ -160,7 +152,6 @@ test_that("Removing a non-existing value from an array results in no change", {
 })
 
 test_that("You can add a value to an array", {
-  dbComm <- getDbComm()
   q <- list(query = list(regexp = list(path = ".*KO_06_1.*")))
   tb <- getTableByQuery(testIndexName, searchBlock = q, fields = "dbas_fp")
   originalFp <- pluck(tb, "dbas_fp", 1)

@@ -26,5 +26,5 @@ test_that("A small CSL can be sent to elastic", {
   deleteTable(dbComm, tempTable)
 })
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

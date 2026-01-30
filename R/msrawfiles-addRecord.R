@@ -545,7 +545,7 @@ getPolFromPath <- function(path) {
 getIdsNewRecords <- function(tableName, newRecs) {
   paths <- map_chr(newRecs, \(x) x$path)
   pathsString <- quoteAndComma(paths)
-  idTable <- getTableByEsql(glue("FROM {tableName} [METADATA _id] | WHERE path IN ({pathsString}) | KEEP _id"))
+  idTable <- getTableByEsql(glue("FROM {tableName} METADATA _id | WHERE path IN ({pathsString}) | KEEP _id"))
   idTable |> pull("_id")
 }
 

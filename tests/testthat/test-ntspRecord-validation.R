@@ -47,7 +47,8 @@ test_that("Wrong blank returns a warning", {
 })
 
 test_that("An incorrect field in featureRecord in a nested field results in an error", {
-  oneFeatureRecord <- getFeatureRecordAndMsrawfileRecordDbas()$featureRecord[[1]]
+  rr <- getOneSampleDbasResultAndRecords()
+  oneFeatureRecord <- convertToRecord(rr$dbasResult, rr$records)[[1]]
   expect_true(validateRecord(oneFeatureRecord))
   oneFeatureRecord$ms2 <- c(oneFeatureRecord$ms2, error_field = "error")
   expect_warning(validateRecord(oneFeatureRecord), "error_field")

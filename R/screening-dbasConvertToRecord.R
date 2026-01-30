@@ -131,8 +131,8 @@ addCompoundInfo <- function(features, specLibPath) {
   comptab <- tbl(specLibConn, "compound") %>% collect()
   grouptab <- tbl(specLibConn, "compound") %>% 
     select(name, compound_id) %>% 
-    left_join(tbl(specLibConn, "compGroupComp"), by = "compound_id") %>% 
-    left_join(tbl(specLibConn, "compoundGroup"), by = "compoundGroup_id") %>% 
+    left_join(tbl(specLibConn, "compound_group_map"), by = "compound_id") %>% 
+    left_join(tbl(specLibConn, "compound_group"), by = "compound_group_id") %>% 
     select(name.x, name.y) %>% 
     rename(compname = name.x, groupname = name.y) %>% 
     collect()
@@ -140,7 +140,7 @@ addCompoundInfo <- function(features, specLibPath) {
   
   features <- lapply(features, function(doc) {
     if ("name" %in% names(doc) && !is.na(doc$name)) {
-      doc[["cas"]] <- filter(comptab, name == !!doc$name) %>% pull(CAS)
+      doc[["cas"]] <- filter(comptab, name == !!doc$name) %>% pull(cas)
       doc[["inchi"]] <- filter(comptab, name == !!doc$name) %>% pull(inchi)
       doc[["inchikey"]] <- filter(comptab, name == !!doc$name) %>% pull(inchikey)
       doc[["formula"]] <- filter(comptab, name == !!doc$name) %>% pull(formula)

@@ -13,8 +13,13 @@
 #' @export
 #'
 findTemplateId <- function(rfIndex, blank = FALSE, pol = "pos", station = "rhein_ko_l", matrix = "spm", duration = "P1D") {
-  idTable <- getTableByEsql(glue('FROM {rfIndex} [METADATA _id]| WHERE blank == {blank} and pol == "{pol}" and 
-                                  station == "{station}" and matrix == "{matrix}" and duration == "{duration}" | KEEP _id'))
+  idTable <- getTableByEsql(glue('
+   FROM {rfIndex} METADATA _id | 
+   WHERE blank == {blank} and pol == "{pol}" and station == "{station}" and matrix == "{matrix}" and 
+     duration == "{duration}" | 
+   KEEP _id |
+   LIMIT 1
+  '))
   ids <- pull(idTable, "_id")
   if (length(ids) == 0) {
     warning("Search returned no hits")

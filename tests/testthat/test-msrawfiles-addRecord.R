@@ -1,7 +1,9 @@
 
 
 test_that("A dummy record can be added to msrawfiles", {
-  dbComm <- getDbComm()
+  queryForTestRecord <- list(query = list(regexp = list(path = ".*RH_pos_20220603_no_peaks_test_addRecord.mzXML")))
+  if (getNrow(dbComm, testIndexName, queryForTestRecord) > 0)
+    deleteRow(dbComm, testIndexName, queryForTestRecord)
   testFile <- test_path("fixtures", "msrawfiles-addRecord", "RH_pos_20220603_no_peaks_test_addRecord.mzXML")
   templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "water", duration = "P1D", station = "rhein_ko_l")
   saveDir <- withr::local_tempdir()
@@ -18,7 +20,6 @@ test_that("A dummy record can be added to msrawfiles", {
   
   importedRecord <- jsonlite::read_json(list.files(saveDir, f = T))
   expect_length(importedRecord[[1]], 79)
-  queryForTestRecord <-  list(query = list(regexp = list(path = ".*RH_pos_20220603_no_peaks_test_addRecord.mzXML")))
   recs <- getTableAsRecords(dbComm, testIndexName, queryForTestRecord)
   pathResult <- recs[[1]]$path
   expect_equal(normalizePath(testFile), pathResult)

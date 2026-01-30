@@ -1,33 +1,20 @@
 
 
-getFeatureRecordAndMsrawfileRecordDbas <- function() {
+
+getFeatureRecordAndMsrawfileRecordNoSampleData <- function() {
   rr <- getOneSampleDbasResultAndRecords()
-  featureRecord <- convertToRecord(rr$dbasResult, rr$records)
-  list(featureRecord = featureRecord, msrawfileRecord = rr$records)
+  featRecs <- convertToRecord(rr$dbasResult, rr$msrRecords)
+  fieldsToRemove <- intersect(names(featRecs[[1]]), fieldsToMergeFromMsrawfiles())
+  featRecs[[1]] <- removeFieldsFromRecord(featRecs[[1]], fieldsToRemove)
+  rr$msrRecords <- nameRecordsByPath(rr$msrRecords)
+  list(featRecs = featRecs, msrRecords = rr$msrRecords)
 }
 
 getOneSampleDbasResultAndRecords <- function() {
+  compWithSpec <- "4-(2-Oxo-3-bornylidenemethyl)phenyl trimethylammonium"
   records <- getOneSampleRecords("dbas")
   result <- readRDS(test_path("fixtures", "screening-dbasConvertToRecord", "oneSampleDbasResult.RDS"))
-  list(dbasResult = result, records = records)
-}
-
-
-
-getFeatureRecordAndMsrawfileRecordNoSampleData <- function() {
-  rr <- getFeatureRecordAndMsrawfileRecordDbas()
-  fieldsToRemove <- intersect(names(rr$featureRecord[[1]]), fieldsToMergeFromMsrawfiles())
-  rr$featureRecord[[1]] <- removeFieldsFromRecord(rr$featureRecord[[1]], fieldsToRemove)
-  rr$msrawfileRecord <- nameRecordsByPath(rr$msrawfileRecord)
-  list(featureRecord = rr$featureRecord, msrawfileRecord = rr$msrawfileRecord)
-}
-
-getFeatureRecordAndMsrawfileRecordNoSpectra <- function() {
-  rr <- getFeatureRecordAndMsrawfileRecordDbas()
-  fieldsToRemove <- c("ms1", "ms2", "eic")
-  rr$featureRecord[[1]] <- removeFieldsFromRecord(rr$featureRecord[[1]], fieldsToRemove)
-  rr$msrawfileRecord <- nameRecordsByPath(rr$msrawfileRecord)
-  list(featureRecord = rr$featureRecord, msrawfileRecord = rr$msrawfileRecord)
+  list(dbasResult = result, msrRecords = records, compWithSpec = compWithSpec)
 }
 
 removeFieldsFromRecord <- function(rec, fieldsToRemove) {
@@ -36,6 +23,7 @@ removeFieldsFromRecord <- function(rec, fieldsToRemove) {
   }
   rec
 }
+
 getDbasScanResultDuplicatePeaks <- function() {
   fldr <- file.path("fixtures", "screening-dbasConvertToRecord")
   readRDS(test_path(fldr, "scanResultOneSampleWithDuplicatePeaks.RDS"))

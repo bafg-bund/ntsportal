@@ -2,22 +2,23 @@
 
 test_that("A small result can be reformated to a dbasRecord object", {
   rr <- getOneSampleDbasResultAndRecords()
-  featureRecord <- convertToRecord(rr$dbasResult, rr$records)
-  expect_contains(names(featureRecord[[1]]), c("mz", "rt", "intensity", "ms2", "feature_table_alias", "csl_experiment_id"))
-  expect_s3_class(featureRecord[[1]], "featureRecord")
-  expect_true(validateRecord(featureRecord[[1]]))
-  differenceIntArea <- featureRecord[[1]]$area - featureRecord[[1]]$intensity
+  featRecs <- convertToRecord(rr$dbasResult, rr$msrRecords)
+  featRecWithSpec <- featRecs[map_lgl(featRecs, \(x) x$name == rr$compWithSpec)][[1]]
+  expect_contains(names(featRecWithSpec), c("mz", "rt", "intensity", "ms2", "feature_table_alias", "csl_experiment_id"))
+  expect_s3_class(featRecs[[1]], "featureRecord")
+  expect_true(validateRecord(featRecs[[1]]))
+  differenceIntArea <- featRecs[[1]]$area - featRecs[[1]]$intensity
   expect_gt(differenceIntArea, 100)
-  checkForAlias(featureRecord[[1]])
-  expect_length(featureRecord[[1]]$compound_annotation, 1)
-  annotationTableCols <- names(featureRecord[[1]]$compound_annotation[[1]])
+  checkForAlias(featRecs[[1]])
+  expect_length(featRecs[[1]]$compound_annotation, 1)
+  annotationTableCols <- names(featRecs[[1]]$compound_annotation[[1]])
   expect_contains(annotationTableCols, "score_ms2_match")
   expect_contains(annotationTableCols, "mz_diff_lib")
 })
 
 test_that("Sample data is added to features", {
   featureRecMsrawfileRec <- getFeatureRecordAndMsrawfileRecordNoSampleData()
-  featureWithData <- addSampleInfo(featureRecMsrawfileRec$featureRecord, featureRecMsrawfileRec$msrawfileRecord)
+  featureWithData <- addSampleInfo(featureRecMsrawfileRec$featRecs, featureRecMsrawfileRec$msrRecords)
   expect_contains(names(featureWithData[[1]]), c("path"))
   expect_true(validateRecord(newFeatureRecord(featureWithData[[1]])))
 })
@@ -31,11 +32,13 @@ test_that("Record is reduced to selected fields", {
 })
 
 test_that("Spectra area added to feature", {
-  scanResult <- getOneSampleDbasResultAndRecords()$dbasResult
-  feature <- getFeatureRecordAndMsrawfileRecordNoSpectra()$featureRecord[[1]]
-  featuresWithSpectra <- addSpectraToFeatures(scanResult, list(feature))
-  expect_contains(names(featuresWithSpectra[[1]]), "ms2")
-  expect_contains(names(featuresWithSpectra[[1]]), "score_ms2_match")
+  rr <- getOneSampleDbasResultAndRecords()
+  featRecs <- convertToRecord(rr$dbasResult, rr$msrRecords)
+  featRecWithSpec <- featRecs[map_lgl(featRecs, \(x) x$name == rr$compWithSpec)][[1]]
+  featRecNoSpec <- removeFieldsFromRecord(featRecWithSpec, c("ms1", "ms2", "eic"))
+  featRecAddedSpec <- addSpectraToFeatures(rr$dbasResult, list(featRecNoSpec))[[1]]
+  expect_contains(names(featRecAddedSpec), "ms2")
+  expect_contains(names(featRecAddedSpec), "score_ms2_match")
 })
 
 test_that("MS2 matching score can be read for a peak ID", {
@@ -55,7 +58,7 @@ test_that("An empty result is converted to an empty record", {
 
 test_that("Internal standard name, intensity and area is added to record", {
   resultAndRecords <- getOneSampleDbasResultAndRecords()
-  testRecordList <- convertToRecord(resultAndRecords$dbasResult, resultAndRecords$records)
+  testRecordList <- convertToRecord(resultAndRecords$dbasResult, resultAndRecords$msrRecords)
   
   expect_contains(names(testRecordList[[1]]), "internal_standard")
   expect_equal(testRecordList[[1]]$internal_standard, "Olmesartan-d6")
@@ -65,8 +68,8 @@ test_that("Internal standard name, intensity and area is added to record", {
 
 test_that("If the internal standard is not found, there is no addition of area and intensity to the doc", {
   resultAndRecords <- getOneSampleDbasResultAndRecords()
-  resultAndRecords$records[[1]]$internal_standard <- "Foobar"
-  testRecordList <- convertToRecord(resultAndRecords$dbasResult, resultAndRecords$records)
+  resultAndRecords$msrRecords[[1]]$internal_standard <- "Foobar"
+  testRecordList <- convertToRecord(resultAndRecords$dbasResult, resultAndRecords$msrRecords)
   
   expect_contains(names(testRecordList[[1]]), "internal_standard")
   expect_equal(testRecordList[[1]]$internal_standard, "Foobar")

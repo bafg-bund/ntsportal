@@ -1,5 +1,6 @@
 
 connectNtsportal()
+dbComm <- getDbComm()
 
 rootDirectoryForTestMsrawfiles <- "/beegfs/nts/ntsportal/msrawfiles/unit_tests"
 ntspVersion <- "25.3"

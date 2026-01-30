@@ -1,6 +1,6 @@
 
 
-# nohup Rscript screening-dbasRealBatchRheinKobPos.R &> dbasRheinKobPos.log &
+# nohup Rscript screening-dbasRheinKobPos.R &> dbasRheinKobPos.log &
 library(ntsportal)
 tempSaveDir <- "testResults-dbasRheinKobPos"
 unlink(tempSaveDir, recursive = T)

@@ -50,5 +50,5 @@ test_that("You can change the version of all dbas_alias_names", {
   expect_equal(q$execute()$hits$to_list()[[1]]$feature_table_alias, glue("ntsp{ntspVersion}_feature_unit_tests"))
 })
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

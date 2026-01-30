@@ -33,7 +33,7 @@ SpecLibRecords <- R6Class(
       self$records <- private$addExperimentRecords()
       private$addMs2Spectra()
       private$addRetentionTimes()
-      private$addExperimentGroups()
+      private$addDataSources()
       private$addCompoundGroups()
       private$cleanUpFields()
       invisible(self)
@@ -74,7 +74,7 @@ SpecLibRecords <- R6Class(
     },
     addRetentionTimes = function() {
       sdb <- DBI::dbConnect(RSQLite::SQLite(), self$specLibPath)
-      rttbl <- tbl(sdb, "retentionTime") %>% collect()
+      rttbl <- tbl(sdb, "retention_time") %>% collect()
       DBI::dbDisconnect(sdb)
       cli_progress_bar("addRetentionTimes", total = length(self$records))
       for (i in seq_along(self$records)) {
@@ -96,34 +96,31 @@ SpecLibRecords <- R6Class(
       }
       cli_progress_done()
     },
-    addExperimentGroups = function() {
+    addDataSources = function() {
       sdb <- DBI::dbConnect(RSQLite::SQLite(), self$specLibPath)
-      egetbl <- tbl(sdb, "expGroupExp") %>% collect()
-      egtbl <- tbl(sdb, "experimentGroup") %>% collect()
+      dstbl <- tbl(sdb, "data_source") %>% collect()
       DBI::dbDisconnect(sdb)
-      cli_progress_bar("addExperimentGroups", total = length(self$records))
+      cli_progress_bar("addDataSources", total = length(self$records))
       for (i in seq_along(self$records)) {
-        expId <- self$records[[i]]$experiment_id
-        expGroup <- egetbl %>%
-          filter(experiment_id == !!expId) %>%
-          left_join(egtbl, by = "experimentGroup_id") 
-        self$records[[i]]$data_source <- expGroup$name  # the experiment groups are used to show data source
+        dsId <- self$records[[i]]$data_source_id
+        dataSource <- filter(dstbl, data_source_id == !!dsId)
+        self$records[[i]]$data_source <- dataSource$name  # the experiment groups are used to show data source
         cli_progress_update()
       }
       cli_progress_done()
     },
     addCompoundGroups = function() {
       sdb <- DBI::dbConnect(RSQLite::SQLite(), self$specLibPath)
-      cgctbl <- tbl(sdb, "compGroupComp") %>% collect()
-      cgtbl <- tbl(sdb, "compoundGroup") %>% collect()
+      cgctbl <- tbl(sdb, "compound_group_map") %>% collect()
+      cgtbl <- tbl(sdb, "compound_group") %>% collect()
       DBI::dbDisconnect(sdb)
       cli_progress_bar("addCompoundGroups", total = length(self$records))
       for (i in seq_along(self$records)) {
         compId <- self$records[[i]]$compound_id
         compGroup <- cgctbl %>%
           filter(compound_id == !!compId) %>%
-          left_join(cgtbl, by = "compoundGroup_id") 
-        compGroup <- subset(compGroup, Negate(is.element)(name, c("BfG", "LfU", "UBA")))
+          left_join(cgtbl, by = "compound_group_id") 
+        compGroup <- subset(compGroup, Negate(is.element)(name, c("bfg", "lfuby", "uba")))
         if (nrow(compGroup) == 0) 
           next
         self$records[[i]]$comp_group <- compGroup$name
@@ -132,28 +129,20 @@ SpecLibRecords <- R6Class(
       cli_progress_done()
     },
     cleanUpFields = function() {
-      cli_progress_bar("cleanUpFields", total = 11)
-      private$changeFieldName("CAS", "cas")
-      cli_progress_update()
-      private$changeFieldName("SMILES", "smiles")
-      cli_progress_update()
+      cli_progress_bar("cleanUpFields", total = 8)
       private$changeFieldName("polarity", "pol")
       cli_progress_update()
-      private$changeFieldName("^CE$", "ce")
-      cli_progress_update()
-      private$changeFieldName("^CES$", "ces")
-      cli_progress_update()
-      private$changeFieldName("col_type", "frag_type")
-      cli_progress_update()
       private$changeFieldName("isotope", "isotopologue")
-      cli_progress_update()
-      private$removeField("chem_list_id")
       cli_progress_update()
       private$changeFieldName("experiment_id", "csl_experiment_id")
       cli_progress_update()
       private$removeField("parameter_id")
       cli_progress_update()
       private$removeField("compound_id")
+      cli_progress_update()
+      private$removeField("compound_group_id")
+      cli_progress_update()
+      private$removeField("data_source_id")
       cli_progress_update()
       private$correctDateFormat()
       cli_progress_done()

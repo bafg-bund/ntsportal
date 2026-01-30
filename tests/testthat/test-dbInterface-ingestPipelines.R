@@ -13,5 +13,10 @@ test_that("You can read an ingest pipeline", {
   expect_length(x, 2)
 })
 
+test_that("A non-existant pipeline is not found", {
+  pipelineName <- "foobar"
+  expect_false(testForPipeline(pipelineName))
+})
+
 # Copyright 2025 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

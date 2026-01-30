@@ -1,6 +1,5 @@
 
 test_that("One file is uploaded in Elasticsearch", {
-  dbComm <- getDbComm()
   esIndices <- ingestFeatureRecords(test_path("fixtures", "featureRecordExampleRds"), ingestPipeline = "ingest-feature-unit-tests")
   indexName <- esIndices[[1]]$ntsp
   expect_match(indexName, "ntsp\\d{2}.*_feature_v\\d{12}_unit_tests")
@@ -37,7 +36,6 @@ test_that("You can add the RDS path to a list of records", {
 test_that("You can create multiple indices", {
   aliasNames <- c("ntsp99.9_feature_foo", "ntsp99.9_feature_bar")
   timestamp <- "00000000000000"
-  dbComm <- getDbComm()
   indexMappingPath <- fs::path_package("ntsportal", "mappings")
   pairs <- pyIngestModule$createIndexAddAlias(aliasNames, dbComm@client, timestamp, indexMappingPath)
   expect_true(all(map_lgl(pairs, function(pair) isTable(dbComm, pair[[1]]))))
@@ -47,7 +45,6 @@ test_that("You can create multiple indices", {
 
 test_that("An error in python results in an error message", {
   jsonPath <- getRdsFilePaths(test_path("fixtures", "featureRecordExampleRds"))
-  dbComm <- getDbComm()
   indexTimeStamp <- format(lubridate::now(), "%y%m%d%H%M%S")
   indexMappingPath <- fs::path_package("ntsportal", "mappings")
   recs <- readRdsToRecords(jsonPath)
@@ -62,5 +59,5 @@ test_that("An error in python results in an error message", {
   log_appender(appender_console)
 })
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
