@@ -39,26 +39,21 @@ cleanUpFeatures <- function(features) {
 
 removeNasFromRecord <- function(rec) {
   for (field in names(rec)) {
-    if (is.vector(rec[[field]])) {
+    if (is.atomic(rec[[field]])) {
       rec[[field]] <- rec[[field]][!is.na(rec[[field]])]
       rec[[field]] <- rec[[field]][!(rec[[field]] == "NA")]
       if (length(rec[[field]]) == 0)
         rec[[field]] <- NULL
     } else if (is.data.frame(rec[[field]])) {
-      warning("data.frame found in record ", rec, " in field ", field)
-      rec[[field]] <- NULL
-    } else if (is.list(field)) {
-      rec[[field]] <- lapply(rec[[field]], function(fieldEntry) {
-        fieldEntry <- fieldEntry[!any(is.na(fieldEntry))]
-        fieldEntry <- fieldEntry[!any(fieldEntry == "NA")]
-        fieldEntry
-      })
-      if (length(field) == 0)
+      stop("data.frame found in record ", rec$name, " in field ", field)
+    } else if (is.list(rec[[field]])) {
+      rec[[field]] <- lapply(rec[[field]], removeNasFromRecord)
+      if (length(rec[[field]]) == 0)
         rec[[field]] <- NULL
     } else if (is.null(rec[[field]])) {
       rec[[field]] <- NULL
     } else {
-      stop("unknown case when removing NAs")
+      stop("Unknown case in record ", rec$name, " in field ", field)
     }
   }
   rec

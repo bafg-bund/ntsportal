@@ -48,7 +48,7 @@ getAreasOfFeatures.dbasResult <- function(scanResult) {
                                                   "int_h", "int_a", "real_mz", "real_rt_min")]
   featuresTable <- cleanUpFeaturesTable(featuresTable)
   featuresTableWithPath <- addPathToFeaturesTable(featuresTable, scanResult)
-  featuresTableWithMulti <- addMultiHitGroupToFeaturesTable(featuresTableWithPath, scanResult)
+  featuresTableWithMulti <- addMultiHitGroupToFeaturesTable(featuresTableWithPath)
   featuresTableWithQc <- addAnnotationQualityToFeaturesTable(featuresTableWithMulti, scanResult$peakList)
   createFeaturesListFromFeaturesTable(featuresTableWithQc)
 }
@@ -86,34 +86,11 @@ addPathToFeaturesTable <- function(features, scanResult) {
   featuresWithPath
 }
 
-addMultiHitGroupToFeaturesTable <- function(featsTbl, scanRes) {
-  featsTbl <- mergeFeatsTblPeakListForMultiHits(featsTbl, scanRes$peakList)
-  featsTbl <- addMultiHitIdCol(featsTbl)
+addMultiHitGroupToFeaturesTable <- function(featsTbl) {
+  batchHash <- shortHash(dirname(featsTbl$path[1]))
+  featsTbl <- group_by(featsTbl, intensity, area, mz, rt, path) |> 
+    mutate(multi_hit_id = paste0(batchHash, cur_group_id())) |> ungroup()
   as.data.frame(featsTbl)
-}
-
-mergeFeatsTblPeakListForMultiHits <- function(ft, pl) {
-  pl <- rename(pl, name = comp_name)
-  ft <- addIonSpecToTable(ft)
-  pl <- addIonSpecToTable(pl)
-  left_join(ft, select(pl, ionSpec, duplicate), by = "ionSpec") |> select(-ionSpec)
-}
-
-addIonSpecToTable <- function(df) {
-  mutate(df, ionSpec = paste(name, adduct, isotopologue, sep = "|"))
-}
-
-addMultiHitIdCol <- function(ft) {
-  ft <- mutate(ft, multi_hit_id = ifelse(is.na(duplicate), NA, paste0(shortHash(path), duplicate))) |> 
-    select(-duplicate)
-  numUnitary <- sum(is.na(ft$multi_hit_id))
-  if (numUnitary > 0)
-    ft$multi_hit_id[is.na(ft$multi_hit_id)] <- randomString(numUnitary)
-  ft
-}
-
-randomString <- function(x) {
-  stringi::stri_rand_strings(n = x, length = 10)
 }
 
 shortHash <- function(x) {

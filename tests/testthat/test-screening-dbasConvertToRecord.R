@@ -10,8 +10,9 @@ test_that("A small result can be reformated to a dbasRecord object", {
   differenceIntArea <- featRecs[[1]]$area - featRecs[[1]]$intensity
   expect_gt(differenceIntArea, 100)
   checkForAlias(featRecs[[1]])
-  expect_length(featRecs[[1]]$compound_annotation, 1)
-  annotationTableCols <- names(featRecs[[1]]$compound_annotation[[1]])
+  level1Feat <- featRecs[sapply(featRecs, \(x) length(x) == 25)][[1]]
+  expect_length(level1Feat$compound_annotation, 1)
+  annotationTableCols <- names(level1Feat$compound_annotation[[1]])
   expect_contains(annotationTableCols, "score_ms2_match")
   expect_contains(annotationTableCols, "mz_diff_lib")
 })
@@ -117,9 +118,6 @@ test_that("If a peak has duplicate annotations, they are grouped as multihits an
   
   # Case 3) 3 duplicate, 1 unitary
   scanRes3 <- getDbasScanResultDuplicatePeaks()
-  scanRes3$peakList <- scanRes3$peakList[c(1,2,3,1), ]
-  scanRes3$peakList[4, "comp_name"] <- "Diclofenac"
-  scanRes3$peakList[4, "peakID"] <- 9
   scanRes3$reintegrationResults <- scanRes3$reintegrationResults[c(1,2,3,1), ]
   scanRes3$reintegrationResults[4, "comp_name"] <- "Diclofenac"
   recs3 <- convertToRecord(scanRes3, msrBatch)
@@ -129,13 +127,11 @@ test_that("If a peak has duplicate annotations, they are grouped as multihits an
   
   # Case 4) 2 duplicate, 2 duplicate, 1 unitary
   scanRes4 <- getDbasScanResultDuplicatePeaks()
-  scanRes4$peakList <- scanRes4$peakList[c(1,2,3,1,2), ]
-  scanRes4$peakList[c(4,5), "comp_name"] <- c("Diclofenac", "Sitagliptin")
-  scanRes4$peakList[c(4,5), "peakID"] <- c(8, 9)
-  scanRes4$peakList[c(4,5), "duplicate"] <- 2
   scanRes4$reintegrationResults <- scanRes4$reintegrationResults[c(1,2,3,1,2), ]
   scanRes4$reintegrationResults[4, "comp_name"] <- "Diclofenac"
   scanRes4$reintegrationResults[5, "comp_name"] <- "Sitagliptin"
+  scanRes4$reintegrationResults[4, "real_mz"] <- 100.0001
+  scanRes4$reintegrationResults[5, "real_mz"] <- 100.0001
   recs4 <- convertToRecord(scanRes4, msrBatch)
   expect_length(recs4, 5)
   expect_length(recs4[[1]]$name, 1)
@@ -143,9 +139,9 @@ test_that("If a peak has duplicate annotations, they are grouped as multihits an
   expect_length(recs4[[4]]$name, 1)
   multiHitIds <- unique(map_chr(recs4, \(x) x$multi_hit_id))
   expect_length(multiHitIds, 3)
-  expect_true(all(nchar(multiHitIds) == 10))
-  expect_contains(map_chr(recs4[[4]]$compound_annotation, \(x) x$name), "Diclofenac")
-  expect_contains(map_chr(recs4[[4]]$compound_annotation, \(x) x$name), "Sitagliptin")
+  artificialDup <- recs4[[which(sapply(recs4, \(x) x$name == "Diclofenac"))]]
+  expect_contains(map_chr(artificialDup$compound_annotation, \(x) x$name), "Diclofenac")
+  expect_contains(map_chr(artificialDup$compound_annotation, \(x) x$name), "Sitagliptin")
 })
 
 test_that("If there are gap-filled multihit peaks these are also linked", {
