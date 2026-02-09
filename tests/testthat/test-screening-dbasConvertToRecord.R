@@ -44,7 +44,8 @@ test_that("Spectra area added to feature", {
 
 test_that("MS2 matching score can be read for a peak ID", {
   scanResult <- getOneSampleDbasResultAndRecords()$dbasResult
-  matchScore <- getScoreMs2Match(10, scanResult)
+  peakId <- scanResult$peakList[1, "peakID"]
+  matchScore <- getScoreMs2Match(peakId, scanResult)
   expect_gt(matchScore, 300)
   expect_true(is.integer(matchScore))
 })
