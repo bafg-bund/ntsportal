@@ -24,6 +24,7 @@
 #' @importFrom purrr pluck
 #' @importFrom purrr reduce
 #' @importFrom purrr keep
+#' @importFrom purrr discard
 #' @importFrom purrr list_rbind
 #' @importFrom purrr list_c
 #' @importFrom tibble as_tibble

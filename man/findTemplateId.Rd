@@ -10,7 +10,7 @@ findTemplateId(
   pol = "pos",
   station = "rhein_ko_l",
   matrix = "spm",
-  duration = 365
+  duration = "P1D"
 )
 }
 \arguments{

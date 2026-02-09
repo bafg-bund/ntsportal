@@ -15,16 +15,13 @@ changeMsrawfilePath(rfIndex, oldPath, newPath, checkType = "md5")
 
 \item{checkType}{Method to check that files are the same, either "md5" (default) or "filesize"}
 }
-\value{
-TRUE if change was successful (invisibly)
-}
 \description{
 This is a secure method of changing the "path" field of an entry in msrawfiles. The filename is not changed and must
 remain the same. It will check that both files are the same before making the change.
 }
 \details{
 Both files must exist when making the change. The function takes some time if it compares md5-checksums of the two
-files. For large numbers of files use the filesize check.
+files. For large numbers of files use `checkType` = "filesize".
 }
 \examples{
 \dontrun{

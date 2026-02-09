@@ -1,4 +1,6 @@
 
+
+
 test_that("Batch check runs and returns error", {
   records <- getMsrawfilesTestRecords("dbas")
   recordsInBatches <- splitRecordsByDir(records)

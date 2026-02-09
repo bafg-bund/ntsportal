@@ -10,14 +10,13 @@
 checkMsrawfiles <- function(indexName = "ntsp25.2_msrawfiles") {
   if (!grepl("msrawfiles", indexName))
     stop("This function is intended only for msrawfiles-type indices")
-  runMsrawfileChecksForProcessingType("dbas")
-  runMsrawfileChecksForProcessingType("nts")
+  runMsrawfileChecksForProcessingType(indexName, "dbas")
+  runMsrawfileChecksForProcessingType(indexName, "nts")
 }
 
-runMsrawfileChecksForProcessingType <- function(screeningType) {
+runMsrawfileChecksForProcessingType <- function(indexName, screeningType) {
   allRecords <- getTableAsRecords(
-    getDbComm(), msrawfilesIndex, 
-    searchBlock = list(query = list(terms = list(batchname = batchNames))), sortField = "start", 
+    getDbComm(), indexName, sortField = "start", 
     fields = c(msrawfilesFieldsForProcessing(screeningType), msrawfileFieldsForValidation()),
     recordConstructor = switch(screeningType, dbas = newDbasMsrawfilesRecord, nts = newNtsMsrawfilesRecord)
   )

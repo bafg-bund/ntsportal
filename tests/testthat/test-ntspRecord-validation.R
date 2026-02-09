@@ -1,6 +1,8 @@
 
 
-
+test_that("Full validation of msrawfiles runs without error", {
+  expect_snapshot(checkMsrawfiles(testIndexName), error = TRUE)
+})
 
 test_that("Normal record validation returns true for dbas", {
   records <- getMsrawfilesTestRecords("dbas")
@@ -48,10 +50,10 @@ test_that("Wrong blank returns a warning", {
 
 test_that("An incorrect field in featureRecord in a nested field results in an error", {
   rr <- getOneSampleDbasResultAndRecords()
-  oneFeatureRecord <- convertToRecord(rr$dbasResult, rr$records)[[1]]
+  oneFeatureRecord <- convertToRecord(rr$dbasResult, rr$msrRecords)[[1]]
   expect_true(validateRecord(oneFeatureRecord))
   oneFeatureRecord$ms2 <- c(oneFeatureRecord$ms2, error_field = "error")
-  expect_warning(validateRecord(oneFeatureRecord), "error_field")
+  expect_warning(expect_warning(validateRecord(oneFeatureRecord), "ms2"), "error_field")
   expect_false(suppressWarnings(validateRecord(oneFeatureRecord)))
 })
 

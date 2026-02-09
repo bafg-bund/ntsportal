@@ -16,7 +16,20 @@ getSelectedMsrawfileBatches <- function(msrawfilesIndex, rootDirs, screeningType
 
 recordsToBatches <- function(records) {
   groupedRecords <- splitRecordsByDir(records)
+  groupedRecords <- map(groupedRecords, orderByStart)
   map(groupedRecords, recordsToOneBatch)
+}
+
+orderByStart <- function(records) {
+  recordsWithStart <- keep(records, \(x) "start" %in% names(x))
+  recordsWithoutStart <- discard(records, \(x) "start" %in% names(x))
+  if (length(recordsWithStart) > 0) {
+    startTimes <- map_chr(recordsWithStart, \(x) x$start)
+    stopifnot(all(grepl("\\d{4}-\\d{2}-\\d{2}", startTimes)))
+    startTimes <- lubridate::ymd(startTimes)
+    recordsWithStart <- recordsWithStart[order(startTimes)]
+  }
+  c(recordsWithStart, recordsWithoutStart)
 }
 
 recordsToOneBatch <- function(records) {
@@ -58,7 +71,8 @@ msrawfilesFieldsForProcessingGeneral <- function() {
     "path",
     "pol",
     "replicate_regex",
-    "spectral_library_path"
+    "spectral_library_path",
+    "start"
   )
 }
 

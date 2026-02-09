@@ -65,9 +65,10 @@ saveRDS(testNtsResults, test_path("fixtures", "screening-nts", "ntsResultSampleA
 
 # ntsResultBisoprololBatch ####
 batchDirectory <- file.path(rootDirectoryForTestMsrawfiles, "olmesartan-d6-bisoprolol")
-recs <- getMsrawfilesTestRecords()
+recs <- getMsrawfilesTestRecords(screeningType = "nts")
 recs <- keep(recs, \(rec) grepl(batchDirectory, rec$path))
-testNtsResults <- scanBatchNts(recs)
+recs <- newNtsMsrawfilesBatch(recs)
+testNtsResults <- scanBatch(recs)
 saveRDS(testNtsResults, test_path("fixtures", "screening-nts", "ntsResultBisoprololBatch.RDS"))
 
 # reintegratedReportDessauBatch and recordsDessauBatch ####

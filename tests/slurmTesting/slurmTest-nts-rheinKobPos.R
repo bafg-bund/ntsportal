@@ -7,4 +7,4 @@ dirs <- c(
 )
 screeningSelectedBatchesSlurm(index, dirs, saveDir, "jewell@bafg.de", screeningType = "nts")
 
-#ingestFeatureRecords("tests/slurmTesting/testResults", ingestPipeline = "ingest-feature")
+ingestFeatureRecords(saveDir)
