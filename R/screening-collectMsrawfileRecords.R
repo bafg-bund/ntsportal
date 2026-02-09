@@ -5,6 +5,8 @@ getSelectedMsrawfileBatches <- function(msrawfilesIndex, rootDirs, screeningType
   batchNames <- getAllBatchesInDir(msrawfilesIndex, rootDirs)
   if (length(batchNames) == 0)
     stop("No batches found in dir ", paste(rootDirs, collapse = ", "))
+  # Sorting by start is important for the "consecutive" filter (e.g. in daily measurements)
+  # Even though records are split after collection (see recordsToBatches()), the sort order is kept.
   allRecords <- getTableAsRecords(
     getDbComm(), msrawfilesIndex, 
     searchBlock = list(query = list(terms = list(batchname = as.list(batchNames)))), sortField = "start", 
@@ -16,20 +18,7 @@ getSelectedMsrawfileBatches <- function(msrawfilesIndex, rootDirs, screeningType
 
 recordsToBatches <- function(records) {
   groupedRecords <- splitRecordsByDir(records)
-  groupedRecords <- map(groupedRecords, orderByStart)
   map(groupedRecords, recordsToOneBatch)
-}
-
-orderByStart <- function(records) {
-  recordsWithStart <- keep(records, \(x) "start" %in% names(x))
-  recordsWithoutStart <- discard(records, \(x) "start" %in% names(x))
-  if (length(recordsWithStart) > 0) {
-    startTimes <- map_chr(recordsWithStart, \(x) x$start)
-    stopifnot(all(grepl("\\d{4}-\\d{2}-\\d{2}", startTimes)))
-    startTimes <- lubridate::ymd(startTimes)
-    recordsWithStart <- recordsWithStart[order(startTimes)]
-  }
-  c(recordsWithStart, recordsWithoutStart)
 }
 
 recordsToOneBatch <- function(records) {
