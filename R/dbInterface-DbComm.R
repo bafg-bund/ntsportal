@@ -75,6 +75,10 @@ setGeneric("refreshTable", function(dbComm, tableName) standardGeneric("refreshT
 #' @export
 setGeneric("removeValueFromArray", function(dbComm, tableName, field, value, searchBlock = list()) standardGeneric("removeValueFromArray"))
 
+#' Replace a value in a field
+#' @inheritParams  addValueToArray
+#' @param oldValue Value to be replaced
+#' @export
 setGeneric("replaceValueInField", function(dbComm, tableName, field, oldValue, newValue) standardGeneric("replaceValueInField"))
 
 #' Set the value of a field in a table

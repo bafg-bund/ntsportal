@@ -8,9 +8,12 @@
 #' @export
 updateLinearRegressionTable <- function(sourceTableName) {
   dbComm <- getDbComm()
-  stopifnot(grepl("dbas.*upb", sourceTableName))
-  queryBlock = list(term = list(duration = 365))
-  destTableName <- sub("^(ntsp\\d\\d\\.?\\d)_dbas_(.*)$", "\\1_analysis_dbas_\\2", sourceTableName)
+  stopifnot(grepl("feature.*upb", sourceTableName))
+  queryBlock = list(bool = list(must = list(
+    list(term = list(duration = "P1Y")),
+    list(nested = list(path = "compound_annotation", query = list(exists = list(field = "compound_annotation.name"))))
+  )))
+  destTableName <- sub("^(ntsp\\d\\d\\.?\\d)_feature_(.*)$", "\\1_analysis_dbas_\\2", sourceTableName)
   records <- computeLinearRegression(sourceTableName, queryBlock)
   deleteTable(dbComm, destTableName)
   createNewTable(dbComm, destTableName, "analysis_dbas")
@@ -138,5 +141,5 @@ getAggsForRegressionAnalysis <- function() {
 }
 
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

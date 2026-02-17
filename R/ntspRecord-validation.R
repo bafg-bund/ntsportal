@@ -7,7 +7,7 @@
 #' @param indexName default: ntspXX.X_msrawfiles
 #' @return TRUE if checks passed
 #' @export
-checkMsrawfiles <- function(indexName = "ntsp25.2_msrawfiles") {
+checkMsrawfiles <- function(indexName = "ntsp25.3_msrawfiles") {
   if (!grepl("msrawfiles", indexName))
     stop("This function is intended only for msrawfiles-type indices")
   runMsrawfileChecksForProcessingType(indexName, "dbas")
@@ -15,6 +15,7 @@ checkMsrawfiles <- function(indexName = "ntsp25.2_msrawfiles") {
 }
 
 runMsrawfileChecksForProcessingType <- function(indexName, screeningType) {
+  message("Checking metadata for processing type: ", screeningType)
   allRecords <- getTableAsRecords(
     getDbComm(), indexName, sortField = "start", 
     fields = c(msrawfilesFieldsForProcessing(screeningType), msrawfileFieldsForValidation()),
