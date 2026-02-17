@@ -14,19 +14,19 @@ knitr::opts_chunk$set(
 )
 ```
 
-`addRawfiles()` creates a new entry in the `msrawfiles` table. It uses an existing document as a template and dynamically changes certain fields based on data encoded in the filename or directly passed by the user. More details are found in the `addRawfiles()` documentation.
+`addRawfiles()` creates a new metadata entry for a measurment file in the `msrawfiles` table. It uses an existing entry as a template and dynamically changes certain fields based on data encoded in the filename or directly passed by the user. More details are found in the `addRawfiles()` documentation.
 
 # Step-by-step guide to using `addRawfiles()`
 
 1. Install the newest version of *ntsportal*, including the Python requirements.
-2. First, create a backup of `msrawfiles`. Use the function `createBackupMsrawfiles()`, a backup named `ntsp25.2_msrawfiles_backup_<YYYYMMDD>` is then created.
+2. First, create a backup of `msrawfiles`. Use the function `createBackupMsrawfiles()`, a backup named `ntsp25.3_msrawfiles_backup_<YYYYMMDD>` is then created.
 
 ```{r, eval=FALSE}
 
 library(ntsportal)
 connectNtsportal()
 
-rfIndex <- "ntsp25.2_msrawfiles"
+rfIndex <- "ntsp25.3_msrawfiles"
 
 createBackupMsrawfiles(rfIndex)
 ```
@@ -64,7 +64,7 @@ addRawfiles(
 
 - Use the `dirMeasurmentFiles` argument to specify where to look for the original (vendor format) measurement files (root directory is sufficient). This is used to get the measurement time since this is not always written in the mzXML file, e.g. when converting wiff files[^storage-bfg].
 
-5. Check `add-rawfiles-check.json` (e.g., `start`, `filename`, `pol` and `blank` fields)
+5. Check `add-rawfiles-check.json` (e.g., `start`, `filename`, `pol`, `instrument`, `tag`, `comment` and `blank` fields)
 - If you want to make changes to `add-rawfiles-check.json`, these can be accepted only if you are adding one file (run `addRawfiles()` with just one file in the `newPaths` argument)
 6. When prompted in the console, enter `y` when okay / `n` when not okay / `c` if you have made changes to the JSON (remember to save the JSON beforehand)
 7. Add the next set of files, in this example the blanks in the same batch are added:
@@ -97,9 +97,9 @@ The function is designed to make adding new files to `msrawfiles` as quick and e
 
 # Special cases
 
-## The files being added have different measurement locations
+## The files being added have different sampling locations
 
-`addRawfiles()` can dynamically change The location for each entry based on the location encoded in the filename. The field `dbas_station_regex` in the template document is used to find documents from a matching location from existing entries in `msrawfiles`. The location information is then copied from these documents (`station`, `loc`, `river`, `km` and `gkz` fields).
+`addRawfiles()` can dynamically change The location for each entry based on the location encoded in the filename. The field `dbas_station_regex` in the template document is used to find documents from a matching location from existing entries in `msrawfiles`. The location information is then copied from these documents (`station`, `loc`, `river`, `km` and `gkz` fields). `dbas_station_regex` must have `()` to indicate where the station code is found in the filename, e.g., `^(.*)_\d{2}_\d{2}`.
 
 Use `newStation = "filename"` to copy location information from other entries
 ```{r, eval=FALSE}
@@ -110,5 +110,5 @@ Example `filename`: `OBF34910_20230821_Zschopau_pos.mzXML`
 Example `dbas_station_regex`: `^(OBF\\d{5})_`
 
 
-<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- Copyright 2026 Bundesanstalt für Gewässerkunde -->
 <!-- This file is part of ntsportal -->

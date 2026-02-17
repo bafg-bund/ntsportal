@@ -58,5 +58,30 @@ test_that("Adding a file with malformed date results in an error", {
   expect_equal(numFound, 0)
 })
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+test_that("Location information is copied from msrawfiles based on dbas_station_regex of template", {
+  newFileName <- "Des_99_02_pos.mzXML"
+  qTest <- list(query = list(term = list(filename = newFileName)))
+  if (getNrow(dbComm, testIndexName, qTest) > 0)
+    deleteRow(dbComm, testIndexName, qTest)
+  saveDir <- withr::local_tempdir()
+  newFilePath <- file.path(saveDir, newFileName)
+  file.create(newFilePath)
+  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m")
+  suppressWarnings(addRawfiles(
+    rfIndex = testIndexName, 
+    templateId = templateId,
+    newPaths = newFilePath, 
+    newStation = "filename",
+    dirMeasurmentFiles = saveDir,
+    prompt = F,
+    saveDirectory = saveDir
+  ))
+  rec <- getTableAsRecords(dbComm, testIndexName, qTest, field = c("station", "loc", "river", "path"))[[1]]
+  expect_equal(rec$station, "mulde_de_m")
+  expect_type(rec$loc, "list")
+  expect_true(grepl(newFileName, rec$path))
+  deleteRow(dbComm, testIndexName, qTest)
+})
+
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

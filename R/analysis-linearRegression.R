@@ -11,6 +11,8 @@ updateLinearRegressionTable <- function(sourceTableName) {
   stopifnot(grepl("feature.*upb", sourceTableName))
   queryBlock = list(bool = list(must = list(
     list(term = list(duration = "P1Y")),
+    list(exists = list(field = "area_internal_standard")),
+    list(exists = list(field = "area")),
     list(nested = list(path = "compound_annotation", query = list(exists = list(field = "compound_annotation.name"))))
   )))
   destTableName <- sub("^(ntsp\\d\\d\\.?\\d)_feature_(.*)$", "\\1_analysis_dbas_\\2", sourceTableName)
