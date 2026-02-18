@@ -47,7 +47,7 @@ navbar:
       - text: --------
       - text: Database management
       - text: Adding measurement files to msrawfiles
-        href: articles/Add-measurement-file-to-msrawfiles.html
+        href: articles/add-measurement-file-to-msrawfiles.html
       - text: Modifying documents via the API
         href: articles/Modify-documents-using-API.html
       - text: --------

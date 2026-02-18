@@ -10,7 +10,7 @@ Provides functionality for building and managing the NTSPortal database.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/bafg-bund/ntsportal}
+  \item \url{https://docs.ntsportal.bafg.de}
 }
 
 }

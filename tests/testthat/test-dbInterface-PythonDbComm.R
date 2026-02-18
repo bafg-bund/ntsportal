@@ -55,7 +55,6 @@ test_that("You can retrieve an entire index as records", {
 })
 
 test_that("You can retrieve records sorted by a field or fields", {
-  dbComm <- getDbComm()
   records <- getTableAsRecords(dbComm, testIndexName, fields = "start")
   startValsUnsorted <- map_chr(records, \(rec) rec$start)
   records <- getTableAsRecords(dbComm, testIndexName, fields = "start", sortField = "start")
@@ -72,6 +71,26 @@ test_that("You can retrieve records sorted by a field or fields", {
   expect_false(identical(startValsSorted, startValsSortedInverse))
   expect_equal(startValsSortedUsingList, startValsSortedInverse)
   expect_false(identical(startValsSortedUsingList, startValsSortedUsingListMultiSort))
+})
+
+test_that("You can remove a field from a row", {
+  getRivers <- function(recs) {
+    unlist(purrr::map_if(recs, \(x) !is.null(x$river), \(x) x$river, .else = \(x) NA_character_))
+  }
+  # create new test table
+  dummyIndex <- "ntsp_foobar"
+  if (isTable(dbComm, dummyIndex))
+    deleteTable(dbComm, dummyIndex)
+  copyTable(dbComm, testIndexName, dummyIndex, "msrawfiles")
+  recs <- getTableAsRecords(dbComm, dummyIndex, fields = "river")
+  expect_contains(getRivers(recs), "mulde")
+  expect_contains(getRivers(recs), "rhein")
+  removeFieldFromTable(dbComm, dummyIndex, "river", list(query = list(term = list(river = "mulde"))))
+  recs <- getTableAsRecords(dbComm, dummyIndex, fields = "river")
+  
+  expect_disjoint(getRivers(recs), "mulde")
+  expect_contains(getRivers(recs), "rhein")
+  deleteTable(dbComm, dummyIndex)
 })
 
 test_that("You can append records to a table (ingest)", {
@@ -167,5 +186,5 @@ test_that("You can add a value to an array", {
   expect_equal(cleanedFp, originalFp)
 })
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

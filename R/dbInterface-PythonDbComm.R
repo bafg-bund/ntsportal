@@ -197,6 +197,22 @@ setMethod("setValueInField", "PythonDbComm", function(dbComm, tableName, field, 
   refreshTable(dbComm, tableName)
 })
 
+# removeFieldFromTable ####
+setMethod("removeFieldFromTable", "PythonDbComm", function(dbComm, tableName, field, searchBlock = list()) {
+  searchBlock <- matchAllIfEmpty(searchBlock)
+  tryCatch({
+    ubq <- dbComm@dsl$UpdateByQuery(using = dbComm@client, index = tableName)$
+      update_from_dict(searchBlock)$
+      script(source=glue("ctx._source.remove('{field}')"))
+    resp <- ubq$execute()
+  },
+  error = function(cnd)
+    warning("Error in removeFieldFromTable: ", conditionMessage(cnd))
+  )
+  numberUpdatedMessage(resp)
+  refreshTable(dbComm, tableName)
+})
+
 # removeValueFromArray ####
 setMethod("removeValueFromArray", "PythonDbComm", function(dbComm, tableName, field, value, searchBlock = list()) {
   searchBlock <- matchAllIfEmpty(searchBlock)
@@ -250,5 +266,5 @@ matchAllIfEmpty <- function(searchBlock) {
   }
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

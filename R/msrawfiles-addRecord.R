@@ -357,7 +357,6 @@ reformatDate <- function(dateObject) {
 addStationToRecord <- function(rec, newStation, rfIndex, newStationList) {
   # In the case of "same_as_template" no changes are made to rec (it was a copy of template)
   if (newStation == "filename") {
-    
     stationList <- getStationListFromCode(rfIndex, basename(rec$path), rec$dbas_station_regex)
     rec <- appendStationListFields(rec, stationList)
   } else if (newStation == "newStationList") {
@@ -477,11 +476,10 @@ checkLocIsUniform <- function(stationHits) {
 }
 
 addOptionalStationField <- function(field, resListTemp, hits) {
-  if (all(vapply(hits, function(doc) !is.null(doc[["_source"]][[field]]), logical(1)))) {
-    vals <- vapply(hits, function(doc) doc[["_source"]][[field]], 
-                   switch(field, river = character(1), km = numeric(1), gkz = numeric(1)))
+  if (all(map_lgl(hits, \(x) !is.null(x[[field]])))) {
+    vals <- vapply(hits, \(x) x[[field]], switch(field, river = character(1), km = numeric(1), gkz = numeric(1)))
     if (length(unique(vals)) != 1) {
-      stop("Not all ", field, " are the same for station ", st[1])
+      stop("Not all ", field, " are the same for station ", hits[[1]]$station)
     }
     resListTemp[[field]] <- vals[1]
   }

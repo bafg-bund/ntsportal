@@ -99,7 +99,9 @@ The function is designed to make adding new files to `msrawfiles` as quick and e
 
 ## The files being added have different sampling locations
 
-`addRawfiles()` can dynamically change The location for each entry based on the location encoded in the filename. The field `dbas_station_regex` in the template document is used to find documents from a matching location from existing entries in `msrawfiles`. The location information is then copied from these documents (`station`, `loc`, `river`, `km` and `gkz` fields). `dbas_station_regex` must have `()` to indicate where the station code is found in the filename, e.g., `^(.*)_\d{2}_\d{2}`.
+`addRawfiles()` can dynamically change The location for each entry based on the location encoded in the filename. The field `dbas_station_regex` in the template document is used to find documents from a matching location from existing entries in `msrawfiles`. The location information is then copied from these documents (`station`, `loc`, `river`, `km` and `gkz` fields). `dbas_station_regex` must have `()` to indicate where the station code is found in the filename, e.g., `^(.*)_\d{2}_\d{2}`. 
+
+Note that if the sampling date (`start`) is also encoded in the filename, the parsing is done using the `start_date_regex` from the template entry. Therefore, the regular expression in `start_date_regex` from the template entry must be generalized to work with all possible station codes. 
 
 Use `newStation = "filename"` to copy location information from other entries
 ```{r, eval=FALSE}
