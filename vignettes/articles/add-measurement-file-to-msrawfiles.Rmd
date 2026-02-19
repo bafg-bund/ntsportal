@@ -24,7 +24,6 @@ knitr::opts_chunk$set(
 ```{r, eval=FALSE}
 
 library(ntsportal)
-connectNtsportal()
 
 rfIndex <- "ntsp25.3_msrawfiles"
 

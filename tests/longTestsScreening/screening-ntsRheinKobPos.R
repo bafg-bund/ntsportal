@@ -1,4 +1,4 @@
-# nohup Rscript screening-ntsRealBatchRheinKobPos.R &> ntsRheinKobPos.log &
+# nohup Rscript screening-ntsRheinKobPos.R &> ntsRheinKobPos.log &
 library(ntsportal)
 tempSaveDir <- "testResults-ntsRheinKobPos"
 unlink(tempSaveDir, recursive = T)
