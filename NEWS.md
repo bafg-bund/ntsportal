@@ -62,11 +62,11 @@ annotation level (1 or 2 [gap-filled]) does not play a role.
   - `dbas_build_averages`
   - `dbas_cores_report`
   - `dbas_cores`
-  - `nts_spectral_library`
+  - `nts_spectral_library` (use `spectral_library_path`)
   - `dbas_spectral_library_sha256`
   - `nts_index_name`
-  - `nts_alias_name`
-  - `dbas_alias_name`
+  - `nts_alias_name` (use `feature_table_alias`)
+  - `dbas_alias_name` (use `feature_table_alias`)
   - `nts_alig_mz_tol_units`
 * Field names in `spectral_library` documents have changed
   - `frag_type` to `collision_type`

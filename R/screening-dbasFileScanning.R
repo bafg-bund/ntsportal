@@ -221,6 +221,7 @@ getFileIndices <- function(compName, originalSampName, pl, reportRawFiles) {
 emptyFalsePostivesTibble <- function() {
   tibble(compName = character(), fileIndex = numeric())
 }
+
 reintegrateReport <- function(report) {
   originalReport <- report$copy()
   batchPath <- dirname(report$rawFiles[1])
@@ -272,7 +273,5 @@ getValueOrEmpty <- function(record, field) {
     NA else temp
 }
 
-
-
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
