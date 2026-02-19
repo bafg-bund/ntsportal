@@ -1,6 +1,6 @@
 
 # Variables to be changed #################
-userEmail <- "jewell@bafg.de"
+userEmail <- "prodoehl@bafg.de"
 dirTestResults <- "tests/slurmTesting/testResults-dbas-rheinKobPos"
 msrawfileIndexName <- "ntsp25.3_msrawfiles"
 ###########################################

@@ -45,6 +45,6 @@ bfgdown::insertLogo(public, "pkgdown/bfg_logo.png", href = "https://www.bafg.de"
 # sync with public_html
 host <- Sys.info()["nodename"]
 user <- Sys.info()["user"]
-if (host == "pvil-rr.bafg.de" & user == "Jewell") {
+if (host == "pvil-rr.bafg.de") {
   system(sprintf("cp -rp %s/* /home/%s/public_html/ntsportal_pkgdown", public, user))
 }

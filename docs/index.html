@@ -106,8 +106,8 @@
 <li>Confirm that Python and a virtual environment is available</li>
 </ol>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/virtualenv-tools.html" class="external-link">virtualenv_exists</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>If there are errors, check that <code>reticulate</code> is installed and the virtual environment is activated (in RStudio under Project or Global options). If no virtual environment is available, use <code><a href="https://rstudio.github.io/reticulate/reference/virtualenv-tools.html" class="external-link">reticulate::virtualenv_create()</a></code>.</p>
+<code class="sourceCode R"><span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/reticulate/man/virtualenv-tools.html" class="external-link">virtualenv_exists</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>If there are errors, check that <code>reticulate</code> is installed and the virtual environment is activated (in RStudio under Project or Global options). If no virtual environment is available, use <code><a href="https://rdrr.io/pkg/reticulate/man/virtualenv-tools.html" class="external-link">reticulate::virtualenv_create()</a></code>.</p>
 <ol start="2" style="list-style-type: decimal">
 <li>Install ntsportal</li>
 </ol>
@@ -117,7 +117,7 @@
 <li>Install Python packages</li>
 </ol>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/virtualenv-tools.html" class="external-link">virtualenv_install</a></span><span class="op">(</span>requirements <span class="op">=</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path_package.html" class="external-link">path_package</a></span><span class="op">(</span><span class="st">"ntsportal"</span>, <span class="st">"pythonElasticComm"</span>, <span class="st">"requirements.txt"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/reticulate/man/virtualenv-tools.html" class="external-link">virtualenv_install</a></span><span class="op">(</span>requirements <span class="op">=</span> <span class="fu">fs</span><span class="fu">::</span><span class="fu"><a href="https://fs.r-lib.org/reference/path_package.html" class="external-link">path_package</a></span><span class="op">(</span><span class="st">"ntsportal"</span>, <span class="st">"pythonElasticComm"</span>, <span class="st">"requirements.txt"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>If not already created, this command will create the “r-reticulate” Python virtual environment and install packages.</p>
 <ol start="4" style="list-style-type: decimal">
 <li>Setup connection to Elasticsearch</li>
