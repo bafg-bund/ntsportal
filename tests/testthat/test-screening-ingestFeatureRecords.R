@@ -9,6 +9,8 @@ test_that("One file is uploaded in Elasticsearch", {
   expect_match(aliasName, "ntsp\\d{2}\\.\\d+_feature_unit_tests")
   startDate <- getTableByQuery(indexName, fields = "start") |> slice(1) |> as.character()
   expect_match(startDate, "\\d{4}-\\d{2}-\\d{2}")
+  instName <- getTableByQuery(indexName, fields = "instrument_name") |> slice(1) |> as.character()
+  expect_equal(instName, "sediment_tof")
   deleteTable(dbComm, indexName)
 })
 
@@ -30,7 +32,7 @@ test_that("You can add the current time to a list of records", {
 test_that("You can add the RDS path to a list of records", {
   jsonPath <- getRdsFilePaths(test_path("fixtures", "featureRecordExampleRds"))
   recs <- readRdsToRecords(jsonPath)
-  expect_match(recs$rdsPath, "ntsportal-featureRecord.*-part-a\\.RDS$")
+  expect_match(recs$rdsPath, "ntsportal-featureRecord-\\d{6}-\\d{4}-.*\\.RDS$")
 })
 
 test_that("You can create multiple indices", {
@@ -54,7 +56,7 @@ test_that("An error in python results in an error message", {
   
   executePyIngestModule(recs, dbComm, indexTimeStamp, indexMappingPath)
   errorLines <- readLines(tfile)
-  expect_match(errorLines[1], "ntsportal-featureRecord.*-part-a")
+  expect_match(errorLines[1], "ntsportal-featureRecord-\\d{6}-\\d{4}-.*\\.RDS")
   file.remove(tfile)
   log_appender(appender_console)
 })

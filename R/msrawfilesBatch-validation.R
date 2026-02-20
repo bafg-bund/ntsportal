@@ -103,8 +103,7 @@ fieldsToCheckUniformAllSamples.msrawfilesBatch <- function(msrawfilesBatch) {
     "pol",
     "data_source",
     "chrom_method",
-    "internal_standard",
-    "feature_table_alias"
+    "internal_standard"
   )
 }
 #' @export

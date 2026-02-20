@@ -14,13 +14,15 @@ knitr::opts_chunk$set(
 )
 ```
 
-The documentation is extensive: [Aggregations Docs](https://www.elastic.co/docs/explore-analyze/query-filter/aggregations). For the NTSPortal schema, see [Structure of NTSPortal](articles/structure-and-table-naming.html). 
+The API documentation is extensive: [Aggregations Docs](https://www.elastic.co/docs/explore-analyze/query-filter/aggregations). For the NTSPortal schema, see [Structure of NTSPortal](articles/structure-and-table-naming.html) and [Document field descriptions for NTSPortal](articles/table-mappings.html).
+
+The use of the aggregation API from Python is possible using the package `elasticsearch` (in R the python code is called via `reticulate`). See the example in `ntsportal::getUniqueValues()`.
 
 # Aggregation: `terms`
 
 The `terms` aggregation groups the documents returned by the query into buckets according to a keyword or boolean field. Aggregations can be nested, so each bucket can be successively split into further sub-buckets.
 
-This code is to search for two stations and split results by station, polarity and blank yes/no via three nested `terms` aggregations. 
+This code (for the elasticsearch console) is to search for two stations and split results by station, polarity and blank yes/no via three nested `terms` aggregations. 
 
 ```json
 GET ntsp_msrawfiles/_search?size=0  // Size is 0, meaning no doc sources are returned
@@ -96,7 +98,7 @@ GET ntsp25.2_dbas*/_search?size=0
 In this example a `term` query is used to filter only for data from suspended particulate matter (spm). The detections are then binned by station name (`terms` bucket aggregation) and for each station the latest file upload time is returned (`max` metric aggregation).
 
 ```json
-GET ntsp_msrawfiles/_search?size=0
+GET ntsp25.3_msrawfiles/_search?size=0
 {
   "query": {
     "term": {
@@ -126,7 +128,7 @@ GET ntsp_msrawfiles/_search?size=0
 In this example the query is for stations ulm or wettin, no blanks and the documents are split by station and polarity
 
 ```json
-GET ntsp_msrawfiles/_search?size=0
+GET ntsp25.3_msrawfiles/_search?size=0
 {
   "query": {
     "bool": {
@@ -142,7 +144,7 @@ GET ntsp_msrawfiles/_search?size=0
         {
           "term": {
             "blank": {
-              "value": "false"
+              "value": false
             }
           }
         }
@@ -171,7 +173,7 @@ GET ntsp_msrawfiles/_search?size=0
 In this example documents are searched by matching a pattern and the split by coordinates (geopoint)
 
 ```json
-GET ntsp_msrawfiles/_search?size=0
+GET ntsp25.3_msrawfiles/_search?size=0
 {
   "query": {
     "regexp": {
@@ -278,5 +280,5 @@ GET ntsp_dbas_v231006_frame/_search?size=0
 }
 ```
 
-<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- Copyright 2026 Bundesanstalt für Gewässerkunde -->
 <!-- This file is part of ntsportal -->

@@ -47,6 +47,8 @@ ingesting is done by `appendRecords()`
 annotation level (1 or 2 [gap-filled]) does not play a role.
 * Vignette documentation moved from vignettes to pkgdown articles, which are available on the documentation website 
 (to reduce installation size).
+* Added field `instrument_name` to `msrawfiles` and `feature` table to identify instruments
+* `feature_table_alias` no longer needs to be uniform within a batch
 * Field names in `msrawfiles` documents have changed to accommodate NTS processing.
   - `dbas_blank_regex` to `blank_regex`
   - `dbas_date_format` to `start_date_format`
@@ -75,7 +77,7 @@ annotation level (1 or 2 [gap-filled]) does not play a role.
   + Python = 3.12.12
   + ElasticSearch = 9.2.3
   + elasticsearch (Python) = 9.2.1
-  + CSL = 25.7
+  + CSL = 26.1
   + ntsworkflow = 0.2.10
   
   

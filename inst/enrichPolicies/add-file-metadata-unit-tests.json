@@ -19,7 +19,8 @@
       "comment",
       "dbas_alias_name",
       "station",
-      "loc"
+      "loc",
+      "instrument_name"
     ]
   }
 }

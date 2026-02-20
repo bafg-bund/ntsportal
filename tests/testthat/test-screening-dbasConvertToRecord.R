@@ -10,7 +10,7 @@ test_that("A small result can be reformated to a dbasRecord object", {
   differenceIntArea <- featRecs[[1]]$area - featRecs[[1]]$intensity
   expect_gt(differenceIntArea, 100)
   checkForAlias(featRecs[[1]])
-  level1Feat <- featRecs[sapply(featRecs, \(x) length(x) == 25)][[1]]
+  level1Feat <- featRecs[sapply(featRecs, \(x) length(x) == 26)][[1]]
   expect_length(level1Feat$compound_annotation, 1)
   annotationTableCols <- names(level1Feat$compound_annotation[[1]])
   expect_contains(annotationTableCols, "score_ms2_match")
@@ -96,15 +96,15 @@ test_that("Annotation quality information is added to records", {
 })
 
 test_that("If a peak has duplicate annotations, they are grouped as multihits and all annotations are included", {
-  # Case 1) 2 duplicate, 1 unitary
+  # Case 1) 2 duplicate, 2 unitary
   scanRes1 <- getDbasScanResultDuplicatePeaks()
   msrBatch <- getDbasBatchDuplicatePeaks()
   recs1 <- convertToRecord(scanRes1, msrBatch)
-  expect_length(recs1, 3)
+  expect_length(recs1, 4)
   expect_length(recs1[[1]]$name, 1)
-  expect_length(recs1[[2]]$compound_annotation, 2)
-  expect_contains(names(recs1[[2]]), "multi_hit_id")
-  expect_type(recs1[[2]]$multi_hit_id, "character")
+  expect_length(recs1[[3]]$compound_annotation, 2)
+  expect_contains(names(recs1[[3]]), "multi_hit_id")
+  expect_type(recs1[[3]]$multi_hit_id, "character")
   
   # Case 2) 2 unitary
   scanRes2 <- getDbasScanResultDuplicatePeaks()
