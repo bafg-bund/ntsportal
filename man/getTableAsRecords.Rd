@@ -9,6 +9,7 @@ getTableAsRecords(
   tableName,
   searchBlock = list(),
   fields = "*",
+  sortField = "no-sort",
   recordConstructor = newNtspRecord
 )
 }
@@ -20,6 +21,9 @@ getTableAsRecords(
 \item{searchBlock}{list coercible to json for Elasticsearch Search API (Query DSL)}
 
 \item{fields}{Fields to include in the response, wildcards are permitted, default is all fields.}
+
+\item{sortField}{field by which to sort the results, length-one character (optionally preceded by '-') or list, see
+https://elasticsearch-dsl.readthedocs.io/en/stable/api.html#elasticsearch_dsl.Search.sort}
 
 \item{recordConstructor}{function to construct new records}
 }

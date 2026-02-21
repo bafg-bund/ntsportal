@@ -47,12 +47,12 @@ testForPipeline <- function(pipelineName) {
     error = function(cnd) {
       message(pipelineName, " not found: ", conditionMessage(cnd))  
     })
-  if (exists("res")) {
-    length(res$body[[pipelineName]]) == 1
+  if (exists("res") && is.numeric(res$body[[pipelineName]]$created_date_millis)) {
+    TRUE
   } else {
     FALSE
   }
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

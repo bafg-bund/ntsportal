@@ -1,0 +1,163 @@
+{
+  "mappings" : {
+    "_meta": {
+      "type": "ntsportal,feature",
+      "version": "25.3",
+      "licence": "GNU GPL-3.0"
+    },
+    "dynamic": "strict",
+    "properties" : {
+      "adduct" : {"type" : "keyword", "meta": {"description": "ESI adduct form", "example": "[M+H]+"}},
+      "area" : {"type" : "integer", "meta": {"description": "chromatographic peak area"}},
+      "area_internal_standard" : {"type" : "integer", "meta": {"description": "chromatographic peak area"}},
+      "cas" : {"type" : "keyword", "meta": {"description": "chemical abstracts service registry number", "example": "95-14-7"}},
+      "chrom_method" : {"type" : "keyword", "meta": {"description": "chromatographic method code", "example": "bfg_nts_rp1"}},
+      "comment" : {"type" : "text", "meta": {"description": "free as text or array of text blocks"}},
+      "comp_group" : {"type" : "keyword", "meta": {"description": "compound usage or classification(s)", "example": "Industrial_process"}},
+      "compound_annotation": {
+        "type" : "nested",
+        "properties" : {
+          "adduct" : {"type" : "keyword", "meta": {"description": "ESI adduct form", "example": "[M+H]+"}},
+          "cas" : {"type" : "keyword", "meta": {"description": "chemical abstracts service registry number", "example": "95-14-7"}},
+          "formula" : {"type" : "keyword", "meta": {"description": "molecular formula", "example": "C7H4Cl2O2"}},
+          "inchi" : {"type" : "keyword", "meta": {"description": "international chemical identifier", "example": "InChI=1S/C7H5NS/c1-2-4-7-6(3-1)8-5-9-7/h1-5H"}},
+          "inchikey" : {"type" : "keyword", "meta": {"description": "hash of international chemical identifier", "example": "ILLQTAPXYCRJRB-UHFFFAOYSA-N"}},
+          "isotopologue" : {"type" : "keyword", "meta": {"description": "isotopic difference to monoisotopic", "example": "37Cl"}},
+          "name" : {"type" : "keyword", "meta": {"description": "compound name"}},
+          "rt_diff_lib" : {"type" : "half_float", "meta": {"unit": "minutes", "description": "rt difference to library"}},
+          "mz_diff_lib" : {"type" : "float", "meta": {"unit": "mDa", "description": "mz difference to library"}},
+          "score_ms2_match": {
+            "type": "short",
+            "meta": {"description": "Dot product matching score out of 1000", "example": "452"}
+          }
+        }
+      },
+      "concentration" : {"type" : "half_float", "meta": {"unit": "ng/L", "description": "estimated concentration"}},
+      "data_source" : {"type" : "keyword", "meta": {"description": "institution responsible for data processing", "example": "bfg"}},
+      "date_measurement" : {
+        "type" : "date",
+        "format" : "yyyy-MM-dd HH:mm:ss",
+        "meta": {"description": "instrumental analysis time"}
+      },
+      "date_import" : {
+        "type" : "date",
+        "format": "yyyy-MM-dd HH:mm:ss",
+        "meta": {"description": "ingest time"}
+      },
+      "feature_table_alias": {"type" : "keyword", "meta": {"description": "Alias to use for feature table", "example": "ntsp25.3_feature_bfg"}},
+      "duration" : {"type" : "keyword", "meta": {"description": "Composite sample duration (ISO 8601) grab: P0", "example": "P1Y"}},
+      "eic" : {
+        "type" : "nested",
+        "properties" : {
+          "int" : {"type" : "scaled_float", "scaling_factor": 10, "meta": {"description": "intensity"}},
+          "time" : {"type" : "scaled_float", "scaling_factor": 10, "meta": {"unit": "s", "description": "chromatographic run time"}}
+        },
+        "enabled": false
+      },
+      "formula" : {"type" : "keyword", "meta": {"description": "molecular formula", "example": "C7H4Cl2O2"}},
+      "gkz" : { "type" : "integer", "meta": {"description": "gewaesserkennzahl of sampling location", "example": "26"}},
+      "inchi" : {"type" : "keyword", "meta": {"description": "international chemical identifier", "example": "InChI=1S/C7H5NS/c1-2-4-7-6(3-1)8-5-9-7/h1-5H"}},
+      "inchikey" : {"type" : "keyword", "meta": {"description": "hash of international chemical identifier", "example": "ILLQTAPXYCRJRB-UHFFFAOYSA-N"}},
+      "instrument": { "type" : "text", "meta": {"description": "instrument type code", "example": "LC-ESI-QTOF TripleTOF 6600 SCIEX"}},
+      "instrument_name": {"type": "keyword", "meta": {"description": "Instrument name", "example": "wasser_tof"}},
+      "intensity" : {"type" : "integer", "meta": {"description": "chromatographic peak height at apex"}},
+      "internal_standard" : {"type" : "keyword", "meta": {"description": "int. std. compound name", "example": "Bezafibrate-d6"}},
+      "intensity_internal_standard" : {"type" : "integer", "meta": {"description": "peak intensity (height at apex)"}},
+      "isotopologue" : {"type" : "keyword", "meta": {"description": "isotopic difference to monoisotopic", "example": "37Cl"}},
+      "km": { "type" : "half_float", "meta": {"description": "river kilometer of sampling location"}},
+      "licence" : {"type" : "keyword", "meta": {"description": "open data licence for data", "example": "dl-de/by-2-0"}},
+      "csl_experiment_id":  {"type" : "integer", "meta": {"description": "CSL experiment ID for spectral match", "example": "26"}},
+      "library_mz": {"type" : "float", "meta": {"unit": "Da", "description": "mass-to-charge ratio in library"}},
+      "library_rt": {"type" : "half_float", "meta": {"unit": "minutes", "description": "library retention time at peak apex"}},
+      "loc" : {"type" : "geo_point", "meta": {"description": "sampling coordinates (WGS84)"}},
+      "matrix" : {"type" : "keyword", "meta": {"description": "sampling matrix code", "example": "spm"}},
+      "ms1" : {
+        "type" : "nested",
+        "properties" : {
+          "int" : {"type" : "scaled_float", "scaling_factor": 100, "meta": {"description": "centroid intensity, relative to feature intensity"}},
+          "mz" : {"type" : "float", "meta": {"unit": "Da", "description": "mass-to-charge ratio"}}
+        },
+        "enabled": false
+      },
+      "ms2" : {
+        "type" : "nested",
+        "properties" : {
+          "int" : {"type" : "scaled_float", "scaling_factor": 100, "meta": {"description": "centroid intensity, relative to max"}},
+          "mz" : {"type" : "float", "meta": {"unit": "Da", "description": "mass-to-charge ratio"}}
+        }
+      },
+      "multi_hit_id" : {"type" : "keyword", "meta": {"description": "ID of duplicate features from multiple annotations"}},
+      "mz" : {"type" : "float", "meta": {"unit": "Da", "description": "mass-to-charge ratio"}},
+      "mz_diff_lib" : {"type" : "float", "meta": {"unit": "mDa", "description": "mz difference to library"}},
+      "name" : {"type" : "keyword", "meta": {"description": "compound name as written in library"}},
+      "path": {"type" : "keyword", "meta": {"description": "absolute path to measurement file (mzXML, mzML)"}},
+      "pol" : {"type" : "keyword", "meta": {"description": "3-letter ESI polarity mode", "example": "pos"}},
+      "river" : { "type" : "keyword", "meta": {"description": "river name of sampling location (local spelling)", "example": "rhein"}},
+      "rt" : {"type" : "half_float", "meta": {"unit": "minutes", "description": "chromatographic retention time at peak apex"}},
+      "rt_diff_lib" : {"type" : "half_float", "meta": {"unit": "minutes", "description": "rt difference to library"}},
+      "rtt" : {
+        "type" : "nested",
+        "properties" : {
+          "method" : {
+            "type" : "keyword", "meta": {"description": "chromatographic method code", "example": "bfg_nts_rp1"}
+          },
+          "predicted" : {
+            "type" : "boolean", "meta": {"description": "is predicted (non-experimental) retention time"}
+          },
+          "rt" : {
+            "type" : "half_float",
+            "meta": {"unit": "min", "description": "chromatographic retention time at peak apex"}
+          }
+        }
+      },
+      "sample_source" : {
+        "type" : "keyword", 
+        "meta": {"description": "institute responsible for sampling", "example": "bful/lfulg saxony"}
+      },
+      "score_ms2_match": {
+        "type": "short",
+        "meta": {"description": "Dot product matching score out of 1000", "example": "452"}
+      },
+      "start" : {
+        "type" : "date",
+        "format" : "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||yyyy-MM-dd HH:mm",
+        "meta": {"description": "sampling time (start time for composite)"}
+      },
+      "station" : {"type" : "keyword", "meta": {"description": "sampling location code", "example": "rhein_ko_l"}},
+      "tag": {"type": "keyword", "meta": {"description": "labels to assist searching"}}
+    },
+    "runtime": {
+      "area_relative_to_internal_standard" : {
+        "type": "double",
+        "script": {
+          "source": "if (params._source.area_internal_standard != null) emit((double)params._source.area / (double)params._source.area_internal_standard)"
+        },
+        "meta": {"description": "area/area_internal_standard"}
+      },
+      "batchname": {
+        "type": "keyword",
+        "script": "def x = params._source.path.splitOnToken('/'); emit(String.join('/', Arrays.asList(x).subList(0,x.length-1)))",
+        "meta": {"description": "Leading directories of path field", "example": "/beegfs/nts/ntsportal/msrawfiles/unit_tests"}
+      },
+      "filename": {
+        "type" : "keyword",
+        "script": "def x=params._source.path.splitOnToken('/'); emit(x[x.length-1])",
+        "meta": {"description": "Basename of path field", "example": "KO_06_1_pos.mzXML"}
+      },
+      "intensity_relative_to_internal_standard" : {
+        "type": "double",
+        "script": {
+          "source": "if (params._source.intensity_internal_standard != null) emit((double)params._source.intensity / (double)params._source.intensity_internal_standard)"
+        },
+        "meta": {"description": "intensity/intensity_internal_standard"}
+      },
+      "esi_ion_spec": {
+        "type": "keyword",
+        "script": {
+          "source": "emit(doc['name'].value +'_'+ doc['pol'].value +'_'+ doc['adduct'].value +'_'+ doc['isotopologue'].value)"
+        },
+        "meta": {"description": "Concatination of name, pol, adduct, isotopologue", "example": "1,3-Dicyclohexylurea_pos_[M+H]+_monoisotopic"}
+      }
+    }
+  }
+}

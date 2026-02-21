@@ -61,6 +61,9 @@
             if (ctx.file_metadata.loc != null) {
               ctx.loc = ctx.file_metadata.loc;
             }
+            if (ctx.file_metadata.instrument_name != null) {
+              ctx.instrument_name = ctx.file_metadata.instrument_name;
+            }
             ctx.remove('file_metadata');
           }
         "

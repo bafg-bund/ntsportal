@@ -50,24 +50,15 @@ setGeneric("getNrow", function(dbComm, tableName, searchBlock = list()) standard
 #' make a subclass, e.g., to make `msrawfilesRecord`s use `newMsrawfilesRecord`. The default makes the generic `ntspRecord`.
 #' @inheritParams getNrow
 #' @param fields Fields to include in the response, wildcards are permitted, default is all fields.
+#' @param sortField field by which to sort the results, length-one character (optionally preceded by '-') or list, see
+#'   https://elasticsearch-dsl.readthedocs.io/en/stable/api.html#elasticsearch_dsl.Search.sort
 #' @param recordConstructor function to construct new records
 #' @return A `list` of `ntspRecord` objects
 #' @export
 setGeneric(
   "getTableAsRecords", 
-  function(dbComm, tableName, searchBlock = list(), fields = "*", recordConstructor = newNtspRecord) 
+  function(dbComm, tableName, searchBlock = list(), fields = "*", sortField = "no-sort", recordConstructor = newNtspRecord) 
     standardGeneric("getTableAsRecords")
-)
-
-#' Get a table as a tibble
-#' @description Works similarly to `getTableAsRecords()` but reformats the `ntspRecords` into a `tibble`. 
-#' @inheritParams getTableAsRecords
-#' @return A tibble
-#' @seealso \link{`getTableAsRecords`}
-#' @export
-setGeneric(
-  "getTableAsTibble",
-  function(dbComm, tableName, searchBlock = list(), fields = "*") standardGeneric("getTableAsTibble")
 )
 
 #' Get unique values in a field of a table
@@ -76,21 +67,6 @@ setGeneric(
 #' @return a vector
 #' @export
 setGeneric("getUniqueValues", function(dbComm, tableName, field, maxLength = 10000) standardGeneric("getUniqueValues"))
-setGeneric("refreshTable", function(dbComm, tableName) standardGeneric("refreshTable"))
-
-#' Remove a value from an array field 
-#' @inheritParams addValueToArray
-#' @seealso \link{`addValueToArray`}
-#' @export
-setGeneric("removeValueFromArray", function(dbComm, tableName, field, value, searchBlock = list()) standardGeneric("removeValueFromArray"))
-
-setGeneric("replaceValueInField", function(dbComm, tableName, field, oldValue, newValue) standardGeneric("replaceValueInField"))
-
-#' Set the value of a field in a table
-#' @description Used to change the value of a field for all rows (i.e. docs) returned by `seearchBlock`
-#' @inheritParams addValueToArray
-#' @export
-setGeneric("setValueInField", function(dbComm, tableName, field, value, searchBlock = list()) standardGeneric("setValueInField"))
 
 #' Test the DB-Connection
 #' @inheritParams isTable
@@ -99,5 +75,33 @@ setGeneric("setValueInField", function(dbComm, tableName, field, value, searchBl
 #' @docType methods
 setGeneric("ping", function(dbComm) standardGeneric("ping")) 
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+setGeneric("refreshTable", function(dbComm, tableName) standardGeneric("refreshTable"))
+
+#' Remove a value from an array field 
+#' @inheritParams addValueToArray
+#' @seealso \link{`addValueToArray`}
+#' @export
+setGeneric("removeValueFromArray", function(dbComm, tableName, field, value, searchBlock = list()) standardGeneric("removeValueFromArray"))
+
+#' Remove a field from a Table
+#' @inheritParams addValueToArray
+#' @export
+setGeneric("removeFieldFromTable", function(dbComm, tableName, field, searchBlock = list()) standardGeneric("removeFieldFromTable"))
+
+#' Replace a value in a field
+#' Will replace all occurrences of this value in the specified field. There is no way to restrict the change to specific 
+#' records. For that purpose, use `setValueInField()`.
+#' @inheritParams  addValueToArray
+#' @param oldValue Value to be replaced
+#' @seealso \link{`setValueInField`}
+#' @export
+setGeneric("replaceValueInField", function(dbComm, tableName, field, oldValue, newValue) standardGeneric("replaceValueInField"))
+
+#' Set the value of a field in a table
+#' @description Used to change the value of a field for all rows (i.e. docs) returned by `seearchBlock`
+#' @inheritParams addValueToArray
+#' @export
+setGeneric("setValueInField", function(dbComm, tableName, field, value, searchBlock = list()) standardGeneric("setValueInField"))
+
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

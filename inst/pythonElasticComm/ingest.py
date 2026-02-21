@@ -12,7 +12,7 @@ def testPrint():
 def ingestRecords(recs, client, indexTimeStamp, indexMappingPath, pipeline=None):
     """Ingests json documents into Elasticsearch grouped by unique alias name. For each unique alias name a respective
      target index with timestamp is created and the alias is assigned."""
-    uniqueAliasNames = set(rec['dbas_alias_name'] for rec in recs)
+    uniqueAliasNames = set(rec['feature_table_alias'] for rec in recs)
     # Create dbas/nts indices in Elasticsearch based on alias names
     targetIndexAliasPairs = createIndexAddAlias(uniqueAliasNames, client, indexTimeStamp, indexMappingPath)
     # Ingest data to target indices in Elasticsearch
@@ -26,13 +26,13 @@ def createIndexAddAlias(uniqueAliasNames, client, indexTimeStamp, indexMappingPa
     for aliasName in uniqueAliasNames:
 
         # Get alias name type
-        result = re.search(r'(_dbas|_nts)', aliasName)
+        result = re.search(r'(_feature)', aliasName)
         if not result:
-            raise ValueError(f"Alias '{aliasName}' must contain 'nts' or 'dbas'")
+            raise ValueError(f"Alias '{aliasName}' must contain 'feature'")
         alias_type = result.group(0)[1:]
 
         # Create index name from alias name
-        index_name = re.sub(r'(ntsp\d\d\.\d)_(dbas|nts)', f'\\1_index_\\2_v{indexTimeStamp}', aliasName)
+        index_name = re.sub(r'(ntsp\d\d\.\d)_(feature)', f'\\1_index_\\2_v{indexTimeStamp}', aliasName)
 
         # Add name pairs for target index and alias
         targetIndexAliasPairs.update({aliasName: index_name})
@@ -64,7 +64,7 @@ def createIndexAddAlias(uniqueAliasNames, client, indexTimeStamp, indexMappingPa
 
 def ingestToIndices(targetIndexAliasPairs, records, client, pipeline=None):
     for aliasName, targetIndexName in targetIndexAliasPairs.items():
-        filteredRecs = [rec for rec in records if rec['dbas_alias_name'] == aliasName]
+        filteredRecs = [rec for rec in records if rec['feature_table_alias'] == aliasName]
         recsForAppending = [drop_nan_entries(rec) for rec in filteredRecs]
         appendRecordsToTable(targetIndexName, recsForAppending, client, pipeline)
 

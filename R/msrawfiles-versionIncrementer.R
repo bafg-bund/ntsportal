@@ -13,9 +13,9 @@ msrawfilesSetVersion <- function(msrawfilesName, version) {
   version <- as.character(version)
   verifyVersionText(version)
   newTableName <- getNewTableName(msrawfilesName, version)
-  dbComm <- getOption("ntsportal.dbComm")()
+  dbComm <- getDbComm()
   copyTable(dbComm, msrawfilesName, newTableName, "msrawfiles")
-  changeAllDbasAliasNames(newTableName, version)
+  changeAllFeatureAliasNames(newTableName, version)
 }
 
 verifyVersionText <- function(version) {
@@ -29,21 +29,21 @@ getNewTableName <- function(oldName, version) {
   stringr::str_replace(oldName, "^(ntsp)\\d?\\d?\\.?\\d?(_.*)$", glue("\\1{version}\\2"))
 }
 
-changeAllDbasAliasNames <- function(msrawfilesName, version) {
-  dbComm <- getOption("ntsportal.dbComm")()
-  allAliases <- getUniqueValues(dbComm, msrawfilesName, "dbas_alias_name")
+changeAllFeatureAliasNames <- function(msrawfilesName, version) {
+  dbComm <- getDbComm()
+  allAliases <- getUniqueValues(dbComm, msrawfilesName, "feature_table_alias")
   newAliases <- getNewTableName(allAliases, version)
   walk2(allAliases, newAliases, 
     function(old, new) 
       replaceValueInField(
         dbComm = dbComm, 
         tableName = msrawfilesName, 
-        field = "dbas_alias_name",
+        field = "feature_table_alias",
         oldValue = old,
         newValue = new
       )
   )
 } 
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

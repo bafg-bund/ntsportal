@@ -72,17 +72,17 @@ Add new records for MS measurement files to msrawfiles index
 
   \strong{Adding sample time information (`start` field)}
   
-  Using "filename" means that the sample time is extracted from the filename. The field `dbas_date_regex` is used to
-  find the date of the sample from the file name. It works in conjunction with `dbas_date_format`. `dbas_date_regex`
-  extracts the text, while `dbas_date_format` tells R how to interpret the text. For example, the file name
-  `RH_pos_20170101.mzXML` uses the date_regex `"([20]*\\d{6})"` and date_format `"ymd"`. The `dbas_date_regex` uses
+  Using "filename" means that the sample time is extracted from the filename. The field `start_date_regex` is used to
+  find the date of the sample from the file name. It works in conjunction with `start_date_format`. `start_date_regex`
+  extracts the text, while `start_date_format` tells R how to interpret the text. For example, the file name
+  `RH_pos_20170101.mzXML` uses the date_regex `"([20]*\\d{6})"` and date_format `"ymd"`. The `start_date_regex` uses
   the tidyverse regular expression syntax and the `stringr::str_match` function to extract the text referring to the
   date. The brackets indicate the text to extract and these can be surrounded by anchors. It is also possible to have
   multiple brackets, the text in multiple brackets will be combined before parsing. For example the file
   `UEBMS_2024_002_Main_Kahl_Jan_pos_DDA.mzXML` can be parsed with date_regex `_(20\\d{2})_.*_(\\w{3})_pos` and
   date_format `ym`.
 
-  `dbas_date_format` may be one of `"ymd"`, `"dmy"`, `"ym"` for year-month and `"yy"` for just the year. The date
+  `start_date_format` may be one of `"ymd"`, `"dmy"`, `"ym"` for year-month and `"yy"` for just the year. The date
   parsing is done by `lubridate`.
   
   \strong{Making manual changes}

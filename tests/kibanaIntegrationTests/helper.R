@@ -1,10 +1,11 @@
 
 devtools::load_all()
 
-getExampleDocs <- function(index) {
-  response <- esSearchPaged(
-    index, 
-    searchBody = list(
+getExampleDocs <- function(tableName) {
+  getTableAsRecords(
+    getDbComm(), 
+    tableName, 
+    searchBlock = list(
       query = list(
         bool = list(
           must = list(
@@ -15,9 +16,9 @@ getExampleDocs <- function(index) {
         )
       )
     ),
-    sort = "start"
-  )$hits$hits
-  lapply(response, function(x) x[["_source"]])
+    sortField = "start", 
+    recordConstructor = newFeatureRecord
+  )
 }
 
 changeAliasInDocs <- function(docs, newAlias) {

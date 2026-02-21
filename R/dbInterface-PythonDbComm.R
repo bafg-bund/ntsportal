@@ -132,40 +132,21 @@ setMethod("getNrow", "PythonDbComm",function(dbComm, tableName, searchBlock = li
 setMethod(
   "getTableAsRecords", 
   "PythonDbComm", 
-  function(dbComm, tableName, searchBlock = list(), fields = "*", recordConstructor = newNtspRecord) {
+  function(dbComm, tableName, searchBlock = list(), fields = "*", sortField = "no-sort", recordConstructor = newNtspRecord) {
   searchBlock <- matchAllIfEmpty(searchBlock)
   s <- dbComm@dsl$Search(using=dbComm@client, index = tableName)$
     update_from_dict(searchBlock)$source(fields = fields)
-  message(s$count(), " records will be retrieved")
-  if (s$count() > 1e6)
-    stop("Exceeded the maximum docs that may be retrieved (1e6), refine the query using the searchBlock argument (query DSL)")
+  if (is.list(sortField) || sortField != "no-sort") 
+    s <- s$sort(sortField)
+  if (s$count() > 1e7)
+    stop("Exceeded the maximum rows that may be retrieved (1e7), refine the query using the searchBlock argument (Query DSL)")
+  progBar <- cli_progress_bar("Retrieving", total = s$count())
+  message(s$count(), " rows will be retrieved from table ", tableName)
   reticulate::iterate(s$iterate(), function(hit) {
+    cli_progress_update(id = progBar)
     recordConstructor(hit$to_dict())
   })
 })
-
-# getTableAsTibble ####
-setMethod("getTableAsTibble", "PythonDbComm", function(dbComm, tableName, searchBlock = list(), fields = "*") {
-  recs <- getTableAsRecords(dbComm, tableName, searchBlock, fields = fields)
-  convertRecordsToTibble(recs)
-})
-
-convertRecordsToTibble <- function(recs) {
-  unitaryFields <- getUnitaryFields(recs)
-  tibbleRowsList <- map(recs, \(rec) getTibbleRow(rec, unitaryFields))
-  dplyr::bind_rows(tibbleRowsList)
-} 
-getUnitaryFields <- function(recs) {
-  fields <- reduce(map(recs, names), union)
-  fieldLengths <- map(recs, \(rec) map_int(fields, \(f) length(rec[[f]])))
-  fields[pmap_int(fieldLengths, max) == 1]
-}
-getTibbleRow <- function(rec, unitaryFields) {
-  unclass(rec) |> 
-    tibble::enframe() |> 
-    tidyr::pivot_wider() |> 
-    tidyr::unnest(cols = any_of(unitaryFields))
-}
 
 
 # getUniqueValues ####
@@ -216,6 +197,22 @@ setMethod("setValueInField", "PythonDbComm", function(dbComm, tableName, field, 
   refreshTable(dbComm, tableName)
 })
 
+# removeFieldFromTable ####
+setMethod("removeFieldFromTable", "PythonDbComm", function(dbComm, tableName, field, searchBlock = list()) {
+  searchBlock <- matchAllIfEmpty(searchBlock)
+  tryCatch({
+    ubq <- dbComm@dsl$UpdateByQuery(using = dbComm@client, index = tableName)$
+      update_from_dict(searchBlock)$
+      script(source=glue("ctx._source.remove('{field}')"))
+    resp <- ubq$execute()
+  },
+  error = function(cnd)
+    warning("Error in removeFieldFromTable: ", conditionMessage(cnd))
+  )
+  numberUpdatedMessage(resp)
+  refreshTable(dbComm, tableName)
+})
+
 # removeValueFromArray ####
 setMethod("removeValueFromArray", "PythonDbComm", function(dbComm, tableName, field, value, searchBlock = list()) {
   searchBlock <- matchAllIfEmpty(searchBlock)
@@ -261,10 +258,6 @@ setMethod("show", "PythonDbComm", function(object) {
   )
 })
 
-viewTable <- function(dbComm, tableName) {
-  View(getTableAsTibble(dbComm, tableName))
-}
-
 matchAllIfEmpty <- function(searchBlock) {
   if (length(searchBlock) == 0) {
     return(list(query = list(match_all = stats::setNames(list(), character(0)))))
@@ -273,5 +266,5 @@ matchAllIfEmpty <- function(searchBlock) {
   }
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

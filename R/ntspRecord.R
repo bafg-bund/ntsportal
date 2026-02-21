@@ -6,8 +6,18 @@ newNtspRecord <- function(rec = list(), ..., class = character()) {
 }
 
 #' @export
-newMsrawfilesRecord <- function(rec = list()) {
-  newNtspRecord(rec, class = "msrawfilesRecord")
+newMsrawfilesRecord <- function(rec = list(), ..., class = character()) {
+  newNtspRecord(rec, class = c(class, "msrawfilesRecord"))
+}
+
+#' @export
+newDbasMsrawfilesRecord <- function(rec = list()) {
+  newMsrawfilesRecord(rec, class = "dbasMsrawfilesRecord")
+}
+
+#' @export
+newNtsMsrawfilesRecord <- function(rec = list()) {
+  newMsrawfilesRecord(rec, class = "ntsMsrawfilesRecord")
 }
 
 #' @export
@@ -30,11 +40,23 @@ print.msrawfilesRecord <- function(x, ...) {
 }
 
 #' @export
+print.dbasMsrawfilesRecord <- function(x, ...) {
+  cat("msrawfilesRecord for DBAS processing\n")
+  NextMethod()
+}
+
+#' @export
+print.ntsMsrawfilesRecord <- function(x, ...) {
+  cat("msrawfilesRecord for NTS processing\n")
+  NextMethod()
+}
+
+#' @export
 print.featureRecord <- function(x, ...) {
   cat("featureRecord\n")
   cat("mz: ", x$mz, ", rt: ", x$rt, "\n", sep = "")
   NextMethod()
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

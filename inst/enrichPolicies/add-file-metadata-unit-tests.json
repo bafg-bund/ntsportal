@@ -1,6 +1,6 @@
 {
   "match": {
-    "indices": "ntsp25.2_msrawfiles_unit_tests", 
+    "indices": "ntsp25.3_msrawfiles_unit_tests", 
     "match_field": "path",
     "enrich_fields": [
       "start",
@@ -19,7 +19,8 @@
       "comment",
       "dbas_alias_name",
       "station",
-      "loc"
+      "loc",
+      "instrument_name"
     ]
   }
 }

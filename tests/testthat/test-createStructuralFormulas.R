@@ -46,7 +46,7 @@ test_that("Extracting compound list from database returns a data.frame", {
   importCsl(databasePath = test_path("fixtures", "CSL_olmesartan-d6.db"), targetPath = tempSaveDir)
   
   compList <- extractCompoundList(databaseFile = file.path(tempSaveDir, "CSL_olmesartan-d6.db"))
-  expect_length(compList, 8)
+  expect_length(compList, 7)
   expect_gte(nrow(compList), 1)
   
   file.remove(list.files(tempSaveDir, full.names = TRUE))
@@ -72,5 +72,5 @@ test_that("Check for missing PNGs are reported correctly", {
   file.remove(list.files(tempSaveDir, full.names = T))
 })
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

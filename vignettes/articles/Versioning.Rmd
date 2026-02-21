@@ -1,0 +1,15 @@
+---
+title: "Versioning of NTSPortal"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Versioning of NTSPortal}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Version naming follows the convention "YY.x", where YY is the two-digit year and x is a version number 1-9. There can not be more than 9 versions in one year.
+
+When the database is updated the web application is updated to the same version. The database is updated by first copying the msrawfiles table to the new version "ntsp25.3_msrawfiles" using `msrawfilesSetVersion()`. If needed, the processing settings are changed, e.g. a new CSL version is applied, and then all the measurement files are reprocessed.
+
+<!-- Copyright 2026 Bundesanstalt für Gewässerkunde -->
+<!-- This file is part of ntsportal -->

@@ -1,19 +1,19 @@
 
-test_that("A long list of feature records are saved to multiple files", {
-  featureRecordList <- rep(getFeatureRecord(), times = 1000)
+test_that("A long list of feature records are saved to one file", {
+  featureRecordList <- rep(getEmptyFeatureRecord(), times = 100000)
   tempSaveDir <- withr::local_tempdir()
 
-  fileNames <- saveRecord(featureRecordList, tempSaveDir, maxSizeGb = 0.1)
+  fileName <- saveRecord(featureRecordList, tempSaveDir)
   
-  expect_length(fileNames, 2)
-  expect_match(fileNames[2], "part-b")
+  expect_length(fileName, 1)
+  expect_match(fileName, "-featureRecord-.*\\.RDS$")
   
   file.remove(list.files(tempSaveDir, full.names = T))
   file.remove(tempSaveDir)
 })
 
 test_that("Simple record can be saved as RDS", {
-  featureRecordList <- getFeatureRecord()
+  featureRecordList <- getEmptyFeatureRecord()
   tempSaveDir <- withr::local_tempdir()
   
   fileName <- saveRecord(featureRecordList, tempSaveDir)
@@ -21,14 +21,12 @@ test_that("Simple record can be saved as RDS", {
   expect_contains(names(recs[[1]]), "path")
   checkForAlias(recs[[1]])
   
-  expect_match(fileName, "part-a")
-  
   file.remove(list.files(tempSaveDir, full.names = T))
   file.remove(tempSaveDir)
 })
 
 test_that("An empty record is saved as an empty RDS", {
-  emptyRecordList <- getEmptyRecord()
+  emptyRecordList <- getEmptyFeatureRecord()
   tempSaveDir <- withr::local_tempdir()
   fileName <- saveRecord(emptyRecordList, tempSaveDir)
   
@@ -43,11 +41,9 @@ test_that("An empty record is saved as an empty RDS", {
 })
 
 test_that("A filename can be correctly generated", {
-  featureRecordList <- getFeatureRecord()
-  attr(featureRecordList, "part") <- "q"
+  featureRecordList <- getEmptyFeatureRecord()
   fileName <- makeFileNameForBatch(featureRecordList)
-  expect_match(fileName, "part-q")
-  
+  expect_match(fileName, "-featureRecord-\\d{6}-\\d{4}-")
   featureRecordList[[1]]$path <- "/some/other/path"
   fileName2 <- makeFileNameForBatch(featureRecordList)
   expect_true(fileName != fileName2)

@@ -1,5 +1,4 @@
-# Copyright 2025 Bundesanstalt für Gewässerkunde
-# This file is part of ntsportal
+
 
 glue_json <- function(stringToModify) {
   x <- glue::glue(stringToModify, .envir = parent.frame(1), .open = "[[", .close = "]]")
@@ -35,7 +34,7 @@ free_gb <- function() {
 }  
 
 #' Get search results for more than 10000 docs by pagination. 
-#' @description deprecated in favor of `getTableAsRecords()`
+#' @description deprecated in favor of `getTableByQuery()`, `getTableByEsql()` or `getTableAsRecords()`, 
 #' @param indexName Name of ElasticSearch index (or wildcard pattern)
 #' @param searchBody search body, default will return all docs
 #' @param sort Sort argument passed onto elastic::Search. Defines which field 
@@ -55,6 +54,8 @@ free_gb <- function() {
 #' temp <- lapply(res$hits$hits, function(x) as.data.frame(x[["_source"]]))
 #' df <- plyr::rbind.fill(temp)
 #' }
+#' @seealso \link{`getTableByQuery`}
+#' @seealso \link{`getTableByEsql`}
 #' @seealso \link{`getTableAsRecords`}
 esSearchPaged <- function(
     indexName, 
@@ -162,10 +163,18 @@ build_es_query_for_ids <- function(ids, toShow) {
   invisible(T)
 }
 
+getMappingProperties <- function(mappingType) {
+  getMapping(mappingType)$mappings$properties
+}
+
 getMapping <- function(mappingType) {
-  stopifnot(mappingType %in% c("dbas", "msrawfiles", "nts", "analysis_dbas", "spectral_library", "nondetect_dbas"))
+  stopifnot(mappingType %in% getNtsportalTableTypes())
   pth <- fs::path_package("ntsportal", "mappings", glue("{mappingType}_index_mappings.json"))
   jsonlite::read_json(pth)
+}
+
+getNtsportalTableTypes <- function() {
+  c("feature", "msrawfiles", "analysis_dbas", "spectral_library", "nondetect_dbas")
 }
 
 testConnection <- function() {
@@ -174,6 +183,77 @@ testConnection <- function() {
     stop("Unable to connect to elasticSearch")
 }
 
+getField <- function(listRecords, fieldName, quiet = FALSE) {
+  if (!fieldAvailable(listRecords, fieldName)) {
+    if (!quiet)
+      message("Field ", fieldName, " not found in any docs")
+    return(rep(NA, length(listRecords)))
+  } 
+  values <- lapply(listRecords, getValueOrEmpty, field = fieldName)
+  sizes <- vapply(values, length, numeric(1))
+  if (all(sizes == 1)) {
+    unname(unlist(values))
+  } else {
+    unname(values)
+  }
+}
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+splitRecordsByDir <- function(recsToProcess) {
+  paths <- getField(recsToProcess, "path")
+  if (length(paths) > 0) {
+    dirs <- dirname(getField(recsToProcess, "path"))
+  } else {
+    dirs <- character(0)
+  }
+  split(recsToProcess, dirs)
+}
+
+#' Turn mappings into a tibble for documentation
+#'
+#' @param mappingType name of mapping type, e.g. "feature"
+#'
+#' @returns tbl_df of mappings with metadata
+#' @export
+makeMappingsTbl <- function(mappingType) {
+  m <- getMapping(mappingType)
+  properties <- m$mappings$properties
+  mainLevel <- makeTblFromPropertiesList(properties)
+  
+  nestedFields <- mainLevel[mainLevel$type == "nested", "field", drop = T]
+  nestedLevel <- mainLevel[0, ]
+  if (length(nestedFields) > 0)
+    nestedLevel <- list_rbind(map(nestedFields, \(f) makeTblNestedField(f, properties)))
+  
+  runTimeLevel <- mainLevel[0, ]
+  runtime <- m$mappings$runtime
+  if (!is.null(runtime)) 
+    runTimeLevel <- makeTblRuntimeFields(runtime)
+  
+  rbind(mainLevel, nestedLevel, runTimeLevel) |> arrange(field)
+}
+
+makeTblNestedField <- function(parentField, properties) {
+  propertiesNested <- properties[[parentField]]$properties
+  newTbl <- makeTblFromPropertiesList(propertiesNested)
+  newTbl$field <- paste0(parentField, ".", newTbl$field)
+  newTbl
+}
+
+makeTblRuntimeFields <- function(runtimeProperties) {
+  newTbl <- makeTblFromPropertiesList(runtimeProperties)
+  newTbl$type <- paste(newTbl$type, "(runtime)")
+  newTbl
+}
+
+makeTblFromPropertiesList <- function(properties) {
+  tibble(
+    field = names(properties),
+    type = map_chr(properties, \(p) p$type),
+    description = map_chr(properties, \(p) ifelse(is.null(p$meta$description), "", p$meta$description)),
+    unit = map_chr(properties, \(p) ifelse(is.null(p$meta$unit), "", p$meta$unit)),
+    example = map_chr(properties, \(p) ifelse(is.null(p$meta$example), "", p$meta$example))
+  )
+}
+
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

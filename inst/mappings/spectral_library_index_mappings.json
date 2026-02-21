@@ -2,71 +2,59 @@
   "mappings": {
     "_meta": {
       "type": "ntsportal,spectral_library",
-      "version": "25.2",
+      "version": "25.3",
       "licence": "GNU GPL-3.0"
     },
     "dynamic": "strict",
     "properties": {
-      "time_added" : {
-        "type" : "date",
-        "format" : "yyyy-MM-dd HH:mm:ss", 
-        "meta": {"description": "Time of entry into CSL"}
-      },
-      "cas" : {"type" : "keyword", "meta": {"description": "chemical abstracts service registry number", "example": "95-14-7"}},
-      "name" : {"type" : "keyword", "meta": {"description": "compound name"}},
+      "adduct" : {"type" : "keyword", "meta": {"description": "ESI adduct form", "example": "[M+H]+"}},
+      "cas" : {"type" : "keyword", "meta": {"description": "Chemical abstracts service registry number", "example": "95-14-7"}},
+      "ce" : {"type" : "float", "meta": {"description": "Collision energy"}},
+      "ces" : {"type" : "float", "meta": {"description": "Collision energy spread"}},
+      "ce_unit": {"type" : "keyword", "meta": {"description": "Collision energy units", "example": "eV"}},
+      "csl_experiment_id":  {"type" : "integer", "meta": {"description": "CSL experiment ID for spectral match", "example": "26"}},
+      "collision_type": {"type" : "keyword", "meta": {"description": "Type of fragmentation for this spectrum"}},
+      "comment": {"type": "text", "meta": {"description": "free as text or array of text blocks"}},
+      "comp_group": {"type" : "keyword", "meta": {"description": "compound usage or classification(s)", "example": "Industrial_process"}},
+      "data_source": {"type" : "keyword", "meta": {"description": "institution responsible for data processing", "example": "bfg"}},
+      "formula" : {"type" : "keyword", "meta": {"description": "molecular formula", "example": "C7H4Cl2O2"}},
+      "inchi" : {"type" : "keyword", "meta": {"description": "international chemical identifier", "example": "InChI=1S/C7H5NS/c1-2-4-7-6(3-1)8-5-9-7/h1-5H"}},
+      "inchikey" : {"type" : "keyword", "meta": {"description": "hash of international chemical identifier", "example": "ILLQTAPXYCRJRB-UHFFFAOYSA-N"}},
+      "instrument": {"type" : "keyword", "meta": {"description": "Instrument type code", "example": "LC-ESI-QTOF TripleTOF 6600 SCIEX"}},
+      "ionisation": {"type" : "keyword", "meta": {"description": "Type of LC-MS interface used"}},
+      "isotopologue" : {"type" : "keyword", "meta": {"description": "Isotopic difference to monoisotopic", "example": "37Cl"}},
+      "licence" : {"type" : "keyword", "meta": {"description": "open data licence for data", "example": "CC BY 4.0"}},
       "ms2" : {
         "type" : "nested",
         "properties" : {
-          "int" : {"type" : "float", "meta": {"description": "centroid intensity"}},
+          "int" : {"type" : "scaled_float", "scaling_factor": 100, "meta": {"description": "centroid intensity"}},
           "mz" : {"type" : "float", "meta": {"unit": "Da", "description": "mass-to-charge ratio"}}
         }
       },
       "mz" : {"type" : "float", "meta": {"unit": "Da", "description": "mass-to-charge ratio"}},
-      "tag": {"type": "keyword", "meta": {"description": "labels to assist searching"}},
-      "inchi" : {"type" : "keyword", "meta": {"description": "international chemical identifier", "example": "InChI=1S/C7H5NS/c1-2-4-7-6(3-1)8-5-9-7/h1-5H"}},
-      "formula" : {"type" : "keyword", "meta": {"description": "molecular formula", "example": "C7H4Cl2O2"}},
-      "smiles" : {"type" : "keyword", "meta": {"description": "SMILES line notation for compound structure"}},
-      "comment": {"type": "text", "meta": {"description": "free as text or array of text blocks"}},
+      "name" : {"type" : "keyword", "meta": {"description": "compound name"}},
       "pol" : {"type" : "keyword", "meta": {"description": "3-letter ESI polarity mode", "example": "pos"}},
-      "isotopologue" : {"type" : "keyword", "meta": {"description": "isotopic difference to monoisotopic", "example": "37Cl"}},
-      "adduct" : {"type" : "keyword", "meta": {"description": "ESI adduct form", "example": "[M+H]+"}},
+      "smiles" : {"type" : "keyword", "meta": {"description": "SMILES line notation for compound structure"}},
       "rtt" : {
         "type" : "nested",
         "properties" : {
-          "method" : {
-            "type" : "keyword"
-          },
-          "doi" : {
-            "type" : "keyword"
-          },
-          "predicted" : {
-            "type" : "boolean"
-          },
-          "rt" : {
-            "type" : "float", 
-            "meta": {"unit": "min", "description": "chromatographic retention time at peak apex"}
-          }
+          "method" : {"type" : "keyword", "meta": {"description": "Chromatgraphic method code", "example": "bfg_nts_rp1"}},
+          "doi" : {"type" : "keyword", "meta": {"description": "DOI for chromatgraphic method", "example": "10.1016/j.chroma.2015.11.014"}},
+          "predicted" : {"type" : "boolean", "meta": {"description": "Is the retention time modelled?"}},
+          "rt" : {"type" : "half_float", "meta": {"unit": "min", "description": "Chromatographic retention time at peak apex"}}
         }
       },
-      "inchikey" : {"type" : "keyword", "meta": {"description": "hash of international chemical identifier", "example": "ILLQTAPXYCRJRB-UHFFFAOYSA-N"}},
-      "mw" : {"type" : "float"},
-      "ce" : {"type" : "float", "meta": {"description": "Collision energy"}},
-      "ces" : {"type" : "float", "meta": {"description": "Collision energy spread"}},
-      "instrument": {"type" : "keyword", "meta": {"description": "instrument type code", "example": "LC-ESI-QTOF TripleTOF 6600 SCIEX"}},
-      "ionisation": {"type" : "keyword", "meta": {"description": "Type of LC-MS interface used"}},
-      "ce_unit": {"type" : "keyword", "meta": {"description": "Collision energy units"}},
-      "csl_experiment_id":  {"type" : "integer", "meta": {"description": "CSL experiment ID for spectral match", "example": "26"}},
-      "frag_type": {"type" : "keyword", "meta": {"description": "Type of fragmentation for this spectrum"}},
-      "comp_group": {"type" : "keyword", "meta": {"description": "compound usage or classification(s)", "example": "Industrial_process"}},
-      "data_source": {"type" : "keyword", "meta": {"description": "institution responsible for data processing", "example": "bfg"}},
-      "licence" : {"type" : "keyword", "meta": {"description": "open data licence for data", "example": "dl-de/by-2-0"}}
+      "mw" : {"type" : "float", "meta": {"description": "DEPRECATED"}},
+      "tag": {"type": "keyword", "meta": {"description": "labels to assist searching"}},
+      "time_added" : {"type" : "date", "format" : "yyyy-MM-dd HH:mm:ss", "meta": {"description": "Time of entry into CSL"}}
     },
     "runtime": {
       "esi_ion_spec": {
         "type": "keyword",
         "script": {
           "source": "emit(doc['name'].value +'_'+ doc['pol'].value +'_'+ doc['adduct'].value +'_'+ doc['isotopologue'].value)"
-        }
+        },
+        "meta": {"description": "Concatination of name, pol, adduct, isotopologue", "example": "1,3-Dicyclohexylurea_pos_[M+H]+_monoisotopic"}
       }
     }
   }

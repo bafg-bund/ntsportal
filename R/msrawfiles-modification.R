@@ -1,16 +1,5 @@
 
 
-createNewIndexForResults <- function(escon, mappingType = "nts", indexName) {
-  f <- switch(
-    mappingType,
-    nts = fs::path_package("ntsportal", "mappings", "nts_index_mappings.json"),
-    dbas = fs::path_package("ntsportal", "mappings", "dbas_index_mappings.json"),
-    spectral_library = fs::path_package("ntsportal", "mappings", "spectral_library_index_mappings.json"),
-    stop("unknown mapping type")
-  )
-  mappings <- jsonlite::read_json(f)
-  elastic::index_create(escon, indexName, body = mappings)
-}
 
 #' Change alias of an index to a new index.
 #' 
@@ -43,8 +32,6 @@ changeAliasAddress <- function(indexName, aliasName, closeAfter = FALSE) {
   invisible(res$acknowledged)
 }
 
-
-
 #' Change the path of one document in msrawfiles
 #' @description
 #' This is a secure method of changing the "path" field of an entry in msrawfiles. The filename is not changed and must
@@ -55,8 +42,7 @@ changeAliasAddress <- function(indexName, aliasName, closeAfter = FALSE) {
 #' @param checkType Method to check that files are the same, either "md5" (default) or "filesize"
 #' @details
 #' Both files must exist when making the change. The function takes some time if it compares md5-checksums of the two
-#' files. For large numbers of files use the filesize check.
-#' @return TRUE if change was successful (invisibly)
+#' files. For large numbers of files use `checkType` = "filesize".
 #' @export
 #' @examples
 #' \dontrun{
@@ -84,8 +70,6 @@ changeMsrawfilePath <- function(rfIndex, oldPath, newPath, checkType = "md5") {
   stopifnot(length(oldPath) == 1, length(newPath) == 1)
   stopifnot(all(file.exists(oldPath, newPath)))
   stopifnot(checkType %in% c("md5", "filesize"))
-  # Check that both files are the same
-  # Same name
   stopifnot(basename(oldPath) == basename(newPath))
   # Same content (slow)
   if (checkType == "md5" && tools::md5sum(oldPath) != tools::md5sum(newPath))
@@ -94,94 +78,42 @@ changeMsrawfilePath <- function(rfIndex, oldPath, newPath, checkType = "md5") {
   if (checkType == "filesize" && file.size(oldPath) != file.size(newPath)) {
     stop(oldPath, " and ", newPath, " are not the same")
   }
-  
-  res1 <- elastic::Search(escon, rfIndex, body = sprintf('
-    {
-      "query": {
-        "term": {
-          "path": {
-            "value": "%s"
-          }
-        }
-      },
-      "size": 1,
-      "_source": false
-    }
-    ', normalizePath(oldPath))
-  )
-  if (res1$hits$total$value == 0) {
-    warning(oldPath, " not found in ", rfindex, " index. No change made.")
-  } else if (res1$hits$total$value > 1) {
-    stop(oldPath, " found more than once in ", rfindex, " index. Please correct.")
+  normOldPath <- normalizePath(oldPath)
+  normNewPath <- normalizePath(newPath)
+  numOldPath <- getNrecsWithPath(rfIndex, normOldPath)
+  numNewPath <- getNrecsWithPath(rfIndex, normNewPath)
+  if (numOldPath == 1 && numNewPath == 0) {
+    replaceValueInField(getDbComm(), rfIndex, "path", normOldPath, normNewPath)
   } else {
-    docId <- as.character(res1$hits$hits[[1]]["_id"])
-    res2 <- elastic::docs_update(escon, rfIndex, id = docId, body = 
-                                   sprintf('
-      {
-        "script": {
-          "source": "ctx._source.path = params.newPath",
-          "params": {
-            "newPath": "%s"
-          }
-        }
-      }
-     ', normalizePath(newPath))                               
-    )
-    invisible(res2$result == "updated")
+    stop("Database not in the correct state for a change. Number of records with oldPath: ", numOldPath, ". Number of
+         records with newPath: ", numNewPath)
   }
 }
 
 #' Change filename in the msrawfiles-db and on the filesystem
 #' @description Used to change filename of a measurement file and simultaneously
-#' change the `path` field in `msrawfiles`.
+#' change the `path` field in `msrawfiles`. This change is riskier than using `changeMsrawfilePath` so it isn't exported 
 #' @inheritParams changeMsrawfilePath
-#' @export
 changeMsrawfileFilename <- function(rfIndex, oldPath, newPath) {
   stopifnot(length(oldPath) == 1, length(newPath) == 1)
   stopifnot(file.exists(oldPath))
-  
-  oldName <- basename(oldPath)
-  newName <- basename(newPath)
- 
-  res1 <- elastic::Search(escon, rfIndex, body = sprintf('
-    {
-      "query": {
-        "term": {
-          "filename": {
-            "value": "%s"
-          }
-        }
-      },
-      "size": 1,
-      "_source": false
-    }
-    ', oldName)
-  )
-  if (res1$hits$total$value == 0) {
-    warning(oldName, " not found in ", rfIndex, " index. No change made.")
-    return(FALSE)
-  } else if (res1$hits$total$value > 1) {
-    stop(oldName, " found more than once in ", rfIndex, " index. Please correct.")
+  normOldPath <- normalizePath(oldPath)
+  numOldPath <- getNrecsWithPath(rfIndex, normOldPath)
+  numNewPath <- getNrecsWithPath(rfIndex, newPath)
+  if (numOldPath == 1 && numNewPath == 0) {
+    file.rename(from = normOldPath, to = newPath)
+    normNewPath <- normalizePath(newPath)
+    replaceValueInField(getDbComm(), rfIndex, "path", normOldPath, normNewPath)
   } else {
-    docId <- as.character(res1$hits$hits[[1]]["_id"])
-    res2 <- elastic::docs_update(escon, rfIndex, id = docId, body = 
-      glue_json('
-      {
-        "script": {
-          "source": "ctx._source.path = params.newPath",
-          "params": {
-            "newPath": "[[newPath]]"
-          }
-        }
-      }
-     ')                               
-    )
-    
-    # Change filename on filesystem
-    file.rename(from = oldPath, to = newPath)
+    stop("Database not in the correct state for a change. Number of records with oldPath: ", numOldPath, ". Number of
+         records with newPath: ", numNewPath)
   }
-  message("File ", oldName, " updated to ", newName)
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+getNrecsWithPath <- function(rfIndex, normPath) {
+  queryPath <- list(query = list(term = list(path = normPath)))
+  getNrow(getDbComm(), rfIndex, searchBlock = queryPath)
+}
+
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

@@ -29,7 +29,7 @@ currently can only be one field and may not be '_id'.}
 ElasticSearch API response as a list
 }
 \description{
-deprecated in favor of `getTableAsRecords()`
+deprecated in favor of `getTableByQuery()`, `getTableByEsql()` or `getTableAsRecords()`,
 }
 \examples{
 \dontrun{
@@ -43,5 +43,9 @@ df <- plyr::rbind.fill(temp)
 }
 }
 \seealso{
+\link{`getTableByQuery`}
+
+\link{`getTableByEsql`}
+
 \link{`getTableAsRecords`}
 }

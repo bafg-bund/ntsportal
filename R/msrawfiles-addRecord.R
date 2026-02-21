@@ -42,17 +42,17 @@
 #' 
 #'   \strong{Adding sample time information (`start` field)}
 #'   
-#'   Using "filename" means that the sample time is extracted from the filename. The field `dbas_date_regex` is used to
-#'   find the date of the sample from the file name. It works in conjunction with `dbas_date_format`. `dbas_date_regex`
-#'   extracts the text, while `dbas_date_format` tells R how to interpret the text. For example, the file name
-#'   `RH_pos_20170101.mzXML` uses the date_regex `"([20]*\\d{6})"` and date_format `"ymd"`. The `dbas_date_regex` uses
+#'   Using "filename" means that the sample time is extracted from the filename. The field `start_date_regex` is used to
+#'   find the date of the sample from the file name. It works in conjunction with `start_date_format`. `start_date_regex`
+#'   extracts the text, while `start_date_format` tells R how to interpret the text. For example, the file name
+#'   `RH_pos_20170101.mzXML` uses the date_regex `"([20]*\\d{6})"` and date_format `"ymd"`. The `start_date_regex` uses
 #'   the tidyverse regular expression syntax and the `stringr::str_match` function to extract the text referring to the
 #'   date. The brackets indicate the text to extract and these can be surrounded by anchors. It is also possible to have
 #'   multiple brackets, the text in multiple brackets will be combined before parsing. For example the file
 #'   `UEBMS_2024_002_Main_Kahl_Jan_pos_DDA.mzXML` can be parsed with date_regex `_(20\\d{2})_.*_(\\w{3})_pos` and
 #'   date_format `ym`.
 #'
-#'   `dbas_date_format` may be one of `"ymd"`, `"dmy"`, `"ym"` for year-month and `"yy"` for just the year. The date
+#'   `start_date_format` may be one of `"ymd"`, `"dmy"`, `"ym"` for year-month and `"yy"` for just the year. The date
 #'   parsing is done by `lubridate`.
 #'   
 #'   \strong{Making manual changes}
@@ -174,19 +174,11 @@ addRawfiles <- function(
     },
     stop("Unknown input, aborting.")
   )
-  createEscon()
-  ids <- character()
-  for (doci in newRecords) {
-    response <- elastic::docs_create(escon, rfIndex, body = doci)
-    ids <- append(ids, response[["_id"]])
-  }
-  idString <- paste(shQuote(ids, type = "cmd"), collapse = ", ")
-  idString <- paste0(idString, "\n")
-  message("Documents were uploaded with the IDs")
-  message(idString)
   
-  dbComm <- getDbComm()
-  refreshTable(dbComm, rfIndex)
+  appendRecords(getDbComm(), rfIndex, newRecords)
+  ids <- getIdsNewRecords(rfIndex, newRecords)
+  message("Documents were uploaded with the IDs")
+  message(quoteAndComma(ids))
 
   timesFound <- vapply(newPaths, filenameCountInIndex, numeric(1), rfIndex = rfIndex)
   
@@ -200,50 +192,40 @@ addRawfiles <- function(
   invisible(ids)
 }
 
+
 checkArgumentValidity <- function(rfIndex, templateId, newPaths, newStart, newStation, newStationList) {
   checkResult <- TRUE
-  
   if (length(templateId) != 1) {
     checkResult <- addError(checkResult, "Only one templateId allowed")
   }
-  
   if (!grepl("^ntsp.*msrawfiles.*", rfIndex)) {
     checkResult <- addError(checkResult, "Index name is incorrect or does not follow convention")
   }
-  
   fileFound <- vapply(newPaths, file.exists, logical(1))
-  
   if (!all(fileFound)) {
     checkResult <- addError(checkResult, "Files not found")
   }
-  
   if (anyDuplicated(newPaths)) {
     checkResult <- addError(checkResult, "There are duplicated filepaths")
   }
-  
   fileKind <- vapply(newPaths, grepl, pattern = "\\.mzX?ML$", logical(1))
   if (!all(fileKind)) {
     checkResult <- addError(checkResult, "Files are not all .mzXML or .mzML files")
   }
-  
   filePol <- getPolFromPaths(newPaths)
   if (length(filePol) != 1) {
     checkResult <- addError(checkResult, "Only one polarity allowed per batch")
   }
-  
   if (!(newStart == "filename" || grepl("^\\d{8}$", newStart))) {
     checkResult <- addError(checkResult, "'newStart' must be 'filename' or a fixed date in the form 'yyyymmdd'")
   }
-  
   if (!is.element(newStation, c("same_as_template", "filename", "newStationList"))) {
     checkResult <- addError(checkResult, "newStation must be 'same_as_template' or 'filename' or a list 
             with the elements station, loc and optionally river and km")
   } 
-  
   if (!validateStationList(newStationList)) {
     checkResult <- addError(checkResult, "'newStationList' is malformed, check documentation")
   }
-  
   stopIfAnyErrors(checkResult)
 }
 
@@ -260,11 +242,11 @@ checkTemplateRecord <- function(newPaths, templateRec, promptBeforeIngest) {
       checkResult <- addError(checkResult, "More than one file added with different polarity to template")
   }
   
-  dateFormat <- templateRec$dbas_date_format
+  dateFormat <- templateRec$start_date_format
   if (!is.element(dateFormat, c("ymd", "dmy", "yy", "ym"))) {
-    message("Unknown dbas_date_format ", dateFormat, " in template")
+    message("Unknown start_date_format ", dateFormat, " in template")
     if (length(newPaths) > 1 || !promptBeforeIngest)
-      checkResult <- addError(checkResult, "More than one file added with invalid dbas_date_format in template")
+      checkResult <- addError(checkResult, "More than one file added with invalid start_date_format in template")
   }
   
   if (!validateRecord(templateRec)) {
@@ -282,8 +264,8 @@ checkDateParsing <- function(newPaths, templateRec, promptBeforeIngest) {
     basename(newPaths),
     getStartFromFilenameAsDate,
     lubridate::ymd(19700101),
-    dateRegex = templateRec$dbas_date_regex,
-    dateFormat = templateRec$dbas_date_format
+    dateRegex = templateRec$start_date_regex,
+    dateFormat = templateRec$start_date_format
   )
   if (any(is.na(newDates))) {
     badFiles <- newPaths[is.na(newDates)]
@@ -300,7 +282,7 @@ checkDateParsing <- function(newPaths, templateRec, promptBeforeIngest) {
 
 checkStationParsing <- function(newPaths, templateRec) {
   if (!is.element("dbas_station_regex", names(templateRec)))
-    stop("dbas_station_regex, not found in template")
+    stop("dbas_station_regex not found in template")
 }
 
 
@@ -334,7 +316,7 @@ addPolToRecord <- function(rec) {
 
 addStartToRecord <- function(rec, newStart) {
   if (newStart == "filename") {
-    rec$start <- getFormatedStartFromFilename(basename(rec$path), rec$dbas_date_regex, rec$dbas_date_format)
+    rec$start <- getFormatedStartFromFilename(basename(rec$path), rec$start_date_regex, rec$start_date_format)
   } else {
     rec$start <- getFixedStart(newStart)
   }
@@ -375,7 +357,6 @@ reformatDate <- function(dateObject) {
 addStationToRecord <- function(rec, newStation, rfIndex, newStationList) {
   # In the case of "same_as_template" no changes are made to rec (it was a copy of template)
   if (newStation == "filename") {
-    
     stationList <- getStationListFromCode(rfIndex, basename(rec$path), rec$dbas_station_regex)
     rec <- appendStationListFields(rec, stationList)
   } else if (newStation == "newStationList") {
@@ -388,10 +369,11 @@ getStationListFromCode <- function(rfIndex, filename, stationRegex) {
   stationQueryRegex <- makeStationQueryRegex(filename, stationRegex)
   stationHits <- getHitsWithStation(rfIndex, stationQueryRegex)
   
-  checkStationIsUnique(stationHits)
-  checkLocIsUnique(stationHits)
-  
-  stationList <- list(station = st[1], loc = locs[[1]])
+  checkStationIsUniform(stationHits)
+  checkLocIsUniform(stationHits)
+  thisStation <- stationHits[[1]]$station
+  thisLoc <- stationHits[[1]]$loc
+  stationList <- list(station = thisStation, loc = thisLoc)
   stationList <- addOptionalStationField("river", stationList, stationHits)
   stationList <- addOptionalStationField("km", stationList, stationHits)
   stationList <- addOptionalStationField("gkz", stationList, stationHits)
@@ -446,43 +428,33 @@ makeStationQueryRegex <- function(filename, stationRegex) {
   } else {
     regex2 <- paste0(regex2, ".*")
   } 
-  regex2 <- sub("\\(.*\\)", stationCode, regex2)
-  regex3 <- gsub("\\\\", "\\\\\\\\", regex2)
-  regex3
+  sub("\\(.*\\)", stationCode, regex2)
 }
 
 getHitsWithStation <- function(rfIndex, stationQueryRegex) {
-  res <- elastic::Search(escon, rfIndex, body = sprintf('
-  {
-  "query": {
-      "regexp": {
-        "filename": "%s"
-      }
-    },
-    "size": 10000,
-    "_source": ["station", "loc", "river", "km", "gkz"]
+  db <- getDbComm()
+  qdsl <- list(query = list(regexp = list(filename = stationQueryRegex)))
+  numHits <- getNrow(db, rfIndex, qdsl)
+  if (numHits == 0) {
+    stop("No documents found with the station code: ", stationQueryRegex)
   }
-  ', stationQueryRegex))
-  
-  stopifnot(res$hits$total$relation == "eq")
-  if (res$hits$total$value == 0) {
-    stop("No documents found with the station code: ", stationCode, 
-         " for filename ", filename)
-  }
-  res$hits$hits
+  getTableAsRecords(
+    db, rfIndex, qdsl, fields = c("station", "loc", "river", "km", "gkz"), 
+    recordConstructor = newFeatureRecord
+  )
 }
 
-checkStationIsUnique <- function(stationHits) {
-  stationsInHits <- vapply(stationHits, function(doc) doc[["_source"]][["station"]], character(1))
+checkStationIsUniform <- function(stationHits) {
+  stationsInHits <- map_chr(stationHits, \(x) x$station)
   if (length(unique(stationsInHits)) != 1)
     stop("More than one station found in ntsportal")
 }
 
-checkLocIsUnique <- function(stationHits) {
-  locsInHits <- lapply(hits, function(doc) doc[["_source"]][["loc"]])
+checkLocIsUniform <- function(stationHits) {
+  locsInHits <- map(stationHits, \(x) x$loc)
   testLocs <- outer(locsInHits, locsInHits, Vectorize(all.equal))
   if (is.list(testLocs)) {
-    message("Not all locs for station ", st[1], " are exactly the same")
+    message("Not all locs for station ", stationHits[[1]]$station, " are exactly the same")
     message(paste(unlist(testLocs)[unlist(testLocs) != "TRUE"], collapse = "\n"))
     isOk <- readline("Continue anyway? (y/n): ")
     switch(
@@ -491,7 +463,7 @@ checkLocIsUnique <- function(stationHits) {
         message(
           "Taking the first loc ", 
           paste(unlist(locs[[1]]), collapse = ", "),
-          " for station ", st[1])
+          " for station ", stationHits[[1]]$station)
       },
       n = {
         stop("Processing terminated.")
@@ -504,11 +476,10 @@ checkLocIsUnique <- function(stationHits) {
 }
 
 addOptionalStationField <- function(field, resListTemp, hits) {
-  if (all(vapply(hits, function(doc) !is.null(doc[["_source"]][[field]]), logical(1)))) {
-    vals <- vapply(hits, function(doc) doc[["_source"]][[field]], 
-                   switch(field, river = character(1), km = numeric(1), gkz = numeric(1)))
+  if (all(map_lgl(hits, \(x) !is.null(x[[field]])))) {
+    vals <- vapply(hits, \(x) x[[field]], switch(field, river = character(1), km = numeric(1), gkz = numeric(1)))
     if (length(unique(vals)) != 1) {
-      stop("Not all ", field, " are the same for station ", st[1])
+      stop("Not all ", field, " are the same for station ", hits[[1]]$station)
     }
     resListTemp[[field]] <- vals[1]
   }
@@ -560,6 +531,17 @@ getPolFromPath <- function(path) {
   stringr::str_extract(basename(path), "pos|neg")
 }
 
+getIdsNewRecords <- function(tableName, newRecs) {
+  paths <- map_chr(newRecs, \(x) x$path)
+  pathsString <- quoteAndComma(paths)
+  idTable <- getTableByEsql(glue("FROM {tableName} METADATA _id | WHERE path IN ({pathsString}) | KEEP _id | LIMIT 10000"))
+  idTable |> pull("_id")
+}
+
+quoteAndComma <- function(charVec) {
+  paste(shQuote(charVec, type = "cmd"), collapse = ", ")
+} 
+
 addError <- function(checkResult, warningText) {
   warning(warningText, call. = FALSE)
   c(checkResult, FALSE)
@@ -577,12 +559,15 @@ stopIfAnyErrors <- function(checkResult) {
 
 getTemplateRecord <- function(rfIndex, templateId) {
   dbComm <- getDbComm()
+  sb <- list(query = list(ids = list(values = templateId)))
+  if (getNrow(dbComm, rfIndex, sb) == 0)
+    stop("ID: ", templateId, " not found in ", rfIndex)
   getTableAsRecords(
     dbComm = dbComm, tableName = rfIndex, 
-    searchBlock = list(query = list(ids = list(values = templateId))), 
+    searchBlock = sb, 
     recordConstructor = newMsrawfilesRecord
   )[[1]]
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

@@ -3,8 +3,8 @@
 
 resetConnectionCredentials()
 
-dbasBfgTable <- "ntsp25.1_dbas_bfg"
-wildCardTable <- "ntsp25.1_dbas*"
+dbasBfgTable <- "ntsp25.3_feature_bfg"
+wildCardTable <- "ntsp25.3_feature*"
 
 # Once tests complete, return to old state
 resetConnectionCredentials()

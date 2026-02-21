@@ -2,26 +2,16 @@
   "mappings": {
     "_meta": {
       "type": "ntsportal,analysis_dbas",
-      "version": "25.2",
+      "version": "25.3",
       "licence": "GNU GPL-3.0"
     },
     "dynamic": "strict",
     "properties": {
-      "lm": {
-        "type": "float"
-      },
-      "matrix": {
-        "type": "keyword"
-      },
-      "name": {
-        "type": "keyword"
-      },
-      "pol": {
-        "type": "keyword"
-      },
-      "station": {
-        "type": "keyword"
-      }
+      "lm": {"type": "float", "meta": {"description": "Slope of regression (linear model) rel. area, time"}},
+      "matrix": {"type": "keyword", "meta": {"description": "Sampling matrix code", "example": "spm"}},
+      "name" : {"type" : "keyword", "meta": {"description": "compound name(s)"}},
+      "pol": {"type": "keyword", "meta": {"description": "3-letter ESI polarity mode", "example": "pos"}},
+      "station": {"type": "keyword", "meta": {"description": "sampling location code", "example": "rhein_ko_l"}}
     }
   }
 }

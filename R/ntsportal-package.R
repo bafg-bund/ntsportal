@@ -11,7 +11,25 @@
 #' @import logger
 #' @import future
 #' @importFrom glue glue
-#' @import purrr
+#' @importFrom purrr map
+#' @importFrom purrr map2
+#' @importFrom purrr map_lgl
+#' @importFrom purrr map_chr
+#' @importFrom purrr map_int
+#' @importFrom purrr map_dbl
+#' @importFrom purrr pmap_int
+#' @importFrom purrr map_at
+#' @importFrom purrr walk
+#' @importFrom purrr walk2
+#' @importFrom purrr pluck
+#' @importFrom purrr reduce
+#' @importFrom purrr keep
+#' @importFrom purrr discard
+#' @importFrom purrr list_rbind
+#' @importFrom purrr list_c
+#' @importFrom tibble as_tibble
+#' @importFrom tibble as_tibble_row
+#' @importFrom tibble tibble
 #' @import methods
 #' @import R6
 #' @import cli
@@ -21,6 +39,7 @@ NULL
   pathToPyModules <- fs::path_package("ntsportal", "pythonElasticComm")
   options(warn = 1)
   options(ntsportal.dbComm = PythonDbComm)
+  #options(ntsportal.elasticsearchHostUrl = "https://ntsportal.bafg.de/es-api")
   options(ntsportal.elasticsearchHostUrl = "https://elastic.dmz.bafg.de")
   options(cli.progress_clear = FALSE)
   options(cli.progress_show_after = 0)

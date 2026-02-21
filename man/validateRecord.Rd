@@ -2,16 +2,19 @@
 % Please edit documentation in R/ntspRecord-validation.R
 \name{validateRecord}
 \alias{validateRecord}
+\alias{validateRecord.dbasMsrawfilesRecord}
 \alias{validateRecord.msrawfilesRecord}
 \alias{validateRecord.featureRecord}
-\title{Validate that a `*record` is correctly formated}
+\title{Validate that a `*record` is correctly formatted}
 \usage{
 validateRecord(record)
+
+\method{validateRecord}{dbasMsrawfilesRecord}(record)
 
 \method{validateRecord}{msrawfilesRecord}(record)
 
 \method{validateRecord}{featureRecord}(record)
 }
 \description{
-Checks are run for conisitency and the files are present on disc.
+Checks are run for consistency and the associated files (if any) are present on disc.
 }

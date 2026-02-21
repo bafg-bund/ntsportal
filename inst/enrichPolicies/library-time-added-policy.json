@@ -1,0 +1,9 @@
+{
+  "match": {
+    "indices": "ntsp25.3_spectral_library",
+    "match_field": "name",
+    "enrich_fields": [
+      "time_added"
+    ]
+  }
+}

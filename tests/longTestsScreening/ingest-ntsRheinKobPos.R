@@ -1,0 +1,5 @@
+library(logger)
+library(ntsportal)
+log_info("started")
+ingestFeatureRecords("tests/longTestsScreening/testResults-ntsRheinKobPos")
+log_info("ended")

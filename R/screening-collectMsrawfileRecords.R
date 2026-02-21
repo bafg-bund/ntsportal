@@ -1,65 +1,94 @@
 
 
-getSelectedMsrawfileBatches <- function(msrawfilesIndex, batchDirs) {
-  allRecords <- getAllMsrawfilesRecords(msrawfilesIndex)
-  recordsToProcess <- getSelectedRecords(allRecords, batchDirs)
-  splitRecordsByDir(recordsToProcess)
-}
-
-getSelectedRecords <- function(allRecords, dirsToKeep) {
-  dirsToKeep <- normalizePath(list.dirs(dirsToKeep)) 
-  purrr::keep(allRecords, function(record) dirname(record$path) %in% dirsToKeep)
-}
-
-getUnprocessedMsrawfileBatches <- function(msrawfilesIndex, screeningType) {
-  ntspVersion <- stringr::str_match(msrawfilesIndex, "^ntsp(\\d\\d\\.\\d)")[,2]
-  stopifnot(grepl("^\\d\\d\\.\\d$", ntspVersion))
-  allRecords <- getAllMsrawfilesRecords(msrawfilesIndex)
-  recordsToProcess <- getUnprocessedRecords(allRecords, screeningType, ntspVersion)
-  splitRecordsByDir(recordsToProcess)
-}
-
-getAllMsrawfilesRecords <- function(msrawfilesIndex) {
-  dbComm <- getDbComm()
-  getTableAsRecords(dbComm, msrawfilesIndex, recordConstructor = newMsrawfilesRecord)
-}
-
-getRecordsFromHits <- function(hitsArray, className) {
-  lapply(hitsArray, function(x) structure(x[["_source"]], class = className))
-}
-
-getUnprocessedRecords <- function(allRecords, screeningType, ntspVersion) {
-  indexToCheck <- switch(screeningType,
-    nts = glue("ntsp{ntspVersion}_nts*"),
-    dbas = glue("ntsp{ntspVersion}_dbas*"),
-    dbasTest = glue("ntsp{ntspVersion}_dbas_unit_tests*"),
-    stop("screeningType unknown")
+getSelectedMsrawfileBatches <- function(msrawfilesIndex, rootDirs, screeningType) {
+  warnNonExistentDirs(rootDirs)
+  batchNames <- getAllBatchesInDir(msrawfilesIndex, rootDirs)
+  if (length(batchNames) == 0)
+    stop("No batches found in dir ", paste(rootDirs, collapse = ", "))
+  # Sorting by start is important for the "consecutive" filter (e.g. in daily measurements)
+  # Even though records are split after collection (see recordsToBatches()), the sort order is kept.
+  allRecords <- getTableAsRecords(
+    getDbComm(), msrawfilesIndex, 
+    searchBlock = list(query = list(terms = list(batchname = as.list(batchNames)))), sortField = "start", 
+    fields = msrawfilesFieldsForProcessing(screeningType),
+    recordConstructor = switch(screeningType, dbas = newDbasMsrawfilesRecord, nts = newNtsMsrawfilesRecord)
   )
-  allDirs <- extractDirs(allRecords)
-  processedDirs <- getDirsInFeatureIndex(indexToCheck)
-  dirsWithUnprocessed <- setdiff(allDirs, processedDirs)
-  purrr::keep(allRecords, function(rec) dirname(rec$path) %in% dirsWithUnprocessed)
+  recordsToBatches(allRecords)
 }
 
-splitRecordsByDir <- function(recsToProcess) {
-  paths <- getField(recsToProcess, "path")
-  if (length(paths) > 0) {
-    dirs <- dirname(getField(recsToProcess, "path"))
-  } else {
-    dirs <- character(0)
+recordsToBatches <- function(records) {
+  groupedRecords <- splitRecordsByDir(records)
+  map(groupedRecords, recordsToOneBatch)
+}
+
+recordsToOneBatch <- function(records) {
+  recordType <- class(records[[1]])[1]
+  batchMaker <- switch(recordType, 
+                       dbasMsrawfilesRecord = newDbasMsrawfilesBatch, 
+                       ntsMsrawfilesRecord = newNtsMsrawfilesBatch)
+  batchMaker(records)
+} 
+
+getAllBatchesInDir <- function(msrawfilesIndex, rootDirs) {
+  dirsToKeep <- list_c(map(rootDirs, \(x) normalizePath(list.dirs(x))))
+  allBatches <- getUniqueValues(getDbComm(), msrawfilesIndex, "batchname", maxLength = 100000)
+  warnMissingBatches(dirsToKeep, allBatches)
+  dirsToKeep[dirsToKeep %in% allBatches]
+}
+
+warnMissingBatches <- function(dirsToKeep, allBatches) {
+  missingBatches <- dirsToKeep[!(dirsToKeep %in% allBatches)]
+  if (length(missingBatches) > 0) {
+    warning("No batches found for directories: ", paste(missingBatches, collapse = ", "))
   }
-  split(recsToProcess, dirs)
 }
 
-extractDirs <- function(allRecords) {
-  unique(dirname(getField(allRecords, "path")))
+warnNonExistentDirs <- function(rootDirs) {
+  if (!all(dir.exists(rootDirs))) {
+    badDirs <- purrr::discard(rootDirs, dir.exists)
+    warning("The following directories do not exist: ", paste(badDirs, collapse = ", "))
+  }
 }
 
-getDirsInFeatureIndex <- function(indexName) {
-  dbComm <- getOption("ntsportal.dbComm")()
-  allPaths <- getUniqueValues(dbComm, indexName, "path", maxLength = 9e5)
-  unique(dirname(allPaths))
+msrawfilesFieldsForProcessingGeneral <- function() {
+  c(
+    "blank",
+    "chrom_method",
+    "csl_instruments_allowed",
+    "feature_table_alias",
+    "internal_standard",
+    "path",
+    "pol",
+    "replicate_regex",
+    "spectral_library_path",
+    "start"
+  )
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+msrawfilesFieldsForProcessing <- function(screeningType) {
+  allFieldNames <- names(getMappingProperties("msrawfiles"))
+  processingFields <- allFieldNames[grepl(glue("^{screeningType}_"), allFieldNames)]
+  c(processingFields, msrawfilesFieldsForProcessingGeneral())
+}
+
+#' @export
+newMsrawfilesBatch <- function(msrawfilesRecords = list(), ..., class = character()) {
+  stopifnot(is.list(msrawfilesRecords))
+  stopifnot(all(map_lgl(msrawfilesRecords, \(rec) inherits(rec, "msrawfilesRecord"))))
+  structure(msrawfilesRecords, ..., class = c(class, "msrawfilesBatch", "list"))
+}
+#' @export
+newDbasMsrawfilesBatch <- function(msrawfilesRecords = list()) {
+  stopifnot(is.list(msrawfilesRecords))
+  stopifnot(all(map_lgl(msrawfilesRecords, \(rec) inherits(rec, "dbasMsrawfilesRecord"))))
+  newMsrawfilesBatch(msrawfilesRecords, class = "dbasMsrawfilesBatch")
+}
+#' @export
+newNtsMsrawfilesBatch <- function(msrawfilesRecords = list()) {
+  stopifnot(is.list(msrawfilesRecords))
+  stopifnot(all(map_lgl(msrawfilesRecords, \(rec) inherits(rec, "ntsMsrawfilesRecord"))))
+  newMsrawfilesBatch(msrawfilesRecords, class = "ntsMsrawfilesBatch")
+}
+
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

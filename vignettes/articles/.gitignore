@@ -1,0 +1,6 @@
+*.html
+*.R
+*.log
+
+/.quarto/
+**/*.quarto_ipynb

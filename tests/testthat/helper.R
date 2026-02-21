@@ -1,33 +1,52 @@
 
 connectNtsportal()
+dbComm <- getDbComm()
 
 rootDirectoryForTestMsrawfiles <- "/beegfs/nts/ntsportal/msrawfiles/unit_tests"
-ntspVersion <- "25.2"
+ntspVersion <- "25.3"
 
 testIndexName <- glue("ntsp{ntspVersion}_msrawfiles_unit_tests")
 
-getEmptyRecord <- function() {
+# Since the feature record is empty, it doesn't matter which processing is used.
+getEmptyFeatureRecord <- function() {
   emptyResult <- convertToDbasResult(emptyReport())
-  convertToRecord(emptyResult, list(getRecordNoPeaks()))
+  convertToRecord(emptyResult, list(getMsrawfilesRecordNoPeaks("dbas")))
 }
 
 checkForAlias <- function(record) {
-  expect_match(record$dbas_alias_name, "ntsp\\d{2}\\.\\d+_dbas_unit_tests")
+  expect_match(record$feature_table_alias, "ntsp\\d{2}\\.\\d+_feature_unit_tests")
 }
 
-getOneSampleRecords <- function() {
-  recs <- getMsrawfilesTestRecords()
-  keep(recs, \(rec) grepl("KO_06_1_pos|BL_1_pos", rec$path))
+getOneSampleRecords <- function(screeningType) {
+  recs <- getMsrawfilesTestRecords(screeningType)
+  recs <- keep(recs, \(rec) grepl("KO_06_1_pos|BL_1_pos", rec$path))
+  recordsToOneBatch(recs)
 }
 
-getRecordNoPeaks <- function() {
-  records <- getMsrawfilesTestRecords()
+getRecordBatchNoPeaks <- function(screeningType) {
+  recordsToOneBatch(list(getMsrawfilesRecordNoPeaks(screeningType)))
+}
+
+getSingleRecordBatchDes0701pos <- function(screeningType) {
+  records <- getMsrawfilesTestRecords(screeningType)
+  rec <- keep(records, \(rec) grepl("Des_07_01_pos", rec$path))
+  recordsToOneBatch(rec)
+}
+
+
+getMsrawfilesRecordNoPeaks <- function(screeningType) {
+  records <- getMsrawfilesTestRecords(screeningType)
   allBatches <- splitRecordsByDir(records)
   allBatches[[grep("unit_tests/no-peaks", names(allBatches))]][[1]]
 }
 
-getMsrawfilesTestRecords <- function() {
-  readRDS(test_path("fixtures", "msrawfilesTestRecords", "allRecords.RDS"))
+getMsrawfilesTestRecords <- function(screeningType) {
+  switch(screeningType,
+    dbas = readRDS(test_path("fixtures", "msrawfilesTestRecords", "allDbasMsrawfileRecords.RDS")),
+    nts = readRDS(test_path("fixtures", "msrawfilesTestRecords", "allNtsMsrawfileRecords.RDS")),
+    general = readRDS(test_path("fixtures", "msrawfilesTestRecords", "allRecords.RDS")),
+    no_class = readRDS(test_path("fixtures", "msrawfilesTestRecords", "allRecordsNoClass.RDS"))
+  )
 }
 
 getExampleCslAsRecords <- function() {
