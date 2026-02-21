@@ -1,7 +1,7 @@
 anyio==4.12.1
 certifi==2025.1.31
 cffi==1.15.1
-cryptography==37.0.2
+cryptography==46.0.5
 elastic-transport==9.2.1
 elasticsearch==9.2.1
 idna==3.11
