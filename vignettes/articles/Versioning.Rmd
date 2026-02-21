@@ -11,3 +11,5 @@ Version naming follows the convention "YY.x", where YY is the two-digit year and
 
 When the database is updated the web application is updated to the same version. The database is updated by first copying the msrawfiles table to the new version "ntsp25.3_msrawfiles" using `msrawfilesSetVersion()`. If needed, the processing settings are changed, e.g. a new CSL version is applied, and then all the measurement files are reprocessed.
 
+<!-- Copyright 2026 Bundesanstalt für Gewässerkunde -->
+<!-- This file is part of ntsportal -->

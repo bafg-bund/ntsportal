@@ -72,10 +72,10 @@ viewTable <- function(tableName) {
 }
 
 #' Use ES|QL to retrieve a table from NTSPortal
-#' @description ES|QL can be prepared in the "Discover" page of NTSPortal and 
+#' @description ES|QL can be prepared in the "Discover" page of the NTSPortal dashboard.
 #' @param esql ES|QL string
 #' @export
-#' @details ES|QL does not work for nested fields, fields such as ms2, rtt will be ignored 
+#' @details ES|QL does not work for nested fields, fields such as ms2, rtt will be ignored.
 #' @examples
 #' \dontrun{
 #' getTableByEsql("FROM ntsp25.1_dbas* | WHERE station == \"mosel_139\" | KEEP mz | LIMIT 10")

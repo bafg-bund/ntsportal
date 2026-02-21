@@ -67,6 +67,14 @@ setGeneric(
 #' @return a vector
 #' @export
 setGeneric("getUniqueValues", function(dbComm, tableName, field, maxLength = 10000) standardGeneric("getUniqueValues"))
+
+#' Test the DB-Connection
+#' @inheritParams isTable
+#' @return TRUE when connection active
+#' @export
+#' @docType methods
+setGeneric("ping", function(dbComm) standardGeneric("ping")) 
+
 setGeneric("refreshTable", function(dbComm, tableName) standardGeneric("refreshTable"))
 
 #' Remove a value from an array field 
@@ -81,8 +89,11 @@ setGeneric("removeValueFromArray", function(dbComm, tableName, field, value, sea
 setGeneric("removeFieldFromTable", function(dbComm, tableName, field, searchBlock = list()) standardGeneric("removeFieldFromTable"))
 
 #' Replace a value in a field
+#' Will replace all occurrences of this value in the specified field. There is no way to restrict the change to specific 
+#' records. For that purpose, use `setValueInField()`.
 #' @inheritParams  addValueToArray
 #' @param oldValue Value to be replaced
+#' @seealso \link{`setValueInField`}
 #' @export
 setGeneric("replaceValueInField", function(dbComm, tableName, field, oldValue, newValue) standardGeneric("replaceValueInField"))
 
@@ -92,12 +103,5 @@ setGeneric("replaceValueInField", function(dbComm, tableName, field, oldValue, n
 #' @export
 setGeneric("setValueInField", function(dbComm, tableName, field, value, searchBlock = list()) standardGeneric("setValueInField"))
 
-#' Test the DB-Connection
-#' @inheritParams isTable
-#' @return TRUE when connection active
-#' @export
-#' @docType methods
-setGeneric("ping", function(dbComm) standardGeneric("ping")) 
-
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

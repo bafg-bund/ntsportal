@@ -15,10 +15,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Kevin S. Jewell \email{jewell@bafg.de} (Federal Institute of Hydrology (BfG) Koblenz, Germany)
+\strong{Maintainer}: 
 
 Authors:
 \itemize{
+  \item Kevin S. Jewell \email{jewell@bafg.de} (Federal Institute of Hydrology (BfG) Koblenz, Germany)
   \item Ole Lessmann \email{lessmann@bafg.de} (Federal Institute of Hydrology (BfG) Koblenz, Germany)
 }
 

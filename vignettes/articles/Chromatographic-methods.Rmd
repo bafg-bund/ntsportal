@@ -18,9 +18,12 @@ knitr::opts_chunk$set(
 
 | Keyword    | Description                                                          |
 |------------|------------------------------------------------|
-|bfg_nts_rp1|Chromatographic method used for most BfG data. Further information can be found in [Nürenberg et al (2015)](https://doi.org/10.1016/j.chroma.2015.11.014).|
-|lw_nts_rp1 |Chromatographic method used for data from LW|
-|lanuv_nts|Chromatographic method used for data from LANUV|
+|bfg_nts_rp1|Chromatographic method used for most BfG data [(Nürenberg et al., 2015)](https://doi.org/10.1016/j.chroma.2015.11.014)|
+|bfg_nts_rp2|Chromatographic method used at the BfG for the Rhine Project NTS. (Water-MeOH) [Project page](https://www.iksr.org/de/iksr/rhein-2040/rhine-project-non-target-screening)|
+|lw_nts_rp1|Chromatographic method used for data from Zweckverband Landeswasserversorgung|
+|lanuk_nts_rp1|Chromatographic method used for data from LANUK [(Brüggen et al., 2018)](https://doi.org/10.1007/s41664-018-0081-5)|
+|lubw_nts_rp1|Chromatographic method used for data from LUBW|
+|lfuby_nts_rp1|Chromatographic method used for data from LfU Bayern|
 
-<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- Copyright 2026 Bundesanstalt für Gewässerkunde -->
 <!-- This file is part of ntsportal -->

@@ -13,7 +13,18 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-# Overwrite a value
+
+# Using the ntsportal `DbComm` interface
+
+The functions found in the `R/dbInterface-DbComm.R` module can cover typical workflows for modifying documents. See the S4 class and generics' documentation for more details.
+
+# Using the Elasticsearch "Developer Tools" console
+
+Most tasks can be accomplished with `ntsportal`. If more flexibility is needed, use the "Developer Tools" console. 
+
+## Overwrite a value 
+
+It is recommended to use `ntsportal::setValueInField()` or `ntsportal::replaceValueInField()`.
 
 IMPORTANT: Always run the query by itself first using `GET <INDEX>/_search` and check that results are correct. Then copy the query to the POST statement.
 
@@ -45,6 +56,8 @@ POST <INDEX>/_update_by_query
 ```
 
 ## Overwrite a field via a Painless script
+
+It is recommended to use `ntsportal::setValueInField()` or `ntsportal::replaceValueInField()`.
 
 In this case we want to change the station name by adding a prefix to a part of the existing station name.
 
@@ -91,7 +104,9 @@ POST <INDEX>/_update_by_query
 }
 ```
 
-# Create or append to array
+## Create or append to array
+
+It is recommended to use `ntsportal::removeValueFromArray()` and `ntsportal::addValueToArray()`.
 
 If an entry should be treated as an array (multiple entries), such as the `tag` or `comment` fields, then these need to be explicitly saved as arrays. The following script will test if an entry exists and if not will create an array. If there already is an entry (array or not) it will make it an array and append the new value. The field and values to change are given in the `params` field of the script.
 

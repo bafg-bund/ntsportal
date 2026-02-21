@@ -2,7 +2,7 @@
 #' Update the CSL spectral library on ntsportal
 #' @description The `spectral_library` table is a copy of the CSL to use as a reference in the Spectral Library dashboard 
 #' and Spectra and Chromatograms dashboard. This does not change the library used for DBAS processing. After
-#' reprocessing with a new CSL version, this function is run to update the reference table.
+#' reprocessing with a new CSL version, this function must be run to update the reference table.
 #' @param rfTableName Name of the msrawfiles table
 #' @param specLibTableName Name for the new spectral library table (old table will be overwritten)
 #' @export
@@ -171,5 +171,5 @@ ingestSpectralLibrary <- function(specLibRecords, specLibTableName) {
   appendRecords(dbComm, specLibTableName, specLibRecords$records)
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

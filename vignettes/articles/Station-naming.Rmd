@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 ```
 
 # General conventions
-The stations are named as best as possible through the convention `<river>_<location>_<bank>`. The river name uses the local spelling with the complete character set (ß etc.). This enables easier wildcard searching, for example `rhein*` will find all measurement stations on the Rhine river. The location can be either a town, district, or river-km (must be with `km` before, e.g., `donau_km50`, `.` is used for decimals). Numbering of stations along a river is not accepted (either by numbers or letters, e.g., not permitted: `elbe_1`, `lahn_a`. If a code is used for the location, e.g. `jo` for Jochenstein, then this code needs to be added to the table below. The bank indicates on which bank the sample was taken (left: `l`, right: `r`, `m` for middle). Banks are always named in the direction of the flow, for canals see [Teil II Binnenschiffahrtsverordnung](https://elwis.de/DE/Schifffahrtsrecht/Binnenschifffahrtsrecht/BinSchStrO/Zweiter-Teil/Zweiter-Teil-node.html). All text is lower-case without spaces, punctuation or other special characters (`´`, `"`, `,`, etc.).
+The stations are named as best as possible through the convention `<river>_<location>_<bank>`. The river name uses the local spelling with the complete character set (ß etc.). This enables easier wildcard searching, for example `rhein*` will find all measurement stations on the Rhine river. The location can be either a town, district, or river-km (must be with `km` before, e.g., `donau_km50`, `.` is used for decimals). Numbering of stations along a river is not accepted (either by numbers or letters, e.g., not permitted: `elbe_1`, `lahn_a`. If a code is used for the location, e.g. `jo` for Jochenstein, then this code needs to be added to the table below. It is preferred to use the full name of the town, lowercase and local spelling. If the name contains a space, use a hyphen (`-`) instead. The bank indicates on which bank the sample was taken (left: `l`, right: `r`, `m` for middle). Banks are always named in the direction of the flow, for canals see [Teil II Binnenschiffahrtsverordnung](https://elwis.de/DE/Schifffahrtsrecht/Binnenschifffahrtsrecht/BinSchStrO/Zweiter-Teil/Zweiter-Teil-node.html). All text is lower-case without spaces or punctuation characters (`´`, `"`, `,`, etc.). Special characters such as ä, ß, etc. are allowed and preferred.
 
 # Table of station codes  
 [See also Gist](https://gist.github.com/ksjewell/df3f8c0be02a5f0bea7e7e8ab75b0eac)      
@@ -67,5 +67,5 @@ The stations are named as best as possible through the convention `<river>_<loca
 
 Station descriptions: Schulze, T.; Ricking, M. (2005): Abschlussbericht: Entwicklung einer Verfahrensrichtlinie „Sedimente und Schwebstoffe“. Freie Universität Berlin, Umweltbundesamt,  UBA, Berlin. [Link](https://www.umweltbundesamt.de/publikationen/entwicklung-einer-verfahrensrichtlinie-sedimente)
 
-<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- Copyright 2026 Bundesanstalt für Gewässerkunde -->
 <!-- This file is part of ntsportal -->

@@ -10,10 +10,10 @@ getTableByEsql(esql)
 \item{esql}{ES|QL string}
 }
 \description{
-ES|QL can be prepared in the "Discover" page of NTSPortal and
+ES|QL can be prepared in the "Discover" page of the NTSPortal dashboard.
 }
 \details{
-ES|QL does not work for nested fields, fields such as ms2, rtt will be ignored
+ES|QL does not work for nested fields, fields such as ms2, rtt will be ignored.
 }
 \examples{
 \dontrun{

@@ -389,3 +389,7 @@ getEmptyNtsResult <- function(records) {
 getPeakPickingFails <- function(peakPickingResults) {
   map_lgl(peakPickingResults, isPeakPickingResultEmpty)
 }
+
+# Copyright 2026 Bundesanstalt für Gewässerkunde
+# This file is part of ntsportal
+

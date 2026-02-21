@@ -58,5 +58,5 @@ print.featureRecord <- function(x, ...) {
   NextMethod()
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

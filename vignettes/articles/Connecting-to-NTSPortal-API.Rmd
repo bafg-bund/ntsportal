@@ -24,17 +24,19 @@ The API documentation is found [here](https://www.elastic.co/docs/api/doc/elasti
 
 `ntsportal::getTableByQuery()` allows fetching records from NTSPortal as a `tbl_df` and allows the retrieval of nested fields. This function uses the Query DSL language (in the form of a `list`) to pass the queries. The best way to get started with Query DSL is to use the Elasticsearch "Developer Tools" console in the NTSPortal Dashboards. 
 
+For an example of using the API in Python see [Using the Elasticsearch Search API with Query DSL for retrieving documents](articles/Searching-with-ElasticSearch-Query-DSL.html).
+
 ## Storing of user credentials
 
 `ntsportal::connectNtsportal()` stores and retrieves the NTSPortal user credentials, it uses `keyring` to store the username and password. 
 
-## Ignoring SSL verification
-
-This is not recommended, but if there is a certificate error, you can turn off SSL verification.
-
 ## Under the hood
 
 The API interface functions above use the Python package *elasticsearch* to query the database ([documentation](https://elasticsearch-py.readthedocs.io/)). To see how it works look at the code for `ntsportal::PythonDbComm()`, which uses the `inst/pythonElasticComm/elasticSearchComm.py` module to create an elasticsearch client object in R. This client is used in many of the interface functions found in `R/dbInterface-PythonDbComm.R`.
+
+### Ignoring SSL verification
+
+This is not recommended, but if there is a certificate error, you can turn off SSL verification when using `elasticsearch.Elasticsearch()` in Python with the argument `verify_certs=False`.
 
 # Checking your IP address
 

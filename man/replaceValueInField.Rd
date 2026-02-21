@@ -2,7 +2,9 @@
 % Please edit documentation in R/dbInterface-DbComm.R
 \name{replaceValueInField}
 \alias{replaceValueInField}
-\title{Replace a value in a field}
+\title{Replace a value in a field
+Will replace all occurrences of this value in the specified field. There is no way to restrict the change to specific 
+records. For that purpose, use `setValueInField()`.}
 \usage{
 replaceValueInField(dbComm, tableName, field, oldValue, newValue)
 }
@@ -17,4 +19,9 @@ replaceValueInField(dbComm, tableName, field, oldValue, newValue)
 }
 \description{
 Replace a value in a field
+Will replace all occurrences of this value in the specified field. There is no way to restrict the change to specific 
+records. For that purpose, use `setValueInField()`.
+}
+\seealso{
+\link{`setValueInField`}
 }

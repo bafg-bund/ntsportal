@@ -25,7 +25,7 @@ for (a_file in files) {  # a_file <- files[1]
   # Add imprint to footer
   y <- gsub(
     'Developed by Kevin S\\. Jewell, Ole Lessmann\\.',
-     paste0('Developed by Kevin S. Jewell, Ole Lessmann, Jonas Skottnik, Franziska Prodöhl, Nina Hermes, ',  
+     paste0('Developed by Kevin S. Jewell, Ole Lessmann, Franziska Prodöhl, Jonas Skottnik, Nina Hermes, ',  
      'Arne Wick. <a href="https://www.bafg.de/DE/Service/Impressum/impressum_node.html">Imprint</a>.'), 
      x
   )

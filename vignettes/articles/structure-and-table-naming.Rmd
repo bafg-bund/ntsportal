@@ -75,9 +75,9 @@ One alias includes all tables from different ingest times. Since the types `msra
 
 Kibana uses data views to allow for granular data access rights. A data view is a name pattern potentially matching one or several indices (or aliases). A user has a role, and each role is given access to specific indices. The dashboards in Kibana are built with data views so that they are programmed only once and the users role determines which indices are visible in the dashboard. 
 
-An example of a data view is: `ntsp25.3_feature*`. This data view will access both the aliases `ntsp25.3_feature_bfg` and `ntsp25.3_feature_lanuv`, for example, via the wildcard (`*`) expansion. So a user with the role `ntsp_lanuv`, which has access to both aliases and therefore the linked indices, will see both datasets when viewing a dashboard visual using that data view. Similarly, the API can also accept this wildcard notation for accessing tables.
+An example of a data view is: `ntsp25.3_feature*`. This data view will access both the aliases `ntsp25.3_feature_bfg` and `ntsp25.3_feature_lanuk`, for example, via the wildcard (`*`) expansion. So a user with the role `ntsp_lanuk`, which has access to both aliases and therefore the linked indices, will see both datasets when viewing a dashboard visual using that data view. Similarly, the API can also accept this wildcard notation for accessing tables.
 
-It is important that alias names are not a subset of each other or indices. So, for example, the `ntsp_is_dbas` alias is correct while `ntsp_dbas_is` is incorrect. This is because this second alias would also match the data view `ntsp_dbas*` and therefore the internal standard data would appear together with the results.  
+It is important that alias names are not a subset of each other or indices. So, for example, the `ntsp_is_feature` alias for internal standard data is correct while `ntsp_feature_is` is incorrect. This is because this second alias would also match the data view `ntsp_feature*` and therefore the internal standard data would appear together with the results.  
 
 |Index|Alias|Data view|
 |-----|-----|---------|
@@ -91,6 +91,6 @@ It is important that alias names are not a subset of each other or indices. So, 
 
 : Table: Examples of table/index naming conventions
 
-<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- Copyright 2026 Bundesanstalt für Gewässerkunde -->
 <!-- This file is part of ntsportal -->
 

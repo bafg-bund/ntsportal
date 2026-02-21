@@ -80,10 +80,10 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a>
+      <h2 id="analysis-linearregression-module">analysis-linearRegression module<a class="anchor" aria-label="anchor" href="#analysis-linearregression-module"></a>
 </h2>
 
-
+      <div class="section-desc"><p>Functions for updating linear regression tables</p></div>
 
       <dl></dl>
 </div>
@@ -95,66 +95,68 @@
       <dl>
 <dt>
 
-          <code><a href="DbComm-class.html">DbComm-class</a></code>
+          <code><a href="updateLinearRegressionTable.html">updateLinearRegressionTable()</a></code>
 
         </dt>
-        <dd>DbComm interface</dd>
+        <dd>Update the "analysis_dbas" table for Time Series SPM dashboard</dd>
+      </dl>
+</div>
+<div class="section level2">
+      <h2 id="connectiontoelasticsearch-module">connectionToElasticsearch module<a class="anchor" aria-label="anchor" href="#connectiontoelasticsearch-module"></a>
+</h2>
+
+      <div class="section-desc"><p>Functions for saving user credentials for the elasticsearch connection</p></div>
+
+      <dl></dl>
+</div>
+<div class="section level2">
+
+
+
+
+      <dl>
+<dt>
+
+          <code><a href="connectNtsportal.html">connectNtsportal()</a></code>
+
+        </dt>
+        <dd>Set ElasticSearch credentials and create ElasticSearch connection object</dd>
 
         <dt>
 
-          <code><a href="PythonDbComm-class.html">PythonDbComm-class</a></code>
+          <code><a href="resetConnectionCredentials.html">resetConnectionCredentials()</a></code>
 
         </dt>
-        <dd>A DbComm interface using the Python back-end</dd>
+        <dd>Create connection with new credentials</dd>
 
         <dt>
 
-          <code><a href="PythonDbComm.html">PythonDbComm()</a></code>
+          <code><a href="setCredNonInteractive.html">setCredNonInteractive()</a></code>
 
         </dt>
-        <dd>Build Python DB communications interface</dd>
+        <dd>Set credentials for accessing NTSPortal ElasticSearch</dd>
+      </dl>
+</div>
+<div class="section level2">
+      <h2 id="createstructuralformulas-module">createStructuralFormulas module<a class="anchor" aria-label="anchor" href="#createstructuralformulas-module"></a>
+</h2>
 
-        <dt>
+      <div class="section-desc"><p>Functions for updating structural formula images for dashboards</p></div>
 
-          <code><a href="addRawfiles.html">addRawfiles()</a></code>
+      <dl></dl>
+</div>
+<div class="section level2">
 
-        </dt>
-        <dd>Add new records for MS measurement files to msrawfiles index</dd>
 
-        <dt>
 
-          <code><a href="addValueToArray.html">addValueToArray()</a></code>
 
-        </dt>
-        <dd>Add value to an array field</dd>
+      <dl>
+<dt>
 
-        <dt>
-
-          <code><a href="changeAliasAddress.html">changeAliasAddress()</a></code>
-
-        </dt>
-        <dd>Change alias of an index to a new index.</dd>
-
-        <dt>
-
-          <code><a href="changeMsrawfileFilename.html">changeMsrawfileFilename()</a></code>
+          <code><a href="createAllStructures.html">createAllStructures()</a></code>
 
         </dt>
-        <dd>Change filename in the msrawfiles-db and on the filesystem</dd>
-
-        <dt>
-
-          <code><a href="changeMsrawfilePath.html">changeMsrawfilePath()</a></code>
-
-        </dt>
-        <dd>Change the path of one document in msrawfiles</dd>
-
-        <dt>
-
-          <code><a href="checkMsrawfiles.html">checkMsrawfiles()</a></code>
-
-        </dt>
-        <dd>Check `msrawfiles` for validity</dd>
+        <dd>Create images of structural formulae from the spectral library</dd>
 
         <dt>
 
@@ -165,38 +167,97 @@
 
         <dt>
 
+          <code><a href="removeRedundantPngs.html">removeRedundantPngs()</a></code>
+
+        </dt>
+        <dd>Delete redundant PNGs</dd>
+
+        <dt>
+
           <code><a href="checkPngSyncronization.html">checkPngSyncronization()</a></code>
 
         </dt>
         <dd>Check synchronization with the picture server</dd>
+      </dl>
+</div>
+<div class="section level2">
+      <h2 id="dbinterface-enrichpolices-module">dbInterface-enrichPolices module<a class="anchor" aria-label="anchor" href="#dbinterface-enrichpolices-module"></a>
+</h2>
+
+      <div class="section-desc"><p>Functions for updating enrich policies</p></div>
+
+      <dl></dl>
+</div>
+<div class="section level2">
+
+
+
+
+      <dl>
+<dt>
+
+          <code><a href="updateEnrichPolicies.html">updateEnrichPolicies()</a></code>
+
+        </dt>
+        <dd>Update enrich policies in Elasticsearch</dd>
 
         <dt>
 
-          <code><a href="connectNtsportal.html">connectNtsportal()</a></code>
+          <code><a href="executeEnrichPolicy.html">executeEnrichPolicy()</a></code>
 
         </dt>
-        <dd>Set ElasticSearch credentials and create ElasticSearch connection object</dd>
+        <dd>Refresh an existing enrich policy</dd>
+      </dl>
+</div>
+<div class="section level2">
+      <h2 id="dbinterface-gettable-module">dbInterface-getTable module<a class="anchor" aria-label="anchor" href="#dbinterface-gettable-module"></a>
+</h2>
+
+      <div class="section-desc"><p>High-level functions for retrieving data from NTSPortal</p></div>
+
+      <dl></dl>
+</div>
+<div class="section level2">
+
+
+
+
+      <dl>
+<dt>
+
+          <code><a href="getTableByEsql.html">getTableByEsql()</a></code>
+
+        </dt>
+        <dd>Use ES|QL to retrieve a table from NTSPortal</dd>
 
         <dt>
 
-          <code><a href="convertToRecord.html">convertToRecord()</a></code>
+          <code><a href="getTableByQuery.html">getTableByQuery()</a></code>
 
         </dt>
-        <dd>Convert the result of file scanning to a list of feature records Compound and sample metadata, including spectra are collected from the `scanResult`, from the linked raw measurement files, or from `msrawfileRecords`</dd>
+        <dd>Retrieve a table from NTSPortal using Query DSL</dd>
+      </dl>
+</div>
+<div class="section level2">
+      <h2 id="dbinterface-dbcomm-module">dbInterface-DbComm module<a class="anchor" aria-label="anchor" href="#dbinterface-dbcomm-module"></a>
+</h2>
 
-        <dt>
+      <div class="section-desc"><p>Low level Generics for database communication</p></div>
 
-          <code><a href="createAllStructures.html">createAllStructures()</a></code>
+      <dl></dl>
+</div>
+<div class="section level2">
+
+
+
+
+      <dl>
+<dt>
+
+          <code><a href="addValueToArray.html">addValueToArray()</a></code>
 
         </dt>
-        <dd>Create images of structural formulae from the spectral library</dd>
-
-        <dt>
-
-          <code><a href="createBackupMsrawfiles.html">createBackupMsrawfiles()</a></code>
-
-        </dt>
-        <dd>Create a backup of an msrawfiles index</dd>
+        <dd>Add value to an array field</dd>
 
         <dt>
 
@@ -207,24 +268,10 @@
 
         <dt>
 
-          <code><a href="esSearchPaged.html">esSearchPaged()</a></code>
+          <code><a href="DbComm-class.html">DbComm-class</a></code>
 
         </dt>
-        <dd>Get search results for more than 10000 docs by pagination.</dd>
-
-        <dt>
-
-          <code><a href="executeEnrichPolicy.html">executeEnrichPolicy()</a></code>
-
-        </dt>
-        <dd>Refresh an existing enrich policy</dd>
-
-        <dt>
-
-          <code><a href="findTemplateId.html">findTemplateId()</a></code>
-
-        </dt>
-        <dd>Get ID based on search parameters</dd>
+        <dd>DbComm interface</dd>
 
         <dt>
 
@@ -249,31 +296,10 @@
 
         <dt>
 
-          <code><a href="getTableByEsql.html">getTableByEsql()</a></code>
-
-        </dt>
-        <dd>Use ES|QL to retrieve a table from NTSPortal</dd>
-
-        <dt>
-
-          <code><a href="getTableByQuery.html">getTableByQuery()</a></code>
-
-        </dt>
-        <dd>Retrieve a table from NTSPortal using Query DSL</dd>
-
-        <dt>
-
           <code><a href="getUniqueValues.html">getUniqueValues()</a></code>
 
         </dt>
         <dd>Get unique values in a field of a table</dd>
-
-        <dt>
-
-          <code><a href="ingestFeatureRecords.html">ingestFeatureRecords()</a></code>
-
-        </dt>
-        <dd>Ingest featureRecords into Elasticsearch</dd>
 
         <dt>
 
@@ -284,27 +310,6 @@
 
         <dt>
 
-          <code><a href="makeMappingsTbl.html">makeMappingsTbl()</a></code>
-
-        </dt>
-        <dd>Turn mappings into a tibble for documentation</dd>
-
-        <dt>
-
-          <code><a href="msrawfilesSetVersion.html">msrawfilesSetVersion()</a></code>
-
-        </dt>
-        <dd>Change msrawfiles to a new version</dd>
-
-        <dt>
-
-          <code><a href="ntsportal.html">ntsportal</a></code>
-
-        </dt>
-        <dd>ntsportal: A package for non-target data management</dd>
-
-        <dt>
-
           <code><a href="ping.html">ping()</a></code>
 
         </dt>
@@ -312,17 +317,17 @@
 
         <dt>
 
-          <code><a href="removeFieldFromTable.html">removeFieldFromTable()</a></code>
+          <code><a href="PythonDbComm.html">PythonDbComm()</a></code>
 
         </dt>
-        <dd>Remove a field from a Table</dd>
+        <dd>Build Python DB communications interface</dd>
 
         <dt>
 
-          <code><a href="removeRedundantPngs.html">removeRedundantPngs()</a></code>
+          <code><a href="PythonDbComm-class.html">PythonDbComm-class</a></code>
 
         </dt>
-        <dd>Delete redundant PNGs</dd>
+        <dd>A DbComm interface using the Python back-end</dd>
 
         <dt>
 
@@ -333,17 +338,190 @@
 
         <dt>
 
-          <code><a href="replaceValueInField.html">replaceValueInField()</a></code>
+          <code><a href="removeFieldFromTable.html">removeFieldFromTable()</a></code>
 
         </dt>
-        <dd>Replace a value in a field</dd>
+        <dd>Remove a field from a Table</dd>
 
         <dt>
 
-          <code><a href="resetConnectionCredentials.html">resetConnectionCredentials()</a></code>
+          <code><a href="replaceValueInField.html">replaceValueInField()</a></code>
 
         </dt>
-        <dd>Create connection with new credentials</dd>
+        <dd>Replace a value in a field Will replace all occurrences of this value in the specified field. There is no way to restrict the change to specific records. For that purpose, use `setValueInField()`.</dd>
+
+        <dt>
+
+          <code><a href="setValueInField.html">setValueInField()</a></code>
+
+        </dt>
+        <dd>Set the value of a field in a table</dd>
+      </dl>
+</div>
+<div class="section level2">
+      <h2 id="dbinterface-ingestpipelines-module">dbInterface-ingestPipelines module<a class="anchor" aria-label="anchor" href="#dbinterface-ingestpipelines-module"></a>
+</h2>
+
+      <div class="section-desc"><p>Functions for updating ingest pipelines</p></div>
+
+      <dl></dl>
+</div>
+<div class="section level2">
+
+
+
+
+      <dl>
+<dt>
+
+          <code><a href="updateIngestPipelines.html">updateIngestPipelines()</a></code>
+
+        </dt>
+        <dd>Update Ingest Pipelines needed for ntsportal on the elasticsearch cluster</dd>
+      </dl>
+</div>
+<div class="section level2">
+      <h2 id="msrawfiles-addrecord-module">msrawfiles-addRecord module<a class="anchor" aria-label="anchor" href="#msrawfiles-addrecord-module"></a>
+</h2>
+
+      <div class="section-desc"><p>Functions for adding metadata entries to msrawfiles tables</p></div>
+
+      <dl></dl>
+</div>
+<div class="section level2">
+
+
+
+
+      <dl>
+<dt>
+
+          <code><a href="addRawfiles.html">addRawfiles()</a></code>
+
+        </dt>
+        <dd>Add new records for MS measurement files to msrawfiles index</dd>
+      </dl>
+</div>
+<div class="section level2">
+      <h2 id="msrawfiles-modules">msrawfiles- modules<a class="anchor" aria-label="anchor" href="#msrawfiles-modules"></a>
+</h2>
+
+      <div class="section-desc"><p>Functions for manipulating msrawfiles tables</p></div>
+
+      <dl></dl>
+</div>
+<div class="section level2">
+
+
+
+
+      <dl>
+<dt>
+
+          <code><a href="addRawfiles.html">addRawfiles()</a></code>
+
+        </dt>
+        <dd>Add new records for MS measurement files to msrawfiles index</dd>
+
+        <dt>
+
+          <code><a href="changeAliasAddress.html">changeAliasAddress()</a></code>
+
+        </dt>
+        <dd>Change alias of an index to a new index.</dd>
+
+        <dt>
+
+          <code><a href="changeMsrawfileFilename.html">changeMsrawfileFilename()</a></code>
+
+        </dt>
+        <dd>Change filename in the msrawfiles-db and on the filesystem</dd>
+
+        <dt>
+
+          <code><a href="changeMsrawfilePath.html">changeMsrawfilePath()</a></code>
+
+        </dt>
+        <dd>Change the path of one document in msrawfiles</dd>
+
+        <dt>
+
+          <code><a href="createBackupMsrawfiles.html">createBackupMsrawfiles()</a></code>
+
+        </dt>
+        <dd>Create a backup of an msrawfiles index</dd>
+
+        <dt>
+
+          <code><a href="findTemplateId.html">findTemplateId()</a></code>
+
+        </dt>
+        <dd>Get ID based on search parameters</dd>
+
+        <dt>
+
+          <code><a href="msrawfilesSetVersion.html">msrawfilesSetVersion()</a></code>
+
+        </dt>
+        <dd>Change msrawfiles to a new version</dd>
+      </dl>
+</div>
+<div class="section level2">
+      <h2 id="ntsprecord-validation-module">ntspRecord-validation module<a class="anchor" aria-label="anchor" href="#ntsprecord-validation-module"></a>
+</h2>
+
+      <div class="section-desc"><p>Functions for validating records</p></div>
+
+      <dl></dl>
+</div>
+<div class="section level2">
+
+
+
+
+      <dl>
+<dt>
+
+          <code><a href="checkMsrawfiles.html">checkMsrawfiles()</a></code>
+
+        </dt>
+        <dd>Check `msrawfiles` for validity</dd>
+
+        <dt>
+
+          <code><a href="validateRecord.html">validateRecord()</a></code>
+
+        </dt>
+        <dd>Validate that a `*record` is correctly formatted</dd>
+      </dl>
+</div>
+<div class="section level2">
+      <h2 id="screening-modules">screening- modules<a class="anchor" aria-label="anchor" href="#screening-modules"></a>
+</h2>
+
+      <div class="section-desc"><p>Functions for file processing and ingesting records</p></div>
+
+      <dl></dl>
+</div>
+<div class="section level2">
+
+
+
+
+      <dl>
+<dt>
+
+          <code><a href="convertToRecord.html">convertToRecord()</a></code>
+
+        </dt>
+        <dd>Convert the result of file scanning to a list of feature records Compound and sample metadata, including spectra are collected from the `scanResult`, from the linked raw measurement files, or from `msrawfileRecords`</dd>
+
+        <dt>
+
+          <code><a href="ingestFeatureRecords.html">ingestFeatureRecords()</a></code>
+
+        </dt>
+        <dd>Ingest featureRecords into Elasticsearch</dd>
 
         <dt>
 
@@ -354,13 +532,6 @@
 
         <dt>
 
-          <code><a href="screeningOneBatch.html">screeningOneBatch()</a></code>
-
-        </dt>
-        <dd>Process one batch of measurement files</dd>
-
-        <dt>
-
           <code><a href="screeningSelectedBatches.html">screeningSelectedBatches()</a></code>
 
         </dt>
@@ -368,62 +539,79 @@
 
         <dt>
 
+          <code><a href="screeningOneBatch.html">screeningOneBatch()</a></code>
+
+        </dt>
+        <dd>Process one batch of measurement files</dd>
+
+        <dt>
+
           <code><a href="screeningSelectedBatchesSlurm.html">screeningSelectedBatchesSlurm()</a></code>
 
         </dt>
         <dd>Process batches using SLURM by selecting directories</dd>
+      </dl>
+</div>
+<div class="section level2">
+      <h2 id="updatespectrallibrary-module">updateSpectralLibrary module<a class="anchor" aria-label="anchor" href="#updatespectrallibrary-module"></a>
+</h2>
 
-        <dt>
+      <div class="section-desc"><p>Functions for updating spectral library table</p></div>
 
-          <code><a href="setCredNonInteractive.html">setCredNonInteractive()</a></code>
+      <dl></dl>
+</div>
+<div class="section level2">
 
-        </dt>
-        <dd>Set credentials for accessing NTSPortal ElasticSearch</dd>
 
-        <dt>
 
-          <code><a href="setValueInField.html">setValueInField()</a></code>
 
-        </dt>
-        <dd>Set the value of a field in a table</dd>
-
-        <dt>
-
-          <code><a href="updateEnrichPolicies.html">updateEnrichPolicies()</a></code>
-
-        </dt>
-        <dd>Update enrich policies in Elasticsearch</dd>
-
-        <dt>
-
-          <code><a href="updateIngestPipelines.html">updateIngestPipelines()</a></code>
-
-        </dt>
-        <dd>Update Ingest Pipelines needed for ntsportal on the elasticsearch cluster</dd>
-
-        <dt>
-
-          <code><a href="updateLinearRegressionTable.html">updateLinearRegressionTable()</a></code>
-
-        </dt>
-        <dd>Update the "analysis_dbas" table for Time Series SPM dashboard</dd>
-
-        <dt>
+      <dl>
+<dt>
 
           <code><a href="updateSpectralLibrary.html">updateSpectralLibrary()</a></code>
 
         </dt>
         <dd>Update the CSL spectral library on ntsportal</dd>
+      </dl>
+</div>
+<div class="section level2">
+      <h2 id="utilities-and-ntsportal-modules">utilities and ntsportal modules<a class="anchor" aria-label="anchor" href="#utilities-and-ntsportal-modules"></a>
+</h2>
+
+      <div class="section-desc"><p>Miscellaneous and package initialization functions</p></div>
+
+      <dl></dl>
+</div>
+<div class="section level2">
+
+
+
+
+      <dl>
+<dt>
+
+          <code><a href="esSearchPaged.html">esSearchPaged()</a></code>
+
+        </dt>
+        <dd>Get search results for more than 10000 docs by pagination.</dd>
 
         <dt>
 
-          <code><a href="validateRecord.html">validateRecord()</a></code>
+          <code><a href="makeMappingsTbl.html">makeMappingsTbl()</a></code>
 
         </dt>
-        <dd>Validate that a `*record` is correctly formatted</dd>
+        <dd>Turn mappings into a tibble for documentation</dd>
+
+        <dt>
+
+          <code><a href="ntsportal.html">ntsportal</a></code>
+
+        </dt>
+        <dd>ntsportal: A package for non-target data management</dd>
       </dl>
 </div>
-  </main>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
@@ -432,7 +620,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Developed by Kevin S. Jewell, Ole Lessmann, Jonas Skottnik, Franziska Prodöhl, Nina Hermes, Arne Wick. <a href="https://www.bafg.de/DE/Service/Impressum/impressum_node.html">Imprint</a>.</p>
+  <p>Developed by Kevin S. Jewell, Ole Lessmann, Franziska Prodöhl, Jonas Skottnik, Nina Hermes, Arne Wick. <a href="https://www.bafg.de/DE/Service/Impressum/impressum_node.html">Imprint</a>.</p>
 </div>
 
     </footer>

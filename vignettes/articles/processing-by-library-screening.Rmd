@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-Measurement files are processed using the library screening algorithm known as DBAS (database assisted screening), described here, as well as [non-target screening](articles/processing-by-non-target-screening.html). All the parameters for processing, as well as the location of the necessary input files, are stored in the `msrawfiles` index. The output of DBAS processing stored in a `feature` index. See [naming conventions of indices](articles/structure-and-table-naming.html).
+Measurement files are processed using the library screening algorithm known as DBAS (database assisted screening), described here, as well as [non-target screening](articles/processing-by-non-target-screening.html). All the parameters for processing, as well as the location of the necessary input files, are stored in the `msrawfiles` index. The output of DBAS processing is stored in a `feature` index. See [naming conventions of indices](articles/structure-and-table-naming.html).
 
 # Reprocessing all datafiles in msrawfiles index
 
@@ -22,7 +22,7 @@ After additions have been made to the spectral library all datafiles must be rep
 
 ## Connecting to ElasticSearch cluster
 
-Connection within the BfG is achieved in R using `connectNtsportal()`. This will use the stored credentials to build the connection (the `PythonDbComm` interface).
+Saving the login credentials is achieved using `ntsportal::connectNtsportal()`. This will also build the connection object (the `DbComm` interface). Currently the `R/dbInterface-PythonDbComm.R` methods are used to implement the interface.
 
 ## General workflow
 
@@ -36,19 +36,19 @@ The `msrawfile`-records are used to control the processing workflow. Once the wo
 
 ### Process launching
 
-The user runs one of several `screening*` functions to start the processing either locally or via SLURM. In `screeningSelectedBatchesSlurm()` (the most commonly used) specific directories (i.e. batches) containing the measurement files are passed either by listing them directly or by giving a root directory. `dbas` is the default `screeningType` in these functions. Alternatively, the user can process any "new" batches using `dbaScreeningNewBatches()` (Section [Collecting msrawfile records](#collecting-msrawfile-records)).
+The user runs one of several `screening*` functions to start the processing either locally or via SLURM. In `screeningSelectedBatchesSlurm()` (the most commonly used) specific directories (i.e. batches) containing the measurement files are passed either by listing them directly or by giving a root directory. `dbas` is the default `screeningType` in these functions. For further details on selecting batches for processing, see Section [Collecting msrawfile records](#collecting-msrawfile-records).
 
 #### Processing using the workflow manager SLURM
 
-To run the screening via SLURM, first the necessary job files are be created. The user then starts the processing by submitting the job file (.sbatch) to the workload manager.
+To run the screening via SLURM, first the necessary job files are be created. The user then starts the processing by submitting the job file (.sbatch) to the workload manager via the `sbatch` command in a BASH terminal.
 
 ![Figure: The workflow manager SLURM can be used for processing](images/screening-slurmJobSubmission.svg){width=100%}
 
 ### Collecting msrawfile records {#sec-collectingMsrawfileRecords}
-In `dbaScreeningNewBatches()`, new batches are selected by looking at all `dbas` indices and comparing the files found (identified by the `path` field) to the files found in `msrawfiles`. Any batches in `msrawfiles` not yet found in any `dbas` index are selected for processing.
 
 The `msrawfiles` records are loaded and checks performed before the scanning process begins. Output is a list of batches of `ntsportal::msrawfilesRecord`s. 
 
+<!-- IMAGE NEEDS CHANGING -->
 ![Figure: Selecting new batches for processing](images/screening-collectMsrawfiles.svg){width=100%}
 
 
@@ -84,7 +84,7 @@ Before ingesting documents, the user must ensure that the enrich policies and in
 
 The RDS files are imported into NTSPortal with `ingestFeatureRecords()`, which calls the Elasticsearch bulk ingest API via Python. The user runs `ingestFeatureRecords()` separately after processing is complete. The ingest includes a pipeline (`ingest-feature`) which enriches each document with sample metadata found in `msrawfiles`. These are the fields such as sampling location and sampling time, `loc` and `start` fields, respectively. 
 
-![Figure: Details of `ingest()`](images/screening-ingest.svg){width=100%}
+![Figure: Details of `ingestFeatureRecords()`](images/screening-ingest.svg){width=100%}
 
-<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- Copyright 2026 Bundesanstalt für Gewässerkunde -->
 <!-- This file is part of ntsportal -->

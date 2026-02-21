@@ -60,5 +60,5 @@ Each `featureRecord` also includes the path to the measurement file (to referenc
 
 The `featureRecord`s are collected in a `list` and saved as one RDS file per batch.
 
-<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- Copyright 2026 Bundesanstalt für Gewässerkunde -->
 <!-- This file is part of ntsportal -->
