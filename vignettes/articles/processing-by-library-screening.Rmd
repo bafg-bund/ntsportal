@@ -48,9 +48,7 @@ To run the screening via SLURM, first the necessary job files are be created. Th
 
 The `msrawfiles` records are loaded and checks performed before the scanning process begins. Output is a list of batches of `ntsportal::msrawfilesRecord`s. 
 
-<!-- IMAGE NEEDS CHANGING -->
 ![Figure: Selecting new batches for processing](images/screening-collectMsrawfiles.svg){width=100%}
-
 
 ### File-wise scanning
 The measurement files are scanned for compounds in the collective spectral library (CSL) and the results are cleaned. The result is one `dbasResult` object for the batch (`list` of `data.frame`s containing peak information for the whole batch). 
