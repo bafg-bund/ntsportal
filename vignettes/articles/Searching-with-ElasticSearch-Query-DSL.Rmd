@@ -50,12 +50,8 @@ curl -X GET "https://<hostname>:<port>/ntsp25.2_dbas*/_search" \
 ## Using ntsportal
 
 ```{r, eval = FALSE}
-library(ntsportal)
-connectNtsportal()
-dbComm <- getDbComm()
-tb <- getTableAsTibble(
-  dbComm, 
-  tableName = "ntsp25.2_dbas*", 
+tb <- ntsportal::getTableByQuery(
+  tableName = "ntsp25.3_feature*", 
   searchBlock = list(
     query = list(
       term = list(
@@ -66,7 +62,9 @@ tb <- getTableAsTibble(
 )
 ```
 
-`getTableAsTibble()` implements the Python `elasticsearch-dsl` package in the back-end.
+`getTableByQuery()` implements the Python `elasticsearch` package in the back-end (via the `ntsportal::DbComm` interface). [Connecting to the NTSPortal Elasticsearch Search API from R or Python](articles/Connecting-to-NTSPortal-API.html) has more details regarding using the API in R.
+
+See also `ntsportal::getTableByEsql()` for a simpler query language.
 
 ## Using Python 
 
@@ -78,29 +76,29 @@ client = Elasticsearch(hosts="https://elastic.bafg.de", api_key= os.environ.get(
 response  = client.search(
     index="ntsp25.2_dbas*",
     body= {
-               "query": {
-                    "exists": {
-                        "field": "name"
-                    }
-                },
-                "aggs": {
-                    "all_names": {
-                            "terms": {
-                            "field": "name",
-                            "size": 950
-                            },
-                        "aggs": {
-                            "metadata": {
-                                "top_hits": {
-                                "size": 1,
-                                "_source": ["name", "cas", "inchikey"]
-                                }
+           "query": {
+                "exists": {
+                    "field": "name"
+                }
+            },
+            "aggs": {
+                "all_names": {
+                        "terms": {
+                        "field": "name",
+                        "size": 950
+                        },
+                    "aggs": {
+                        "metadata": {
+                            "top_hits": {
+                            "size": 1,
+                            "_source": ["name", "cas", "inchikey"]
                             }
                         }
                     }
-                },
-                "size": 0
-    }
+                }
+            },
+            "size": 0
+          }
 )
 ```
 

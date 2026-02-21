@@ -2,7 +2,7 @@
 
 test_that("You can get the spectral library path", {
   pth <- getSpectralLibraryPath(testIndexName)
-  expect_match(pth, "/CSL_v\\d\\d\\.\\d\\.db$")
+  expect_match(pth, "/CSL_v\\d\\d\\.\\d\\.?\\d?\\.db$")
 })
 
 test_that("A small CSL can be converted to a list of records", {
@@ -26,5 +26,5 @@ test_that("A small CSL can be sent to elastic", {
   deleteTable(dbComm, tempTable)
 })
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

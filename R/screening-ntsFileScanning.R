@@ -150,7 +150,7 @@ getAnnotationTable <- function(sampleList, peaklist, grouped, datenList, recFirs
   log_info("Starting annotation")
   # TODO change ntsworkflow: instrument: default settings should be to include everything
   sdb <- connectSqlite(recFirstUnknown$spectral_library_path)
-  specSource <- tbl(sdb, "experimentGroup") %>%
+  specSource <- tbl(sdb, "data_source") %>%
     select(name) %>% distinct() %>% collect() %>% .$name
   DBI::dbDisconnect(sdb)
   
@@ -389,3 +389,7 @@ getEmptyNtsResult <- function(records) {
 getPeakPickingFails <- function(peakPickingResults) {
   map_lgl(peakPickingResults, isPeakPickingResultEmpty)
 }
+
+# Copyright 2026 Bundesanstalt für Gewässerkunde
+# This file is part of ntsportal
+

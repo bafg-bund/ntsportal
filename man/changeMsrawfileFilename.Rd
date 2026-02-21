@@ -15,5 +15,5 @@ changeMsrawfileFilename(rfIndex, oldPath, newPath)
 }
 \description{
 Used to change filename of a measurement file and simultaneously
-change the `path` field in `msrawfiles`.
+change the `path` field in `msrawfiles`. This change is riskier than using `changeMsrawfilePath` so it isn't exported
 }

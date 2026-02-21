@@ -1,6 +1,6 @@
 {
   "match": {
-    "indices": "ntsp25.2_dbas*", 
+    "indices": "ntsp25.3_feature*", 
     "match_field": "path",
     "enrich_fields": ["date_import"]
   }

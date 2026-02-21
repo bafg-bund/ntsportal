@@ -7,17 +7,17 @@
 #' @param indexName default: ntspXX.X_msrawfiles
 #' @return TRUE if checks passed
 #' @export
-checkMsrawfiles <- function(indexName = "ntsp25.2_msrawfiles") {
+checkMsrawfiles <- function(indexName = "ntsp25.3_msrawfiles") {
   if (!grepl("msrawfiles", indexName))
     stop("This function is intended only for msrawfiles-type indices")
-  runMsrawfileChecksForProcessingType("dbas")
-  runMsrawfileChecksForProcessingType("nts")
+  runMsrawfileChecksForProcessingType(indexName, "dbas")
+  runMsrawfileChecksForProcessingType(indexName, "nts")
 }
 
-runMsrawfileChecksForProcessingType <- function(screeningType) {
+runMsrawfileChecksForProcessingType <- function(indexName, screeningType) {
+  message("Checking metadata for processing type: ", screeningType)
   allRecords <- getTableAsRecords(
-    getDbComm(), msrawfilesIndex, 
-    searchBlock = list(query = list(terms = list(batchname = batchNames))), sortField = "start", 
+    getDbComm(), indexName, sortField = "start", 
     fields = c(msrawfilesFieldsForProcessing(screeningType), msrawfileFieldsForValidation()),
     recordConstructor = switch(screeningType, dbas = newDbasMsrawfilesRecord, nts = newNtsMsrawfilesRecord)
   )
@@ -279,6 +279,7 @@ validateRecord.featureRecord <- function(record) {
     isNestedFieldAList(record, "ms2"),
     isNestedFieldAList(record, "eic"),
     isNestedFieldAList(record, "loc"),
+    isNestedFieldAList(record, "compound_annotation"),
     checkFieldsAllowed(record)
   )
 }
@@ -348,5 +349,5 @@ warnBadFields <- function(badFields, parentField = "top-level") {
   warning("Fields in ", parentField, " field which should not be there: ", badFieldsString)
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

@@ -104,7 +104,7 @@ createSaveDir <- function(saveDirectory) {
   if (!dir.exists(saveDirectory)) {
     dir.create(saveDirectory)
   } else {
-    message(saveDirectory, " already exists, files may be overwritten")
+    message(saveDirectory, " already exists, files will be overwritten")
   }
 }
 
@@ -115,8 +115,8 @@ checkScreeningType <- function(screeningType) {
 }
 saveFilesSlurm <- function(recordsInBatches, saveDirectory) {
   saveRDS(recordsInBatches, file.path(saveDirectory, "recordsInBatches.RDS"))
-  file.copy(fs::path_package("ntsportal", "scripts", "arrayScreening.sbatch"), saveDirectory)
-  file.copy(fs::path_package("ntsportal", "scripts", "screeningSlurm.R"), saveDirectory)
+  file.copy(fs::path_package("ntsportal", "scripts", "arrayScreening.sbatch"), saveDirectory, overwrite = TRUE)
+  file.copy(fs::path_package("ntsportal", "scripts", "screeningSlurm.R"), saveDirectory, overwrite = TRUE)
 }
 
 addInfoToJob <- function(jobFile, saveDirectory, email, numberOfBatches) {
@@ -129,5 +129,5 @@ addTextToJob <- function(jobFile, variableName, value) {
   system(glue::glue("sed -i 's|{variableName}|{value}|g' {jobFile}"))
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

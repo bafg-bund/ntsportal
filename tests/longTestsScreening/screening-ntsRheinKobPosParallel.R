@@ -1,6 +1,6 @@
 
 
-# nohup Rscript screening-ntsRealBatchRheinKobPosParallel.R &> ntsRheinKobPosParallel.log &
+# nohup Rscript screening-ntsRheinKobPosParallel.R &> ntsRheinKobPosParallel.log &
 library(ntsportal)
 connectNtsportal()
 tempSaveDir <- "testResults-ntsRheinKobPos-parallel"

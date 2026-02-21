@@ -1,10 +1,10 @@
 
 # Variables to be changed #################
-userEmail <- "jewell@bafg.de"
+userEmail <- "prodoehl@bafg.de"
 dirTestResults <- "tests/slurmTesting/testResults-dbas-rheinKobPos"
 msrawfileIndexName <- "ntsp25.3_msrawfiles"
 ###########################################
-
+library(logger)
 library(ntsportal)
 index <- "ntsp25.3_msrawfiles"
 dirs <- c(
@@ -13,3 +13,8 @@ dirs <- c(
 )
 screeningSelectedBatchesSlurm(index, dirs, dirTestResults, userEmail)
 
+
+# after completion
+log_info("started")
+ingestFeatureRecords(dirTestResults)
+log_info("ended")

@@ -57,8 +57,10 @@
 <url><loc>https://docs.ntsportal.bafg.de/reference/ntsportal-package.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/ntsportal.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/ping.html</loc></url>
+<url><loc>https://docs.ntsportal.bafg.de/reference/removeFieldFromTable.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/removeRedundantPngs.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/removeValueFromArray.html</loc></url>
+<url><loc>https://docs.ntsportal.bafg.de/reference/replaceValueInField.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/resetConnectionCredentials.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/scanBatch.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/scanBatchDbas.html</loc></url>

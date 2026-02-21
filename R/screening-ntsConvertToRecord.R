@@ -244,3 +244,5 @@ addIntStdToFeatures <- function(scanResult, features) {
   UseMethod("addIntStdToFeatures")
 }
 
+# Copyright 2026 Bundesanstalt für Gewässerkunde
+# This file is part of ntsportal

@@ -14,8 +14,8 @@
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="Get search results for more than 10000 docs by pagination. — esSearchPaged">
-<meta name="description" content="deprecated in favor of `getTableAsRecords()`">
-<meta property="og:description" content="deprecated in favor of `getTableAsRecords()`">
+<meta name="description" content="deprecated in favor of `getTableByQuery()`, `getTableByEsql()` or `getTableAsRecords()`,">
+<meta property="og:description" content="deprecated in favor of `getTableByQuery()`, `getTableByEsql()` or `getTableAsRecords()`,">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -54,7 +54,7 @@
     <li><a class="dropdown-item" href="../articles/processing-by-non-target-screening.html">Processing by non-target screening</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Database management</h6></li>
-    <li><a class="dropdown-item" href="../articles/Add-measurement-file-to-msrawfiles.html">Adding measurement files to msrawfiles</a></li>
+    <li><a class="dropdown-item" href="../articles/add-measurement-file-to-msrawfiles.html">Adding measurement files to msrawfiles</a></li>
     <li><a class="dropdown-item" href="../articles/Modify-documents-using-API.html">Modifying documents via the API</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Naming conventions</h6></li>
@@ -79,12 +79,12 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Get search results for more than 10000 docs by pagination.</h1>
-      <small class="dont-index">Source: <a href="https://github.com/bafg-bund/ntsportal/blob/HEAD/R/utilities.R" class="external-link"><code>R/utilities.R</code></a></small>
+
       <div class="d-none name"><code>esSearchPaged.Rd</code></div>
     </div>
 
     <div class="ref-description section level2">
-    <p>deprecated in favor of `getTableAsRecords()`</p>
+    <p>deprecated in favor of `getTableByQuery()`, `getTableByEsql()` or `getTableAsRecords()`,</p>
     </div>
 
     <div class="section level2">
@@ -141,7 +141,11 @@ currently can only be one field and may not be '_id'.</p></dd>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a>
 </h2>
-    <div class="dont-index"><p>`getTableAsRecords`</p></div>
+    <div class="dont-index">
+<p>`getTableByQuery`</p>
+<p>`getTableByEsql`</p>
+<p>`getTableAsRecords`</p>
+</div>
     </div>
 
     <div class="section level2">
@@ -168,7 +172,7 @@ currently can only be one field and may not be '_id'.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Developed by Kevin S. Jewell, Ole Lessmann, Jonas Skottnik, Franziska Prodöhl, Nina Hermes, Arne Wick. <a href="https://www.bafg.de/DE/Service/Impressum/impressum_node.html">Imprint</a>.</p>
+  <p>Developed by Kevin S. Jewell, Ole Lessmann, Franziska Prodöhl, Jonas Skottnik, Nina Hermes, Arne Wick. <a href="https://www.bafg.de/DE/Service/Impressum/impressum_node.html">Imprint</a>.</p>
 </div>
 
     </footer>

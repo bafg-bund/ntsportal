@@ -1,7 +1,15 @@
+ntsportal 25.3
+================
+
+- [Background](#background)
+- [Project Funding](#project-funding)
+- [Licence](#licence)
+- [Installation](#installation)
+- [External links](#external-links)
 
 <!-- README.md is generated from README.Rmd. Please edit README.Rmd -->
 
-# ntsportal v25.3
+# Background
 
 The goal of the R-package *ntsportal* is to provide the backend for the
 NTSPortal database and online dashboards for non-target-screening data
@@ -25,19 +33,22 @@ contact the Federal Institute of Hydrology at <ntsportal@bafg.de>. The
 back-end code for publication purposes and does not include the
 environmental data.
 
-## Project Funding
+# Project Funding
 
-The project was initiated by a research funding grant by the Federal
-Environment Agency (UBA, “Online Portal: Non-Target-Screening für die
-Umweltüberwachung der Zukunft” REFOPLAN 3720222010) and continued
-funding is provided by the research grant REFOPLAN 3723222020
-(“Weiterentwicklung des Online Portals für die Umweltbeobactung der
-Zukunft”). Additional funding is provided by the Federal Ministry of
-Transport (BMV) and the Federal Ministry of the Environment (BMU).
+The project was initiated by a research funding grant by the German
+Federal Environment Agency REFOPLAN 3720222010 (*Online Portal:
+Non-Target-Screening für die Umweltüberwachung der Zukunft* ) and
+continued funding through REFOPLAN 3723222020 (*Weiterentwicklung des
+Online Portals für die Umweltbeobactung der Zukunft*) and REFOPLAN
+TrendNTS (*TrendNTS - Fortsetzung des HRMS Non-Target Screening in
+Gewässern mit Proben der Umweltprobenbank zur Etablierung eines Trend-
+und Warnmonitorings*). Additional funding is provided by the Federal
+Ministry of Transport (BMV) and the Federal Ministry of the Environment
+(BMU).
 
-## License
+# Licence
 
-Copyright 2025 Bundesanstalt für Gewässerkunde (Federal Institute of
+Copyright 2026 Bundesanstalt für Gewässerkunde (Federal Institute of
 Hydrology)
 
 ntsportal is free software: you can redistribute it and/or modify it
@@ -56,13 +67,13 @@ with ntsportal. If not, see <https://www.gnu.org/licenses/>.
 If you use the package or any derivative thereof, please cite the work,
 see `citation("ntsportal")`.
 
-## Installation
+# Installation
 
 NTSPortal is a conglomerate of many systems (see Structure of
 NTSPortal). This guide describes the installation of the R-package
 ntsportal (the back-end processing and management tool).
 
-### Installation via Github
+## Installation via Github
 
 1)  Confirm that Python and a virtual environment is available
 
@@ -98,3 +109,16 @@ options(ntsportal.elasticsearchHostUrl = "https://my.elastic.cluster")
 connectNtsportal()  # first time: enter username and password
 ping(getDbComm())
 ```
+
+# External links
+
+- [Collective Spectral Library](https://doi.org/10.5281/zenodo.16901589)
+- [NTSPortal documentation](https://docs.ntsportal.bafg.de)
+- [UBA Projektseite *Gewässerbeobachtung der
+  Zukunft*](https://www.umweltbundesamt.de/gewaesserbeobachtung-der-zukunft-nts-portal)
+- [BfG Projektseite *NTS-Portal Online-Portal Non-Target-Screening für
+  die Umweltüberwachung der
+  Zukunft*](https://www.bafg.de/SharedDocs/Projekte/Importer/M39620204064.html)
+- [BfG Projektseite *Weiterentwicklung des Online-Portals für die
+  Gewässerbeobachtung der
+  Zukunft*](https://www.bafg.de/SharedDocs/Projekte/Importer/M39620204084.html)

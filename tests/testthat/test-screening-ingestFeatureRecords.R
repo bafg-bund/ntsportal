@@ -1,6 +1,5 @@
 
 test_that("One file is uploaded in Elasticsearch", {
-  dbComm <- getDbComm()
   esIndices <- ingestFeatureRecords(test_path("fixtures", "featureRecordExampleRds"), ingestPipeline = "ingest-feature-unit-tests")
   indexName <- esIndices[[1]]$ntsp
   expect_match(indexName, "ntsp\\d{2}.*_feature_v\\d{12}_unit_tests")
@@ -10,6 +9,8 @@ test_that("One file is uploaded in Elasticsearch", {
   expect_match(aliasName, "ntsp\\d{2}\\.\\d+_feature_unit_tests")
   startDate <- getTableByQuery(indexName, fields = "start") |> slice(1) |> as.character()
   expect_match(startDate, "\\d{4}-\\d{2}-\\d{2}")
+  instName <- getTableByQuery(indexName, fields = "instrument_name") |> slice(1) |> as.character()
+  expect_equal(instName, "sediment_tof")
   deleteTable(dbComm, indexName)
 })
 
@@ -31,13 +32,12 @@ test_that("You can add the current time to a list of records", {
 test_that("You can add the RDS path to a list of records", {
   jsonPath <- getRdsFilePaths(test_path("fixtures", "featureRecordExampleRds"))
   recs <- readRdsToRecords(jsonPath)
-  expect_match(recs$rdsPath, "ntsportal-featureRecord.*-part-a\\.RDS$")
+  expect_match(recs$rdsPath, "ntsportal-featureRecord-\\d{6}-\\d{4}-.*\\.RDS$")
 })
 
 test_that("You can create multiple indices", {
   aliasNames <- c("ntsp99.9_feature_foo", "ntsp99.9_feature_bar")
   timestamp <- "00000000000000"
-  dbComm <- getDbComm()
   indexMappingPath <- fs::path_package("ntsportal", "mappings")
   pairs <- pyIngestModule$createIndexAddAlias(aliasNames, dbComm@client, timestamp, indexMappingPath)
   expect_true(all(map_lgl(pairs, function(pair) isTable(dbComm, pair[[1]]))))
@@ -47,7 +47,6 @@ test_that("You can create multiple indices", {
 
 test_that("An error in python results in an error message", {
   jsonPath <- getRdsFilePaths(test_path("fixtures", "featureRecordExampleRds"))
-  dbComm <- getDbComm()
   indexTimeStamp <- format(lubridate::now(), "%y%m%d%H%M%S")
   indexMappingPath <- fs::path_package("ntsportal", "mappings")
   recs <- readRdsToRecords(jsonPath)
@@ -57,10 +56,10 @@ test_that("An error in python results in an error message", {
   
   executePyIngestModule(recs, dbComm, indexTimeStamp, indexMappingPath)
   errorLines <- readLines(tfile)
-  expect_match(errorLines[1], "ntsportal-featureRecord.*-part-a")
+  expect_match(errorLines[1], "ntsportal-featureRecord-\\d{6}-\\d{4}-.*\\.RDS")
   file.remove(tfile)
   log_appender(appender_console)
 })
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

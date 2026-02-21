@@ -282,7 +282,7 @@ checkDateParsing <- function(newPaths, templateRec, promptBeforeIngest) {
 
 checkStationParsing <- function(newPaths, templateRec) {
   if (!is.element("dbas_station_regex", names(templateRec)))
-    stop("dbas_station_regex, not found in template")
+    stop("dbas_station_regex not found in template")
 }
 
 
@@ -357,7 +357,6 @@ reformatDate <- function(dateObject) {
 addStationToRecord <- function(rec, newStation, rfIndex, newStationList) {
   # In the case of "same_as_template" no changes are made to rec (it was a copy of template)
   if (newStation == "filename") {
-    
     stationList <- getStationListFromCode(rfIndex, basename(rec$path), rec$dbas_station_regex)
     rec <- appendStationListFields(rec, stationList)
   } else if (newStation == "newStationList") {
@@ -370,10 +369,11 @@ getStationListFromCode <- function(rfIndex, filename, stationRegex) {
   stationQueryRegex <- makeStationQueryRegex(filename, stationRegex)
   stationHits <- getHitsWithStation(rfIndex, stationQueryRegex)
   
-  checkStationIsUnique(stationHits)
-  checkLocIsUnique(stationHits)
-  
-  stationList <- list(station = st[1], loc = locs[[1]])
+  checkStationIsUniform(stationHits)
+  checkLocIsUniform(stationHits)
+  thisStation <- stationHits[[1]]$station
+  thisLoc <- stationHits[[1]]$loc
+  stationList <- list(station = thisStation, loc = thisLoc)
   stationList <- addOptionalStationField("river", stationList, stationHits)
   stationList <- addOptionalStationField("km", stationList, stationHits)
   stationList <- addOptionalStationField("gkz", stationList, stationHits)
@@ -428,43 +428,33 @@ makeStationQueryRegex <- function(filename, stationRegex) {
   } else {
     regex2 <- paste0(regex2, ".*")
   } 
-  regex2 <- sub("\\(.*\\)", stationCode, regex2)
-  regex3 <- gsub("\\\\", "\\\\\\\\", regex2)
-  regex3
+  sub("\\(.*\\)", stationCode, regex2)
 }
 
 getHitsWithStation <- function(rfIndex, stationQueryRegex) {
-  res <- elastic::Search(escon, rfIndex, body = sprintf('
-  {
-  "query": {
-      "regexp": {
-        "filename": "%s"
-      }
-    },
-    "size": 10000,
-    "_source": ["station", "loc", "river", "km", "gkz"]
+  db <- getDbComm()
+  qdsl <- list(query = list(regexp = list(filename = stationQueryRegex)))
+  numHits <- getNrow(db, rfIndex, qdsl)
+  if (numHits == 0) {
+    stop("No documents found with the station code: ", stationQueryRegex)
   }
-  ', stationQueryRegex))
-  
-  stopifnot(res$hits$total$relation == "eq")
-  if (res$hits$total$value == 0) {
-    stop("No documents found with the station code: ", stationCode, 
-         " for filename ", filename)
-  }
-  res$hits$hits
+  getTableAsRecords(
+    db, rfIndex, qdsl, fields = c("station", "loc", "river", "km", "gkz"), 
+    recordConstructor = newFeatureRecord
+  )
 }
 
-checkStationIsUnique <- function(stationHits) {
-  stationsInHits <- vapply(stationHits, function(doc) doc[["_source"]][["station"]], character(1))
+checkStationIsUniform <- function(stationHits) {
+  stationsInHits <- map_chr(stationHits, \(x) x$station)
   if (length(unique(stationsInHits)) != 1)
     stop("More than one station found in ntsportal")
 }
 
-checkLocIsUnique <- function(stationHits) {
-  locsInHits <- lapply(hits, function(doc) doc[["_source"]][["loc"]])
+checkLocIsUniform <- function(stationHits) {
+  locsInHits <- map(stationHits, \(x) x$loc)
   testLocs <- outer(locsInHits, locsInHits, Vectorize(all.equal))
   if (is.list(testLocs)) {
-    message("Not all locs for station ", st[1], " are exactly the same")
+    message("Not all locs for station ", stationHits[[1]]$station, " are exactly the same")
     message(paste(unlist(testLocs)[unlist(testLocs) != "TRUE"], collapse = "\n"))
     isOk <- readline("Continue anyway? (y/n): ")
     switch(
@@ -473,7 +463,7 @@ checkLocIsUnique <- function(stationHits) {
         message(
           "Taking the first loc ", 
           paste(unlist(locs[[1]]), collapse = ", "),
-          " for station ", st[1])
+          " for station ", stationHits[[1]]$station)
       },
       n = {
         stop("Processing terminated.")
@@ -486,11 +476,10 @@ checkLocIsUnique <- function(stationHits) {
 }
 
 addOptionalStationField <- function(field, resListTemp, hits) {
-  if (all(vapply(hits, function(doc) !is.null(doc[["_source"]][[field]]), logical(1)))) {
-    vals <- vapply(hits, function(doc) doc[["_source"]][[field]], 
-                   switch(field, river = character(1), km = numeric(1), gkz = numeric(1)))
+  if (all(map_lgl(hits, \(x) !is.null(x[[field]])))) {
+    vals <- vapply(hits, \(x) x[[field]], switch(field, river = character(1), km = numeric(1), gkz = numeric(1)))
     if (length(unique(vals)) != 1) {
-      stop("Not all ", field, " are the same for station ", st[1])
+      stop("Not all ", field, " are the same for station ", hits[[1]]$station)
     }
     resListTemp[[field]] <- vals[1]
   }
@@ -545,7 +534,7 @@ getPolFromPath <- function(path) {
 getIdsNewRecords <- function(tableName, newRecs) {
   paths <- map_chr(newRecs, \(x) x$path)
   pathsString <- quoteAndComma(paths)
-  idTable <- getTableByEsql(glue("FROM {tableName} [METADATA _id] | WHERE path IN ({pathsString}) | KEEP _id"))
+  idTable <- getTableByEsql(glue("FROM {tableName} METADATA _id | WHERE path IN ({pathsString}) | KEEP _id | LIMIT 10000"))
   idTable |> pull("_id")
 }
 
@@ -570,12 +559,15 @@ stopIfAnyErrors <- function(checkResult) {
 
 getTemplateRecord <- function(rfIndex, templateId) {
   dbComm <- getDbComm()
+  sb <- list(query = list(ids = list(values = templateId)))
+  if (getNrow(dbComm, rfIndex, sb) == 0)
+    stop("ID: ", templateId, " not found in ", rfIndex)
   getTableAsRecords(
     dbComm = dbComm, tableName = rfIndex, 
-    searchBlock = list(query = list(ids = list(values = templateId))), 
+    searchBlock = sb, 
     recordConstructor = newMsrawfilesRecord
   )[[1]]
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

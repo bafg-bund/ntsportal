@@ -75,11 +75,11 @@ test_that("False positives are removed", {
 }) 
 
 test_that("Replicate detections are correctly computed", {
-  mergedReport <- getMergedReportDessauBatch()
-  cleanedReport <- cleanReport(getMergedReportDessauBatch(), getRecordsDessauBatch())
-  deletedComps <- setdiff(mergedReport$peakList$comp_name, cleanedReport$peakList$comp_name)
+  reintReport <- getReintegratedReportDessauBatch()
+  cleanedReport <- cleanReport(getReintegratedReportDessauBatch(), getRecordsDessauBatch())
+  deletedComps <- setdiff(reintReport$peakList$comp_name, cleanedReport$peakList$comp_name)
   expect_contains(deletedComps, "Olmesartan-d6")
-  expect_contains(mergedReport$peakList$comp_name, "Methyltriphenylphosphonium")
+  expect_contains(reintReport$peakList$comp_name, "Methyltriphenylphosphonium")
   expect_contains(cleanedReport$peakList$comp_name, "Methyltriphenylphosphonium")
 })
 
@@ -143,6 +143,22 @@ test_that("When non unitary field missing in one record the ruturn value is a li
   records[[2]]$dbas_fp <- NULL
   values <- getField(records, "dbas_fp")
   expect_true(is.na(values[[2]]))
+})
+
+test_that("Removing compounds with no replicate detections works for level 1 and level 2 annotations", {
+  testReportBim <- ntsworkflow::loadReport(F, test_path("fixtures", "screening-dbasFileScanning", "reintegratedReportBimmen.RDS"))
+  testRecordsBim <- readRDS(test_path("fixtures", "screening-dbasFileScanning", "batchBimmen.RDS"))
+  # check that "3-Phenylpyridine" in B14
+  before <- testReportBim$integRes
+  compsFoundBefore <- subset(before, samp == "B14_pos1.mzXML", comp_name, drop = T)
+  expect_contains(compsFoundBefore, "Benzyl-triethylammonium")
+  expect_contains(compsFoundBefore, "3-Phenylpyridine")
+  cleanedReport <- cleanReport(testReportBim, testRecordsBim)
+  dbasResult <- convertToDbasResult(cleanedReport)
+  after <- dbasResult$reintegrationResults
+  compsFoundAfter <- subset(after, samp == "B14_pos1.mzXML", comp_name, drop = T)
+  expect_contains(compsFoundAfter, "Benzyl-triethylammonium")
+  expect_disjoint("3-Phenylpyridine", compsFoundAfter)
 })
 
 # Copyright 2025 Bundesanstalt für Gewässerkunde

@@ -54,7 +54,7 @@
     <li><a class="dropdown-item" href="articles/processing-by-non-target-screening.html">Processing by non-target screening</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Database management</h6></li>
-    <li><a class="dropdown-item" href="articles/Add-measurement-file-to-msrawfiles.html">Adding measurement files to msrawfiles</a></li>
+    <li><a class="dropdown-item" href="articles/add-measurement-file-to-msrawfiles.html">Adding measurement files to msrawfiles</a></li>
     <li><a class="dropdown-item" href="articles/Modify-documents-using-API.html">Modifying documents via the API</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Naming conventions</h6></li>
@@ -79,29 +79,42 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="ntsportal-v253">ntsportal v25.3<a class="anchor" aria-label="anchor" href="#ntsportal-v253"></a>
 </h1></div>
+<ul>
+<li><a href="#background">Background</a></li>
+<li><a href="#project-funding">Project Funding</a></li>
+<li><a href="#licence">Licence</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#external-links">External links</a></li>
+</ul>
+<!-- README.md is generated from README.Rmd. Please edit README.Rmd -->
+</div>
+<div class="section level1">
+<h1 id="background">Background<a class="anchor" aria-label="anchor" href="#background"></a>
+</h1>
 <p>The goal of the R-package <em>ntsportal</em> is to provide the backend for the NTSPortal database and online dashboards for non-target-screening data (based on LC-HRMS measurements) of surface waters. NTSPortal is designed to process measurement files and make the processed data available via an API and through online dashboards. The dashboards allow searching, data analysis and visualization. For detailed statistical analysis, the API can be used for accessing the data in Python or R scripts. The system currently uses <a href="https://www.elastic.co/docs/get-started" class="external-link">Elasticsearch</a> for storing and searching the data. This R-package is used for processing and managing the data and search engine. The functions for data processing use <a href="https://github.com/bafg-bund/ntsworkflow" class="external-link">ntsworkflow</a>. For further information on the structure and internal design of NTSPortal, please refer to the <a href="https://docs.ntsportal.bafg.de">documentation</a>.</p>
 <p>Access to the internally managed NTSPortal database is available for research institutions and government agencies upon request. Please contact the Federal Institute of Hydrology at <a href="mailto:ntsportal@bafg.de" class="email">ntsportal@bafg.de</a>. The <a href="https://github.com/bafg-bund/ntsportal" class="external-link">repository</a> includes the back-end code for publication purposes and does not include the environmental data.</p>
-<div class="section level2">
-<h2 id="project-funding">Project Funding<a class="anchor" aria-label="anchor" href="#project-funding"></a>
-</h2>
-<p>The project was initiated by a research funding grant by the Federal Environment Agency (UBA, “Online Portal: Non-Target-Screening für die Umweltüberwachung der Zukunft” REFOPLAN 3720222010) and continued funding is provided by the research grant REFOPLAN 3723222020 (“Weiterentwicklung des Online Portals für die Umweltbeobactung der Zukunft”). Additional funding is provided by the Federal Ministry of Transport (BMV) and the Federal Ministry of the Environment (BMU).</p>
 </div>
-<div class="section level2">
-<h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
-</h2>
-<p>Copyright 2025 Bundesanstalt für Gewässerkunde (Federal Institute of Hydrology)</p>
+<div class="section level1">
+<h1 id="project-funding">Project Funding<a class="anchor" aria-label="anchor" href="#project-funding"></a>
+</h1>
+<p>The project was initiated by a research funding grant by the German Federal Environment Agency REFOPLAN 3720222010 (<em>Online Portal: Non-Target-Screening für die Umweltüberwachung der Zukunft</em> ) and continued funding through REFOPLAN 3723222020 (<em>Weiterentwicklung des Online Portals für die Umweltbeobactung der Zukunft</em>) and REFOPLAN TrendNTS (<em>TrendNTS - Fortsetzung des HRMS Non-Target Screening in Gewässern mit Proben der Umweltprobenbank zur Etablierung eines Trend- und Warnmonitorings</em>). Additional funding is provided by the Federal Ministry of Transport (BMV) and the Federal Ministry of the Environment (BMU).</p>
+</div>
+<div class="section level1">
+<h1 id="licence">Licence<a class="anchor" aria-label="anchor" href="#licence"></a>
+</h1>
+<p>Copyright 2026 Bundesanstalt für Gewässerkunde (Federal Institute of Hydrology)</p>
 <p>ntsportal is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</p>
 <p>ntsportal is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</p>
 <p>You should have received a copy of the GNU General Public License along with ntsportal. If not, see <a href="https://www.gnu.org/licenses/" class="external-link uri">https://www.gnu.org/licenses/</a>.</p>
 <p>If you use the package or any derivative thereof, please cite the work, see <code>citation("ntsportal")</code>.</p>
 </div>
-<div class="section level2">
-<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
-</h2>
+<div class="section level1">
+<h1 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h1>
 <p>NTSPortal is a conglomerate of many systems (see Structure of NTSPortal). This guide describes the installation of the R-package ntsportal (the back-end processing and management tool).</p>
-<div class="section level3">
-<h3 id="installation-via-github">Installation via Github<a class="anchor" aria-label="anchor" href="#installation-via-github"></a>
-</h3>
+<div class="section level2">
+<h2 id="installation-via-github">Installation via Github<a class="anchor" aria-label="anchor" href="#installation-via-github"></a>
+</h2>
 <ol style="list-style-type: decimal">
 <li>Confirm that Python and a virtual environment is available</li>
 </ol>
@@ -123,21 +136,25 @@
 <li>Setup connection to Elasticsearch</li>
 </ol>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bafg-bund/ntsportal" class="external-link">ntsportal</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://docs.ntsportal.bafg.de">ntsportal</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>ntsportal.elasticsearchHostUrl <span class="op">=</span> <span class="st">"https://my.elastic.cluster"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/connectNtsportal.html">connectNtsportal</a></span><span class="op">(</span><span class="op">)</span>  <span class="co"># first time: enter username and password</span></span>
 <span><span class="fu"><a href="reference/ping.html">ping</a></span><span class="op">(</span><span class="fu"><a href="reference/getDbComm.html">getDbComm</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
-</div>
-  </main><aside class="col-md-3"><div class="links">
-<h2 data-toc-skip>Links</h2>
-<ul class="list-unstyled">
-<li><a href="https://github.com/bafg-bund/ntsportal/" class="external-link">Browse source code</a></li>
+<div class="section level1">
+<h1 id="external-links">External links<a class="anchor" aria-label="anchor" href="#external-links"></a>
+</h1>
+<ul>
+<li><a href="https://doi.org/10.5281/zenodo.16901589" class="external-link">Collective Spectral Library</a></li>
+<li><a href="https://docs.ntsportal.bafg.de">NTSPortal documentation</a></li>
+<li><a href="https://www.umweltbundesamt.de/gewaesserbeobachtung-der-zukunft-nts-portal" class="external-link">UBA Projektseite <em>Gewässerbeobachtung der Zukunft</em></a></li>
+<li><a href="https://www.bafg.de/SharedDocs/Projekte/Importer/M39620204064.html" class="external-link">BfG Projektseite <em>NTS-Portal Online-Portal Non-Target-Screening für die Umweltüberwachung der Zukunft</em></a></li>
+<li><a href="https://www.bafg.de/SharedDocs/Projekte/Importer/M39620204084.html" class="external-link">BfG Projektseite <em>Weiterentwicklung des Online-Portals für die Gewässerbeobachtung der Zukunft</em></a></li>
 </ul>
 </div>
 
-<div class="license">
+  </main><aside class="col-md-3"><div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li>GNU <a href="https://www.r-project.org/Licenses/GPL-3" class="external-link">GPL-3</a>.0</li>
@@ -155,7 +172,7 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Kevin S. Jewell <br><small class="roles"> Maintainer </small>   </li>
+<li>Kevin S. Jewell <br><small class="roles"> Author </small>   </li>
 <li>Ole Lessmann <br><small class="roles"> Author </small>   </li>
 <li><a href="authors.html">More about authors...</a></li>
 </ul>
@@ -172,7 +189,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Developed by Kevin S. Jewell, Ole Lessmann, Jonas Skottnik, Franziska Prodöhl, Nina Hermes, Arne Wick. <a href="https://www.bafg.de/DE/Service/Impressum/impressum_node.html">Imprint</a>.</p>
+  <p>Developed by Kevin S. Jewell, Ole Lessmann, Franziska Prodöhl, Jonas Skottnik, Nina Hermes, Arne Wick. <a href="https://www.bafg.de/DE/Service/Impressum/impressum_node.html">Imprint</a>.</p>
 </div>
 
     </footer>

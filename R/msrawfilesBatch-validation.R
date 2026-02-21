@@ -103,8 +103,7 @@ fieldsToCheckUniformAllSamples.msrawfilesBatch <- function(msrawfilesBatch) {
     "pol",
     "data_source",
     "chrom_method",
-    "internal_standard",
-    "feature_table_alias"
+    "internal_standard"
   )
 }
 #' @export
@@ -145,5 +144,6 @@ badBatchWarning <- function(records, reason) {
   batchName <- dirname(getField(records, "path")[1])
   warning(reason, " in batch ", batchName)
 }
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

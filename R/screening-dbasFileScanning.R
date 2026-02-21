@@ -34,12 +34,12 @@ scanBatch <- function(msrawfilesBatch, ...) {
 #' }
 scanBatch.dbasMsrawfilesBatch <- function(msrawfilesBatch, compsToProcess = NULL, showProgress = FALSE) {
   progBar <- ifelse(showProgress, cli_progress_bar("Processing batch", total = length(msrawfilesBatch)), "no-progress")
-  reports <- purrr::map(msrawfilesBatch, fileScanDbas, compsToProcess = compsToProcess, progBar = progBar)
+  reports <- map(msrawfilesBatch, \(rec) fileScanDbas(rec, compsToProcess = compsToProcess, progBar = progBar))
   reports <- removeEmptyReports(reports)
   mergedReport <- mergeReports(reports)
-  cleanedReport <- cleanReport(mergedReport, msrawfilesBatch)
-  reintegratedReport <- reintegrateReport(cleanedReport)
-  dbasResults <- convertToDbasResult(reintegratedReport)
+  reintegratedReport <- reintegrateReport(mergedReport)
+  cleanedReport <- cleanReport(reintegratedReport, msrawfilesBatch)
+  dbasResults <- convertToDbasResult(cleanedReport)
   dbasResults
 }
 
@@ -151,7 +151,7 @@ removeFalsePositives <- function(report, records) {
     getCompoundsNoReplicateDetections(report, replicateRegex)
   ) |> distinct() |> tidyr::nest(fileIndices = fileIndex, .by = "compName")
   
-  if (nrow(falsePositives) > 0) { # i <- 1
+  if (nrow(falsePositives) > 0) { 
     for (i in 1:nrow(falsePositives)) {
       report$deleteFP(
         pluck(falsePositives, "compName", i),
@@ -189,19 +189,24 @@ getCompoundsBelowMinimumDetections <- function(report, minimumDetections) {
 }
 
 getCompoundsNoReplicateDetections <- function(report, replicateRegex) {
-  if (is.na(replicateRegex)) return(emptyFalsePostivesTibble())
-  pl <- report$peakList
-  pl$originalSampName <- stringr::str_replace(pl$samp, replicateRegex, "\\1")
-  replicateCount <- by(pl, list(pl$comp_name, pl$originalSampName), nrow) |> array2DF()
+  if (is.na(replicateRegex)) 
+    return(emptyFalsePostivesTibble())
+  ir <- report$integRes
+  ir$originalSampName <- stringr::str_replace(ir$samp, replicateRegex, "\\1")
+  replicateCount <- by(ir, list(ir$comp_name, ir$originalSampName), nrow) |> array2DF()
   colnames(replicateCount) <- c("compName", "originalSampName", "count")
   replicateCount <- replicateCount[!is.na(replicateCount$count), ]
-  if (nrow(replicateCount) == 0) return(emptyFalsePostivesTibble())
+  if (nrow(replicateCount) == 0) 
+    return(emptyFalsePostivesTibble())
+  # Regardless of the number of replicates, if compound is found at least twice, it's not added to FP list
   markAsFp <- replicateCount[replicateCount$count < 2, c("compName", "originalSampName")]
-  if (nrow(markAsFp) == 0) return(emptyFalsePostivesTibble())
+  if (nrow(markAsFp) == 0) 
+    return(emptyFalsePostivesTibble())
   list_rbind(map2(
     markAsFp$compName, 
     markAsFp$originalSampName, 
-    function(compName, originalSampName) getFileIndices(compName, originalSampName, pl, report$rawFiles)
+    function(compName, originalSampName) 
+      getFileIndices(compName, originalSampName, ir, report$rawFiles)
   ))
 }
 
@@ -216,6 +221,7 @@ getFileIndices <- function(compName, originalSampName, pl, reportRawFiles) {
 emptyFalsePostivesTibble <- function() {
   tibble(compName = character(), fileIndex = numeric())
 }
+
 reintegrateReport <- function(report) {
   originalReport <- report$copy()
   batchPath <- dirname(report$rawFiles[1])
@@ -242,9 +248,9 @@ convertToDbasResult <- function(report) {
   )
   
   results$intStdResults <- results$intStdResults[, c("samp", "IS", "int_h", "int_a")]
-  
   results$intStdResults <- dplyr::rename(results$intStdResults, filename = samp, compound_name = IS, intensity = int_h, 
                                          area = int_a)
+  
   class(results) <- "dbasResult"
   results
 }
@@ -267,7 +273,5 @@ getValueOrEmpty <- function(record, field) {
     NA else temp
 }
 
-
-
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

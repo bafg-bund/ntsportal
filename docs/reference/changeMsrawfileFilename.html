@@ -15,9 +15,9 @@
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="Change filename in the msrawfiles-db and on the filesystem — changeMsrawfileFilename">
 <meta name="description" content="Used to change filename of a measurement file and simultaneously
-change the `path` field in `msrawfiles`.">
+change the `path` field in `msrawfiles`. This change is riskier than using `changeMsrawfilePath` so it isn't exported">
 <meta property="og:description" content="Used to change filename of a measurement file and simultaneously
-change the `path` field in `msrawfiles`.">
+change the `path` field in `msrawfiles`. This change is riskier than using `changeMsrawfilePath` so it isn't exported">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -56,7 +56,7 @@ change the `path` field in `msrawfiles`.">
     <li><a class="dropdown-item" href="../articles/processing-by-non-target-screening.html">Processing by non-target screening</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Database management</h6></li>
-    <li><a class="dropdown-item" href="../articles/Add-measurement-file-to-msrawfiles.html">Adding measurement files to msrawfiles</a></li>
+    <li><a class="dropdown-item" href="../articles/add-measurement-file-to-msrawfiles.html">Adding measurement files to msrawfiles</a></li>
     <li><a class="dropdown-item" href="../articles/Modify-documents-using-API.html">Modifying documents via the API</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Naming conventions</h6></li>
@@ -81,13 +81,13 @@ change the `path` field in `msrawfiles`.">
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Change filename in the msrawfiles-db and on the filesystem</h1>
-      <small class="dont-index">Source: <a href="https://github.com/bafg-bund/ntsportal/blob/HEAD/R/msrawfiles-modification.R" class="external-link"><code>R/msrawfiles-modification.R</code></a></small>
+
       <div class="d-none name"><code>changeMsrawfileFilename.Rd</code></div>
     </div>
 
     <div class="ref-description section level2">
     <p>Used to change filename of a measurement file and simultaneously
-change the `path` field in `msrawfiles`.</p>
+change the `path` field in `msrawfiles`. This change is riskier than using `changeMsrawfilePath` so it isn't exported</p>
     </div>
 
     <div class="section level2">
@@ -129,7 +129,7 @@ change the `path` field in `msrawfiles`.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Developed by Kevin S. Jewell, Ole Lessmann, Jonas Skottnik, Franziska Prodöhl, Nina Hermes, Arne Wick. <a href="https://www.bafg.de/DE/Service/Impressum/impressum_node.html">Imprint</a>.</p>
+  <p>Developed by Kevin S. Jewell, Ole Lessmann, Franziska Prodöhl, Jonas Skottnik, Nina Hermes, Arne Wick. <a href="https://www.bafg.de/DE/Service/Impressum/impressum_node.html">Imprint</a>.</p>
 </div>
 
     </footer>

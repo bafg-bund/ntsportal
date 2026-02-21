@@ -14,6 +14,24 @@
       "chrom_method" : {"type" : "keyword", "meta": {"description": "chromatographic method code", "example": "bfg_nts_rp1"}},
       "comment" : {"type" : "text", "meta": {"description": "free as text or array of text blocks"}},
       "comp_group" : {"type" : "keyword", "meta": {"description": "compound usage or classification(s)", "example": "Industrial_process"}},
+      "compound_annotation": {
+        "type" : "nested",
+        "properties" : {
+          "adduct" : {"type" : "keyword", "meta": {"description": "ESI adduct form", "example": "[M+H]+"}},
+          "cas" : {"type" : "keyword", "meta": {"description": "chemical abstracts service registry number", "example": "95-14-7"}},
+          "formula" : {"type" : "keyword", "meta": {"description": "molecular formula", "example": "C7H4Cl2O2"}},
+          "inchi" : {"type" : "keyword", "meta": {"description": "international chemical identifier", "example": "InChI=1S/C7H5NS/c1-2-4-7-6(3-1)8-5-9-7/h1-5H"}},
+          "inchikey" : {"type" : "keyword", "meta": {"description": "hash of international chemical identifier", "example": "ILLQTAPXYCRJRB-UHFFFAOYSA-N"}},
+          "isotopologue" : {"type" : "keyword", "meta": {"description": "isotopic difference to monoisotopic", "example": "37Cl"}},
+          "name" : {"type" : "keyword", "meta": {"description": "compound name"}},
+          "rt_diff_lib" : {"type" : "half_float", "meta": {"unit": "minutes", "description": "rt difference to library"}},
+          "mz_diff_lib" : {"type" : "float", "meta": {"unit": "mDa", "description": "mz difference to library"}},
+          "score_ms2_match": {
+            "type": "short",
+            "meta": {"description": "Dot product matching score out of 1000", "example": "452"}
+          }
+        }
+      },
       "concentration" : {"type" : "half_float", "meta": {"unit": "ng/L", "description": "estimated concentration"}},
       "data_source" : {"type" : "keyword", "meta": {"description": "institution responsible for data processing", "example": "bfg"}},
       "date_measurement" : {
@@ -41,6 +59,7 @@
       "inchi" : {"type" : "keyword", "meta": {"description": "international chemical identifier", "example": "InChI=1S/C7H5NS/c1-2-4-7-6(3-1)8-5-9-7/h1-5H"}},
       "inchikey" : {"type" : "keyword", "meta": {"description": "hash of international chemical identifier", "example": "ILLQTAPXYCRJRB-UHFFFAOYSA-N"}},
       "instrument": { "type" : "text", "meta": {"description": "instrument type code", "example": "LC-ESI-QTOF TripleTOF 6600 SCIEX"}},
+      "instrument_name": {"type": "keyword", "meta": {"description": "Instrument name", "example": "wasser_tof"}},
       "intensity" : {"type" : "integer", "meta": {"description": "chromatographic peak height at apex"}},
       "internal_standard" : {"type" : "keyword", "meta": {"description": "int. std. compound name", "example": "Bezafibrate-d6"}},
       "intensity_internal_standard" : {"type" : "integer", "meta": {"description": "peak intensity (height at apex)"}},
@@ -67,12 +86,15 @@
           "mz" : {"type" : "float", "meta": {"unit": "Da", "description": "mass-to-charge ratio"}}
         }
       },
+      "multi_hit_id" : {"type" : "keyword", "meta": {"description": "ID of duplicate features from multiple annotations"}},
       "mz" : {"type" : "float", "meta": {"unit": "Da", "description": "mass-to-charge ratio"}},
-      "name" : {"type" : "keyword", "meta": {"description": "compound name(s)"}},
+      "mz_diff_lib" : {"type" : "float", "meta": {"unit": "mDa", "description": "mz difference to library"}},
+      "name" : {"type" : "keyword", "meta": {"description": "compound name as written in library"}},
       "path": {"type" : "keyword", "meta": {"description": "absolute path to measurement file (mzXML, mzML)"}},
       "pol" : {"type" : "keyword", "meta": {"description": "3-letter ESI polarity mode", "example": "pos"}},
       "river" : { "type" : "keyword", "meta": {"description": "river name of sampling location (local spelling)", "example": "rhein"}},
       "rt" : {"type" : "half_float", "meta": {"unit": "minutes", "description": "chromatographic retention time at peak apex"}},
+      "rt_diff_lib" : {"type" : "half_float", "meta": {"unit": "minutes", "description": "rt difference to library"}},
       "rtt" : {
         "type" : "nested",
         "properties" : {
@@ -128,20 +150,6 @@
           "source": "if (params._source.intensity_internal_standard != null) emit((double)params._source.intensity / (double)params._source.intensity_internal_standard)"
         },
         "meta": {"description": "intensity/intensity_internal_standard"}
-      },
-      "mz_difference_to_library" : {
-        "type": "double",
-        "script": {
-          "source": "if (params._source.library_mz != null) emit((double)params._source.mz - (double)params._source.library_mz)"
-        },
-        "meta": {"description": "m/z error", "unit": "Da"}
-      },
-      "rt_difference_to_library" : {
-        "type": "double",
-        "script": {
-          "source": "if (params._source.library_rt != null) emit((double)params._source.rt - (double)params._source.library_rt)"
-        },
-        "meta": {"description": "Ret. time error", "unit": "minutes"}
       },
       "esi_ion_spec": {
         "type": "keyword",

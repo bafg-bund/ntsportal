@@ -14,8 +14,8 @@ getRecordsDessauBatch <- function() {
   readRDS(test_path("fixtures", "screening-dbasFileScanning", "recordsDessauBatch.RDS"))
 }
 
-getMergedReportDessauBatch <- function() {
-  readRDS(test_path("fixtures", "screening-dbasFileScanning", "mergedReportDessauBatch.RDS"))
+getReintegratedReportDessauBatch <- function() {
+  readRDS(test_path("fixtures", "screening-dbasFileScanning", "reintegratedReportDessauBatch.RDS"))
 }
 
 

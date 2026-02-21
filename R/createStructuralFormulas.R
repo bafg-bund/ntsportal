@@ -12,7 +12,7 @@ createAllStructures <- function(databasePath, targetDir) {
   compList <- extractCompoundList(newDbPath)
   cli_progress_bar("Creating PNGs", total = nrow(compList))
   for (i in 1:nrow(compList)) {
-    createPngFromSmiles(compList[i, "SMILES"], compList[i, "inchikey"], targetDir)
+    createPngFromSmiles(compList[i, "smiles"], compList[i, "inchikey"], targetDir)
     cli_progress_update()
   }
   cli_process_done()
@@ -29,7 +29,7 @@ extractCompoundList <- function(databaseFile) {
   compoundList
 }
 
-createPngFromSmiles <- function(smiles,inchikey,targetPath) {
+createPngFromSmiles <- function(smiles, inchikey, targetPath) {
   iAtomContainer <- rcdk::parse.smiles(smiles, kekulise = TRUE)
   structureMatrix <- lapply(iAtomContainer,makeStructureMatrix)
   outputPath <- file.path(targetPath, paste0(inchikey,".png"))
@@ -127,3 +127,6 @@ checkPngSyncronization <- function(fileUrl, filePathHd) {
     cli::cli_alert_warning("Images are not the same")
   }
 }
+
+# Copyright 2026 Bundesanstalt für Gewässerkunde
+# This file is part of ntsportal

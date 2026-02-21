@@ -47,7 +47,7 @@ navbar:
       - text: --------
       - text: Database management
       - text: Adding measurement files to msrawfiles
-        href: articles/Add-measurement-file-to-msrawfiles.html
+        href: articles/add-measurement-file-to-msrawfiles.html
       - text: Modifying documents via the API
         href: articles/Modify-documents-using-API.html
       - text: --------
@@ -73,3 +73,92 @@ footer:
   structure: 
     left: built_with
     right: developed_by
+    
+reference:
+- title: analysis-linearRegression module
+  desc:  Functions for updating linear regression tables
+- contents:
+  - updateLinearRegressionTable
+- title: connectionToElasticsearch module
+  desc:  Functions for saving user credentials for the elasticsearch connection
+- contents:
+  - connectNtsportal
+  - resetConnectionCredentials
+  - setCredNonInteractive
+- title: createStructuralFormulas module
+  desc:  Functions for updating structural formula images for dashboards
+- contents:
+  - createAllStructures
+  - checkPngAvailability
+  - removeRedundantPngs
+  - checkPngSyncronization
+- title: dbInterface-enrichPolices module
+  desc:  Functions for updating enrich policies
+- contents:
+  - updateEnrichPolicies
+  - executeEnrichPolicy
+- title: dbInterface-getTable module
+  desc:  High-level functions for retrieving data from NTSPortal
+- contents:
+  - getTableByEsql
+  - getTableByQuery
+- title: dbInterface-DbComm module
+  desc:  Low level Generics for database communication
+- contents:
+  - addValueToArray
+  - deleteTable
+  - DbComm-class
+  - getDbComm
+  - getNrow
+  - getTableAsRecords
+  - getUniqueValues
+  - isTable
+  - ping
+  - PythonDbComm
+  - PythonDbComm-class
+  - removeValueFromArray
+  - removeFieldFromTable
+  - replaceValueInField
+  - setValueInField
+- title: dbInterface-ingestPipelines module
+  desc:  Functions for updating ingest pipelines
+- contents:
+  - updateIngestPipelines
+- title: msrawfiles-addRecord module
+  desc:  Functions for adding metadata entries to msrawfiles tables
+- contents:
+  - addRawfiles
+- title: msrawfiles- modules
+  desc:  Functions for manipulating msrawfiles tables
+- contents:
+  - addRawfiles
+  - changeAliasAddress
+  - changeMsrawfileFilename
+  - changeMsrawfilePath
+  - createBackupMsrawfiles
+  - findTemplateId
+  - msrawfilesSetVersion
+- title: ntspRecord-validation module
+  desc:  Functions for validating records
+- contents:
+  - checkMsrawfiles
+  - validateRecord
+- title: screening- modules
+  desc:  Functions for file processing and ingesting records
+- contents:
+  - convertToRecord
+  - ingestFeatureRecords
+  - scanBatch
+  - screeningSelectedBatches
+  - screeningOneBatch
+  - screeningSelectedBatchesSlurm
+- title: updateSpectralLibrary module
+  desc:  Functions for updating spectral library table
+- contents:
+  - updateSpectralLibrary
+- title: utilities and ntsportal modules
+  desc:  Miscellaneous and package initialization functions
+- contents:
+  - esSearchPaged
+  - makeMappingsTbl
+  - ntsportal

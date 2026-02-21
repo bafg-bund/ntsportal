@@ -5,6 +5,8 @@ getSelectedMsrawfileBatches <- function(msrawfilesIndex, rootDirs, screeningType
   batchNames <- getAllBatchesInDir(msrawfilesIndex, rootDirs)
   if (length(batchNames) == 0)
     stop("No batches found in dir ", paste(rootDirs, collapse = ", "))
+  # Sorting by start is important for the "consecutive" filter (e.g. in daily measurements)
+  # Even though records are split after collection (see recordsToBatches()), the sort order is kept.
   allRecords <- getTableAsRecords(
     getDbComm(), msrawfilesIndex, 
     searchBlock = list(query = list(terms = list(batchname = as.list(batchNames)))), sortField = "start", 
@@ -58,7 +60,8 @@ msrawfilesFieldsForProcessingGeneral <- function() {
     "path",
     "pol",
     "replicate_regex",
-    "spectral_library_path"
+    "spectral_library_path",
+    "start"
   )
 }
 
@@ -87,5 +90,5 @@ newNtsMsrawfilesBatch <- function(msrawfilesRecords = list()) {
   newMsrawfilesBatch(msrawfilesRecords, class = "ntsMsrawfilesBatch")
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

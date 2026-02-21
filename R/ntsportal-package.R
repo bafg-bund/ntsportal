@@ -24,6 +24,7 @@
 #' @importFrom purrr pluck
 #' @importFrom purrr reduce
 #' @importFrom purrr keep
+#' @importFrom purrr discard
 #' @importFrom purrr list_rbind
 #' @importFrom purrr list_c
 #' @importFrom tibble as_tibble
@@ -38,8 +39,8 @@ NULL
   pathToPyModules <- fs::path_package("ntsportal", "pythonElasticComm")
   options(warn = 1)
   options(ntsportal.dbComm = PythonDbComm)
-  options(ntsportal.elasticsearchHostUrl = "https://ntsportal.bafg.de/es-api")
-  #options(ntsportal.elasticsearchHostUrl = "https://elastic.dmz.bafg.de")
+  #options(ntsportal.elasticsearchHostUrl = "https://ntsportal.bafg.de/es-api")
+  options(ntsportal.elasticsearchHostUrl = "https://elastic.dmz.bafg.de")
   options(cli.progress_clear = FALSE)
   options(cli.progress_show_after = 0)
   if (Sys.info()["sysname"] == "Linux")

@@ -67,21 +67,6 @@ setGeneric(
 #' @return a vector
 #' @export
 setGeneric("getUniqueValues", function(dbComm, tableName, field, maxLength = 10000) standardGeneric("getUniqueValues"))
-setGeneric("refreshTable", function(dbComm, tableName) standardGeneric("refreshTable"))
-
-#' Remove a value from an array field 
-#' @inheritParams addValueToArray
-#' @seealso \link{`addValueToArray`}
-#' @export
-setGeneric("removeValueFromArray", function(dbComm, tableName, field, value, searchBlock = list()) standardGeneric("removeValueFromArray"))
-
-setGeneric("replaceValueInField", function(dbComm, tableName, field, oldValue, newValue) standardGeneric("replaceValueInField"))
-
-#' Set the value of a field in a table
-#' @description Used to change the value of a field for all rows (i.e. docs) returned by `seearchBlock`
-#' @inheritParams addValueToArray
-#' @export
-setGeneric("setValueInField", function(dbComm, tableName, field, value, searchBlock = list()) standardGeneric("setValueInField"))
 
 #' Test the DB-Connection
 #' @inheritParams isTable
@@ -90,5 +75,33 @@ setGeneric("setValueInField", function(dbComm, tableName, field, value, searchBl
 #' @docType methods
 setGeneric("ping", function(dbComm) standardGeneric("ping")) 
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+setGeneric("refreshTable", function(dbComm, tableName) standardGeneric("refreshTable"))
+
+#' Remove a value from an array field 
+#' @inheritParams addValueToArray
+#' @seealso \link{`addValueToArray`}
+#' @export
+setGeneric("removeValueFromArray", function(dbComm, tableName, field, value, searchBlock = list()) standardGeneric("removeValueFromArray"))
+
+#' Remove a field from a Table
+#' @inheritParams addValueToArray
+#' @export
+setGeneric("removeFieldFromTable", function(dbComm, tableName, field, searchBlock = list()) standardGeneric("removeFieldFromTable"))
+
+#' Replace a value in a field
+#' Will replace all occurrences of this value in the specified field. There is no way to restrict the change to specific 
+#' records. For that purpose, use `setValueInField()`.
+#' @inheritParams  addValueToArray
+#' @param oldValue Value to be replaced
+#' @seealso \link{`setValueInField`}
+#' @export
+setGeneric("replaceValueInField", function(dbComm, tableName, field, oldValue, newValue) standardGeneric("replaceValueInField"))
+
+#' Set the value of a field in a table
+#' @description Used to change the value of a field for all rows (i.e. docs) returned by `seearchBlock`
+#' @inheritParams addValueToArray
+#' @export
+setGeneric("setValueInField", function(dbComm, tableName, field, value, searchBlock = list()) standardGeneric("setValueInField"))
+
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

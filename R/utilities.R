@@ -1,5 +1,4 @@
-# Copyright 2025 Bundesanstalt für Gewässerkunde
-# This file is part of ntsportal
+
 
 glue_json <- function(stringToModify) {
   x <- glue::glue(stringToModify, .envir = parent.frame(1), .open = "[[", .close = "]]")
@@ -35,7 +34,7 @@ free_gb <- function() {
 }  
 
 #' Get search results for more than 10000 docs by pagination. 
-#' @description deprecated in favor of `getTableAsRecords()`
+#' @description deprecated in favor of `getTableByQuery()`, `getTableByEsql()` or `getTableAsRecords()`, 
 #' @param indexName Name of ElasticSearch index (or wildcard pattern)
 #' @param searchBody search body, default will return all docs
 #' @param sort Sort argument passed onto elastic::Search. Defines which field 
@@ -55,6 +54,8 @@ free_gb <- function() {
 #' temp <- lapply(res$hits$hits, function(x) as.data.frame(x[["_source"]]))
 #' df <- plyr::rbind.fill(temp)
 #' }
+#' @seealso \link{`getTableByQuery`}
+#' @seealso \link{`getTableByEsql`}
 #' @seealso \link{`getTableAsRecords`}
 esSearchPaged <- function(
     indexName, 
@@ -254,5 +255,5 @@ makeTblFromPropertiesList <- function(properties) {
   )
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

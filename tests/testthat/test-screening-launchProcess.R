@@ -110,9 +110,12 @@ test_that("NT-Screening array job file and records in batches are produced", {
 })
 
 test_that("Screening for non-existent batches returns a helpful error", {
-  expect_snapshot(try(screeningSelectedBatches(testIndexName, "foo", "bar")))
+  tempSaveDir <- "~/tmp/temp-dir-ntsportal-test-screening-launchProcess"
+  if (dir.exists(tempSaveDir))
+    unlink(tempSaveDir, recursive = T)
+  expect_snapshot(try(screeningSelectedBatches(testIndexName, "foo", tempSaveDir)))
 })
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
 
