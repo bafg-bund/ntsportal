@@ -7,11 +7,22 @@
     },
     "dynamic": "strict",
     "properties": {
+      "adduct" : {"type" : "keyword", "meta": {"description": "ESI adduct form", "example": "[M+H]+"}},
+      "isotopologue" : {"type" : "keyword", "meta": {"description": "isotopic difference to monoisotopic", "example": "37Cl"}},
       "lm": {"type": "float", "meta": {"description": "Slope of regression (linear model) rel. area, time"}},
       "matrix": {"type": "keyword", "meta": {"description": "Sampling matrix code", "example": "spm"}},
       "name" : {"type" : "keyword", "meta": {"description": "compound name(s)"}},
       "pol": {"type": "keyword", "meta": {"description": "3-letter ESI polarity mode", "example": "pos"}},
       "station": {"type": "keyword", "meta": {"description": "sampling location code", "example": "rhein_ko_l"}}
+    },
+    "runtime": {
+      "esi_ion_spec": {
+        "type": "keyword",
+        "script": {
+          "source": "emit(doc['name'].value +'_'+ doc['pol'].value +'_'+ doc['adduct'].value +'_'+ doc['isotopologue'].value)"
+        },
+        "meta": {"description": "Concatination of name, pol, adduct, isotopologue", "example": "1,3-Dicyclohexylurea_pos_[M+H]+_monoisotopic"}
+      }
     }
   }
 }

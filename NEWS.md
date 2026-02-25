@@ -1,4 +1,5 @@
 
+
 # ntsportal 25.3
 
 ## Major changes (backend)
@@ -72,6 +73,11 @@ annotation level (1 or 2 [gap-filled]) does not play a role.
   - `nts_alig_mz_tol_units`
 * Field names in `spectral_library` documents have changed
   - `frag_type` to `collision_type`
+* Field added to `analysis_dbas` documents:
+  - `adduct`
+  - `isotopologue`
+  - Runtime field `esi_ion_spec`
+  
 * Updated various dependencies to versions:
   + R = 4.5.2
   + Python = 3.12.12
