@@ -112,6 +112,13 @@ removeRedundantPngs <- function(databasePath, targetDir) {
 #' @description Checks that a PNG file on the picture server and on disk are identical.
 #' @param fileUrl URL of the file on the picture server
 #' @param filePathHd Path to the file on disk
+#' @examples
+#' \dontrun{
+#' checkPngSyncronization(
+#'   "https:/ntsportal.bafg.de/picture/ABDMBNAKYBUEEX-UHFFFAOYSA-N.png", 
+#'   "~/myLinkToPictureSync/ABDMBNAKYBUEEX-UHFFFAOYSA-N.png"
+#' )
+#' }
 #' @export
 checkPngSyncronization <- function(fileUrl, filePathHd) {
   saveDir <- withr::local_tempdir()
