@@ -9,6 +9,11 @@
     "properties": {
       "adduct" : {"type" : "keyword", "meta": {"description": "ESI adduct form", "example": "[M+H]+"}},
       "isotopologue" : {"type" : "keyword", "meta": {"description": "isotopic difference to monoisotopic", "example": "37Cl"}},
+      "last_detection" : {
+        "type" : "date",
+        "format" : "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||yyyy-MM-dd HH:mm",
+        "meta": {"description": "last detection"}
+      },
       "lm": {"type": "float", "meta": {"description": "Slope of regression (linear model) rel. area, time"}},
       "matrix": {"type": "keyword", "meta": {"description": "Sampling matrix code", "example": "spm"}},
       "name" : {"type" : "keyword", "meta": {"description": "compound name(s)"}},

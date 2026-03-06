@@ -1,10 +1,22 @@
+
+# Variables to be changed #################
+userEmail <- Sys.getenv("USER_EMAIL")
+dirTestResults <- "tests/slurmTesting/testResults-nts-rheinKobPos"
+msrawfileIndexName <- "ntsp25.3_msrawfiles"
+###########################################
+
 library(ntsportal)
-saveDir <- "tests/slurmTesting/testResults-nts-rheinKobPos"
-index <- "ntsp25.3_msrawfiles"
+if (userEmail == "")
+  stop("USER_EMAIL environment variable not correctly set")
 dirs <- c(
   "/beegfs/nts/ntsportal/msrawfiles/koblenz/wasser/2021/202105/pos/",
   "/beegfs/nts/ntsportal/msrawfiles/koblenz/wasser/2021/202106/pos/"
 )
-screeningSelectedBatchesSlurm(index, dirs, saveDir, "jewell@bafg.de", screeningType = "nts")
+screeningSelectedBatchesSlurm(msrawfileIndexName, dirs, dirTestResults, userEmail, screeningType = "nts")
 
-ingestFeatureRecords(saveDir)
+
+# After completion
+# Remember to delete indices after ingest
+logger::log_info("started")
+ingestFeatureRecords(dirTestResults)
+logger::log_info("ended")

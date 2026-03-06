@@ -57,8 +57,8 @@ computeLinearRegressionOneEsiSpec <- function(esiSpec, sourceTableName) {
       }, numeric(1)),
       time = sapply(time_buckets, function(x) lubridate::ymd_hms(x$key_as_string, tz = "UTC"))
     )
-    # Need to normalize the regression to the max area 
     
+    # Need to normalize the regression to the max area 
     df$norma <- df$norma / max(df$norma, na.rm = T)
     model <- lm(norma ~ time, df)
     slope <- model$coefficients["time"]
@@ -69,8 +69,10 @@ computeLinearRegressionOneEsiSpec <- function(esiSpec, sourceTableName) {
       isotopologue = thisIsotop,
       station = thisStation,
       change_per_ms = slope,
-      datapoints = length(time_buckets)
+      datapoints = length(time_buckets),
+      last_detection = lubridate::format_ISO8601(lubridate::as_datetime(max(df$time)), precision = "ymd")
     )
+    
     regressionDfList[[length(regressionDfList) + 1]] <- newRow
     
   }
