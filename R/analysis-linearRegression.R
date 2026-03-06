@@ -59,8 +59,9 @@ computeLinearRegressionOneEsiSpec <- function(esiSpec, sourceTableName) {
     )
     
     # Need to normalize the regression to the max area 
-    df$norma <- df$norma / max(df$norma, na.rm = T)
-    model <- lm(norma ~ time, df)
+    #df$norma <- df$norma / max(df$norma, na.rm = T)
+    # use semi-log regression to get % change
+    model <- lm(log(norma) ~ time, df)
     slope <- model$coefficients["time"]
     newRow <- data.frame(
       name = thisComp,
