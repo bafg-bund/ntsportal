@@ -21,22 +21,22 @@ The NTSPortal system is made up of many components which can be grouped into thr
 |Software Component|Version|Description|
 |:-----------------|:------|:----------------------------------------------|
 |R|4.5.2|High level scripting, db management|
-|Python|3.12.11|Interface to Elasticsearch using Python package "elasticsearch"|
-|Elasticsearch|8.18.8|Database and search engine|
-|Kibana|8.18.8|Content management system|
-|ntsworkflow|0.2.9|R package for processing|
+|Python|3.12.12|Interface to Elasticsearch using Python package "elasticsearch"|
+|Elasticsearch|9.2.3|Database and search engine|
+|Kibana|9.2.3|Content management system|
+|ntsworkflow|0.2.10|R package for processing|
 |xcms|4.8.0|R package for interfacing with mzXML files|
-|Spectral library (CSL)|25.5|Library for MS2 spectra|
+|Spectral library (CSL)|26.1|Library for MS2 spectra|
 |Vega, vega-lite|v5|Custom graphics in Kibana|
-|rJava|1.0-11|R package interface to Java|
-|Java|1.8.0_472|openJDK is used for Java|
-|Rocky Linux|8.10|Operating system for servers|
+|rJava|1.0-14|R package interface to Java|
+|openJDK|1.8.0_482|openJDK is used for Java|
+|Rocky Linux|8.10|Operating system for R server and HPC|
 
 : Table: Versions of software components
 
 # Hardware architecture
 
-The hardware components used to run NTSPortal can be similarly categorized as the software. The core component of NTSPortal is a high-performance computing cluster (HPC) used for measurement file processing. This system consists of 7 compute nodes each with 64 CPUs and 503 GB of memory. The HPC is controlled by the HPC control server. Measurement files are stored on a network attached storage (NAS), which is synchronized with a fast, SSD-based storage (BeeGFS). The data management component consists of a separate server (R-server) and a 3-node cluster running Elasticsearch (containerized). The visualization component is accomplished with a server hosting the dashboards (Kibana). All traffic to and from the Internet runs through a reverse proxy for IT security reasons. All servers are virtualized and run Rocky Linux 8.10 and the Elasticsearch cluster, R and Kibana servers run on an HCI (hyper-converged infrastructure).
+The hardware components used to run NTSPortal can be similarly categorized as the software. The core component of NTSPortal is a high-performance computing cluster (HPC) used for measurement file processing. This system consists of 7 compute nodes each with 64 CPUs and 503 GB of memory. The HPC is controlled by the HPC control server. Measurement files are stored on a network attached storage (NAS), which is synchronized with a fast, SSD-based storage (BeeGFS). The data management component consists of a separate server (R-server) and a 3-node cluster running Elasticsearch (containerized). The visualization component is accomplished with a server hosting the dashboards (Kibana). All traffic to and from the Internet runs through a reverse proxy for IT security reasons. All servers are virtualized and run Rocky Linux 8.10 and the Elasticsearch cluster, R and Kibana servers run on an HCI (hyper-converged infrastructure) and are containerized with Docker.
 
 ![Figure: Hardware components of NTSPortal. Arrows indicate general data flow.](images/ntsportal-hardware.png){width=100%}
 
