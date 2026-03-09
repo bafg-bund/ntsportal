@@ -63,13 +63,14 @@ computeLinearRegressionOneEsiSpec <- function(esiSpec, sourceTableName) {
     # use semi-log regression to get % change
     model <- lm(log(norma) ~ time, df)
     slope <- model$coefficients["time"]
+    
     newRow <- data.frame(
       name = thisComp,
       pol = thisPol,
       adduct = thisAdduct,
       isotopologue = thisIsotop,
       station = thisStation,
-      change_per_ms = slope,
+      change_per_s = (exp(slope) - 1) * 100,  # convert slope to % change per second
       datapoints = length(time_buckets),
       last_detection = lubridate::format_ISO8601(lubridate::as_datetime(max(df$time)), precision = "ymd")
     )
@@ -81,7 +82,7 @@ computeLinearRegressionOneEsiSpec <- function(esiSpec, sourceTableName) {
     return(list())
   regDf <- do.call("rbind", regressionDfList)
   rownames(regDf) <- NULL
-  regDf$lm <- regDf$change_per_ms * 1000 * 60 * 60 * 24 * 365
+  regDf$lm <- regDf$change_per_s * 60 * 60 * 24 * 365  # convert seconds to years
   
   # make data ready for elastic
   regDf$change_per_ms <- NULL
