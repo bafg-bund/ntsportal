@@ -1,7 +1,7 @@
 
 
 # Variables to be changed #################
-userEmail <- "jewell@bafg.de"
+userEmail <- Sys.getenv("USER_EMAIL")
 dirTestResults <- "tests/slurmTesting/testResults-dbas-olmesartan-d6-bisoprolol"
 msrawfileIndexName <- "ntsp25.3_msrawfiles_unit_tests"
 ###########################################
@@ -28,5 +28,5 @@ indexNames <- ingestFeatureRecords(dirTestResults)
 
 # Cleanup
 dbComm <- getDbComm()
-deleteTable(dbComm, indexNames[[1]]$ntsp25.2_dbas_unit_tests)
+deleteTable(dbComm, indexNames[[1]]$ntsp25.3_feature_unit_tests)
 file.remove(list.files(dirTestResults, f = T))
