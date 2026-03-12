@@ -31,7 +31,6 @@ computeLinearRegressionOneEsiSpec <- function(esiSpec, sourceTableName) {
     size = 0
   )
   
-  
   regressionDfList <- list()
   esiSpecSplit <- strsplit(esiSpec, "_")[[1]]
   thisComp <- esiSpecSplit[1]
@@ -58,8 +57,6 @@ computeLinearRegressionOneEsiSpec <- function(esiSpec, sourceTableName) {
       time = sapply(time_buckets, function(x) lubridate::ymd_hms(x$key_as_string, tz = "UTC"))
     )
     
-    # Need to normalize the regression to the max area 
-    #df$norma <- df$norma / max(df$norma, na.rm = T)
     # use semi-log regression to get % change
     model <- lm(log(norma) ~ time, df)
     slope <- model$coefficients["time"]
@@ -82,10 +79,10 @@ computeLinearRegressionOneEsiSpec <- function(esiSpec, sourceTableName) {
     return(list())
   regDf <- do.call("rbind", regressionDfList)
   rownames(regDf) <- NULL
-  regDf$lm <- regDf$change_per_s * 60 * 60 * 24 * 365  # convert seconds to years
+  regDf$change_per_year <- round(regDf$change_per_s * 60 * 60 * 24 * 365)  # convert seconds to years
   
   # make data ready for elastic
-  regDf$change_per_ms <- NULL
+  regDf$change_per_s <- NULL
   regDf$datapoints <- NULL
   
   regDf$matrix <- "spm"

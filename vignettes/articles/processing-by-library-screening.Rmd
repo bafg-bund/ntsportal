@@ -14,9 +14,9 @@ knitr::opts_chunk$set(
 
 Measurement files are processed using the library screening algorithm known as DBAS (database assisted screening), described here, as well as [non-target screening](articles/processing-by-non-target-screening.html). All the parameters for processing, as well as the location of the necessary input files, are stored in the `msrawfiles` index. The output of DBAS processing is stored in a `feature` index. See [naming conventions of indices](articles/structure-and-table-naming.html).
 
-# Reprocessing all datafiles in msrawfiles index
+# Launching the (re)processing of measurement files
 
-After additions have been made to the spectral library all datafiles must be reprocessed. After making necessary changes to the `msrawfiles` table, processing can be started with the various `screening*` functions depending on where the processing should take place (locally, server etc.). For example, `screeningSelectedBatchesSlurm()` is used to begin processing using the SLURM workload manager.
+Processing measurment files using the screening algorithms `dbas` or `nts` is started by the user using either [`screeningSelectedBatches()`](reference/screeningSelectedBatches.html) or, if the processing is to be done via the SLURM workload manager [`screeningSelectedBatchesSlurm()`](reference/screeningSelectedBatchesSlurm.html). For example, after additions have been made to the spectral library (CSL) all measurement files must be reprocessed with the new CSL version. After making necessary changes to the `spectral_library_path` field in the `msrawfiles` table, processing can be started with the aforementioned functions. For more details, see [Process Launching](#process-launching).
 
 # Overview of processing algorithm
 
@@ -34,9 +34,9 @@ The `msrawfile`-records are used to control the processing workflow. Once the wo
 
 ![Figure: Overview of the screening process for new batches](images/screening-overview.svg){width=100%}
 
-### Process launching
+### Process launching {#sec-process-launching}
 
-The user runs one of several `screening*` functions to start the processing either locally or via SLURM. In `screeningSelectedBatchesSlurm()` (the most commonly used) specific directories (i.e. batches) containing the measurement files are passed either by listing them directly or by giving a root directory. `dbas` is the default `screeningType` in these functions. For further details on selecting batches for processing, see Section [Collecting msrawfile records](#collecting-msrawfile-records).
+The user runs one of two `screeningSelectedBatches*()` [functions](reference/index.html#screening-modules) to start the processing either locally or via SLURM. Specific directories (i.e. batches) containing the measurement files are passed either by listing them directly or by giving a root directory. `dbas` is the default `screeningType` in these functions. For further details on how batches are selected for processing, see Section [Collecting msrawfile records](#collecting-msrawfile-records).
 
 #### Processing using the workflow manager SLURM
 
@@ -44,7 +44,7 @@ To run the screening via SLURM, first the necessary job files are be created. Th
 
 ![Figure: The workflow manager SLURM can be used for processing](images/screening-slurmJobSubmission.svg){width=100%}
 
-### Collecting msrawfile records {#sec-collectingMsrawfileRecords}
+### Collecting msrawfile records {#sec-collecting-msrawfile-records}
 
 The `msrawfiles` records are loaded and checks performed before the scanning process begins. Output is a list of batches of `ntsportal::msrawfilesRecord`s. 
 

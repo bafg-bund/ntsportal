@@ -14,7 +14,7 @@
         "format" : "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||yyyy-MM-dd HH:mm",
         "meta": {"description": "last detection"}
       },
-      "lm": {"type": "float", "meta": {"description": "Slope of regression (linear model) rel. area, time"}},
+      "change_per_year": {"type": "short", "meta": {"description": "Avg. change in rel. area per year"}},
       "matrix": {"type": "keyword", "meta": {"description": "Sampling matrix code", "example": "spm"}},
       "name" : {"type" : "keyword", "meta": {"description": "compound name(s)"}},
       "pol": {"type": "keyword", "meta": {"description": "3-letter ESI polarity mode", "example": "pos"}},

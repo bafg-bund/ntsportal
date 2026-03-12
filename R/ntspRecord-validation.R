@@ -183,6 +183,7 @@ defineRequiredFieldsAnySample <- function(record) {
 defineRequiredFieldsAnySample.ntsMsrawfilesRecord <- function(record) {
   c(
     "nts_alig_filter_min_features",
+    "nts_eic_extraction_width",
     "nts_mz_min",
     "nts_mz_max",
     "nts_mz_step",

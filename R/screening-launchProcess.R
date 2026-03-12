@@ -74,10 +74,7 @@ screeningOneBatch <- function(msrawfilesBatch, saveDirectory) {
 #' \dontrun{
 #' userEmail <- "example@bafg.de"
 #' dirResults <- "processingResults"
-#' msrawfileIndexName <- "ntsp25.2_msrawfiles"
-#' library(ntsportal)
-#' connectNtsportal()
-#' file.remove(list.files(dirResults, f = T))
+#' msrawfileIndexName <- "ntsp25.3_msrawfiles"
 #'
 #' screeningSelectedBatchesSlurm(
 #'   msrawfileIndex = msrawfileIndexName,
