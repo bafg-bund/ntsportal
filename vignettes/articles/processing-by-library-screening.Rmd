@@ -12,27 +12,23 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-Measurement files are processed using the library screening algorithm known as DBAS (database assisted screening), described here, as well as [non-target screening](articles/processing-by-non-target-screening.html). All the parameters for processing, as well as the location of the necessary input files, are stored in the `msrawfiles` index. The output of DBAS processing is stored in a `feature` index. See [naming conventions of indices](articles/structure-and-table-naming.html).
+Measurement files are processed using the library screening algorithm known as DBAS (database assisted screening), described here, or the  [non-target screening](articles/processing-by-non-target-screening.html) algorithm. All the parameters for processing, as well as the location of the necessary input files, are stored in the `msrawfiles` table of NTSPortal. The output of processing is stored in a `feature` table. See [naming conventions of indices](articles/structure-and-table-naming.html).
 
-# Launching the (re)processing of measurement files
+# Starting the (re)processing of measurement files
 
-Processing measurment files using the screening algorithms `dbas` or `nts` is started by the user using either [`screeningSelectedBatches()`](reference/screeningSelectedBatches.html) or, if the processing is to be done via the SLURM workload manager [`screeningSelectedBatchesSlurm()`](reference/screeningSelectedBatchesSlurm.html). For example, after additions have been made to the spectral library (CSL) all measurement files must be reprocessed with the new CSL version. After making necessary changes to the `spectral_library_path` field in the `msrawfiles` table, processing can be started with the aforementioned functions. For more details, see [Process Launching](#process-launching).
+Processing measurement files using the screening algorithms `dbas` or `nts` is started by the user using either with [`screeningSelectedBatches()`](reference/screeningSelectedBatches.html) or, if the processing is to be done via the SLURM workload manager [`screeningSelectedBatchesSlurm()`](reference/screeningSelectedBatchesSlurm.html). For example, after additions have been made to the spectral library (CSL) all measurement files are reprocessed with the new CSL version. After making necessary changes to the `spectral_library_path` field in the `msrawfiles` table, processing can be started with the aforementioned functions. The results of processing are saved as `.RDS` files. After processing is complete,  `ingestFeatureRecords()` is used to upload the data to NTSPortal.
 
-# Overview of processing algorithm
+The following provides further technical detail regarding the internal implementation of these functions.
 
-## Connecting to ElasticSearch cluster
-
-Saving the login credentials is achieved using `ntsportal::connectNtsportal()`. This will also build the connection object (the `DbComm` interface). Currently the `R/dbInterface-PythonDbComm.R` methods are used to implement the interface.
+# Internal implementation of the processing algorithm
 
 ## General workflow
 
 The HRMS measurement files are stored as mzXML files in the filesystem, in directories representing batches (measurement sequences). The files were previously converted from the vendor specific formats (.raw, .wiff, etc.) using *Proteowizard's* `msconvert`-tool. 
 
-The `msrawfiles` table is used to manage the metadata. Each measurement file has a record in this table which contains information such as file's path, sampling and acquisition information and processing parameters.
+The `msrawfiles` table is used to manage the metadata. Each measurement file has a record in this table which contains information such as the file's path, sampling and acquisition information as well as processing parameters. The `msrawfilesRecord`s (sorted into `msrawfilesBatch`es) are used to control the processing workflow.
 
-The `msrawfile`-records are used to control the processing workflow. Once the workflow is complete, the data is saved as a JSON file in the format needed for Elasticsearch ingest (importing the data into Elasticsearch). The ingest itself is done in a separate step.
-
-![Figure: Overview of the screening process for new batches](images/screening-overview.svg){width=100%}
+![Figure: Overview of the screening process for selected batches](images/screening-overview.svg){width=100%}
 
 ### Process launching {#sec-process-launching}
 
@@ -42,16 +38,16 @@ The user runs one of two `screeningSelectedBatches*()` [functions](reference/ind
 
 To run the screening via SLURM, first the necessary job files are be created. The user then starts the processing by submitting the job file (.sbatch) to the workload manager via the `sbatch` command in a BASH terminal.
 
-![Figure: The workflow manager SLURM can be used for processing](images/screening-slurmJobSubmission.svg){width=100%}
+![Figure: The workflow manager SLURM can be used for processing](images/screening-slurmJobSubmission.svg){width=80%}
 
 ### Collecting msrawfile records {#sec-collecting-msrawfile-records}
 
-The `msrawfiles` records are loaded and checks performed before the scanning process begins. Output is a list of batches of `ntsportal::msrawfilesRecord`s. 
+The `msrawfilesRecord`s are fetched from Elasticsearch (`msrawfiles` table) and organized into batches. Checks are performed on the both the records and the batches. The Output is a `list` of `msrawfilesBatch` objects. 
 
-![Figure: Selecting new batches for processing](images/screening-collectMsrawfiles.svg){width=100%}
+![Figure: Selecting new batches for processing](images/screening-collectMsrawfiles.svg){width=50%}
 
 ### File-wise scanning
-The measurement files are scanned for compounds in the collective spectral library (CSL) and the results are cleaned. The result is one `dbasResult` object for the batch (`list` of `data.frame`s containing peak information for the whole batch). 
+`msrawfilesBatch` has subclasses for each processing type. The object type directs the workflow to the correct processing method. For example, a `dbasMsrawfilesBatch` is processed by the DBAS (library screening) method using the `scanBatch()` generic. In this method, the measurement files are scanned for compounds in the collective spectral library (CSL) and the results are cleaned, for example via blank correction. The result is one `dbasResult` object for the batch (`list` of `data.frame`s containing peak information for the whole batch). 
 
 Table: `dbasResult` class
 
@@ -68,17 +64,17 @@ Table: `dbasResult` class
 
 ### Conversion to `featureRecord`
 
-The results from scanning (`dbasResult`) are converted to a `list` format for later import into NTSportal (`featureRecord`). Additional compound information is taken from the spectral library and measurement file metadata is taken from `msrawfiles` and added to each record. MS^1^, MS^2^ spectra and the EIC of the peak are added if available (only peaks in `dbasResult$peakList` have these data available).
+The results from scanning (`dbasResult`) are converted to a `featureRecord` format for import into NTSportal. Additional compound information is taken from the spectral library. MS^1^, MS^2^ spectra and the EIC of the peak are added if available (only peaks in `dbasResult$peakList` have these data available).
 
-![Figure: Converting the `dbasResult` to a `featureRecord`](images/screening-conversion-to-featurerecord.svg){width=100%}
+![Figure: Converting the `scanResult` to a `featureRecord`](images/screening-conversion-to-featurerecord.svg){width=100%}
 
 ### Writing RDS for database import
 
-The list of `featureRecord` objects from one batch are saved in an RDS file (using the default `gzip` compression). 
+The list of `featureRecord` objects from one batch are saved in an RDS file (which uses the default `gzip` compression). 
 
 ### Database import (ingest)
 
-Before ingesting documents, the user must ensure that the enrich policies and ingest pipelines are up to date. This is done with `updateEnrichPolicies()`, which will synchronize Elasticsearch with the current enrich policies and ingest pipelines needed for ntsportal.
+Before ingesting documents, the user must ensure that the enrich policies and ingest pipelines are up to date. This is done with `updateEnrichPolicies()`, which will synchronize Elasticsearch with the current enrich policies and ingest pipelines needed.
 
 The RDS files are imported into NTSPortal with `ingestFeatureRecords()`, which calls the Elasticsearch bulk ingest API via Python. The user runs `ingestFeatureRecords()` separately after processing is complete. The ingest includes a pipeline (`ingest-feature`) which enriches each document with sample metadata found in `msrawfiles`. These are the fields such as sampling location and sampling time, `loc` and `start` fields, respectively. 
 
