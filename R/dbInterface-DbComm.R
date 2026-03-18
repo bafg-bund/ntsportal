@@ -19,6 +19,11 @@ getDbComm <- function() {
 #' @seealso \link{`removeValueFromArray`}
 #' @export
 setGeneric("addValueToArray", function(dbComm, tableName, field, value, searchBlock = list()) standardGeneric("addValueToArray"))
+
+#' Add row(s) to a table
+#' @inheritParams addValueToArray
+#' @param records list of records in NTSPortal format
+#' @export
 setGeneric("appendRecords", function(dbComm, tableName, records) standardGeneric("appendRecords"))
 
 #' Delete row(s) from a table
