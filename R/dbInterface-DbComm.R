@@ -20,7 +20,13 @@ getDbComm <- function() {
 #' @export
 setGeneric("addValueToArray", function(dbComm, tableName, field, value, searchBlock = list()) standardGeneric("addValueToArray"))
 setGeneric("appendRecords", function(dbComm, tableName, records) standardGeneric("appendRecords"))
-setGeneric("deleteRow", function(dbComm, tableName, searchBlock = list()) standardGeneric("deleteRow"))
+
+#' Delete row(s) from a table
+#' @description Delete selected rows from a table. Warning: this function is non-interactive and will irreversibly 
+#' delete rows. A searchBlock must be provided.
+#' @inheritParams addValueToArray
+#' @export
+setGeneric("deleteRow", function(dbComm, tableName, searchBlock = NULL) standardGeneric("deleteRow"))
 
 #' Delete a table
 #' @description The named table is removed from the database

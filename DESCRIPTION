@@ -1,7 +1,7 @@
 Package: ntsportal
 Type: Package
 Title: ntsportal - a database for non-target-screening of surface water
-Version: 25.3
+Version: 26.1
 Authors@R: c(
              person(c("Kevin", "S."), "Jewell", email = "jewell@bafg.de", role = c("aut", "cre"),
              comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany"),
