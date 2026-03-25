@@ -167,7 +167,7 @@ addRawfiles <- function(
       if (length(newRecords) != 1)
         stop("You can only change one document and use this as template for others")
       message("Adding changed document")
-      newRecordsNew <- jsonlite::read_json("add-rawfiles-check.json")
+      newRecordsNew <- jsonlite::read_json(file.path(saveDirectory, "add-rawfiles-check.json"))
       if (all.equal(newRecordsNew, newRecords)[1] == TRUE)
         stop("There was no change made, aborting.")
       newRecords <- newRecordsNew
