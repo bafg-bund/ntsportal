@@ -138,6 +138,29 @@ test_that("A station can be passed as a list", {
   deleteRow(dbComm, testIndexName, qTemplateFile)
 })
 
+test_that("A fixed start date can be passed", {
+  queryForTestRecord <- list(query = list(regexp = list(path = ".*RH_pos_20220603_no_peaks_test_addRecord.mzXML")))
+  if (getNrow(dbComm, testIndexName, queryForTestRecord) > 0)
+    deleteRow(dbComm, testIndexName, queryForTestRecord)
+  testFile <- test_path("fixtures", "msrawfiles-addRecord", "RH_pos_20220603_no_peaks_test_addRecord.mzXML")
+  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "water", duration = "P1D", station = "rhein_ko_l")
+  saveDir <- withr::local_tempdir()
+  suppressMessages(
+    addRawfiles(
+      rfIndex = testIndexName, 
+      newStart = "2026-01-01",
+      templateId = templateId,
+      newPaths = testFile, 
+      dirMeasurmentFiles = test_path("fixtures", "msrawfiles-addRecord"),
+      prompt = F,
+      saveDirectory = saveDir
+    )  
+  )
+  recs <- getTableAsRecords(dbComm, testIndexName, queryForTestRecord)
+  expect_equal(recs[[1]]$start, "2026-01-01")
+  deleteRow(dbComm, testIndexName, queryForTestRecord)
+})
+
 test_that("Batch with two different locations is correctly processed", {
   # Add dummy record for fictitious station "foobar_station", which is encoded in the filename as just "Foo"
   newFileName <- "Foo_07_01_pos.mzXML"

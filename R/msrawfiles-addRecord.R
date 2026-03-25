@@ -216,8 +216,8 @@ checkArgumentValidity <- function(rfIndex, templateId, newPaths, newStart, newSt
   if (length(filePol) != 1) {
     checkResult <- addError(checkResult, "Only one polarity allowed per batch")
   }
-  if (!(newStart == "filename" || grepl("^\\d{8}$", newStart))) {
-    checkResult <- addError(checkResult, "'newStart' must be 'filename' or a fixed date in the form 'yyyymmdd'")
+  if (!(newStart == "filename" || grepl("^\\d{4}-\\d{2}-\\d{2}$", newStart))) {
+    checkResult <- addError(checkResult, "'newStart' must be 'filename' or a fixed date in the form 'yyyy-mm-dd'")
   }
   if (!is.element(newStation, c("same_as_template", "filename", "newStationList"))) {
     checkResult <- addError(checkResult, "newStation must be 'same_as_template' or 'filename' or a list 
@@ -318,7 +318,7 @@ addStartToRecord <- function(rec, newStart) {
   if (newStart == "filename") {
     rec$start <- getFormatedStartFromFilename(basename(rec$path), rec$start_date_regex, rec$start_date_format)
   } else {
-    rec$start <- getFixedStart(newStart)
+    rec$start <- getFixedFormatedStart(newStart)
   }
   rec
 }
