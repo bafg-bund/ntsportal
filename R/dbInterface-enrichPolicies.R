@@ -2,7 +2,9 @@
 
 #' Update enrich policies in Elasticsearch
 #' @description
-#' Refresh (overwrite and re-execute) the enrich policies as stored in the ntsportal package (inst/enrichPolicies)
+#' Refresh (overwrite and re-execute) the enrich policies as stored in the ntsportal package (inst/enrichPolicies). Use
+#' `GET _cat/tasks?h=ac,ti,ts,time&actions=policy_execution` in the Elasticsearch console to track when the
+#' policies have finished.
 #' @return a vector of task IDs for all enrich policy execution tasks
 #' @export
 updateEnrichPolicies <- function() {
