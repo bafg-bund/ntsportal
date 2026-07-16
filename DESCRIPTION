@@ -38,7 +38,6 @@ Imports:
     RJSONIO,
     zoo,
     stringi
-RoxygenNote: 7.3.3
 Remotes:
     github::bafg-bund/ntsworkflow
 Suggests:
@@ -53,3 +52,4 @@ VignetteBuilder: knitr
 Config/testthat/edition: 3
 URL: https://docs.ntsportal.bafg.de
 Config/Needs/website: rmarkdown
+Config/roxygen2/version: 8.0.0
