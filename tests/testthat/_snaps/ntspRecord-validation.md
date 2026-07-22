@@ -4,7 +4,7 @@
       checkMsrawfiles(testIndexName)
     Message
       Checking metadata for processing type: dbas
-      20 rows will be retrieved from table ntsp25.3_msrawfiles_unit_tests
+      20 rows will be retrieved from table ntsp26.1_msrawfiles_unit_tests
       Retrieving ==>----------------------------    5% | ETA:  0s
       Retrieving ==============================>  100% | ETA:  0s
       

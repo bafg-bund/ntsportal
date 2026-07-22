@@ -15,7 +15,8 @@ getDbComm <- function() {
 #' @param tableName Name of table in database, wildcards are permitted
 #' @param field table column (field) name see mappings
 #' @param value value to set or add
-#' @param searchBlock list coercible to json for Elasticsearch Search API (Query DSL)
+#' @param searchBlock list coercible to json for Elasticsearch Search API (Query DSL) to select a subset of rows to 
+#' query or change. Default is all table rows.
 #' @seealso \link{`removeValueFromArray`}
 #' @export
 setGeneric("addValueToArray", function(dbComm, tableName, field, value, searchBlock = list()) standardGeneric("addValueToArray"))

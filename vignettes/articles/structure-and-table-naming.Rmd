@@ -20,9 +20,9 @@ The NTSPortal system is made up of many components which can be grouped into thr
 
 |Software Component|Version|Description|
 |:-----------------|:------|:----------------------------------------------|
-|R|4.5.2|High level scripting, db management|
+|R|4.5.3|High level scripting, db management|
 |Python|3.12.12|Interface to Elasticsearch using Python package "elasticsearch"|
-|Elasticsearch|9.2.3|Database and search engine|
+|Elasticsearch|9.4.2|Database and search engine|
 |Kibana|9.2.3|Content management system|
 |ntsworkflow|0.2.10|R package for processing|
 |xcms|4.8.0|R package for interfacing with mzXML files|

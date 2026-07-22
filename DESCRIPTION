@@ -32,12 +32,8 @@ Imports:
     reticulate,
     elastic,
     digest,
-    rlang,
-    lubridate,
-    cli,
     RJSONIO,
-    zoo,
-    stringi
+    zoo
 Remotes:
     github::bafg-bund/ntsworkflow
 Suggests:

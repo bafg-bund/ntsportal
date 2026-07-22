@@ -7,10 +7,6 @@ library(ntspQaTools)
 source("tests/testthat/helper.R")
 dbComm <- getDbComm()
 
-# new msrawfiles_unit_tests index (use only when incrementing the version) ####
-copyTable(dbComm, tableName = "ntsp25.3_msrawfiles_unit_tests", newTableName = testIndexName, mappingType = "msrawfiles")
-changeAllDbasAliasNames(msrawfilesName = testIndexName, version = ntspVersion)
-# deleteIndex(testIndexName)
 
 # msrawfiles allRecords ####
 allRecords <- getTableAsRecords(dbComm, testIndexName, recordConstructor = newMsrawfilesRecord)

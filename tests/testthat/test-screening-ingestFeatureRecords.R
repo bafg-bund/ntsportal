@@ -1,6 +1,8 @@
 
 test_that("One file is uploaded in Elasticsearch", {
-  esIndices <- ingestFeatureRecords(test_path("fixtures", "featureRecordExampleRds"), ingestPipeline = "ingest-feature-unit-tests")
+  esIndices <- ingestFeatureRecords(test_path("fixtures", "featureRecordExampleRds"), 
+                                    ingestPipeline = "ingest-feature-unit-tests",
+                                    enrichPolicy = "date-import-policy-unit-tests")
   indexName <- esIndices[[1]]$ntsp
   expect_match(indexName, "ntsp\\d{2}.*_feature_v\\d{12}_unit_tests")
   expect_true(isTable(dbComm, indexName))
@@ -59,6 +61,25 @@ test_that("An error in python results in an error message", {
   expect_match(errorLines[1], "ntsportal-featureRecord-\\d{6}-\\d{4}-.*\\.RDS")
   file.remove(tfile)
   log_appender(appender_console)
+})
+
+test_that("area relative to internal standard is computed on ingest", {
+  esIndices <- ingestFeatureRecords(
+    test_path("fixtures", "featureRecordExampleRds"), 
+    ingestPipeline = "ingest-feature-unit-tests",
+    enrichPolicy = "date-import-policy-unit-tests")
+  indexName <- esIndices[[1]]$ntsp
+  resultRow <- getTableByEsql(
+    glue(
+      'FROM {indexName} | 
+       KEEP area, area_internal_standard, area_relative_to_internal_standard, filename, batchname, esi_ion_spec | 
+       LIMIT 1')
+  )
+  expect_equal(resultRow$area / resultRow$area_internal_standard, resultRow$area_relative_to_internal_standard)
+  expect_match(pull(resultRow, filename), ".*\\.mzX?ML")
+  expect_match(pull(resultRow, batchname), "/olmesartan-d6-bisoprolol$")
+  expect_match(pull(resultRow, esi_ion_spec), "\\w+_[posneg]{3}_.+_\\w+")
+  deleteTable(dbComm, indexName)
 })
 
 # Copyright 2026 Bundesanstalt für Gewässerkunde

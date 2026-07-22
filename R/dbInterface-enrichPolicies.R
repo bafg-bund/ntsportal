@@ -2,7 +2,9 @@
 
 #' Update enrich policies in Elasticsearch
 #' @description
-#' Refresh (overwrite and re-execute) the enrich policies as stored in the ntsportal package (inst/enrichPolicies)
+#' Refresh (overwrite and re-execute) the enrich policies as stored in the ntsportal package (inst/enrichPolicies). This
+#' will also update the ingest pipelines. The function will return a number of task IDs on ElasticSearch, which may take
+#' a while to complete.
 #' @return a vector of task IDs for all enrich policy execution tasks
 #' @export
 updateEnrichPolicies <- function() {
@@ -62,7 +64,14 @@ testForEnrichPolicy <- function(policyName) {
 #' @export
 executeEnrichPolicy <- function(policyName, asBackgroundTask = TRUE) {
   dbComm <- getDbComm()
-  res <- dbComm@client$enrich$execute_policy(name = policyName, wait_for_completion=!asBackgroundTask)
+  tryCatch(
+    res <- dbComm@client$enrich$execute_policy(name = policyName, wait_for_completion=!asBackgroundTask),
+    error = function(cnd) {
+      message("Error in executeEnrichPolicy:", cnd)
+    }
+  )
+  if (!exists("res"))
+    return("failed")
   res$body$task
 }
 

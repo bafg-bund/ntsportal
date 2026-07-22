@@ -67,6 +67,12 @@ The stations are named as best as possible through the convention `<river>_<loca
 |saar_re_m           |Saar, Schleuse Rehlingen, Saar km 54.2, Flussmitte                                           |
 |                    | breitengrad: 49.374082                                                                     |
 |                    | laengengrad: 6.698360                                                                      |
+|mulde_de_m          |Mulde, Dessau, Flussmitte                                                                   |
+|                    | breitengrad: 51.8517                                                                     |
+|                    | laengengrad: 12.2553                                                                      |
+|oder_ho_l           |Oder, Hohenwutzen, linkes Ufer                                                              |
+|                    | breitengrad: 52.8432                                                                     |
+|                    | laengengrad: 14.1222                                                                      |                   
 
 
 Station descriptions: Schulze, T.; Ricking, M. (2005): Abschlussbericht: Entwicklung einer Verfahrensrichtlinie „Sedimente und Schwebstoffe“. Freie Universität Berlin, Umweltbundesamt,  UBA, Berlin. [Link](https://www.umweltbundesamt.de/publikationen/entwicklung-einer-verfahrensrichtlinie-sedimente)

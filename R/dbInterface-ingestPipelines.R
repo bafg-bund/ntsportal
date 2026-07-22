@@ -1,5 +1,8 @@
 
 #' Update Ingest Pipelines needed for ntsportal on the elasticsearch cluster
+#' @description
+#' Refresh (overwrite) ingest pipelines based on those saved in the ntsportal installation directory. This does not
+#' execute the enrich policies.
 #' @export
 updateIngestPipelines <- function() {
   pipelineNames <- getIngestPipelineNames()

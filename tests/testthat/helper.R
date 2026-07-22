@@ -3,7 +3,7 @@ connectNtsportal()
 dbComm <- getDbComm()
 
 rootDirectoryForTestMsrawfiles <- "/beegfs/nts/ntsportal/msrawfiles/unit_tests"
-ntspVersion <- "25.3"
+ntspVersion <- "26.1"
 
 testIndexName <- glue("ntsp{ntspVersion}_msrawfiles_unit_tests")
 

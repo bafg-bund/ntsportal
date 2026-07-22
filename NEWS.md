@@ -1,15 +1,25 @@
 
 # ntsportal 26.1
 
-## Major changes (Frontend)
+## Major changes (frontend)
 
 * Linear regression analysis in the SPM time series dashboard shows the average percent change per year for the full 
 time period of annual sampling (field: `change_per_year`). This is computed using a semi-log regression analysis. 
 The table also shows the date of the last detection (field: `last_detection`).
 
-## Major changes (Backend)
+## Major changes (backend)
 
 
+## Minor changes (backend)
+
+* Updated various dependencies to versions:
+  + R = 4.5.3
+  + R-tidyverse = 2.0.0
+  + Python = 3.12.13
+  + ElasticSearch = 9.4.2
+  + Python-elasticsearch = 9.4.1
+  + R-ntsworkflow = 0.2.11
+  + CSL = 26.2
 
 # ntsportal 25.3
 

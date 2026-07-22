@@ -2,7 +2,7 @@
   "mappings": {
     "_meta": {
       "type": "ntsportal,spectral_library",
-      "version": "25.3",
+      "version": "26.1",
       "licence": "GNU GPL-3.0"
     },
     "dynamic": "strict",
