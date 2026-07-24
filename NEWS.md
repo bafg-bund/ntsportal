@@ -9,6 +9,8 @@ The table also shows the date of the last detection (field: `last_detection`).
 
 ## Major changes (backend)
 
+* Run-time fields were removed from feature documents and instead are computed during ingest using the ingest pipeline 
+defined in `ingestPipelines/ingest-feature.json`. This increases ingest time but greatly improves search performance.
 
 ## Minor changes (backend)
 

@@ -1,8 +1,8 @@
 library(ntsportal)
-saveDir <- "tests/slurmTesting/testResultsNtsRheinKobAll"
+saveDir <- "testResultsNtsRheinKobAll"
 unlink(saveDir, recursive = T)
 dir.create(saveDir)
-index <- "ntsp25.2_msrawfiles"
+index <- "ntsp26.1_msrawfiles"
 dirs <- "/beegfs/nts/ntsportal/msrawfiles/koblenz"
 screeningSelectedBatchesSlurm(index, dirs, saveDir, "jewell@bafg.de", screeningType = "nts")
 

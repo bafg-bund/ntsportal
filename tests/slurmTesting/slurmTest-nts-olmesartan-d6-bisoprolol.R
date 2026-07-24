@@ -2,15 +2,16 @@
 
 # Variables to be changed #################
 userEmail <- "jewell@bafg.de"
-dirTestResults <- "tests/slurmTesting/testResults-nts-olmesartan-d6-bisoprolol"
-msrawfileIndexName <- "ntsp25.3_msrawfiles_unit_tests"
+dirTestResults <- "testResults-nts-olmesartan-d6-bisoprolol"
+msrawfileIndexName <- "ntsp26.1_msrawfiles_unit_tests"
 ###########################################
 
 library(ntsportal)
-file.remove(list.files(dirTestResults, f = T))
 dirs <- c(
   "/beegfs/nts/ntsportal/msrawfiles/unit_tests/olmesartan-d6-bisoprolol/"
 )
+unlink(dirTestResults, recursive = T)
+dir.create(dirTestResults)
 
 screeningSelectedBatchesSlurm(
   msrawfileIndex = msrawfileIndexName, 

@@ -1,5 +1,5 @@
 ---
-title: "Processing by library screening"
+title: "Processing by library screening with R-ntsworkflow"
 output: html_document
 ---
 

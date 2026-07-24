@@ -6,7 +6,7 @@ connectNtsportal()
 tempSaveDir <- "testResults-ntsRheinKobPos-parallel"
 if (!dir.exists(tempSaveDir))
   dir.create(tempSaveDir)
-index <- "ntsp25.3_msrawfiles"
+index <- "ntsp26.1_msrawfiles"
 batchDirectory <- c(
   "/beegfs/nts/ntsportal/msrawfiles/koblenz/wasser/2021/202105/pos/",
   "/beegfs/nts/ntsportal/msrawfiles/koblenz/wasser/2021/202106/pos/"

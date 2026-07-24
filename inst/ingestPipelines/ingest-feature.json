@@ -68,6 +68,50 @@
           }
         "
       }
+    },
+    {
+      "script": {
+        "description": "Compute area/area_internal_standard",
+        "source": "
+          if (ctx.area_internal_standard != null) {
+            ctx.area_relative_to_internal_standard = (double)ctx.area / (double)ctx.area_internal_standard;
+          }
+        "
+      }
+    },
+    {
+      "script": {
+        "description": "Compute intensity/intensity_internal_standard",
+        "source": "
+          if (ctx.intensity_internal_standard != null) {
+            ctx.intensity_relative_to_internal_standard = (double)ctx.intensity / (double)ctx.intensity_internal_standard;
+          }
+        "
+      }
+    },
+    {
+      "script": {
+        "description": "Batchname, leading directories of path field",
+        "source": "
+          def x = ctx.path.splitOnToken('/'); ctx.batchname = String.join('/', Arrays.asList(x).subList(0, x.length-1));
+        "
+      }
+    },
+    {
+      "script": {
+        "description": "Filename, basename of path field",
+        "source": "
+          def x = ctx.path.splitOnToken('/'); ctx.filename = x[x.length-1];
+        "
+      }
+    },
+    {
+      "script": {
+        "description": "Concatenation of name, pol, adduct, isotopologue",
+        "source": "
+          ctx.esi_ion_spec = ctx.name +'_'+ ctx.pol +'_'+ ctx.adduct +'_'+ ctx.isotopologue
+        "
+      }
     }
   ]
 }
