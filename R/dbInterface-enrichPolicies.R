@@ -78,8 +78,11 @@ executeEnrichPolicy <- function(policyName, asBackgroundTask = TRUE) {
 cancelTask <- function(taskId) {
   dbComm <- getDbComm()
   res <- dbComm@client$tasks$cancel(task_id=taskId)
-  if (res$body$nodes[[1]]$tasks[[taskId]]$cancelled)
-    message("task cancelled")
+  if (length(res$body$node_failures) > 0) {
+    warning("Task not cancelled. Error message: ", res$body$node_failures[[1]]$caused_by$reason)
+  } else if (res$body$nodes[[1]]$tasks[[taskId]]$cancelled) {
+    message("task [", taskId, "] cancelled")
+  }
 }
 
 # Copyright 2025 Bundesanstalt für Gewässerkunde

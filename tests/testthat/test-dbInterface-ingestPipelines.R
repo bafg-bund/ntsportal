@@ -10,7 +10,7 @@ test_that("You can create and delete an ingest pipeline", {
 test_that("You can read an ingest pipeline", {
   pipelineName <- "ingest-feature-unit-tests"
   x <- readPipelineProcessors(pipelineName)
-  expect_length(x, 2)
+  expect_length(x, 7)
 })
 
 test_that("A non-existant pipeline is not found", {
