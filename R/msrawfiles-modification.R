@@ -71,6 +71,7 @@ changeMsrawfilePath <- function(rfIndex, oldPath, newPath, checkType = "md5") {
   stopifnot(all(file.exists(oldPath, newPath)))
   stopifnot(checkType %in% c("md5", "filesize"))
   stopifnot(basename(oldPath) == basename(newPath))
+  stopifnot(oldPath != newPath)
   # Same content (slow)
   if (checkType == "md5" && tools::md5sum(oldPath) != tools::md5sum(newPath))
     stop(oldPath, " and ", newPath, " are not the same")

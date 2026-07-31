@@ -91,6 +91,28 @@ It is important that alias names are not a subset of each other or indices. So, 
 
 : Table: Examples of table/index naming conventions
 
+# Batch naming conventions
+
+Measurement files are stored on the network filesystem in directories for each batch. The following conventions are used to build the directory tree for storing measurement files. The `batchname` field in the `msrawfiles` table is the full path to the directory holding the files.
+
+Order of naming is generally: location/time/method/polarity. Where "/" are the (sub)directories.
+
+Order of naming in detail (optional divisions in brackets):
+
+`/station, region or river/matrix/(duration)/year(s)/month(s)/(batch_specification, method, instrument)/polarity`
+
+The additional / within time are optional, and further sub-directories are permitted, as long as polarity (pos or neg) is always the final subdirectory.
+
+Where possible, use the same keywords as used in the metadata fields for `matrix`, `duration`, etc. of the `msrawfiles` table. All text is lower-case, word separation only by underscore `_`. Not permitted: `-`, `,`, `.`, space or any other punctuation or special characters.
+
+## Examples
+
+- `rhein_bimmen_l/spm/p1y/2005_2013/pos`
+- `rhein_ko_l/water/p1d/2025/202501/pos`
+- `sachsen/water/p10/2021/paket15/pos`
+- `mosel/water/p10/2021/batch3/pos`
+- `mosel/water/p1d/2021/202109/pos`
+
 <!-- Copyright 2026 Bundesanstalt für Gewässerkunde -->
 <!-- This file is part of ntsportal -->
 

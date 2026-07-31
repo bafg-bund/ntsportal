@@ -10,7 +10,10 @@ The table also shows the date of the last detection (field: `last_detection`).
 ## Major changes (backend)
 
 * Run-time fields were removed from feature documents and instead are computed during ingest using the ingest pipeline 
-defined in `ingestPipelines/ingest-feature.json`. This increases ingest time but greatly improves search performance.
+defined in `ingestPipelines/ingest-feature.json`. This increases ingest time slightly but greatly improves search performance.
+* Reorganization of batches holding measurement files for improved processing performance and for a more logical structure. This
+will impact results where the batch size has changed. In these cases the change is marked as a time-series annotation.
+The new batch structure is reported in the article Structure of NTSPortal, Section: Batch naming conventions.
 
 ## Minor changes (backend)
 
