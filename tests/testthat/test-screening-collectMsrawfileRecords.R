@@ -42,3 +42,18 @@ test_that("One can provide multiple directories", {
   expect_length(batchNames, 2)
 })
 
+test_that("Additional blank records are added to a batch if these are listed", {
+  batchName <- "/beegfs/nts/ntsportal/msrawfiles/unit_tests/olmesartan-d6-bisoprolol"
+  batch <- getSelectedMsrawfileBatches(testIndexName, batchName, "dbas")
+  paths <- getField(batch[[1]], "path")
+  expect_length(batch[[1]], 11)
+  expect_contains(basename(paths), "BL_1_pos.mzXML")
+})
+
+test_that("One additional blank record can be added to a batch if listed", {
+  batchName <- "/beegfs/nts/ntsportal/msrawfiles/unit_tests/olmesartan-d6"
+  batch <- getSelectedMsrawfileBatches(testIndexName, batchName, "dbas")
+  paths <- getField(batch[[1]], "path")
+  expect_length(batch[[1]], 5)
+  expect_contains(basename(paths), "RH_pos_20220602_no_peaks_MQ_test.mzXML")
+})

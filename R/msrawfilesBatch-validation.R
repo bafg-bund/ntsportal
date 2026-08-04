@@ -35,7 +35,7 @@ allFieldsUniform <- function(records) {
 }
 
 blanksPresent <- function(records) {
-  if (!any(getField(records, "blank"))) {
+  if (!any(getField(records, "blank")) && !any(fieldAvailable(records, "additional_blank_path"))) {
     badBatchWarning(records, "No blank found")
     FALSE
   } else {
@@ -103,7 +103,8 @@ fieldsToCheckUniformAllSamples.msrawfilesBatch <- function(msrawfilesBatch) {
     "pol",
     "data_source",
     "chrom_method",
-    "internal_standard"
+    "internal_standard",
+    "additional_blank_path"
   )
 }
 #' @export

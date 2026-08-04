@@ -13,12 +13,31 @@ getSelectedMsrawfileBatches <- function(msrawfilesIndex, rootDirs, screeningType
     fields = msrawfilesFieldsForProcessing(screeningType),
     recordConstructor = switch(screeningType, dbas = newDbasMsrawfilesRecord, nts = newNtsMsrawfilesRecord)
   )
-  recordsToBatches(allRecords)
+  recordsToBatches(allRecords, msrawfilesIndex)
 }
 
-recordsToBatches <- function(records) {
+recordsToBatches <- function(records, msrawfilesIndex) {
   groupedRecords <- splitRecordsByDir(records)
+  groupedRecords <- map(groupedRecords, \(recs) addMoreBlanksToBatch(recs, msrawfilesIndex))
   map(groupedRecords, recordsToOneBatch)
+}
+
+addMoreBlanksToBatch <- function(records, msrawfilesIndex) {
+  if (fieldAvailable(records, "additional_blank_path")) {
+    # Field is the same for the whole batch (see validation)
+    pathNewBlanks <- getField(records[1], "additional_blank_path")[[1]]
+    screeningType <- stringr::str_match(class(records[[1]])[1], "^(\\w+)MsrawfilesRecord$")[,2]
+    stopifnot(screeningType %in% c("nts", "dbas"))
+    recordsNewBlanks <- getTableAsRecords(
+      getDbComm(), msrawfilesIndex, 
+      searchBlock = list(query = list(terms = list(path = as.list(pathNewBlanks)))), sortField = "start", 
+      fields = msrawfilesFieldsForProcessing(screeningType),
+      recordConstructor = switch(screeningType, dbas = newDbasMsrawfilesRecord, nts = newNtsMsrawfilesRecord)
+    )
+    c(records, recordsNewBlanks)
+  } else {
+    records
+  }
 }
 
 recordsToOneBatch <- function(records) {
@@ -53,6 +72,7 @@ warnNonExistentDirs <- function(rootDirs) {
 msrawfilesFieldsForProcessingGeneral <- function() {
   c(
     "blank",
+    "additional_blank_path",
     "chrom_method",
     "csl_instruments_allowed",
     "feature_table_alias",

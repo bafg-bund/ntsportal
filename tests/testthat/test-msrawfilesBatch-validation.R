@@ -11,7 +11,7 @@ test_that("Batch check runs and returns error", {
 
 test_that("Checking one batch for dba-screening runs without error", {
   records <- getMsrawfilesTestRecords("dbas")
-  recordsInBatches <- recordsToBatches(records)
+  recordsInBatches <- recordsToBatches(records, testIndexName)
   checkResponse <- checkQualityBatch(recordsInBatches[[4]])
   expect_true(checkResponse)
 })

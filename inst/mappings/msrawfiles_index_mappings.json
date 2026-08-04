@@ -7,6 +7,7 @@
     },
     "dynamic": "strict",
     "properties": {
+      "additional_blank_path": {"type": "keyword", "meta": {"description": "Absolute path to additional blanks for batch"}},
       "blank": {"type": "boolean", "meta": {"description": "Is sample a blank?"}},
       "blank_regex": {"type": "keyword", "meta": {"description": "Regex. for blank code in filename"}},
       "chrom_method": {"type": "keyword", "meta": {"description": "chromatographic method code", "example": "bfg_nts_rp1"}},

@@ -7,7 +7,6 @@
 # nohup Rscript tests/testthat/fixtures/prepareFixtures.R &> tests/testthat/fixtures/prepareFixtures.log &
 # tail -f tests/testthat/fixtures/prepareFixtures.log
 
-
 # Setup ####
 devtools::load_all()
 library(ntspQaTools)
@@ -161,5 +160,6 @@ reintegratedReport <- reintegrateReport(mergedReport)
 saveRDS(reintegratedReport, "tests/testthat/fixtures/screening-dbasFileScanning/reintegratedReportBimmen.RDS")
 
 log_info("End")
+
 # Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

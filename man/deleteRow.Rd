@@ -11,7 +11,8 @@ deleteRow(dbComm, tableName, searchBlock = NULL)
 
 \item{tableName}{Name of table in database, wildcards are permitted}
 
-\item{searchBlock}{list coercible to json for Elasticsearch Search API (Query DSL)}
+\item{searchBlock}{list coercible to json for Elasticsearch Search API (Query DSL) to select a subset of rows to 
+query or change. Default is all table rows.}
 }
 \description{
 Delete selected rows from a table. Warning: this function is non-interactive and will irreversibly 

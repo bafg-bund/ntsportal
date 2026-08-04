@@ -15,7 +15,8 @@ setValueInField(dbComm, tableName, field, value, searchBlock = list())
 
 \item{value}{value to set or add}
 
-\item{searchBlock}{list coercible to json for Elasticsearch Search API (Query DSL)}
+\item{searchBlock}{list coercible to json for Elasticsearch Search API (Query DSL) to select a subset of rows to 
+query or change. Default is all table rows.}
 }
 \description{
 Used to change the value of a field for all rows (i.e. docs) returned by `seearchBlock`

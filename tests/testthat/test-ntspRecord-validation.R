@@ -1,7 +1,7 @@
 
 
 test_that("Full validation of msrawfiles runs without error", {
-  expect_snapshot(checkMsrawfiles(testIndexName), error = TRUE)
+  expect_no_error(checkMsrawfiles(testIndexName))
 })
 
 test_that("Normal record validation returns true for dbas", {

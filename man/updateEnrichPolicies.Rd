@@ -10,5 +10,7 @@ updateEnrichPolicies()
 a vector of task IDs for all enrich policy execution tasks
 }
 \description{
-Refresh (overwrite and re-execute) the enrich policies as stored in the ntsportal package (inst/enrichPolicies)
+Refresh (overwrite and re-execute) the enrich policies as stored in the ntsportal package (inst/enrichPolicies). This
+will also update the ingest pipelines. The function will return a number of task IDs on ElasticSearch, which may take
+a while to complete.
 }

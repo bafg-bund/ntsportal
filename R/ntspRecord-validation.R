@@ -22,7 +22,7 @@ runMsrawfileChecksForProcessingType <- function(indexName, screeningType) {
     recordConstructor = switch(screeningType, dbas = newDbasMsrawfilesRecord, nts = newNtsMsrawfilesRecord)
   )
   validateRecordsMsrawfiles(allRecords)
-  recordsInBatches <- recordsToBatches(allRecords)
+  recordsInBatches <- recordsToBatches(allRecords, indexName)
   checkQualityBatchList(recordsInBatches)
 }
 
