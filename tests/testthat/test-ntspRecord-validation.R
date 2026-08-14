@@ -44,8 +44,9 @@ test_that("Wrong replicate regex returns a warning", {
 
 test_that("Wrong blank returns a warning", {
   records <- getMsrawfilesTestRecords("dbas")
-  records[[10]]$blank <- TRUE
-  expect_warning(correctBlankRegex(records[[10]]))
+  indexNonBlank <- which(!getField(records, "blank"))[1]
+  records[[indexNonBlank]]$blank <- TRUE
+  expect_warning(correctBlankRegex(records[[indexNonBlank]]))
 })
 
 test_that("An incorrect field in featureRecord in a nested field results in an error", {

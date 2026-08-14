@@ -86,7 +86,7 @@ log_info("Section: reintegratedReportDessauBatch and recordsDessauBatch")
 recs <- getTableAsRecords(
   dbComm,
   currentMsr,
-  list(query = list(regexp = list(path = ".*dessau.*/mud_pos/.*"))),
+  list(query = list(regexp = list(path = ".*mulde_dessau_m/spm/p1y/2005_2013/pos.*"))),
   recordConstructor = newDbasMsrawfilesRecord
 )
 filePaths <- map_chr(recs, \(x) x$path)
@@ -108,7 +108,7 @@ saveRDS(reintegratedReport, test_path("fixtures", "screening-dbasFileScanning", 
 saveRDS(recs2, test_path("fixtures", "screening-dbasFileScanning", "recordsDessauBatch.RDS"))
 
 # Create featureRecordExampleRds ####
-log_info("Section: featureRecordExampleRds")
+log_info("Section: Create featureRecordExampleRds")
 tempSaveDir <- withr::local_tempdir()
 pathToFixturesDir <- test_path("fixtures", "featureRecordExampleRds")
 file.remove(list.files(pathToFixturesDir, full.names = T))
@@ -141,16 +141,40 @@ saveRDS(res1, test_path(fldr, "scanResultOneSampleWithDuplicatePeaks.RDS"))
 
 # Example data from Bimmen testing replicate injection filter reintegratedReportBimmen ####
 log_info("Section: Example data from Bimmen testing replicate injection filter reintegratedReportBimmen")
-paths <- c(
-  "/beegfs/nts/ntsportal/msrawfiles/bimmen/schwebstoff/rhb_pos/B14_pos1.mzXML",
-  "/beegfs/nts/ntsportal/msrawfiles/bimmen/schwebstoff/rhb_pos/B14_pos2.mzXML",
-  "/beegfs/nts/ntsportal/msrawfiles/bimmen/schwebstoff/rhb_pos/B14_pos3.mzXML",
-  "/beegfs/nts/ntsportal/msrawfiles/bimmen/schwebstoff/rhb_pos/B21_pos1.mzXML",
-  "/beegfs/nts/ntsportal/msrawfiles/bimmen/schwebstoff/rhb_pos/B21_pos2.mzXML",
-  "/beegfs/nts/ntsportal/msrawfiles/bimmen/schwebstoff/rhb_pos/B21_pos3.mzXML"
+
+recs <- getTableAsRecords(
+  getDbComm(), tableName = currentMsr, 
+  searchBlock = 
+    list(
+      query = list(
+        bool = list(
+          must = list(
+            list(
+              term = list(
+                station = "rhein_bi_l"
+              )
+            ),
+            list(
+              term = list(
+                duration = "P1Y"
+              )
+            ),
+            list(
+              term = list(
+                pol = "pos"
+              )
+            ),
+            list(
+              terms = list(
+                start = list("2014-01-01", "2021-01-01")
+              )
+            )
+          )
+        )
+      )
+    ), 
+    recordConstructor = newDbasMsrawfilesRecord
 )
-recs <- getTableAsRecords(getDbComm(), tableName = currentMsr, searchBlock =  list(query = list(terms = list(path = paths))), 
-                          recordConstructor = newDbasMsrawfilesRecord)
 nbatch <- newDbasMsrawfilesBatch(recs)
 saveRDS(nbatch, "tests/testthat/fixtures/screening-dbasFileScanning/batchBimmen.RDS")
 reports <- purrr::map(nbatch, fileScanDbas, compsToProcess = c("3-Phenylpyridine", "Benzyl-triethylammonium"))

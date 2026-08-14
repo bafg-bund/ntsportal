@@ -113,7 +113,7 @@ test_that("You can ingest a large number of documents quickly", {
   tableName <- "ntsp_temp"
   deleteTable(dbComm, tableName)  # in case it already exists
   createNewTable(dbComm, tableName, "feature")
-  prds <- list.files(test_path("fixtures", "featureRecordExampleRds"), f = T)
+  prds <- list.files(test_path("fixtures", "featureRecordExampleRds"), full.names = TRUE)
   recs <- readRDS(prds)
   recs <- lapply(recs, unclass)
   startTime <- lubridate::now()

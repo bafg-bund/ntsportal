@@ -14,7 +14,7 @@ renv::deactivate()
 
 library(ntsportal)
 connectNtsportal()
-file.remove(list.files(dirTestResults, f = T))
+file.remove(list.files(dirTestResults, full.names = TRUE))
 
 
 dbaScreeningUnprocessedBatchesSlurm(

@@ -18,7 +18,7 @@ The new batch structure is reported in the article Structure of NTSPortal, Secti
 ## Minor changes (backend)
 
 * Updated various dependencies to versions:
-  + R = 4.5.3
+  + R = 4.6.1
   + R-tidyverse = 2.0.0
   + Python = 3.12.13
   + ElasticSearch = 9.4.2

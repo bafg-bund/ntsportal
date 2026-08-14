@@ -18,7 +18,7 @@ test_that("A dummy record can be added to msrawfiles", {
     )  
   )
   
-  importedRecord <- jsonlite::read_json(list.files(saveDir, f = T))
+  importedRecord <- jsonlite::read_json(list.files(saveDir, full.names = TRUE))
   expect_length(importedRecord[[1]], 80)
   recs <- getTableAsRecords(dbComm, testIndexName, queryForTestRecord)
   pathResult <- recs[[1]]$path
@@ -26,7 +26,7 @@ test_that("A dummy record can be added to msrawfiles", {
   startResult <- recs[[1]]$start
   expect_equal(startResult, "2022-06-03")
   deleteRow(dbComm, testIndexName, queryForTestRecord)
-  file.remove(list.files(saveDir, f = T))
+  file.remove(list.files(saveDir, full.names = TRUE))
   refreshTable(dbComm, testIndexName)
   numFound <- getNrow(dbComm, testIndexName, queryForTestRecord)
   expect_equal(numFound, 0)

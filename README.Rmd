@@ -90,6 +90,10 @@ connectNtsportal()  # first time: enter username and password
 ping(getDbComm())
 ```
 
+# Citations
+
+- [Jewell, K.S. et al. (2026) Development of a retrospective processing and data aggregation platform for non-target screening of surface waters](https://doi.org/10.1186/s12302-026-01477-7)
+
 # External links
 
 - [Collective Spectral Library](https://doi.org/10.5281/zenodo.16901589)

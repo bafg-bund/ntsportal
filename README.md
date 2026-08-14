@@ -5,6 +5,7 @@ ntsportal 25.3
 - [Project Funding](#project-funding)
 - [Licence](#licence)
 - [Installation](#installation)
+- [Citations](#citations)
 - [External links](#external-links)
 
 <!-- README.md is generated from README.Rmd. Please edit README.Rmd -->
@@ -109,6 +110,12 @@ options(ntsportal.elasticsearchHostUrl = "https://my.elastic.cluster")
 connectNtsportal()  # first time: enter username and password
 ping(getDbComm())
 ```
+
+# Citations
+
+- [Jewell, K.S. et al. (2026) Development of a retrospective processing
+  and data aggregation platform for non-target screening of surface
+  waters](https://doi.org/10.1186/s12302-026-01477-7)
 
 # External links
 
