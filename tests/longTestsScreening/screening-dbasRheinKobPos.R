@@ -6,7 +6,7 @@ tempSaveDir <- "testResults-dbasRheinKobPos"
 unlink(tempSaveDir, recursive = T)
 dir.create(tempSaveDir)
 index <- "ntsp26.1_msrawfiles"
-batchDirectory <- "/beegfs/nts/ntsportal/msrawfiles/koblenz/wasser/2021/202105/pos/"
+batchDirectory <- "/beegfs/nts/ntsportal/msrawfiles/rhein_koblenz_l/water/tof/p1d/2021/202105/pos/"
 connectNtsportal()
 startTime <- Sys.time()
 screeningSelectedBatches(index, batchDirectory, tempSaveDir)
