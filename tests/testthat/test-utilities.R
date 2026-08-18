@@ -28,5 +28,5 @@ test_that("splitRecordsByDir works with length 0 input", {
   expect_length(records, 0)
 })
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

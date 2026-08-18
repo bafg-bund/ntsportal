@@ -161,6 +161,6 @@ test_that("Removing compounds with no replicate detections works for level 1 and
   expect_disjoint("3-Phenylpyridine", compsFoundAfter)
 })
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
 

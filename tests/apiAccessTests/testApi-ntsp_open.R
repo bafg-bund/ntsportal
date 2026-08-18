@@ -36,5 +36,5 @@ test_that("The open user can specify a wildcard pattern to retrieve docs from mu
 })
 
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

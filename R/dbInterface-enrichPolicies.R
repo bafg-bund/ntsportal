@@ -64,6 +64,8 @@ testForEnrichPolicy <- function(policyName) {
 #' @export
 executeEnrichPolicy <- function(policyName, asBackgroundTask = TRUE) {
   dbComm <- getDbComm()
+  if (isEnrichPolicyRunning(policyName))
+    return("already running")
   tryCatch(
     res <- dbComm@client$enrich$execute_policy(name = policyName, wait_for_completion=!asBackgroundTask),
     error = function(cnd) {
@@ -85,5 +87,11 @@ cancelTask <- function(taskId) {
   }
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+isEnrichPolicyRunning <- function(policyName) {
+  dbComm <- getDbComm()
+  allTasks <- unlist(dbComm@client$tasks$list(detailed=TRUE)$body)
+  any(grepl(policyName, allTasks))
+}
+
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

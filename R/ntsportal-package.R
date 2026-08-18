@@ -57,5 +57,5 @@ NULL
   packageStartupMessage("\nBefore starting, use connectNtsportal() to save your login credentials\n")
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
