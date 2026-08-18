@@ -3,10 +3,11 @@ test_that("Records for selected batches are returned (DBAS)", {
   records <- getMsrawfilesTestRecords("dbas")
   dirs <- unique(dirname(map_chr(records, \(x) x$path)))
   selectedBatch <- getSelectedMsrawfileBatches(testIndexName, dirs[3], "dbas")
+  expect_length(selectedBatch, 1)
   expect_equal(dirname(selectedBatch[[1]][[1]]$path), dirs[3])
   expect_s3_class(selectedBatch[[1]], "dbasMsrawfilesBatch")
   expect_s3_class(selectedBatch[[1]][[1]], c("dbasMsrawfilesRecord", "msrawfilesRecord", "ntspRecord"))
-  selectedBatches <- getSelectedMsrawfileBatches(testIndexName, dirs[2:3], "dbas")
+  selectedBatches <- getSelectedMsrawfileBatches(testIndexName, dirs[3:4], "dbas")
   expect_length(selectedBatches, 2)
 })
 

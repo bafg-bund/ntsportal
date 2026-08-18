@@ -5,8 +5,8 @@
 
 source("tests/kibanaIntegrationTests/helper.R")
 
-aliasExampleDocs <- "ntsp25.3_feature_upb"
-newAliasName <- "ntsp25.3_feature_upb_kibana_integration_test"
+aliasExampleDocs <- "ntsp26.1_feature_upb"
+newAliasName <- "ntsp26.1_feature_upb_kibana_integration_test"
 
 # Process 2 Bimmen files for one compound
 

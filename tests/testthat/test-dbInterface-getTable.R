@@ -8,7 +8,7 @@ test_that("You can retrieve an index of two fields as a tibble", {
 
 test_that("Nested fields are coerced to multiple list-columns of tibbles, multi-length vectors are concatenated", {
   testTibble <- getTableByQuery(
-    "ntsp25.3_spectral_library", 
+    "ntsp26.1_spectral_library", 
     searchBlock = list(query = list(term = list(name = "Carbamazepine"))),
     fields = c("mz", "comp_group", "ms2", "rtt")
   )
@@ -57,7 +57,7 @@ test_that("Records with missing fields are filled with NAs", {
 })
 
 test_that("You can get a tibble from and ES|QL", {
-  testTbl <- getTableByEsql("FROM ntsp25.3_feature* | WHERE station == \"mosel_139\" | KEEP mz, station | LIMIT 10")
+  testTbl <- getTableByEsql("FROM ntsp26.1_feature* | WHERE station == \"mosel_139\" | KEEP mz, station | LIMIT 10")
   expect_s3_class(testTbl, "tbl_df")
   expect_gte(nrow(testTbl), 10)
   expect_type(testTbl$mz, "double")

@@ -74,7 +74,7 @@ screeningOneBatch <- function(msrawfilesBatch, saveDirectory) {
 #' \dontrun{
 #' userEmail <- "example@bafg.de"
 #' dirResults <- "processingResults"
-#' msrawfileIndexName <- "ntsp25.3_msrawfiles"
+#' msrawfileIndexName <- "ntsp26.1_msrawfiles"
 #'
 #' screeningSelectedBatchesSlurm(
 #'   msrawfileIndex = msrawfileIndexName,

@@ -51,7 +51,7 @@ curl -X GET "https://<hostname>:<port>/ntsp25.2_dbas*/_search" \
 
 ```{r, eval = FALSE}
 tb <- ntsportal::getTableByQuery(
-  tableName = "ntsp25.3_feature*", 
+  tableName = "ntsp26.1_feature*", 
   searchBlock = list(
     query = list(
       term = list(

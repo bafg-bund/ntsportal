@@ -1,6 +1,6 @@
 
 test_that("You can retrieve more than 10000 results", {
-  indexName <- "ntsp25.3_msrawfiles"
+  indexName <- "ntsp26.1_msrawfiles"
   hits <- esSearchPaged(indexName, sort = "path", source = "path")$hits$hits
   expect_gt(length(hits), 10000)
 })

@@ -8,6 +8,6 @@ indexNames <- ingestFeatureRecords(dirTestResults)
 
 # Cleanup
 dbComm <- getDbComm()
-deleteTable(dbComm, indexNames[[1]]$ntsp25.3_feature_unit_tests)
+deleteTable(dbComm, indexNames[[1]]$ntsp26.1_feature_unit_tests)
 file.remove(list.files(dirTestResults, full.names = TRUE))
 

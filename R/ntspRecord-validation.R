@@ -7,7 +7,7 @@
 #' @param indexName default: ntspXX.X_msrawfiles
 #' @return TRUE if checks passed
 #' @export
-checkMsrawfiles <- function(indexName = "ntsp25.3_msrawfiles") {
+checkMsrawfiles <- function(indexName = "ntsp26.1_msrawfiles") {
   if (!grepl("msrawfiles", indexName))
     stop("This function is intended only for msrawfiles-type indices")
   runMsrawfileChecksForProcessingType(indexName, "dbas")

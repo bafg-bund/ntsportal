@@ -19,13 +19,13 @@ knitr::opts_chunk$set(
 # Step-by-step guide to using `addRawfiles()`
 
 1. Install the newest version of *ntsportal*, including the Python requirements.
-2. First, create a backup of `msrawfiles`. Use the function `createBackupMsrawfiles()`, a backup named `ntsp25.3_msrawfiles_backup_<YYYYMMDD>` is then created.
+2. First, create a backup of `msrawfiles`. Use the function `createBackupMsrawfiles()`, a backup named `ntsp26.1_msrawfiles_backup_<YYYYMMDD>` is then created.
 
 ```{r, eval=FALSE}
 
 library(ntsportal)
 
-rfIndex <- "ntsp25.3_msrawfiles"
+rfIndex <- "ntsp26.1_msrawfiles"
 
 createBackupMsrawfiles(rfIndex)
 ```
