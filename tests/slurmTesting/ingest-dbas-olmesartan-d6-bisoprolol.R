@@ -1,13 +1,20 @@
 library(ntsportal)
-
-dirTestResults <- "testResults-dbas-olmesartan-d6-bisoprolol"
+library(glue)
+library(testthat)
+library(dplyr)
+dirTestResults <- "tests/slurmTesting/testResults-dbas-olmesartan-d6-bisoprolol"
 # User must manually submit job on SLURM terminal
 
 # Once processing complete:
-indexNames <- ingestFeatureRecords(dirTestResults)
+newTableId <- ingestFeatureRecords(dirTestResults, ingestPipeline = "ingest-feature-unit-tests")
 
-# Cleanup
-dbComm <- getDbComm()
-deleteTable(dbComm, indexNames[[1]]$ntsp26.1_feature_unit_tests)
-file.remove(list.files(dirTestResults, full.names = TRUE))
+index <- newTableId[[1]]$ntsp26.1_feature_unit_tests  
+features <- getTableByEsql(glue('FROM {index} | KEEP name, filename, batchname, start, station, mz, intensity, esi_ion_spec'))
 
+deleteTable(getDbComm(), index)
+
+expect_equal(pull(features, station)[1], "mulde_de_m")
+expect_type(pull(features, mz), "double")
+expect_match(pull(features, start), "\\d{4}-\\d{2}-\\d{2}")
+expect_match(pull(features, esi_ion_spec), "_")
+expect_equal(nrow(features), 39)

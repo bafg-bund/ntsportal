@@ -7,6 +7,13 @@ msrawfileIndexName <- "ntsp26.1_msrawfiles_unit_tests"
 ###########################################
 
 library(ntsportal)
+
+# Variables to be changed #################
+userEmail <- Sys.getenv("USER_EMAIL")
+dirTestResults <- "tests/slurmTesting/testResults-nts-olmesartan-d6-bisoprolol"
+msrawfileIndexName <- "ntsp26.1_msrawfiles_unit_tests"
+###########################################
+
 dirs <- c(
   "/beegfs/nts/ntsportal/msrawfiles/unit_tests/olmesartan-d6-bisoprolol/"
 )
@@ -23,7 +30,9 @@ screeningSelectedBatchesSlurm(
 
 stopifnot(length(list.files(dirTestResults)) == 3)
 
-# User must manually submit job on SLURM terminal
+Sys.sleep(1)
+
+system("module load R/4.6.1 && sbatch tests/slurmTesting/testResults-nts-olmesartan-d6-bisoprolol/arrayScreening.sbatch")
 
 # Once processing complete:
 indexNames <- ingestFeatureRecords(dirTestResults)

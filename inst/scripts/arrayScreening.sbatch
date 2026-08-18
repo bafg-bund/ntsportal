@@ -47,6 +47,7 @@ echo "Time: `date`"
 echo "Running on master node: `hostname`"
 echo "PATH: " $PATH
 echo "LD_LIBRARY_PATH: " $LD_LIBRARY_PATH
+echo "Rscript version: `Rscript --version`"
 echo "R_USER_LIB: `Rscript -e '.libPaths()'`"
 echo -e "Current directory:" $PWD
 echo "=========================================="

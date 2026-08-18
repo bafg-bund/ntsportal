@@ -1,12 +1,12 @@
 
+library(ntsportal)
 
 # Variables to be changed #################
 userEmail <- Sys.getenv("USER_EMAIL")
-dirTestResults <- "testResults-dbas-olmesartan-d6-bisoprolol"
+dirTestResults <- "tests/slurmTesting/testResults-dbas-olmesartan-d6-bisoprolol"
 msrawfileIndexName <- "ntsp26.1_msrawfiles_unit_tests"
 ###########################################
 
-library(ntsportal)
 unlink(dirTestResults, recursive = T)
 dir.create(dirTestResults)
 dirs <- c(
@@ -22,4 +22,6 @@ screeningSelectedBatchesSlurm(
 
 stopifnot(length(list.files(dirTestResults)) == 3)
 
+Sys.sleep(1)
 
+system("bash -c 'source /etc/profile.d/modules.sh && module load R/4.6.1 && sbatch tests/slurmTesting/testResults-dbas-olmesartan-d6-bisoprolol/arrayScreening.sbatch'")
