@@ -6,7 +6,7 @@ tempSaveDir <- "testResults-dbasWeilMmp2023"
 unlink(tempSaveDir, recursive = T)
 dir.create(tempSaveDir)
 index <- "ntsp26.1_msrawfiles"
-batchDirectory <- "/beegfs/nts/ntsportal/msrawfiles/rhein_weil_r/spm/p1m/2023/pos/"                   
+batchDirectory <- "/beegfs/nts/ntsportal/msrawfiles/rhein_weil_r/spm/p1m/2023"                   
 
 connectNtsportal()
 startTime <- Sys.time()

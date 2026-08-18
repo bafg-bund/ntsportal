@@ -3,7 +3,7 @@
 # nohup Rscript screening-ntsRheinKobPosParallel.R &> ntsRheinKobPosParallel.log &
 library(ntsportal)
 connectNtsportal()
-tempSaveDir <- "testResults-ntsRheinKobPos-parallel"
+tempSaveDir <- "testResults-ntsRheinKobPosParallel"
 unlink(tempSaveDir, recursive = T)
 dir.create(tempSaveDir)
 index <- "ntsp26.1_msrawfiles"
