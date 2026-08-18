@@ -16,6 +16,8 @@ updateEnrichPolicies <- function() {
   policyNames <- getEnrichPolicyNames()
   taskIds <- character()
   for (poliName in policyNames) {
+    if (isEnrichPolicyRunning(poliName))
+      next
     if (testForEnrichPolicy(poliName))
       deleteEnrichPolicy(poliName)
     Sys.sleep(1)
@@ -44,8 +46,13 @@ createEnrichPolicy <- function(policyName) {
 
 deleteEnrichPolicy <- function(policyName) {
   dbComm <- getDbComm()
-  res <- dbComm@client$enrich$delete_policy(name=policyName)
-  if (res$body$acknowledged) 
+  tryCatch(
+    res <- dbComm@client$enrich$delete_policy(name=policyName),
+    error = function(cnd) {
+      message("Error in deleteEnrichPolicy:", cnd)
+    }
+  )
+  if (exists("res") && res$body$acknowledged) 
     message("Enrich policy ", policyName, " successfully deleted") 
 }
 
@@ -90,7 +97,10 @@ cancelTask <- function(taskId) {
 isEnrichPolicyRunning <- function(policyName) {
   dbComm <- getDbComm()
   allTasks <- unlist(dbComm@client$tasks$list(detailed=TRUE)$body)
-  any(grepl(policyName, allTasks))
+  running <- any(grepl(glue("\\[{policyName}\\]"), allTasks))
+  if (running)
+    message(policyName, " is already running")
+  running
 }
 
 # Copyright 2026 Bundesanstalt für Gewässerkunde

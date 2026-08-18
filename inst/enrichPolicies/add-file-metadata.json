@@ -1,6 +1,6 @@
 {
   "match": {
-    "indices": "ntsp25.3_msrawfiles", 
+    "indices": "ntsp26.1_msrawfiles", 
     "match_field": "path",
     "enrich_fields": [
       "start",

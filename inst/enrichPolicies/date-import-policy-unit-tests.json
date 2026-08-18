@@ -1,6 +1,6 @@
 {
   "match": {
-    "indices": "ntsp25.3_feature*_unit_tests", 
+    "indices": "ntsp26.1_feature*_unit_tests", 
     "match_field": "path",
     "enrich_fields": ["date_import"]
   }
