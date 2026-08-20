@@ -1,6 +1,7 @@
 library(ntsportal)
 library(logger)
 library(glue)
+library(testthat)
 dirTestResults <- "tests/slurmTesting/testResults-dbas-rheinKobPos"
 # After completion
 # Remember to delete indices after ingest
@@ -23,5 +24,6 @@ expect_match(pull(features, start), "\\d{4}-\\d{2}-\\d{2}")
 expect_match(pull(features, esi_ion_spec), "_")
 expect_equal(nrow(features), 1000)
 expect_gte(totalRows, 4376)
+expect_equal(totalMonths, 2)
 
 message("Time needed to ingest: ", round(difftime(endTime, startTime, units = "secs")), " s")

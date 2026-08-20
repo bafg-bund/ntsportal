@@ -32,12 +32,5 @@ stopifnot(length(list.files(dirTestResults)) == 3)
 
 Sys.sleep(1)
 
-system("module load R/4.6.1 && sbatch tests/slurmTesting/testResults-nts-olmesartan-d6-bisoprolol/arrayScreening.sbatch")
+system("bash -c 'source /etc/profile.d/modules.sh && module load R/4.6.1 && sbatch tests/slurmTesting/testResults-nts-olmesartan-d6-bisoprolol/arrayScreening.sbatch'")
 
-# Once processing complete:
-indexNames <- ingestFeatureRecords(dirTestResults)
-
-# Cleanup
-dbComm <- getDbComm()
-deleteTable(dbComm, indexNames[[1]]$ntsp25.2_dbas_unit_tests)
-file.remove(list.files(dirTestResults, full.names = TRUE))
