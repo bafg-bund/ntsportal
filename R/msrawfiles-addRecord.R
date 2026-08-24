@@ -20,6 +20,7 @@
 #'   current working dir)
 #' @param newStationList List with fields "station" and "loc" and optionally "river", "gkz" and "km" to add a new
 #'   station. see details
+#' @param ignoreValidation boolean, should validation of template be ignored?
 #'   
 #' @details \strong{Adding location information (`station` and `loc` fields)}
 #'   newStation can be either "same_as_template", "filename" or "newStationList".
@@ -115,7 +116,8 @@ addRawfiles <- function(
       river = "example_new_river",
       gkz = 99999,
       km = 99999
-    )
+    ),
+    ignoreValidation = FALSE
 ) {
   
   checkArgumentValidity(rfIndex, templateId, newPaths, newStart, newStation, newStationList)
@@ -130,7 +132,7 @@ addRawfiles <- function(
           "\n will be added")
   
   templateRec <- getTemplateRecord(rfIndex, templateId)
-  checkTemplateRecord(newPaths, templateRec, promptBeforeIngest)
+  checkTemplateRecord(newPaths, templateRec, promptBeforeIngest, ignoreValidation)
   if (newStart == "filename")
     checkDateParsing(newPaths, templateRec, promptBeforeIngest)
   if (newStation == "filename")
@@ -229,13 +231,13 @@ checkArgumentValidity <- function(rfIndex, templateId, newPaths, newStart, newSt
   stopIfAnyErrors(checkResult)
 }
 
-checkTemplateRecord <- function(newPaths, templateRec, promptBeforeIngest) {
+checkTemplateRecord <- function(newPaths, templateRec, promptBeforeIngest, ignoreValidation) {
   checkResult <- TRUE
   if (templateRec$blank)
     message("Note: Template document is a blank file")
   
   polFromFilename <- getPolFromPaths(newPaths)
-  if (templateRec$pol != polFromFilename) {
+  if (!is.null(templateRec$pol) && templateRec$pol != polFromFilename) {
     message("New file(s) do not have the same polarity as the template, only 
             one file may be added")
     if (length(newPaths) > 1 || !promptBeforeIngest)
@@ -252,8 +254,8 @@ checkTemplateRecord <- function(newPaths, templateRec, promptBeforeIngest) {
   if (!validateRecord(templateRec)) {
     checkResult <- addError(checkResult, "validateRecord failed for template")
   }
-  
-  stopIfAnyErrors(checkResult)
+  if (!ignoreValidation)
+    stopIfAnyErrors(checkResult) 
 }
 
 
@@ -289,7 +291,8 @@ checkStationParsing <- function(newPaths, templateRec) {
 newRecordFromTemplate <- function(pth, newStart, newStation, template, rfIndex, newStationList, dirMeasurmentFiles) {
   rec <- template
   rec <- addPathToRecord(rec, pth)
-  rec <- addPolToRecord(rec)
+  if ("pol" %in% names(rec))
+    rec <- addPolToRecord(rec)
   rec <- addStartToRecord(rec, newStart)
   rec <- addStationToRecord(rec, newStation, rfIndex, newStationList)
   rec <- addMeasurementTimeToRecord(rec, dirMeasurmentFiles)

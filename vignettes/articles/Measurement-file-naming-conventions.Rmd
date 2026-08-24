@@ -37,21 +37,21 @@ Example:
 `2024-02-29_frame_mix_wasser_tof_1000ngl_injrep3_pos.wiff`
 
 ## ASE blanks  
-`<Messdatum YYYY-MM-DD>_ase_bw_<XX>_e<Extraktionsdatum YYYY-MM-DD>_<pol>`
+`<Messdatum YYYY-MM-DD>_ase_bw_extrep<X>_e<Extraktionsdatum YYYY-MM-DD>_<pol>`
 
-`<XX>`: Continuous numbering within same job (e.g. one year of composite samples of all stations) (01-99, 2 digits)  
+`<X>`: Continuous numbering within same job 1-9
 
 Example:  
-`2024-08-30_ase_bw_01_e2024-07-01_pos.wiff`
+`2024-08-30_ase_bw_extrep1_e2024-07-01_pos.wiff`
   
 ## ASE reference samples  
-`<Messdatum YYYY-MM-DD>_ase_ref_<XXX>_e<Extraktionsdatum YYYY-MM-DD>_<pol>`  
+`<Messdatum YYYY-MM-DD>_ase_ref_injrep<X>_e<Extraktionsdatum YYYY-MM-DD>_<pol>`  
 
-`<XXX>`: Continuous numbering... forever (001-999, three digits) 
+`<X>`:  1-3
 
 Example:  
-`2024-08-30_ase_ref_001_e2024-07-01_pos.wiff`  
-  
+`2024-08-30_ase_ref_injrep1_e2024-07-01_pos.wiff`  
+
 ## Monthly and yearly composite SPM samples (umweltprobenbank)  
 `<station>_<Probenamedatum YYYY / YYYY-MM>_<composite type>_extrep<X>_<pol>`
 
