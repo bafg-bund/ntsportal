@@ -191,7 +191,7 @@ getCompoundsBelowMinimumDetections <- function(report, minimumDetections) {
 getCompoundsNoReplicateDetections <- function(report, records) {
   blanks <- getField(records, "blank")
   repGroups <- getField(records, "replicate_group_name", quiet = TRUE)[!blanks]
-  if (is.na(repGroups)) 
+  if (all(is.na(repGroups))) 
     return(emptyFalsePostivesTibble())
   replicateGroup <- tibble(
     samp = basename(getField(records, "path", quiet = TRUE)[!blanks]),

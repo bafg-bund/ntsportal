@@ -4,14 +4,15 @@ checkQualityBatchList <- function(recordsInBatches) {
   batchesOk <- purrr::map_lgl(recordsInBatches, checkQualityBatch)
   if (!all(batchesOk))
     stop("Quality check batches failed")
-  invisible(batchesOk)
+  invisible(all(batchesOk))
 }
 
 checkQualityBatch <- function(msrawfilesBatch) {
   batchOk <- all(
     allFieldsUniform(msrawfilesBatch),
     blanksPresent(msrawfilesBatch),
-    enoughSamplesForMinFeatures(msrawfilesBatch)
+    enoughSamplesForMinFeatures(msrawfilesBatch),
+    checkThreeReplicates(msrawfilesBatch)
   )
   batchOk
 }
@@ -52,6 +53,21 @@ enoughSamplesForMinFeatures <- function(records) {
     return(TRUE)
   if (minFeat > length(records)) {
     badBatchWarning(records, "Not enough samples for minimum features filter")
+    FALSE
+  } else {
+    TRUE
+  }
+}
+
+checkThreeReplicates <- function(records) {
+  recordsEnvSamples <- purrr::discard(records, getField(records, "blank"))
+  if (length(recordsEnvSamples) == 0)
+    return(TRUE)
+  repGroupName <- getField(recordsEnvSamples, "replicate_group_name", quiet = T)
+  if (all(is.na(repGroupName)))
+    return(TRUE)
+  if (!all(table(repGroupName) == 3)) {
+    badBatchWarning(records, "Number of replicates must be exactly 3, check replicate_group_name")
     FALSE
   } else {
     TRUE

@@ -70,7 +70,7 @@ test_that("DBA-Screening array job file and records in batches are produced", {
   expect_equal(linesJobFile[13], "#SBATCH --array=1-1%10")
   expect_match(linesJobFile[6], "testEmail@test.de")
   expect_match(linesJobFile[4], tempSaveDir)
-  expect_match(linesJobFile[56], tempSaveDir)
+  expect_match(linesJobFile[57], tempSaveDir)
   
   oneMsrawfilesBatch <- readRDS(file.path(tempSaveDir, "recordsInBatches.RDS"))[[1]]
   expect_s3_class(oneMsrawfilesBatch, "dbasMsrawfilesBatch")

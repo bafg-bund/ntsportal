@@ -7,7 +7,7 @@ test_that("Records for selected batches are returned (DBAS)", {
   expect_equal(dirname(selectedBatch[[1]][[1]]$path), dirs[3])
   expect_s3_class(selectedBatch[[1]], "dbasMsrawfilesBatch")
   expect_s3_class(selectedBatch[[1]][[1]], c("dbasMsrawfilesRecord", "msrawfilesRecord", "ntspRecord"))
-  selectedBatches <- getSelectedMsrawfileBatches(testIndexName, dirs[3:4], "dbas")
+  selectedBatches <- getSelectedMsrawfileBatches(testIndexName, dirs[grepl("olmesartan-d6-bisoprolol|no-peaks", dirs)], "dbas")
   expect_length(selectedBatches, 2)
 })
 
