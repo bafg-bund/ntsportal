@@ -143,12 +143,12 @@ removeFalsePositives <- function(report, records) {
   # These fields are uniform in the records so just take the first non blank
   blanks <- getField(records, "blank")
   minimumDetections <- getField(records, "dbas_minimum_detections")[!blanks][1]
-  replicateRegex <- getField(records, "replicate_regex", quiet = TRUE)[!blanks][1]
   
+ 
   falsePositives <- bind_rows(
     getFalsePositivesFromRecord(report, records),
     getCompoundsBelowMinimumDetections(report, minimumDetections),
-    getCompoundsNoReplicateDetections(report, replicateRegex)
+    getCompoundsNoReplicateDetections(report, records)
   ) |> distinct() |> tidyr::nest(fileIndices = fileIndex, .by = "compName")
   
   if (nrow(falsePositives) > 0) { 
@@ -188,11 +188,16 @@ getCompoundsBelowMinimumDetections <- function(report, minimumDetections) {
   }
 }
 
-getCompoundsNoReplicateDetections <- function(report, replicateRegex) {
-  if (is.na(replicateRegex)) 
+getCompoundsNoReplicateDetections <- function(report, records) {
+  blanks <- getField(records, "blank")
+  repGroups <- getField(records, "replicate_group_name", quiet = TRUE)[!blanks]
+  if (is.na(repGroups)) 
     return(emptyFalsePostivesTibble())
-  ir <- report$integRes
-  ir$originalSampName <- stringr::str_replace(ir$samp, replicateRegex, "\\1")
+  replicateGroup <- tibble(
+    samp = basename(getField(records, "path", quiet = TRUE)[!blanks]),
+    originalSampName = repGroups
+  )
+  ir <- merge(report$integRes, replicateGroup, by = "samp", all.x = T)
   replicateCount <- by(ir, list(ir$comp_name, ir$originalSampName), nrow) |> array2DF()
   colnames(replicateCount) <- c("compName", "originalSampName", "count")
   replicateCount <- replicateCount[!is.na(replicateCount$count), ]

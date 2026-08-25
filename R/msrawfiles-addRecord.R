@@ -293,6 +293,8 @@ newRecordFromTemplate <- function(pth, newStart, newStation, template, rfIndex, 
   rec <- addPathToRecord(rec, pth)
   if ("pol" %in% names(rec))
     rec <- addPolToRecord(rec)
+  if ("replicate_regex" %in% names(rec))
+    rec <- addReplicateGroupToRecord(rec, pth)
   rec <- addStartToRecord(rec, newStart)
   rec <- addStationToRecord(rec, newStation, rfIndex, newStationList)
   rec <- addMeasurementTimeToRecord(rec, dirMeasurmentFiles)
@@ -314,6 +316,13 @@ addPathToRecord <- function(rec, pth) {
 
 addPolToRecord <- function(rec) {
   rec$pol <-  getPolFromPath(rec$path)
+  rec
+}
+
+addReplicateGroupToRecord <- function(rec, pth) {
+  replicateGroup <- stringr::str_replace(basename(pth), rec$replicate_regex, "\\1")
+  stopifnot(!is.null(replicateGroup), !is.na(replicateGroup), nchar(replicateGroup) > 0)
+  rec$replicate_group_name <- replicateGroup
   rec
 }
 

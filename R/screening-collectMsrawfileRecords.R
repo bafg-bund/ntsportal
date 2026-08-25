@@ -79,7 +79,7 @@ msrawfilesFieldsForProcessingGeneral <- function() {
     "internal_standard",
     "path",
     "pol",
-    "replicate_regex",
+    "replicate_group_name",
     "spectral_library_path",
     "start"
   )
