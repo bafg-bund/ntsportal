@@ -1,5 +1,9 @@
 library(logger)
 library(ntsportal)
+library(glue)
+library(testthat)
+library(dplyr)
+
 log_info("started")
 startTime <- Sys.time()
 newTableId <- ingestFeatureRecords("tests/longTestsScreening/testResults-ntsRheinKobPosParallel")
