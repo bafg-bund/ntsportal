@@ -8,28 +8,28 @@ Before starting, use connectNtsportal() to save your login credentials
   _transport = transport_class(
 Adding Proteowizard to PATH
 PATH is /beegfs/home/Jewell/.virtualenvs/r-reticulate/bin:/home/Jewell/bin:/home/Jewell/.virtualenvs/r-reticulate/bin:/opt/rh/gcc-toolset-13/root/usr/bin:/opt/R/4.6.1/bin:/opt/oracle_instantclient/23.6:/opt/openmpi/4.1.6/bin:/opt/nco/5.3.1/bin:/usr/proj95/bin/:/usr/geos313/bin/:/usr/gdal38/bin/:/opt/texlive/2026/bin/x86_64-linux:/opt/quarto/1.9.37/bin:/opt/cdo/2.5.1/bin:/opt/gsl/2.8/bin:/opt/pandoc/3.8.3/bin:/usr/share/Modules/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/lib/rstudio-server/bin/quarto/bin:/usr/lib/rstudio-server/bin/postback
-INFO [2026-08-25 11:40:43] Start
-INFO [2026-08-25 11:40:43] Section: msrawfiles allRecords
+INFO [2026-08-25 14:13:54] Start
+INFO [2026-08-25 14:13:54] Section: msrawfiles allRecords
 20 rows will be retrieved from table ntsp26.1_msrawfiles_unit_tests
 Retrieving ■■■                                5% | ETA:  0s
 Retrieving ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  100% | ETA:  0s
 
 20 rows will be retrieved from table ntsp26.1_msrawfiles_unit_tests
 20 rows will be retrieved from table ntsp26.1_msrawfiles_unit_tests
-INFO [2026-08-25 11:40:44] Section: oneSampleDbasResult
-INFO [2026-08-25 11:42:10] Section: reportForCleaning
-INFO [2026-08-25 11:43:27] Section: Report for testing false positive removal blankCorrectedReportTriplicate
-INFO [2026-08-25 11:44:45] Section: mergedReportSampleAndBlank
-INFO [2026-08-25 11:45:22] Section: ntsResultSampleAndBlank
-INFO [2026-08-25 11:45:30] Alignment table filter of type min_features
-WARN [2026-08-25 11:45:30] Unable to use min_features on batch /beegfs/nts/ntsportal/msrawfiles/unit_tests, not enough samples
-INFO [2026-08-25 11:45:30] Starting annotation
-INFO [2026-08-25 11:45:45] Completed annotation
-INFO [2026-08-25 11:45:45] Section: ntsResultBisoprololBatch
-INFO [2026-08-25 11:46:06] Alignment table filter of type replicate
-INFO [2026-08-25 11:46:06] Starting annotation
-INFO [2026-08-25 11:46:47] Completed annotation
-INFO [2026-08-25 11:46:47] Section: reintegratedReportDessauBatch and recordsDessauBatch
+INFO [2026-08-25 14:13:54] Section: oneSampleDbasResult
+INFO [2026-08-25 14:15:14] Section: reportForCleaning
+INFO [2026-08-25 14:16:27] Section: Report for testing false positive removal blankCorrectedReportTriplicate
+INFO [2026-08-25 14:17:46] Section: mergedReportSampleAndBlank
+INFO [2026-08-25 14:18:16] Section: ntsResultSampleAndBlank
+INFO [2026-08-25 14:18:23] Alignment table filter of type min_features
+WARN [2026-08-25 14:18:23] Unable to use min_features on batch /beegfs/nts/ntsportal/msrawfiles/unit_tests, not enough samples
+INFO [2026-08-25 14:18:23] Starting annotation
+INFO [2026-08-25 14:18:36] Completed annotation
+INFO [2026-08-25 14:18:37] Section: ntsResultBisoprololBatch
+INFO [2026-08-25 14:18:51] Alignment table filter of type replicate
+INFO [2026-08-25 14:18:51] Starting annotation
+INFO [2026-08-25 14:19:29] Completed annotation
+INFO [2026-08-25 14:19:29] Section: reintegratedReportDessauBatch and recordsDessauBatch
 29 rows will be retrieved from table ntsp26.1_msrawfiles
 Retrieving ■■                                 3% | ETA:  1s
 Retrieving ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  100% | ETA:  0s
@@ -40,55 +40,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
-extension: .mzXML
-contactFilename: 
-runIndexSet: 
-
-spectrum list filters:
-  scanTime [420,480]
-  
-chromatogram list filters:
-  
-filenames:
-  /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/BW_1_pos.mzXML
-  
-processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/BW_1_pos.mzXML
-calculating source file checksums
-
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/BW_1_pos.mzXML
-
-format: mzXML 
-    m/z: Compression-Zlib, 64-bit
-    intensity: Compression-Zlib, 32-bit
-    rt: Compression-Zlib, 64-bit
-ByteOrder_LittleEndian
- indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
-extension: .mzXML
-contactFilename: 
-runIndexSet: 
-
-spectrum list filters:
-  scanTime [420,480]
-  
-chromatogram list filters:
-  
-filenames:
-  /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/BW_2_pos.mzXML
-  
-processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/BW_2_pos.mzXML
-calculating source file checksums
-
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/BW_2_pos.mzXML
-
-format: mzXML 
-    m/z: Compression-Zlib, 64-bit
-    intensity: Compression-Zlib, 32-bit
-    rt: Compression-Zlib, 64-bit
-ByteOrder_LittleEndian
- indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -104,7 +56,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_05_01_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_05_01_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_05_01_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -112,7 +64,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -128,7 +80,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_05_02_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_05_02_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_05_02_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -136,7 +88,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -152,7 +104,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_05_03_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_05_03_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_05_03_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -160,7 +112,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -176,7 +128,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_06_01_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_06_01_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_06_01_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -184,7 +136,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -200,7 +152,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_06_02_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_06_02_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_06_02_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -208,7 +160,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -224,7 +176,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_06_03_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_06_03_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_06_03_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -232,7 +184,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -248,7 +200,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_07_01_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_07_01_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_07_01_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -256,7 +208,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -272,7 +224,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_07_02_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_07_02_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_07_02_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -280,7 +232,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -296,7 +248,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_07_03_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_07_03_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_07_03_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -304,7 +256,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -320,7 +272,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_08_01_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_08_01_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_08_01_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -328,7 +280,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -344,7 +296,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_08_02_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_08_02_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_08_02_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -352,7 +304,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -368,7 +320,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_08_03_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_08_03_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_08_03_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -376,7 +328,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -392,7 +344,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_09_01_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_09_01_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_09_01_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -400,7 +352,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -416,7 +368,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_09_02_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_09_02_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_09_02_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -424,7 +376,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -440,7 +392,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_09_03_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_09_03_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_09_03_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -448,7 +400,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -464,7 +416,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_10_01_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_10_01_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_10_01_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -472,7 +424,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -488,7 +440,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_10_02_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_10_02_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_10_02_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -496,7 +448,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -512,7 +464,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_10_03_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_10_03_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_10_03_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -520,7 +472,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -536,7 +488,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_11_01_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_11_01_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_11_01_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -544,7 +496,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -560,7 +512,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_11_02_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_11_02_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_11_02_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -568,7 +520,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -584,7 +536,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_11_03_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_11_03_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_11_03_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -592,7 +544,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -608,7 +560,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_12_01_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_12_01_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_12_01_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -616,7 +568,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -632,7 +584,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_12_02_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_12_02_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_12_02_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -640,7 +592,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -656,7 +608,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_12_03_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_12_03_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_12_03_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -664,7 +616,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -680,7 +632,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_13_01_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_13_01_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_13_01_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -688,7 +640,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -704,7 +656,7 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_13_02_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_13_02_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_13_02_pos.mzXML
 
 format: mzXML 
     m/z: Compression-Zlib, 64-bit
@@ -712,7 +664,7 @@ format: mzXML
     rt: Compression-Zlib, 64-bit
 ByteOrder_LittleEndian
  indexed="true"
-outputPath: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
 extension: .mzXML
 contactFilename: 
 runIndexSet: 
@@ -728,23 +680,71 @@ filenames:
 processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/Des_13_03_pos.mzXML
 calculating source file checksums
 
-writing output file: /home/Jewell/tmp/RtmpSdyZzA/file162bcf6c76e610/Des_13_03_pos.mzXML
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/Des_13_03_pos.mzXML
 
-Processing batch ■■                                 3% | ETA:  6m
+format: mzXML 
+    m/z: Compression-Zlib, 64-bit
+    intensity: Compression-Zlib, 32-bit
+    rt: Compression-Zlib, 64-bit
+ByteOrder_LittleEndian
+ indexed="true"
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
+extension: .mzXML
+contactFilename: 
+runIndexSet: 
+
+spectrum list filters:
+  scanTime [420,480]
+  
+chromatogram list filters:
+  
+filenames:
+  /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/BW_1_pos.mzXML
+  
+processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/BW_1_pos.mzXML
+calculating source file checksums
+
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/BW_1_pos.mzXML
+
+format: mzXML 
+    m/z: Compression-Zlib, 64-bit
+    intensity: Compression-Zlib, 32-bit
+    rt: Compression-Zlib, 64-bit
+ByteOrder_LittleEndian
+ indexed="true"
+outputPath: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1
+extension: .mzXML
+contactFilename: 
+runIndexSet: 
+
+spectrum list filters:
+  scanTime [420,480]
+  
+chromatogram list filters:
+  
+filenames:
+  /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/BW_2_pos.mzXML
+  
+processing file: /beegfs/nts/ntsportal/msrawfiles/mulde_dessau_m/spm/p1y/2005_2013/pos/BW_2_pos.mzXML
+calculating source file checksums
+
+writing output file: /home/Jewell/tmp/Rtmpdph9J1/file195dc23029ad1/BW_2_pos.mzXML
+
+Processing batch ■■                                 3% | ETA:  5m
 Processing batch ■■■                                7% | ETA:  5m
-Processing batch ■■■■                              10% | ETA:  5m
-Processing batch ■■■■■                             14% | ETA:  5m
+Processing batch ■■■■                              10% | ETA:  4m
+Processing batch ■■■■■                             14% | ETA:  4m
 Processing batch ■■■■■■                            17% | ETA:  4m
 Processing batch ■■■■■■■                           21% | ETA:  4m
 Processing batch ■■■■■■■■                          24% | ETA:  4m
 Processing batch ■■■■■■■■■                         28% | ETA:  4m
-Processing batch ■■■■■■■■■■                        31% | ETA:  4m
+Processing batch ■■■■■■■■■■                        31% | ETA:  3m
 Processing batch ■■■■■■■■■■■                       34% | ETA:  3m
 Processing batch ■■■■■■■■■■■■                      38% | ETA:  3m
 Processing batch ■■■■■■■■■■■■■                     41% | ETA:  3m
 Processing batch ■■■■■■■■■■■■■■                    45% | ETA:  3m
 Processing batch ■■■■■■■■■■■■■■■                   48% | ETA:  3m
-Processing batch ■■■■■■■■■■■■■■■■■                 52% | ETA:  3m
+Processing batch ■■■■■■■■■■■■■■■■■                 52% | ETA:  2m
 Processing batch ■■■■■■■■■■■■■■■■■■                55% | ETA:  2m
 Processing batch ■■■■■■■■■■■■■■■■■■■               59% | ETA:  2m
 Processing batch ■■■■■■■■■■■■■■■■■■■■              62% | ETA:  2m
@@ -753,51 +753,33 @@ Processing batch ■■■■■■■■■■■■■■■■■■■■■
 Processing batch ■■■■■■■■■■■■■■■■■■■■■■■           72% | ETA:  1m
 Processing batch ■■■■■■■■■■■■■■■■■■■■■■■■          76% | ETA:  1m
 Processing batch ■■■■■■■■■■■■■■■■■■■■■■■■■         79% | ETA:  1m
-Processing batch ■■■■■■■■■■■■■■■■■■■■■■■■■■        83% | ETA:  1m
-Processing batch ■■■■■■■■■■■■■■■■■■■■■■■■■■■       86% | ETA: 44s
-Processing batch ■■■■■■■■■■■■■■■■■■■■■■■■■■■■      90% | ETA: 33s
-Processing batch ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■     93% | ETA: 22s
-Processing batch ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■    97% | ETA: 11s
+Processing batch ■■■■■■■■■■■■■■■■■■■■■■■■■■        83% | ETA: 50s
+Processing batch ■■■■■■■■■■■■■■■■■■■■■■■■■■■       86% | ETA: 40s
+Processing batch ■■■■■■■■■■■■■■■■■■■■■■■■■■■■      90% | ETA: 31s
+Processing batch ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■     93% | ETA: 20s
+Processing batch ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■    97% | ETA: 10s
 Processing batch ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  100% | ETA:  0s
 
-INFO [2026-08-25 11:55:05] Section: Create featureRecordExampleRds
+INFO [2026-08-25 14:27:20] Section: Create featureRecordExampleRds
 [1] TRUE
 [1] TRUE
-/home/Jewell/tmp/RtmpSdyZzA/file162bcf3e48dd6d already exists, files will be overwritten
+/home/Jewell/tmp/Rtmpdph9J1/file195dc23727045d already exists, files will be overwritten
 8 rows will be retrieved from table ntsp26.1_msrawfiles_unit_tests
 Retrieving ■■■■■                             12% | ETA:  0s
 Retrieving ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  100% | ETA:  0s
 
 3 rows will be retrieved from table ntsp26.1_msrawfiles_unit_tests
-Error in `purrr::map_chr()` at ntsportal/R/screening-launchProcess.R:29:3:
-ℹ In index: 1.
-ℹ With name:
-  /beegfs/nts/ntsportal/msrawfiles/unit_tests/olmesartan-d6-bisoprolol.
-Caused by error in `if (is.na(repGroups)) ...`:
-! the condition has length > 1
-Backtrace:
-     ▆
-  1. ├─ntsportal::screeningSelectedBatches(...)
-  2. │ └─ntsportal:::screeningBatches(...) at ntsportal/R/screening-launchProcess.R:16:3
-  3. │   └─ntsportal:::screeningSerial(...) at ntsportal/R/screening-launchProcess.R:22:5
-  4. │     └─purrr::map_chr(msrawfileRecordsInBatches, screeningOneBatch, saveDirectory = saveDirectory) at ntsportal/R/screening-launchProcess.R:29:3
-  5. │       └─purrr:::map_("character", .x, .f, ..., .progress = .progress)
-  6. │         ├─purrr:::with_indexed_errors(...)
-  7. │         │ └─base::withCallingHandlers(...)
-  8. │         ├─purrr:::call_with_cleanup(...)
-  9. │         └─ntsportal (local) .f(.x[[i]], ...)
- 10. │           ├─ntsportal::scanBatch(msrawfilesBatch) at ntsportal/R/screening-launchProcess.R:58:3
- 11. │           └─ntsportal:::scanBatch.dbasMsrawfilesBatch(msrawfilesBatch) at ntsportal/R/screening-dbasFileScanning.R:4:3
- 12. │             └─ntsportal:::cleanReport(reintegratedReport, msrawfilesBatch) at ntsportal/R/screening-dbasFileScanning.R:41:3
- 13. │               └─ntsportal:::removeFalsePositives(report, records) at ntsportal/R/screening-dbasFileScanning.R:119:3
- 14. │                 ├─tidyr::nest(...) at ntsportal/R/screening-dbasFileScanning.R:148:3
- 15. │                 ├─dplyr::distinct(...) at ntsportal/R/screening-dbasFileScanning.R:148:3
- 16. │                 ├─dplyr::bind_rows(...) at ntsportal/R/screening-dbasFileScanning.R:148:3
- 17. │                 │ └─rlang::list2(...)
- 18. │                 └─ntsportal:::getCompoundsNoReplicateDetections(report, records)
- 19. └─base::.handleSimpleError(...) at ntsportal/R/screening-dbasFileScanning.R:194:3
- 20.   └─purrr (local) h(simpleError(msg, call))
- 21.     └─cli::cli_abort(...)
- 22.       └─rlang::abort(...)
-Execution halted
+INFO [2026-08-25 14:29:18] Writing RDS file /home/Jewell/tmp/Rtmpdph9J1/file195dc23727045d/ntsportal-featureRecord-260825-1429-681e3c98.RDS
+INFO [2026-08-25 14:29:18] Completed RDS file /home/Jewell/tmp/Rtmpdph9J1/file195dc23727045d/ntsportal-featureRecord-260825-1429-681e3c98.RDS
+[1] TRUE
+[1] TRUE
+INFO [2026-08-25 14:29:18] Section: Duplicate feature test (4 and 5 Benzotriazole, Olmesartan) for dbasConvertToRecord
+[msconvert] no files found matching "/beegfs/nts/ntsportal/msrawfiles/sachsen/neg/paket33/OBF39601_20221114_Dorfbach_Oberschindmaas_neg.mzXML"
+1 rows will be retrieved from table ntsp26.1_msrawfiles
+INFO [2026-08-25 14:29:25] Section: Example data from Bimmen testing replicate injection filter reintegratedReportBimmen
+6 rows will be retrieved from table ntsp26.1_msrawfiles
+Retrieving ■■■■■■                            17% | ETA:  0s
+Retrieving ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  100% | ETA:  0s
+
+INFO [2026-08-25 14:36:26] End
 Ran 2/2 deferred expressions
