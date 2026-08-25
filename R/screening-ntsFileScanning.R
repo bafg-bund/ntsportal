@@ -121,12 +121,10 @@ filterAlignmentTable <- function(grouped, sampleList, idsOfUnknowns, recFirstUnk
       # database and then use this in the code is risky. It would be better to
       # save the replicate groups directly in the index (analogously to the
       # way this is done for blanks)
-      
-      grouped <- ntsworkflow::keep_reps_regex(
+      grouped <- ntsworkflow::keepReps(
         alignment = grouped,
         samples = idsOfUnknowns,
-        sampleList = sampleList,
-        regexp = recFirstUnknown$replicate_regex,
+        reps = 3,
         least = recFirstUnknown$nts_alig_filter_min_features
       )
     },
