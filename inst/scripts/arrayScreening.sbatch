@@ -10,7 +10,7 @@
 #SBATCH --tasks-per-node=1             # number of tasks per node
 #SBATCH --ntasks=1                     # number of tasks
 #SBATCH --cpus-per-task=1              # number of cpus per task (max = 48)
-#SBATCH --array=1-RVarNumBatches%10
+#SBATCH --array=1-RVarNumBatches%20
 
 
 #----------------------------------------------------------------
