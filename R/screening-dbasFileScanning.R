@@ -100,6 +100,8 @@ placeholderToSetMockingFunctions <- function(x) {
 }
 
 removeEmptyReports <- function(reports) {
+  if (all(map_lgl(reports, isEmptyReport)))
+    return(reports[1])
   Filter(Negate(isEmptyReport), reports)
 }
 
@@ -164,8 +166,9 @@ removeFalsePositives <- function(report, records) {
 
 getFalsePositivesFromRecord <- function(report, records) {
   files <- basename(report$rawFiles)  # file index is given by report$rawFiles, index needed for Report$deleteFP
-  fpList <- setNames(getField(records, "dbas_fp"), basename(getField(records, "path")))
-  if (length(fpList) > 0) {
+  fpList <- setNames(getField(records, "dbas_fp", quiet = TRUE), basename(getField(records, "path")))
+  if (!all(is.na(fpList))) {
+    fpList <- fpList[!is.na(fpList)]
     fpRows <- map(seq_along(files), function(ind) tibble(fileIndex = ind, compName = fpList[[files[ind]]]))
     bind_rows(fpRows)
   } else {

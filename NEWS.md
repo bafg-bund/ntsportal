@@ -15,8 +15,11 @@ defined in `ingestPipelines/ingest-feature.json`. This increases ingest time sli
 will impact results where the batch size has changed. In these cases the change is marked as a time-series annotation.
 The new batch structure is reported in the article Structure of NTSPortal, Section: Batch naming conventions.
 
+
 ## Minor changes (backend)
 
+* When no peaks are found in a batch, one feature record with the path and feature_table_alias of the first file is still
+ingested so that the processing attempt is documented. 
 * Updated various dependencies to versions:
   + R = 4.6.1
   + R-tidyverse = 2.0.0
