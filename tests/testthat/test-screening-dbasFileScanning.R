@@ -101,28 +101,13 @@ test_that("Test file with no peaks can be processed", {
   expect_equal(nrow(report$peakList), 0)
 })
 
-test_that("If a scanning result is an error, it returns an empty report", {
-  local_mocked_bindings(placeholderToSetMockingFunctions = function(...) stop("Test error"))
+test_that("If process_all fails, it returns the original, non-processed and empty report", {
   recordNoPeak <- getMsrawfilesRecordNoPeaks("dbas")
-  resultsReport <- fileScanDbas(msrawfileRecord = recordNoPeak, compsToProcess = "Bisoprolol")
+  testScanner <- createScannerDbas(recordNoPeak)
+  testScanner$settings$db_path <- "foo"
+  resultsReport <- runScanningDbas(testScanner, "bar")
+  expect_length(resultsReport$rawData, 0)
   expect_equal(nrow(resultsReport$peakList), 0)
-  withr::deferred_run()
-})
-
-test_that("If a scanning result is a try-error, it returns an empty report", {
-  local_mocked_bindings(placeholderToSetMockingFunctions = function(...) try(stop("Test error")))
-  recordNoPeak <- getMsrawfilesRecordNoPeaks("dbas")
-  resultsReport <- fileScanDbas(msrawfileRecord = recordNoPeak, compsToProcess = "Bisoprolol")
-  expect_equal(nrow(resultsReport$peakList), 0)
-  withr::deferred_run()
-})
-
-test_that("If a scanning result is NULL, it returns an empty report", {
-  local_mocked_bindings(placeholderToSetMockingFunctions = function(...) NULL)
-  recordNoPeak <- getMsrawfilesRecordNoPeaks("dbas")
-  resultsReport <- fileScanDbas(msrawfileRecord = recordNoPeak, compsToProcess = "Bisoprolol")
-  expect_equal(nrow(resultsReport$peakList), 0)
-  withr::deferred_run()
 })
 
 test_that("Getting non existent field returns an NA vector", {

@@ -2,6 +2,6 @@
   "match": {
     "indices": "ntsp26.1_feature*", 
     "match_field": "path",
-    "enrich_fields": ["date_import"]
+    "enrich_fields": ["date_import", "mz"]
   }
 }

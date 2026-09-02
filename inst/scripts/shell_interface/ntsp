@@ -1,0 +1,30 @@
+#!/usr/bin/env Rscript
+
+library(ntsportal)
+library(argparse)
+
+parser = ArgumentParser(prog='ntsp', description = "ntsportal CLI utility")
+subparsers = parser$add_subparsers(help='sub-command help')
+
+parser_process = subparsers$add_parser('process', help='process help', description = "process files")
+parser_process$add_argument("batches", type = "character", nargs = "+", help = "Batches to be processed")
+parser_process$add_argument("-o", "--outputdir", type = "character", default = "processing-results", help = "Directory to save results of processing")
+parser_process$add_argument("-p", "--parallelthreads", type = "integer", default = 1, help = "Number of parallel threads for processing")
+parser_process$add_argument("-t", "--screeningtype", type = "character", default = "dbas", help = "Screening type")
+parser_process$add_argument("-l", "--logfile", type = "character", default = "processing.log", help = "Path to logfile")
+parser_process$add_argument("-i", "--index", type = "character", default = "ntsp26.1_msrawfiles", help = "msrawfiles index to use")
+parser_process$add_argument("--no_overwrite", action = "store_true", default = TRUE, help = "Output directory is not overwritten if it exists [default]")
+parser_process$add_argument("-f", "--force_overwrite", action = "store_false", dest = "no_overwrite", help = "Output directory will be overwritten if it exists")
+args <- parser$parse_args()
+
+if (dir.exists(args$outputdir) && args$no_overwrite)
+  stop("Directory ", args$outputdir, " already exists")
+  
+unlink(args$outputdir, recursive = T)
+dir.create(args$outputdir)
+
+logFile <- file(file.path(args$outputdir, args$logfile), open = "wt")
+sink(logFile, type = "output")
+sink(logFile, type = "message")
+
+screeningSelectedBatches(args$index, args$batches, args$outputdir, numParallel = args$parallelthreads, screeningType = args$screeningtype)

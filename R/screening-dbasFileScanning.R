@@ -73,20 +73,23 @@ createScannerDbas <- function(msrawfileRecord) {
   scanner
 }
 
-
 runScanningDbas <- function(scannerObj, compsToProcess) {
   backupScanner <- scannerObj$copy()
+  processAllError <- FALSE
   tryCatch({
     suppressMessages(scannerObj$process_all(comp_names = compsToProcess))
-    scannerObj$clearData()
     warnNoPeaks(scannerObj)
-    scannerObj <- placeholderToSetMockingFunctions(scannerObj)
   }, 
   error = function(cnd) {
+    processAllError <<- TRUE
     log_error("Processing error in file: {scannerObj$rawFiles},
                   error message: {conditionMessage(cnd)}")
+  },
+  finally = {
+    if (inherits(scannerObj, "Report"))
+      scannerObj$clearData()
   })
-  if (is.null(scannerObj) || inherits(scannerObj, "try-error"))
+  if (processAllError)
     backupScanner else scannerObj
 }
 
