@@ -7,7 +7,7 @@
 installShellInterface(destDir = "~/bin")
 }
 \arguments{
-\item{destDir}{path where into which the script will be linked. Must be already in system PATH}
+\item{destDir}{path into which the script will be linked. Must be already in system PATH}
 }
 \description{
 Install shell interface to path

@@ -258,7 +258,7 @@ makeTblFromPropertiesList <- function(properties) {
 
 #' Install shell interface to path
 #'
-#' @param destDir path where into which the script will be linked. Must be already in system PATH
+#' @param destDir path into which the script will be linked. Must be already in system PATH
 #'
 #' @export
 installShellInterface <- function(destDir = "~/bin") {
