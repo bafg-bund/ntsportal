@@ -40,7 +40,7 @@ free_gb <- function() {
 #' @param sort Sort argument passed onto elastic::Search. Defines which field 
 #' the results are sorted by (best if this is unique for all docs to avoid ties) 
 #' currently can only be one field and may not be '_id'.
-#' @param totalSize 
+#' @param totalSize number of rows to collect in total
 #' @param ... further arguments to elastic::Search, asdf argument does not work.
 #' @export
 #' @return ElasticSearch API response as a list
@@ -253,6 +253,36 @@ makeTblFromPropertiesList <- function(properties) {
     unit = map_chr(properties, \(p) ifelse(is.null(p$meta$unit), "", p$meta$unit)),
     example = map_chr(properties, \(p) ifelse(is.null(p$meta$example), "", p$meta$example))
   )
+}
+
+
+#' Install shell interface to path
+#'
+#' @param destDir path where into which the script will be linked. Must be already in system PATH
+#'
+#' @export
+installShellInterface <- function(destDir = "~/bin") {
+  scriptPath <- fs::path_package("ntsportal", "shellInterface", "ntsp")
+  destDir <- normalizePath(destDir)
+  
+  # Check if destDir exists and is in system PATH
+  if (!dir.exists(destDir)) 
+    stop("destDir does not exist, create directory and add to system path")
+  pathEnv <- strsplit(Sys.getenv("PATH"), .Platform$path.sep)[[1]]
+  if (!is.element(destDir,normalizePath(pathEnv))) {
+    stop(destDir, " is not currently in your system PATH environment variable.")
+  }
+  
+  target <- file.path(destDir, "ntsp")
+  
+  if (file.exists(target)) 
+    file.remove(target)
+  res <- file.symlink(scriptPath, target)
+  if (res) {
+    message("Successfully symlinked 'ntsp' to ", target)
+  } else {
+    message("Failed symlinked 'ntsp' to ", target)
+  }
 }
 
 # Copyright 2026 Bundesanstalt für Gewässerkunde

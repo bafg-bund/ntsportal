@@ -21,6 +21,8 @@ esSearchPaged(
 the results are sorted by (best if this is unique for all docs to avoid ties) 
 currently can only be one field and may not be '_id'.}
 
+\item{totalSize}{number of rows to collect in total}
+
 \item{...}{further arguments to elastic::Search, asdf argument does not work.}
 }
 \value{

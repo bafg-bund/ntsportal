@@ -17,5 +17,5 @@ and Spectra and Chromatograms dashboard. This does not change the library used f
 reprocessing with a new CSL version, this function must be run to update the reference table.
 }
 \examples{
-\dontrun{updateSpectralLibrary("ntsp25.3_msrawfiles", "ntsp25.3_spectral_library")}
+\dontrun{updateSpectralLibrary("ntsp26.1_msrawfiles", "ntsp25.3_spectral_library")}
 }
