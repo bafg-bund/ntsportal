@@ -6,6 +6,8 @@
 * Linear regression analysis in the SPM time series dashboard shows the average percent change per year for the full 
 time period of annual sampling (field: `change_per_year`). This is computed using a semi-log regression analysis. 
 The table also shows the date of the last detection (field: `last_detection`).
+* Time series for analysis of water samples are additionally split by `instrument_name` so that measurements performed 
+with different instruments appear as separate series.
 
 ## Major changes (backend)
 
