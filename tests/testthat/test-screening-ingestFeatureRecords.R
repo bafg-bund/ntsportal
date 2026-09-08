@@ -4,16 +4,25 @@ test_that("One file is uploaded in Elasticsearch", {
                                     ingestPipeline = "ingest-feature-unit-tests",
                                     enrichPolicy = "date-import-policy-unit-tests")
   indexName <- esIndices[[1]]$ntsp
-  expect_match(indexName, "ntsp\\d{2}.*_feature_v\\d{12}_unit_tests")
-  expect_true(isTable(dbComm, indexName))
-  expect_gt(getNrow(dbComm, indexName), 0)
-  aliasName <- getTableByQuery(indexName, fields = "feature_table_alias") |> slice(1) |> as.character()
-  expect_match(aliasName, "ntsp\\d{2}\\.\\d+_feature_unit_tests")
-  startDate <- getTableByQuery(indexName, fields = "start") |> slice(1) |> as.character()
-  expect_match(startDate, "\\d{4}-\\d{2}-\\d{2}")
-  instName <- getTableByQuery(indexName, fields = "instrument_name") |> slice(1) |> as.character()
-  expect_equal(instName, "sediment_tof")
-  deleteTable(dbComm, indexName)
+  testIngestedFeatures(indexName)
+  suppressMessages(
+    compName <- getTableByQuery(indexName, fields = "name") |> slice(1) |> as.character()
+  )
+  expect_gt(length(compName), 0)
+  suppressMessages(deleteTable(dbComm, indexName))
+})
+
+test_that("You can ingest an nts feature record into elasticsearch", {
+  esIndices <- ingestFeatureRecords(test_path("fixtures", "ntsFeatureRecordExampleRds"), 
+                                    ingestPipeline = "ingest-feature-unit-tests",
+                                    enrichPolicy = "date-import-policy-unit-tests")
+  indexName <- esIndices[[1]]$ntsp
+  testIngestedFeatures(indexName)
+  suppressMessages(
+    compName <- getTableByQuery(indexName, fields = "name") |> slice(1) |> as.character()
+  )
+  expect_length(compName, 0)
+  suppressMessages(deleteTable(dbComm, indexName))
 })
 
 test_that("You can read an RDS file to a list of records", {

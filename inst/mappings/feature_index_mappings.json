@@ -8,8 +8,8 @@
     "dynamic": "strict",
     "properties" : {
       "adduct" : {"type" : "keyword", "meta": {"description": "ESI adduct form", "example": "[M+H]+"}},
-      "area" : {"type" : "integer", "meta": {"description": "chromatographic peak area"}},
-      "area_internal_standard" : {"type" : "integer", "meta": {"description": "chromatographic peak area"}},
+      "area" : {"type" : "long", "meta": {"description": "chromatographic peak area"}},
+      "area_internal_standard" : {"type" : "long", "meta": {"description": "chromatographic peak area"}},
       "area_relative_to_internal_standard": {"type": "double", "meta": {"description": "area/area_internal_standard"}},
       "batchname": {
         "type": "keyword",
@@ -70,8 +70,8 @@
       "inchikey" : {"type" : "keyword", "meta": {"description": "hash of international chemical identifier", "example": "ILLQTAPXYCRJRB-UHFFFAOYSA-N"}},
       "instrument": { "type" : "text", "meta": {"description": "instrument type code", "example": "LC-ESI-QTOF TripleTOF 6600 SCIEX"}},
       "instrument_name": {"type": "keyword", "meta": {"description": "Instrument name", "example": "wasser_tof"}},
-      "intensity" : {"type" : "integer", "meta": {"description": "chromatographic peak height at apex"}},
-      "intensity_internal_standard" : {"type" : "integer", "meta": {"description": "peak intensity (height at apex)"}},
+      "intensity" : {"type" : "long", "meta": {"description": "chromatographic peak height at apex"}},
+      "intensity_internal_standard" : {"type" : "long", "meta": {"description": "peak intensity (height at apex)"}},
       "intensity_relative_to_internal_standard" : {"type": "double", "meta": {"description": "intensity/intensity_internal_standard"}},
       "internal_standard" : {"type" : "keyword", "meta": {"description": "int. std. compound name", "example": "Bezafibrate-d6"}},
       "isotopologue" : {"type" : "keyword", "meta": {"description": "isotopic difference to monoisotopic", "example": "37Cl"}},

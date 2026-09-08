@@ -5,20 +5,37 @@ library(argparse)
 
 parser = ArgumentParser(prog='ntsp', description = "ntsportal CLI utility")
 subparsers = parser$add_subparsers(help='sub-command help')
-parser$add_argument("-l", "--logfile", type = "character", default = "placeholder", help = "Path to logfile default is <function>.log")
-parser$add_argument("-o", "--resultsdir", type = "character", default = "processing-results", help = "Directory to save results of processing or from which to ingest results")
-parser$add_argument("--no_overwrite", action = "store_true", default = TRUE, help = "Output directory is not overwritten if it exists [default]")
+parser$add_argument("-l", "--logfile", type = "character", default = "placeholder", 
+                    help = "Path to logfile default is <function>.log")
+parser$add_argument("-o", "--resultsdir", type = "character", default = "processing-results", 
+                    help = "Directory to save results of processing or from which to ingest results")
+parser$add_argument("--no_overwrite", action = "store_true", default = TRUE, 
+                    help = "Output directory is not overwritten if it exists [default]")
 
 parser_process = subparsers$add_parser('process', help='process help', description = "process files")
 parser_process$set_defaults(func="process")
 parser_process$add_argument("batches", type = "character", nargs = "+", help = "Batches to be processed")
-parser_process$add_argument("-p", "--parallelthreads", type = "integer", default = 1, help = "Number of parallel threads for processing")
+parser_process$add_argument("-p", "--parallelthreads", type = "integer", default = 1, 
+                            help = "Number of parallel threads for processing")
 parser_process$add_argument("-t", "--screeningtype", type = "character", default = "dbas", help = "Screening type")
-parser_process$add_argument("-i", "--index", type = "character", default = "ntsp26.1_msrawfiles", help = "msrawfiles index to use")
-parser_process$add_argument("-f", "--force_overwrite", action = "store_false", dest = "no_overwrite", help = "Output directory will be overwritten if it exists")
+parser_process$add_argument("-i", "--index", type = "character", default = "ntsp26.1_msrawfiles", 
+                            help = "msrawfiles index to use")
+parser_process$add_argument("-f", "--force_overwrite", action = "store_false", dest = "no_overwrite", 
+                            help = "Output directory will be overwritten if it exists")
+parser_process$add_argument("-l", "--logfile", type = "character", default = "placeholder", 
+                            help = "Path to logfile default is <function>.log")
+parser_process$add_argument("-o", "--resultsdir", type = "character", default = "processing-results", 
+                            help = "Directory to save results of processing or from which to ingest results")
+parser_process$add_argument("--no_overwrite", action = "store_true", default = TRUE, 
+                            help = "Output directory is not overwritten if it exists [default]")
 
-parser_ingest = subparsers$add_parser('ingest', help='ingest help', description = "Ingest RDS files of completed processing")
+parser_ingest = subparsers$add_parser('ingest', help='ingest help', 
+                                      description = "Ingest RDS files of completed processing")
 parser_ingest$set_defaults(func="ingest")
+parser_ingest$add_argument("-l", "--logfile", type = "character", default = "placeholder", 
+                           help = "Path to logfile default is <function>.log")
+parser_ingest$add_argument("-o", "--resultsdir", type = "character", default = "processing-results", 
+                           help = "Directory to save results of processing or from which to ingest results")
 
 args <- parser$parse_args()
 
@@ -28,7 +45,7 @@ if (args$logfile == "placeholder")
 logFile <- file(file.path(args$resultsdir, args$logfile), open = "wt")
 sink(logFile, type = "output")
 sink(logFile, type = "message")
-
+startTime <- Sys.time()
 switch(
   args$func, 
   "process" = {
@@ -39,11 +56,15 @@ switch(
       unlink(args$resultsdir, recursive = T)
     
     dir.create(args$resultsdir)
-    screeningSelectedBatches(args$index, args$batches, args$resultsdir, numParallel = args$parallelthreads, screeningType = args$screeningtype)
+    
+    screeningSelectedBatches(args$index, args$batches, args$resultsdir, numParallel = args$parallelthreads, 
+                             screeningType = args$screeningtype)
+    
   },
   "ingest" = {
     ingestFeatureRecords(args$resultsdir)
   },
   stop("unknown function")
 )
-
+endTime <- Sys.time()
+message("Completed. Time needed: ", round(difftime(endTime, startTime, units = "hours"), 1), " h")

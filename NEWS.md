@@ -20,6 +20,9 @@ The new batch structure is reported in the article Structure of NTSPortal, Secti
 
 * When no peaks are found in a batch, one feature record with the path and feature_table_alias of the first file is still
 ingested so that the processing attempt is documented. 
+* Changed field type to `long` for fields `area` and `intensity`.
+* Added a bash CLI script for standard processing and ingesting tasks. See `inst/shellInterface/ntsp`. Can be 
+linked into system path for access in the terminal.
 * Updated various dependencies to versions:
   + R = 4.6.1
   + R-tidyverse = 2.0.0

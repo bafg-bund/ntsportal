@@ -116,10 +116,23 @@ file.remove(pathToFixturesDir)
 batchDirectory <- file.path(rootDirectoryForTestMsrawfiles, "olmesartan-d6-bisoprolol")
 pathRds <- screeningSelectedBatches(testIndexName, batchDirectory, tempSaveDir)
 dir.create(pathToFixturesDir)
-file.copy(pathRds, test_path("fixtures", "featureRecordExampleRds"))
+file.copy(pathRds, pathToFixturesDir)
 file.remove(list.files(tempSaveDir, full.names = T))
 # Test the result
 # test <- readRDS(list.files(pathToFixturesDir, full.names = T))
+
+# Create ntsFeatureRecordExampleRds
+log_info("Section: Create ntsFeatureRecordExampleRds")
+tempSaveDir <- withr::local_tempdir()
+pathToFixturesDir <- test_path("fixtures", "ntsFeatureRecordExampleRds")
+file.remove(list.files(pathToFixturesDir, full.names = T))
+file.remove(pathToFixturesDir)
+batchDirectory <- file.path(rootDirectoryForTestMsrawfiles, "olmesartan-d6-bisoprolol")
+pathRds <- screeningSelectedBatches(testIndexName, batchDirectory, tempSaveDir, screeningType = "nts")
+dir.create(pathToFixturesDir)
+file.copy(pathRds, pathToFixturesDir)
+file.remove(list.files(tempSaveDir, full.names = T))
+
 
 # Duplicate feature test (4 and 5 Benzotriazole, Olmesartan) for dbasConvertToRecord ####
 log_info("Section: Duplicate feature test (4 and 5 Benzotriazole, Olmesartan) for dbasConvertToRecord")
