@@ -23,6 +23,7 @@ ingested so that the processing attempt is documented.
 * Changed field type to `long` for fields `area` and `intensity`.
 * Added a bash CLI script for standard processing and ingesting tasks. See `inst/shellInterface/ntsp`. Can be 
 linked into system path for access in the terminal.
+* Removed deprecated functions from R-package `elastic`
 * Updated various dependencies to versions:
   + R = 4.6.1
   + R-tidyverse = 2.0.0

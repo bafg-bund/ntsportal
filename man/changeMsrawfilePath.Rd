@@ -26,23 +26,44 @@ files. For large numbers of files use `checkType` = "filesize".
 \examples{
 \dontrun{
 library(ntsportal)
-connectNtsportal()
+library(dplyr)
+library(tibble)
+rfIndex <- "ntsp26.1_msrawfiles"
 
-ind <- "ntsp_msrawfiles"
-res <- esSearchPaged(ind, sort = "path", searchBody = list(query = list(regexp = list(path = "/srv.*"))), source = "path")$hits$hits
-partToRemove <- "/srv/cifs-mounts/g2/G/G2/HRMS/Messdaten/"
-paths <- sapply(res, function(x) x[["_source"]]$path)
-oldPaths <- data.frame(oldPath = paths, relPath = sub(partToRemove, "", paths))
-relPaths <- list.files("/beegfs/nts/ntsportal/msrawfiles", recursive = T)
-newPaths <- data.frame(
-  newPath = paste0("/beegfs/nts/ntsportal/msrawfiles/", relPaths),
-  relPath = relPaths
-)
+createBackupMsrawfiles(rfIndex)
 
-oldAndNewPaths <- merge(oldPaths, newPaths, all.x = T, by = "relPath")
+oldPath <- getTableByEsql(
+  'FROM ntsp26.1_msrawfiles | 
+  WHERE station == "rhein_bi_l" AND matrix == "spm" AND pol == "pos" AND duration == "P1Y" | 
+  KEEP path')
 
-for (i in 1:nrow(oldAndNewPaths)) {
-  changeMsrawfilePath(ind, oldAndNewPaths$oldPath[i], oldAndNewPaths$newPath[i], checkType = "filesize")  
+oldPath$basename <- basename(oldPath$path)
+
+dirs <- list.files("/beegfs/nts/ntsportal/msrawfiles/rhein_bimmen_l/spm/p1y", pattern = "pos$", include.dirs = T, full.names = T, recursive = T)
+
+paths <- unname(unlist(sapply(dirs, function(p) list.files(p, f = T, pattern = ".mzXML"))))
+newPath <- tibble(path = paths)
+
+newPath$basename <- basename(newPath$path)
+
+allPaths <- merge(oldPath, newPath, by = "basename", suffixes = c("_old", "_new"), all.x = T)
+
+for (i in seq_len(nrow(allPaths))) {
+  message(paste("Verarbeite Datei", i, "von", nrow(allPaths), "..."))
+  tryCatch(
+    changeMsrawfilePath(
+      rfIndex, 
+      oldPath = allPaths$path_old[i], 
+      newPath = allPaths$path_new[i], 
+      checkType = "md5"
+    ),
+    error = function(cnd) {
+      message("error in file ", allPaths$basename[i])
+      message(cnd)
+    }
+  )
 }
+
+message("Pfadänderung erfolgreich für alle Dateien abgeschlossen!")
 }
 }

@@ -23,5 +23,4 @@ stop()
 
 # Go to Dashboard Time series SPM (integrationTests) 
 # https://kibana02.dmz.bafg.de/s/ntsportal-dev/app/dashboards#/view/f6eb3fef-c349-44f9-9a34-70dc3c1a3bb8
-
-elastic::index_delete(escon, indexName[[1]][[newAliasName]])
+deleteTable(getDbComm(), indexName[[1]][[newAliasName]])

@@ -30,7 +30,6 @@ Imports:
     glue,
     keyring,
     reticulate,
-    elastic,
     digest,
     RJSONIO,
     zoo

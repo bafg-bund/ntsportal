@@ -1,37 +1,4 @@
 
-
-
-#' Change alias of an index to a new index.
-#' 
-#' @description Will delete the previous alias
-#'
-#' @param indexName Name of index
-#' @param aliasName Name of alias
-#' @param closeAfter logical, should the previous index, to which the alias 
-#' linked to prior to the change, be closed? 
-#'
-#' @return Passes on response from ES (acknowledged field, TRUE or FALSE), invisibly
-changeAliasAddress <- function(indexName, aliasName, closeAfter = FALSE) {
-  aliases <- elastic::cat_aliases(escon, index = aliasName, parse = T)
-  # Delete previous alias
-  if (!is.null(aliases)) {
-    res1 <- elastic::alias_delete(escon, index = aliases[1, 2], alias = aliases[1, 1])
-    previousIndex <- aliases[1, 2]
-  }
-  res <- elastic::alias_create(escon, indexName, aliasName)
-  ok <- res$acknowledged
-  if (ok) {
-    logger::log_info("Success creating alias {aliasName} on index {indexName}")
-  } else {
-    logger::log_error("Error creating alias {aliasName} on index {indexName}")
-  }
-  if (ok && exists("previousIndex") && length(previousIndex) == 1 && closeAfter) {
-    elastic::index_close(escon, previousIndex)
-    logger::log_info("Closed index {previousIndex}")
-  }
-  invisible(res$acknowledged)
-}
-
 #' Change the path of one document in msrawfiles
 #' @description
 #' This is a secure method of changing the "path" field of an entry in msrawfiles. The filename is not changed and must
@@ -47,24 +14,45 @@ changeAliasAddress <- function(indexName, aliasName, closeAfter = FALSE) {
 #' @examples
 #' \dontrun{
 #' library(ntsportal)
-#' connectNtsportal()
+#' library(dplyr)
+#' library(tibble)
+#' rfIndex <- "ntsp26.1_msrawfiles"
 #' 
-#' ind <- "ntsp_msrawfiles"
-#' res <- esSearchPaged(ind, sort = "path", searchBody = list(query = list(regexp = list(path = "/srv.*"))), source = "path")$hits$hits
-#' partToRemove <- "/srv/cifs-mounts/g2/G/G2/HRMS/Messdaten/"
-#' paths <- sapply(res, function(x) x[["_source"]]$path)
-#' oldPaths <- data.frame(oldPath = paths, relPath = sub(partToRemove, "", paths))
-#' relPaths <- list.files("/beegfs/nts/ntsportal/msrawfiles", recursive = T)
-#' newPaths <- data.frame(
-#'   newPath = paste0("/beegfs/nts/ntsportal/msrawfiles/", relPaths),
-#'   relPath = relPaths
-#' )
+#' createBackupMsrawfiles(rfIndex)
 #' 
-#' oldAndNewPaths <- merge(oldPaths, newPaths, all.x = T, by = "relPath")
+#' oldPath <- getTableByEsql(
+#'   'FROM ntsp26.1_msrawfiles | 
+#'   WHERE station == "rhein_bi_l" AND matrix == "spm" AND pol == "pos" AND duration == "P1Y" | 
+#'   KEEP path')
 #' 
-#' for (i in 1:nrow(oldAndNewPaths)) {
-#'   changeMsrawfilePath(ind, oldAndNewPaths$oldPath[i], oldAndNewPaths$newPath[i], checkType = "filesize")  
+#' oldPath$basename <- basename(oldPath$path)
+#' 
+#' dirs <- list.files("/beegfs/nts/ntsportal/msrawfiles/rhein_bimmen_l/spm/p1y", pattern = "pos$", include.dirs = T, full.names = T, recursive = T)
+#' 
+#' paths <- unname(unlist(sapply(dirs, function(p) list.files(p, f = T, pattern = ".mzXML"))))
+#' newPath <- tibble(path = paths)
+#' 
+#' newPath$basename <- basename(newPath$path)
+#' 
+#' allPaths <- merge(oldPath, newPath, by = "basename", suffixes = c("_old", "_new"), all.x = T)
+#' 
+#' for (i in seq_len(nrow(allPaths))) {
+#'   message(paste("Verarbeite Datei", i, "von", nrow(allPaths), "..."))
+#'   tryCatch(
+#'     changeMsrawfilePath(
+#'       rfIndex, 
+#'       oldPath = allPaths$path_old[i], 
+#'       newPath = allPaths$path_new[i], 
+#'       checkType = "md5"
+#'     ),
+#'     error = function(cnd) {
+#'       message("error in file ", allPaths$basename[i])
+#'       message(cnd)
+#'     }
+#'   )
 #' }
+#' 
+#' message("Pfadänderung erfolgreich für alle Dateien abgeschlossen!")
 #' }
 changeMsrawfilePath <- function(rfIndex, oldPath, newPath, checkType = "md5") {
   stopifnot(length(oldPath) == 1, length(newPath) == 1)

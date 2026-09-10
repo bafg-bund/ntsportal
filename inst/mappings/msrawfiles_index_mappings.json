@@ -83,6 +83,8 @@
       "nts_eic_extraction_width": {"type": "float", "meta": {"description": "Sample tab. opt. EIC m/z width", "unit": "mDa"}},                        
       "path": {"type": "keyword", "meta": {"description": "Absolute path to measurement file (mzXML, mzML)"}},
       "pol": {"type": "keyword", "meta": {"description": "3-letter ESI polarity mode", "example": "pos"}},
+      "proteowizard_settings": {"type": "keyword", "meta": {"description": "MSconvert settings for building mzML", "example": "--zlib --filter \"peakPicking vendor msLevel=1-\""}},
+      "proteowizard_version": {"type": "keyword","meta": {"description": "MSconvert version for building mzML", "example": "3.0.26183"}},
       "replicate_regex": {"type": "keyword", "meta": {"description": "Regular expression to group files into replicates", "example": "(exprep)[123]_"}},
       "replicate_group_name": {"type": "keyword", "meta": {"description": "Filename to group files into replicates", "example": "rhein_ko_l_2026-01-01_exprep_pos.mzXML"}},
       "river": { "type": "keyword", "meta": {"description": "river name of sampling location (local spelling)", "example": "rhein"}},

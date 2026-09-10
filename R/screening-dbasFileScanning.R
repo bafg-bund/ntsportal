@@ -12,7 +12,6 @@ scanBatch <- function(msrawfilesBatch, ...) {
 #' @param compsToProcess Character vector of compounds names to include in the scanning (default is all compounds in the spectral library)
 #' @param showProgress Logical, show progress bar? (for interacte use, default false)
 #' @returns a `dbasResult` (`list` of 7 tables) including `peakList`, `reintegrationResults` etc.
-#' @export
 #' @rdname scanBatch
 #' @examples
 #' \dontrun{
@@ -32,6 +31,7 @@ scanBatch <- function(msrawfilesBatch, ...) {
 #' newBatch <- newDbasMsrawfilesBatch(c(recs, recsBlanks))
 #' res <- scanBatch(newBatch, "Methyltriphenylphosphonium")
 #' }
+#' @export
 scanBatch.dbasMsrawfilesBatch <- function(msrawfilesBatch, compsToProcess = NULL, showProgress = FALSE) {
   progBar <- ifelse(showProgress, cli_progress_bar("Processing batch", total = length(msrawfilesBatch)), "no-progress")
   reports <- map(msrawfilesBatch, \(rec) fileScanDbas(rec, compsToProcess = compsToProcess, progBar = progBar))

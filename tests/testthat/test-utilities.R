@@ -1,8 +1,7 @@
 
 test_that("You can retrieve more than 10000 results", {
   indexName <- "ntsp26.1_msrawfiles"
-  hits <- esSearchPaged(indexName, sort = "path", source = "path")$hits$hits
-  expect_gt(length(hits), 10000)
+  expect_gt(getNrow(dbComm, indexName), 10000)
 })
 
 test_that("Connection can be tested", {

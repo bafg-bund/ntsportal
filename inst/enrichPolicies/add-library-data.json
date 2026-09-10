@@ -4,7 +4,7 @@
     "match_field": "csl_experiment_id",
     "enrich_fields": [
       "mz",
-      "rt"
+      "rtt"
     ]
   }
 }

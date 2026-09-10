@@ -67,7 +67,7 @@ test_that("DBA-Screening array job file and records in batches are produced", {
   
   expect_length(list.files(tempSaveDir),3)
   linesJobFile <- readLines(file.path(tempSaveDir, "arrayScreening.sbatch"))
-  expect_equal(linesJobFile[13], "#SBATCH --array=1-1%10")
+  expect_equal(linesJobFile[13], "#SBATCH --array=1-1%20")
   expect_match(linesJobFile[6], "testEmail@test.de")
   expect_match(linesJobFile[4], tempSaveDir)
   expect_match(linesJobFile[57], tempSaveDir)
