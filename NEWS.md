@@ -6,6 +6,8 @@
 * Linear regression analysis in the SPM time series dashboard shows the average percent change per year for the full 
 time period of annual sampling (field: `change_per_year`). This is computed using a semi-log regression analysis. 
 The table also shows the date of the last detection (field: `last_detection`).
+* Time series for analysis of water samples are additionally split by `instrument_name` so that measurements performed 
+with different instruments appear as separate series.
 
 ## Major changes (backend)
 
@@ -20,7 +22,8 @@ The new batch structure is reported in the article Structure of NTSPortal, Secti
 
 * When no peaks are found in a batch, one feature record with the path and feature_table_alias of the first file is still
 ingested so that the processing attempt is documented. 
-* Changed field type to `long` for fields `area` and `intensity`.
+* Changed field type to `long` for fields `area` and `intensity` in `feature` tables.
+* Added fields `proteowizard_version` and `proteowizard_settings` to `msrawfiles` to track method of conversion from vendor format.
 * Added a bash CLI script for standard processing and ingesting tasks. See `inst/shellInterface/ntsp`. Can be 
 linked into system path for access in the terminal.
 * Removed deprecated functions from R-package `elastic`
