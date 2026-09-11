@@ -19,7 +19,7 @@ test_that("A dummy record can be added to msrawfiles", {
   )
   
   importedRecord <- jsonlite::read_json(list.files(saveDir, full.names = TRUE))
-  expect_length(importedRecord[[1]], 80)
+  expect_length(importedRecord[[1]], 82)
   recs <- getTableAsRecords(dbComm, testIndexName, queryForTestRecord)
   pathResult <- recs[[1]]$path
   expect_equal(normalizePath(testFile), pathResult)

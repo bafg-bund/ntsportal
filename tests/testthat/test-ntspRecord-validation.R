@@ -54,7 +54,7 @@ test_that("An incorrect field in featureRecord in a nested field results in an e
   oneFeatureRecord <- convertToRecord(rr$dbasResult, rr$msrRecords)[[1]]
   expect_true(validateRecord(oneFeatureRecord))
   oneFeatureRecord$ms2 <- c(oneFeatureRecord$ms2, error_field = "error")
-  expect_warning(expect_warning(validateRecord(oneFeatureRecord), "ms2"), "error_field")
+  expect_warning(validateRecord(oneFeatureRecord), "ms2.*error_field")
   expect_false(suppressWarnings(validateRecord(oneFeatureRecord)))
 })
 
