@@ -58,3 +58,13 @@ test_that("One additional blank record can be added to a batch if listed", {
   expect_length(batch[[1]], 5)
   expect_contains(basename(paths), "RH_pos_20220602_no_peaks_MQ_test.mzXML")
 })
+
+test_that("A batch with only blanks is removed", {
+  r <- getMsrawfilesTestRecords("dbas")
+  recs1 <- r[dirname(getField(r, "path")) == "/beegfs/nts/ntsportal/msrawfiles/unit_tests" & getField(r, "blank")] 
+  recs2 <- r[dirname(getField(r, "path")) == "/beegfs/nts/ntsportal/msrawfiles/unit_tests/olmesartan-d6"]
+  testRecs <- c(recs1, recs2)
+  suppressMessages(batches <- recordsToBatches(testRecs, testIndexName))
+  expect_length(batches, 1)
+  expect_match(names(batches), "olmesartan-d6$")
+})

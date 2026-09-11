@@ -19,6 +19,7 @@ getSelectedMsrawfileBatches <- function(msrawfilesIndex, rootDirs, screeningType
 recordsToBatches <- function(records, msrawfilesIndex) {
   groupedRecords <- splitRecordsByDir(records)
   groupedRecords <- map(groupedRecords, \(recs) addMoreBlanksToBatch(recs, msrawfilesIndex))
+  groupedRecords <- discard(groupedRecords, \(recs) all(getField(recs, "blank")))
   map(groupedRecords, recordsToOneBatch)
 }
 

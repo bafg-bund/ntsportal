@@ -88,6 +88,7 @@ screeningSelectedBatchesSlurm <- function(msrawfileIndex, batchDirs, saveDirecto
   createSaveDir(saveDirectory)
   recordsInBatches <- getSelectedMsrawfileBatches(msrawfileIndex, batchDirs, screeningType)
   checkQualityBatchList(recordsInBatches)
+  recordsInBatches <- recordsInBatches[order(map_int(recordsInBatches, length), decreasing = TRUE)]
   saveFilesSlurm(recordsInBatches, saveDirectory)
   slurmJobFile <- file.path(saveDirectory, "arrayScreening.sbatch")
   

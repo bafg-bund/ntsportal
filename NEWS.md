@@ -8,6 +8,7 @@ time period of annual sampling (field: `change_per_year`). This is computed usin
 The table also shows the date of the last detection (field: `last_detection`).
 * Time series for analysis of water samples are additionally split by `instrument_name` so that measurements performed 
 with different instruments appear as separate series.
+* Time-series-annotations (events) now use codes to categorize the type of event. The codes are documented on the dashboard.
 
 ## Major changes (backend)
 
@@ -16,16 +17,17 @@ defined in `ingestPipelines/ingest-feature.json`. This increases ingest time sli
 * Reorganization of batches holding measurement files for improved processing performance and for a more logical structure. This
 will impact results where the batch size has changed. In these cases the change is marked as a time-series annotation.
 The new batch structure is reported in the article Structure of NTSPortal, Section: Batch naming conventions.
-
+* Blanks can be added to a batch by reference to blanks in other batches/directories using the `additional_blank_path` field in msrawfiles.
+Batches (directories) consisting only of blank files are not processed.
 
 ## Minor changes (backend)
 
 * When no peaks are found in a batch, one feature record with the path and feature_table_alias of the first file is still
 ingested so that the processing attempt is documented. 
 * Changed field type to `long` for fields `area` and `intensity` in `feature` tables.
-* Added fields `proteowizard_version` and `proteowizard_settings` to `msrawfiles` to track method of conversion from vendor format.
+* Added fields `proteowizard_version` and `proteowizard_settings` to `msrawfiles` to record measurement file conversion from vendor format.
 * Added a bash CLI script for standard processing and ingesting tasks. See `inst/shellInterface/ntsp`. Can be 
-linked into system path for access in the terminal.
+linked into system path for access in the shell.
 * Removed deprecated functions from R-package `elastic`
 * Updated various dependencies to versions:
   + R = 4.6.1
