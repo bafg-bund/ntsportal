@@ -20,23 +20,39 @@ test_that("A file with no peaks returns an empty result", {
 })
 
 test_that("An empty report is removed from a list of reports", {
+  recordsBatch <- getOneSampleRecords("dbas")
   report <- getMergedReportSampleAndBlank()
   reportWithEmpty <- list(report, emptyReport())
-  report2 <- removeEmptyReports(reportWithEmpty)
-  expect_equal(length(report2), 1)
-  expect_equal(list(report), report2)
+  dataBoxTest <- removeEmptyReports(list(reports = reportWithEmpty, msrawfilesBatch = recordsBatch))
+  expect_equal(length(dataBoxTest$reports), 1)
+  expect_equal(list(report), dataBoxTest$reports)
 })
 
 test_that("Reports can be merged", {
-  reports <- readRDS(test_path("fixtures", "screening-dbasFileScanning", "reportsForMerging.RDS"))
-  report <- mergeReports(reports)
-  expect_s4_class(report, "Report")
+  testReports <- readRDS(test_path("fixtures", "screening-dbasFileScanning", "reportsForMerging.RDS"))
+  filesPreMerge <- sapply(testReports, \(x) x$rawFiles)
+  reportMerged <- mergeReports(testReports)
+  filesPostMerge <- reportMerged$rawFiles
+  expect_equal(filesPreMerge, filesPostMerge)
+  expect_s4_class(reportMerged, "Report")
 })
 
 test_that("A Report can be cleaned", {
-  report <- readRDS(test_path("fixtures", "screening-dbasFileScanning", "reportForCleaning.RDS"))
-  report <- cleanReport(report, getRecordsTripicateBatch())
-  expect_s4_class(report, "Report")
+  reportPreclean <- readRDS(test_path("fixtures", "screening-dbasFileScanning", "reportForCleaning.RDS"))
+  plPreClean <- reportPreclean$peakList
+  irPreClean <- reportPreclean$integRes
+  numberDetections <- table(plPreClean$comp_name)
+  sporadicDetections <- names(which(numberDetections < 2))
+  dataBox <- cleanReport(list(reports = reportPreclean, msrawfilesBatch = getRecordsTripicateBatch()))
+  plPostClean <- dataBox$reports$peakList
+  irPostClean <- dataBox$reports$integRes
+  compsPostPl <- unique(plPostClean$comp_name)
+  compsPostIr <- unique(irPostClean$comp_name)
+  expect_disjoint(compsPostPl, sporadicDetections)
+  expect_disjoint(compsPostIr, sporadicDetections)
+  expect_gt(nrow(plPreClean), nrow(plPostClean))
+  expect_gt(nrow(irPreClean), nrow(irPostClean))
+  expect_s4_class(dataBox$reports, "Report")
 })
 
 test_that("A Report can be reintegrated", {
@@ -56,18 +72,26 @@ test_that("A failed reintegration returns the original report", {
 })
 
 test_that("Blank correction works for sample and blank", {
-  report <- getMergedReportSampleAndBlank()
-  records <- getOneSampleRecords("dbas")
-  peaksBeforeCorrection <- nrow(report$peakList)
-  report <- blankCorrectionDbas(report, records)
-  peaksAfterCorrection <- nrow(report$peakList)
+  boxTest <- list(reports = getMergedReportSampleAndBlank(), msrawfilesBatch = getOneSampleRecords("dbas"))
+  peaksBeforeCorrection <- nrow(boxTest$reports$peakList)
+  allComps <- unique(boxTest$reports$peakList$comp_name)
+  compsSamples <- unique(getPeakListNonBlanks(boxTest)$comp_name)
+  compsBlanks <- setdiff(allComps, compsSamples)
+  boxTest <- blankCorrectionDbas(boxTest)
+  peaksAfterCorrection <- nrow(boxTest$reports$peakList)
+  plComps <- unique(boxTest$reports$peakList$comp_name)
+  irComps <- unique(boxTest$reports$integRes$comp_name)
+  expect_true(all(plComps %in% compsSamples))
+  expect_true(all(irComps %in% compsSamples))
+  expect_false(any(compsBlanks %in% plComps))
+  expect_false(any(compsBlanks %in% irComps))
   expect_lt(peaksAfterCorrection, peaksBeforeCorrection)
 })
 
 test_that("False positives are removed", {
   testData <- getReportReplicateBatch()
   originalComps <- unique(testData$report$peakList$comp_name)
-  report <- removeFalsePositives(testData$report, testData$records)
+  report <- removeFalsePositives(list(reports = testData$report, msrawfilesBatch = testData$records))
   newComps <- unique(report$peakList$comp_name)
   expect_lt(length(newComps), length(originalComps))
   expect_true(is.element("Propranolol", originalComps))
@@ -76,11 +100,11 @@ test_that("False positives are removed", {
 
 test_that("Replicate detections are correctly computed", {
   reintReport <- getReintegratedReportDessauBatch()
-  cleanedReport <- cleanReport(getReintegratedReportDessauBatch(), getRecordsDessauBatch())
-  deletedComps <- setdiff(reintReport$peakList$comp_name, cleanedReport$peakList$comp_name)
+  dataBox <- cleanReport(list(reports = getReintegratedReportDessauBatch(), msrawfilesBatch = getRecordsDessauBatch()))
+  deletedComps <- setdiff(reintReport$peakList$comp_name, dataBox$reports$peakList$comp_name)
   expect_contains(deletedComps, "Olmesartan-d6")
   expect_contains(reintReport$peakList$comp_name, "Methyltriphenylphosphonium")
-  expect_contains(cleanedReport$peakList$comp_name, "Methyltriphenylphosphonium")
+  expect_contains(dataBox$reports$peakList$comp_name, "Methyltriphenylphosphonium")
 })
 
 test_that("Test file Des_07_01_pos.mzXML can be processed for Bisoprolol", {
@@ -110,7 +134,7 @@ test_that("If process_all fails, it returns the original, non-processed and empt
   expect_equal(nrow(resultsReport$peakList), 0)
 })
 
-test_that("Getting non existent field returns an NA vector", {
+test_that("Getting non-existent field returns an NA vector", {
   records <- getRecordsTripicateBatch()
   values <- getField(records, "foobar")
   expect_true(all(is.na(values)))
@@ -138,8 +162,8 @@ test_that("Removing compounds with no replicate detections works for level 1 and
   compsFoundBefore <- subset(before, samp == "B14_pos1.mzXML", comp_name, drop = T)
   expect_contains(compsFoundBefore, "Benzyl-triethylammonium")
   expect_contains(compsFoundBefore, "3-Phenylpyridine")
-  cleanedReport <- cleanReport(testReportBim, testRecordsBim)
-  dbasResult <- convertToDbasResult(cleanedReport)
+  cleanedReportBox <- cleanReport(list(reports = testReportBim, msrawfilesBatch = testRecordsBim))
+  dbasResult <- convertToDbasResult(cleanedReportBox$reports)
   after <- dbasResult$reintegrationResults
   compsFoundAfter <- subset(after, samp == "B14_pos1.mzXML", comp_name, drop = T)
   expect_contains(compsFoundAfter, "Benzyl-triethylammonium")

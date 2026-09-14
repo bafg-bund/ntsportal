@@ -34,12 +34,13 @@ scanBatch <- function(msrawfilesBatch, ...) {
 #' @export
 scanBatch.dbasMsrawfilesBatch <- function(msrawfilesBatch, compsToProcess = NULL, showProgress = FALSE) {
   progBar <- ifelse(showProgress, cli_progress_bar("Processing batch", total = length(msrawfilesBatch)), "no-progress")
-  reports <- map(msrawfilesBatch, \(rec) fileScanDbas(rec, compsToProcess = compsToProcess, progBar = progBar))
-  reports <- removeEmptyReports(reports)
-  mergedReport <- mergeReports(reports)
-  reintegratedReport <- reintegrateReport(mergedReport)
-  cleanedReport <- cleanReport(reintegratedReport, msrawfilesBatch)
-  dbasResults <- convertToDbasResult(cleanedReport)
+  dataBox <- list(msrawfilesBatch = msrawfilesBatch)
+  dataBox$reports <- map(msrawfilesBatch, \(rec) fileScanDbas(rec, compsToProcess = compsToProcess, progBar = progBar))
+  dataBox <- removeEmptyReports(dataBox)
+  dataBox$reports <- mergeReports(dataBox$reports)
+  dataBox$reports <- reintegrateReport(dataBox$reports)
+  dataBox <- cleanReport(dataBox)
+  dbasResults <- convertToDbasResult(dataBox$reports)
   dbasResults
 }
 
@@ -102,10 +103,12 @@ placeholderToSetMockingFunctions <- function(x) {
   x
 }
 
-removeEmptyReports <- function(reports) {
-  if (all(map_lgl(reports, isEmptyReport)))
-    return(reports[1])
-  Filter(Negate(isEmptyReport), reports)
+removeEmptyReports <- function(dataBox) {
+  stopifnot(length(dataBox$reports) == length(dataBox$msrawfilesBatch))
+  emptyReps <- map_lgl(dataBox$reports, isEmptyReport)
+  if (all(emptyReps))
+    return(list(reports = dataBox$reports[1], msrawfilesBatch = dataBox$msrawfilesBatch[1]))
+  list(reports = dataBox$reports[!emptyReps], msrawfilesBatch = dataBox$msrawfilesBatch[!emptyReps])
 }
 
 mergeReports <- function(reports) {
@@ -118,58 +121,38 @@ mergeReports <- function(reports) {
   } 
 }
 
-cleanReport <- function(report, records) {
-  if (!isEmptyReport(report)) 
-    report <- blankCorrectionDbas(report, records)
-  if (!isEmptyReport(report)) 
-    report <- removeFalsePositives(report, records)
-  if (!isEmptyReport(report)) 
-    report <- removeDuplicateDetections(report)
-  report
+cleanReport <- function(dataBox) {
+  stopifnot(length(dataBox$reports$rawFiles) == length(dataBox$msrawfilesBatch))
+  if (!isEmptyReport(dataBox$reports)) 
+    dataBox <- removeFalsePositives(dataBox)
+  if (!isEmptyReport(dataBox$reports)) 
+    dataBox <- removeDuplicateDetections(dataBox)
+  if (!isEmptyReport(dataBox$reports)) 
+    dataBox <- blankCorrectionDbas(dataBox)
+  dataBox
 }
 
-blankCorrectionDbas <- function(report, records) {
-  blanks <- areBlanks(report, records)
-  if (all(!blanks))
-    return(report)
-  report$deleteBackground(which(!blanks), which(blanks))
-  report$remRawFiles(which(blanks))
-  report
-}
-
-areBlanks <- function(report, records) {
-  paths <- report$rawFiles
-  isBlank <- getField(records, "blank")
-  names(isBlank) <- getField(records, "path")
-  isBlank[paths]
-}
-
-removeFalsePositives <- function(report, records) {
-  # These fields are uniform in the records so just take the first non blank
-  blanks <- getField(records, "blank")
-  minimumDetections <- getField(records, "dbas_minimum_detections")[!blanks][1]
-  
- 
+removeFalsePositives <- function(dataBox) {
   falsePositives <- bind_rows(
-    getFalsePositivesFromRecord(report, records),
-    getCompoundsBelowMinimumDetections(report, minimumDetections),
-    getCompoundsNoReplicateDetections(report, records)
+    getFalsePositivesFromRecord(dataBox),
+    getCompoundsBelowMinimumDetections(dataBox),
+    getCompoundsNoReplicateDetections(dataBox)
   ) |> distinct() |> tidyr::nest(fileIndices = fileIndex, .by = "compName")
   
   if (nrow(falsePositives) > 0) { 
     for (i in 1:nrow(falsePositives)) {
-      report$deleteFP(
+      dataBox$reports$deleteFP(
         pluck(falsePositives, "compName", i),
         pluck(falsePositives, "fileIndices", i, 1)
       )
     }
   }
-  report
+  dataBox
 }
 
-getFalsePositivesFromRecord <- function(report, records) {
-  files <- basename(report$rawFiles)  # file index is given by report$rawFiles, index needed for Report$deleteFP
-  fpList <- setNames(getField(records, "dbas_fp", quiet = TRUE), basename(getField(records, "path")))
+getFalsePositivesFromRecord <- function(dataBox) {
+  files <- basename(dataBox$reports$rawFiles)  # file index is given by report$rawFiles, index needed for Report$deleteFP
+  fpList <- setNames(getField(dataBox$msrawfilesBatch, "dbas_fp", quiet = TRUE), basename(getField(dataBox$msrawfilesBatch, "path")))
   if (!all(is.na(fpList))) {
     fpList <- fpList[!is.na(fpList)]
     fpRows <- map(seq_along(files), function(ind) tibble(fileIndex = ind, compName = fpList[[files[ind]]]))
@@ -179,31 +162,47 @@ getFalsePositivesFromRecord <- function(report, records) {
   }
 }
 
-removeDuplicateDetections <- function(report) {
-  report$peakList <- report$peakList[report$peakList$peak == "A", ]
-  report
-}
-
-getCompoundsBelowMinimumDetections <- function(report, minimumDetections) {
-  if (minimumDetections > 1) {
-    timesFound <- by(report$peakList, report$peakList$comp_name, nrow)
-    scarce <- which(timesFound < minimumDetections)
-    tidyr::expand_grid(compName = names(scarce), fileIndex = seq_along(report$rawFiles)) 
-  } else {
+getCompoundsBelowMinimumDetections <- function(dataBox) {
+  # These fields are uniform in the records so just take the first non blank
+  blanks <- getField(dataBox$msrawfilesBatch, "blank")
+  if (all(blanks)) {
     return(emptyFalsePostivesTibble())
+  } else {
+    minimumDetections <- getField(dataBox$msrawfilesBatch, "dbas_minimum_detections")[!blanks][1]
   }
+  peakListNonBlanks <- getPeakListNonBlanks(dataBox)
+  timesFound <- by(peakListNonBlanks, peakListNonBlanks$comp_name, nrow)
+  enoughDetections <- names(which(timesFound >= minimumDetections))
+  allComps <- unique(dataBox$reports$peakList$comp_name)
+  scarce <- allComps[!is.element(allComps, enoughDetections)]
+  if (length(scarce) == 0)
+    return(emptyFalsePostivesTibble())
+  tidyr::expand_grid(compName = scarce, fileIndex = seq_along(dataBox$reports$rawFiles)) 
 }
 
-getCompoundsNoReplicateDetections <- function(report, records) {
-  blanks <- getField(records, "blank")
-  repGroups <- getField(records, "replicate_group_name", quiet = TRUE)[!blanks]
+getPeakListNonBlanks <- function(dataBox) {
+  blanks <- getField(dataBox$msrawfilesBatch, "blank")
+  fileNamesNonBlanks <- basename(getField(dataBox$msrawfilesBatch, "path"))[!blanks]
+  dataBox$reports$peakList[dataBox$reports$peakList$samp %in% fileNamesNonBlanks, ]
+}
+
+getCompoundsNoReplicateDetections <- function(dataBox) {
+  blanks <- getField(dataBox$msrawfilesBatch, "blank")
+  repGroups <- getField(dataBox$msrawfilesBatch, "replicate_group_name", quiet = TRUE)[!blanks]
   if (all(is.na(repGroups))) 
     return(emptyFalsePostivesTibble())
+  numberReps <- table(repGroups)
+  if (!all(numberReps >= 2)) {
+    batchName <- dirname(getField(dataBox$msrawfilesBatch, "path")[1])
+    log_warn("replicate_group_name available but batch {batchName} does not have at least 2 samples in each replicate group")
+    return(emptyFalsePostivesTibble())
+  }
+    
   replicateGroup <- tibble(
-    samp = basename(getField(records, "path", quiet = TRUE)[!blanks]),
+    samp = basename(getField(dataBox$msrawfilesBatch, "path", quiet = TRUE)[!blanks]),
     originalSampName = repGroups
   )
-  ir <- merge(report$integRes, replicateGroup, by = "samp", all.x = T)
+  ir <- merge(dataBox$reports$integRes, replicateGroup, by = "samp", all.x = T)
   replicateCount <- by(ir, list(ir$comp_name, ir$originalSampName), nrow) |> array2DF()
   colnames(replicateCount) <- c("compName", "originalSampName", "count")
   replicateCount <- replicateCount[!is.na(replicateCount$count), ]
@@ -217,7 +216,7 @@ getCompoundsNoReplicateDetections <- function(report, records) {
     markAsFp$compName, 
     markAsFp$originalSampName, 
     function(compName, originalSampName) 
-      getFileIndices(compName, originalSampName, ir, report$rawFiles)
+      getFileIndices(compName, originalSampName, ir, dataBox$reports$rawFiles)
   ))
 }
 
@@ -228,6 +227,22 @@ getFileIndices <- function(compName, originalSampName, pl, reportRawFiles) {
     fileIndex = which(basename(reportRawFiles) %in% sampNames)
   )
 }
+
+blankCorrectionDbas <- function(dataBox) {
+  blanks <- getField(dataBox$msrawfilesBatch, "blank")
+  if (all(!blanks))
+    return(dataBox)
+  dataBox$reports$deleteBackground(which(!blanks), which(blanks))
+  dataBox$reports$remRawFiles(which(blanks))
+  dataBox
+}
+
+removeDuplicateDetections <- function(dataBox) {
+  dataBox$reports$peakList <- dataBox$reports$peakList[dataBox$reports$peakList$peak == "A", ]
+  dataBox
+}
+
+
 
 emptyFalsePostivesTibble <- function() {
   tibble(compName = character(), fileIndex = numeric())

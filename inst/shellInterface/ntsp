@@ -7,8 +7,6 @@ parser = ArgumentParser(prog='ntsp', description = "ntsportal CLI utility")
 subparsers = parser$add_subparsers(help='sub-command help')
 parser$add_argument("-l", "--logfile", type = "character", default = "placeholder", 
                     help = "Path to logfile default is <function>.log")
-parser$add_argument("-o", "--resultsdir", type = "character", default = "processing-results", 
-                    help = "Directory to save results of processing or from which to ingest results")
 parser$add_argument("--no_overwrite", action = "store_true", default = TRUE, 
                     help = "Output directory is not overwritten if it exists [default]")
 
@@ -34,17 +32,14 @@ parser_ingest = subparsers$add_parser('ingest', help='ingest help',
 parser_ingest$set_defaults(func="ingest")
 parser_ingest$add_argument("-l", "--logfile", type = "character", default = "placeholder", 
                            help = "Path to logfile default is <function>.log")
-parser_ingest$add_argument("-o", "--resultsdir", type = "character", default = "processing-results", 
-                           help = "Directory to save results of processing or from which to ingest results")
+parser_ingest$add_argument("resultsdir", type = "character", default = "processing-results", 
+                           help = "Directory from which to ingest results")
 
 args <- parser$parse_args()
 
 if (args$logfile == "placeholder")
   args$logfile <- paste0(args$func, ".log")
 
-logFile <- file(file.path(args$resultsdir, args$logfile), open = "wt")
-sink(logFile, type = "output")
-sink(logFile, type = "message")
 startTime <- Sys.time()
 switch(
   args$func, 
@@ -57,11 +52,16 @@ switch(
     
     dir.create(args$resultsdir)
     
+    logFile <- file(file.path(args$resultsdir, args$logfile), open = "wt")
+    sink(logFile, type = "output")
+    sink(logFile, type = "message")
     screeningSelectedBatches(args$index, args$batches, args$resultsdir, numParallel = args$parallelthreads, 
                              screeningType = args$screeningtype)
-    
   },
   "ingest" = {
+    logFile <- file(file.path(args$resultsdir, args$logfile), open = "wt")
+    sink(logFile, type = "output")
+    sink(logFile, type = "message")
     ingestFeatureRecords(args$resultsdir)
   },
   stop("unknown function")

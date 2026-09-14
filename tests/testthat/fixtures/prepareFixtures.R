@@ -42,10 +42,10 @@ saveRDS(result, test_path("fixtures", "screening-dbasConvertToRecord", "oneSampl
 # reportForCleaning ####
 log_info("Section: reportForCleaning")
 reports <- purrr::map(getRecordsTripicateBatch(), fileScanDbas)
-reports <- removeEmptyReports(reports)
-mergedReport <- mergeReports(reports)
-reintegratedReport <- reintegrateReport(mergedReport)
-saveRDS(reintegratedReport, test_path("fixtures", "screening-dbasFileScanning", "reportForCleaning.RDS"))
+dataBoxCleaning <- removeEmptyReports(list(reports = reports, msrawfilesBatch = getRecordsTripicateBatch()))
+dataBoxCleaning$reports <- mergeReports(dataBoxCleaning$reports)
+dataBoxCleaning$reports <- reintegrateReport(dataBoxCleaning$reports)
+saveRDS(dataBoxCleaning$reports, test_path("fixtures", "screening-dbasFileScanning", "reportForCleaning.RDS"))
 
 # Report for testing false positive removal blankCorrectedReportTriplicate ####
 log_info("Section: Report for testing false positive removal blankCorrectedReportTriplicate")
@@ -54,17 +54,17 @@ allBatches <- splitRecordsByDir(records)
 recs <- allBatches[[grep("unit_tests/olmesartan-d6-bisoprolol", names(allBatches))]]
 recsBatch <- newDbasMsrawfilesBatch(recs)
 reports <- map(recsBatch, fileScanDbas)
-reports <- removeEmptyReports(reports)
-mergedReport <- mergeReports(reports)
-reintegratedReport <- reintegrateReport(mergedReport)
-saveRDS(reintegratedReport, test_path("fixtures", "screening-dbasFileScanning", "blankCorrectedReportTriplicate.RDS"))
+dataBoxFP <- removeEmptyReports(list(reports = reports, msrawfilesBatch = recsBatch))
+dataBoxFP$reports <- mergeReports(dataBoxFP$reports)
+dataBoxFP$reports <- reintegrateReport(dataBoxFP$reports)
+saveRDS(dataBoxFP$reports, test_path("fixtures", "screening-dbasFileScanning", "blankCorrectedReportTriplicate.RDS"))
 
 # mergedReportSampleAndBlank ####
 log_info("Section: mergedReportSampleAndBlank")
 reports <- purrr::map(getOneSampleRecords("dbas"), fileScanDbas)
-reports <- removeEmptyReports(reports)
-mergedReport <- mergeReports(reports)
-saveRDS(mergedReport, test_path("fixtures", "screening-dbasFileScanning", "mergedReportSampleAndBlank.RDS"))
+dataBoxOneSamp <- removeEmptyReports(list(reports = reports, msrawfilesBatch = getOneSampleRecords("dbas")))
+dataBoxOneSamp$reports <- mergeReports(dataBoxOneSamp$reports)
+saveRDS(dataBoxOneSamp$reports, test_path("fixtures", "screening-dbasFileScanning", "mergedReportSampleAndBlank.RDS"))
 
 # ntsResultSampleAndBlank ####
 log_info("Section: ntsResultSampleAndBlank")
@@ -98,13 +98,13 @@ recs2 <- map2(recs, newPaths, \(x, y) {x$path <- y; newDbasMsrawfilesRecord(x)})
 recs2 <- newDbasMsrawfilesBatch(recs2)
 progBar <- cli_progress_bar("Processing batch", total = length(recs2))
 reports <- purrr::map(recs2, fileScanDbas, progBar = progBar)
-reports <- removeEmptyReports(reports)
-mergedReport <- mergeReports(reports)
-reintegratedReport <- reintegrateReport(mergedReport)
-reintegratedReport$MS1 <- data.frame()
-reintegratedReport$MS2 <- data.frame()
-reintegratedReport$EIC <- data.frame()
-saveRDS(reintegratedReport, test_path("fixtures", "screening-dbasFileScanning", "reintegratedReportDessauBatch.RDS"))
+dataBoxDessau <- removeEmptyReports(list(reports = reports, msrawfilesBatch = recs2))
+dataBoxDessau$reports <- mergeReports(dataBoxDessau$reports)
+dataBoxDessau$reports <- reintegrateReport(dataBoxDessau$reports)
+dataBoxDessau$reports$MS1 <- data.frame()
+dataBoxDessau$reports$MS2 <- data.frame()
+dataBoxDessau$reports$EIC <- data.frame()
+saveRDS(dataBoxDessau$reports, test_path("fixtures", "screening-dbasFileScanning", "reintegratedReportDessauBatch.RDS"))
 saveRDS(recs2, test_path("fixtures", "screening-dbasFileScanning", "recordsDessauBatch.RDS"))
 
 # Create featureRecordExampleRds ####
@@ -195,6 +195,16 @@ reports <- removeEmptyReports(reports)
 mergedReport <- mergeReports(reports)
 reintegratedReport <- reintegrateReport(mergedReport)
 saveRDS(reintegratedReport, "tests/testthat/fixtures/screening-dbasFileScanning/reintegratedReportBimmen.RDS")
+
+# Test record for blank correction ####
+tempSaveDir <- withr::local_tempdir()
+pathToFixturesDir <- test_path("fixtures", "screening-dbasFileScanning")
+bt <- getSelectedMsrawfileBatches(currentMsr, "/beegfs/nts/ntsportal/msrawfiles/saale_wettin_m/spm/p1y/2024_2033/pos", "dbas")
+reports <- map(bt[[1]], \(rec) fileScanDbas(rec, compsToProcess = c("Bethanidine", "Sitagliptin", "Bezafibrate-d6")))
+reports <- removeEmptyReports(reports)
+mergedReport <- mergeReports(reports)
+reintegratedReport <- reintegrateReport(mergedReport)
+saveRDS(reintegratedReport, file.path(pathToFixturesDir, "test2.RDS"))
 
 log_info("End")
 
