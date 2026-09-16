@@ -19,6 +19,7 @@ will impact results where the batch size has changed. In these cases the change 
 The new batch structure is reported in the article Structure of NTSPortal, Section: Batch naming conventions.
 * Blanks can be added to a batch by reference to blanks in other batches/directories using the `additional_blank_path` field in msrawfiles.
 Batches (directories) consisting only of blank files are not processed.
+* Bugfix in the processing of DBAS detections: improved blank correction and implementation of minimum detection thresholds.
 
 ## Minor changes (backend)
 

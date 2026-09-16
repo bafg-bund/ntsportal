@@ -124,11 +124,20 @@ mergeReports <- function(reports) {
 cleanReport <- function(dataBox) {
   stopifnot(length(dataBox$reports$rawFiles) == length(dataBox$msrawfilesBatch))
   if (!isEmptyReport(dataBox$reports)) 
+    dataBox <- blankCorrectionDbas(dataBox)
+  if (!isEmptyReport(dataBox$reports)) 
     dataBox <- removeFalsePositives(dataBox)
   if (!isEmptyReport(dataBox$reports)) 
     dataBox <- removeDuplicateDetections(dataBox)
-  if (!isEmptyReport(dataBox$reports)) 
-    dataBox <- blankCorrectionDbas(dataBox)
+  dataBox
+}
+
+blankCorrectionDbas <- function(dataBox) {
+  blanks <- getField(dataBox$msrawfilesBatch, "blank")
+  if (all(!blanks) || all(blanks))
+    return(dataBox)
+  dataBox$reports$deleteBackground(which(!blanks), which(blanks))
+  dataBox$reports$remRawFiles(which(blanks))
   dataBox
 }
 
@@ -170,20 +179,30 @@ getCompoundsBelowMinimumDetections <- function(dataBox) {
   } else {
     minimumDetections <- getField(dataBox$msrawfilesBatch, "dbas_minimum_detections")[!blanks][1]
   }
-  peakListNonBlanks <- getPeakListNonBlanks(dataBox)
-  timesFound <- by(peakListNonBlanks, peakListNonBlanks$comp_name, nrow)
-  enoughDetections <- names(which(timesFound >= minimumDetections))
-  allComps <- unique(dataBox$reports$peakList$comp_name)
-  scarce <- allComps[!is.element(allComps, enoughDetections)]
+  peakListAnalysis <- getPeakListForMinDetectionAnalysis(dataBox)
+  if (nrow(peakListAnalysis) == 0) {
+    enoughDetections <- character(0)
+  } else {
+    timesFound <- by(peakListAnalysis, peakListAnalysis$comp_name, nrow)
+    enoughDetections <- names(which(timesFound >= minimumDetections))
+  }
+  allComps <- unique(c(dataBox$reports$peakList$comp_name, dataBox$reports$integRes$comp_name))
+  scarce <- setdiff(allComps, enoughDetections)
   if (length(scarce) == 0)
     return(emptyFalsePostivesTibble())
   tidyr::expand_grid(compName = scarce, fileIndex = seq_along(dataBox$reports$rawFiles)) 
 }
 
-getPeakListNonBlanks <- function(dataBox) {
+getPeakListForMinDetectionAnalysis <- function(dataBox) {
   blanks <- getField(dataBox$msrawfilesBatch, "blank")
   fileNamesNonBlanks <- basename(getField(dataBox$msrawfilesBatch, "path"))[!blanks]
-  dataBox$reports$peakList[dataBox$reports$peakList$samp %in% fileNamesNonBlanks, ]
+  pl <- dataBox$reports$peakList[dataBox$reports$peakList$samp %in% fileNamesNonBlanks, , drop = FALSE]
+  # Only keep detections, which are also in integRes
+  originalCols <- colnames(pl)
+  pl$samp_comp <- paste(pl$samp, pl$comp_name, sep = "_")
+  ir <- dataBox$reports$integRes
+  ir$samp_comp <- paste(ir$samp, ir$comp_name, sep = "_")
+  pl[pl$samp_comp %in% ir$samp_comp, originalCols, drop = FALSE]
 }
 
 getCompoundsNoReplicateDetections <- function(dataBox) {
@@ -228,21 +247,25 @@ getFileIndices <- function(compName, originalSampName, pl, reportRawFiles) {
   )
 }
 
-blankCorrectionDbas <- function(dataBox) {
-  blanks <- getField(dataBox$msrawfilesBatch, "blank")
-  if (all(!blanks))
-    return(dataBox)
-  dataBox$reports$deleteBackground(which(!blanks), which(blanks))
-  dataBox$reports$remRawFiles(which(blanks))
-  dataBox
-}
-
 removeDuplicateDetections <- function(dataBox) {
   dataBox$reports$peakList <- dataBox$reports$peakList[dataBox$reports$peakList$peak == "A", ]
+  dataBox$reports$integRes <- removeDuplicatesIntegRes(dataBox$reports$integRes)
   dataBox
 }
 
-
+removeDuplicatesIntegRes <- function(ir) {
+  originalCols <- colnames(ir)
+  ir$spec <- paste(ir$comp_name, ir$adduct, ir$isotopologue, ir$samp, sep = "_")
+  newRows <- by(ir, ir$spec, function(r) {
+    if (nrow(r) == 1) {
+      r
+    } else {
+      r <- r[order(r$int_h, decreasing = TRUE), , drop = FALSE]
+      r[1, , drop = FALSE]
+    } 
+  }, simplify = F) |> array2DF()
+  newRows[, originalCols, drop = FALSE]
+}
 
 emptyFalsePostivesTibble <- function() {
   tibble(compName = character(), fileIndex = numeric())

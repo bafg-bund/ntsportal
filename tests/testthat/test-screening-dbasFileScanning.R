@@ -72,30 +72,35 @@ test_that("A failed reintegration returns the original report", {
 })
 
 test_that("Blank correction works for sample and blank", {
-  boxTest <- list(reports = getMergedReportSampleAndBlank(), msrawfilesBatch = getOneSampleRecords("dbas"))
-  peaksBeforeCorrection <- nrow(boxTest$reports$peakList)
-  allComps <- unique(boxTest$reports$peakList$comp_name)
-  compsSamples <- unique(getPeakListNonBlanks(boxTest)$comp_name)
-  compsBlanks <- setdiff(allComps, compsSamples)
+  boxTest <- list(reports = getReintegratedReportDessauBatch(), msrawfilesBatch = getRecordsDessauBatch())
+  plPre <- boxTest$reports$peakList
+  irPre <- boxTest$reports$integRes
+  allCompsPre <- unique(c(plPre$comp_name, irPre$comp_name))
+  compsSamplesPre <- unique(getPeakListForMinDetectionAnalysis(boxTest)$comp_name)
   boxTest <- blankCorrectionDbas(boxTest)
-  peaksAfterCorrection <- nrow(boxTest$reports$peakList)
-  plComps <- unique(boxTest$reports$peakList$comp_name)
-  irComps <- unique(boxTest$reports$integRes$comp_name)
-  expect_true(all(plComps %in% compsSamples))
-  expect_true(all(irComps %in% compsSamples))
-  expect_false(any(compsBlanks %in% plComps))
-  expect_false(any(compsBlanks %in% irComps))
-  expect_lt(peaksAfterCorrection, peaksBeforeCorrection)
+  plPost <- boxTest$reports$peakList
+  irPost <- boxTest$reports$integRes
+  allCompsPost <- unique(c(plPost$comp_name, irPost$comp_name))
+  plPostComps <- unique(plPost$comp_name)
+  irPostComps <- unique(irPost$comp_name)
+  compsBlanks <- setdiff(allCompsPre, allCompsPost)
+  expect_contains(compsBlanks, "Olmesartan-d6")
+  expect_contains(allCompsPre, allCompsPost)
+  expect_contains(compsSamplesPre, irPostComps)
+  expect_disjoint(plPostComps, compsBlanks)
+  expect_disjoint(irPostComps, compsBlanks)
+  expect_lt(nrow(plPost), nrow(plPre))
+  expect_lt(nrow(irPost), nrow(irPre))
 })
 
 test_that("False positives are removed", {
   testData <- getReportReplicateBatch()
   originalComps <- unique(testData$report$peakList$comp_name)
-  report <- removeFalsePositives(list(reports = testData$report, msrawfilesBatch = testData$records))
-  newComps <- unique(report$peakList$comp_name)
+  dataBoxCleaned <- removeFalsePositives(list(reports = testData$report, msrawfilesBatch = testData$records))
+  newComps <- unique(dataBoxCleaned$reports$peakList$comp_name)
   expect_lt(length(newComps), length(originalComps))
-  expect_true(is.element("Propranolol", originalComps))
-  expect_false(is.element("Propranolol", newComps))
+  expect_contains(originalComps, "Propranolol")
+  expect_disjoint("Propranolol", newComps)
 }) 
 
 test_that("Replicate detections are correctly computed", {
@@ -168,6 +173,27 @@ test_that("Removing compounds with no replicate detections works for level 1 and
   compsFoundAfter <- subset(after, samp == "B14_pos1.mzXML", comp_name, drop = T)
   expect_contains(compsFoundAfter, "Benzyl-triethylammonium")
   expect_disjoint("3-Phenylpyridine", compsFoundAfter)
+})
+
+test_that("Duplicate detections are removed from peaklist and reintegration results", {
+  dataBoxDup <- list(reports = getReintegratedReportDessauBatch(), msrawfilesBatch = getRecordsDessauBatch())
+  newRowPl <- dataBoxDup$reports$peakList[10, , drop = FALSE]
+  newRowPl[, "peak"] <- "B"
+  newRowIr <- dataBoxDup$reports$integRes |> filter(comp_name == newRowPl$comp_name, samp == newRowPl$samp)
+  newRowIr[1, "int_h"] <- 100
+  dataBoxDup$reports$peakList <- rbind(dataBoxDup$reports$peakList, newRowPl)
+  dataBoxDup$reports$integRes <- rbind(dataBoxDup$reports$integRes, newRowIr)
+  dataBoxDup <- removeDuplicateDetections(dataBoxDup)
+  expect_disjoint(dataBoxDup$reports$peakList$peak, "B")
+  expect_false(any(duplicated(dataBoxDup$reports$integRes[, c("comp_name", "adduct", "isotopologue", "samp")])))
+  
+  # very large integRes
+  newRowIr <- newRowIr[rep(1, 10000), ]
+  newRowIr[ , "int_h"] <- round(runif(10000, 10, 1e5))
+  newRowIr[ , "comp_name"] <- stringi::stri_rand_strings(10000, 5)
+  dataBoxDup$reports$integRes <- rbind(dataBoxDup$reports$integRes, newRowIr)
+  dataBoxDup <- removeDuplicateDetections(dataBoxDup)
+  expect_gt(nrow(dataBoxDup$reports$integRes), 10000)
 })
 
 # Copyright 2026 Bundesanstalt für Gewässerkunde
