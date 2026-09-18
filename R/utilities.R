@@ -75,6 +75,12 @@ testConnection <- function() {
     stop("Unable to connect to elasticSearch")
 }
 
+#' Get a field from a list of NTSP-records
+#' @param listRecords list of `ntspRecord`
+#' @param fieldName name of field of interest
+#' @param quiet boolean, silence messages when nothing found
+#' @returns for unitary fields, a vector of appropriate type, otherwise a list
+#' @export
 getField <- function(listRecords, fieldName, quiet = FALSE) {
   if (!fieldAvailable(listRecords, fieldName)) {
     if (!quiet)

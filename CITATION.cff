@@ -18,7 +18,7 @@ authors:
   given-names: "Arne"
 title: "ntsportal - Functions for building and managing the NTSPortal database"
 version: 26.1
-date-released: 2026-08-13
+date-released: 2026-09-18
 url: "https://github.com/bafg-bund/ntsportal"
 preferred-citation:
   type: article

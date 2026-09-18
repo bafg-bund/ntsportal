@@ -5,6 +5,7 @@ resetConnectionCredentials()
 
 dbasBfgTable <- "ntsp26.1_feature_bfg"
 wildCardTable <- "ntsp26.1_feature*"
+options(ntsportal.elasticsearchHostUrl = "https://elastic.dmz.bafg.de")
 
 # Once tests complete, return to old state
 resetConnectionCredentials()

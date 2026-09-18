@@ -159,6 +159,6 @@ reference:
 - title: utilities and ntsportal modules
   desc:  Miscellaneous and package initialization functions
 - contents:
-  - esSearchPaged
+  - getField
   - makeMappingsTbl
   - ntsportal
