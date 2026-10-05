@@ -25,15 +25,24 @@ recordsToBatches <- function(records, msrawfilesIndex) {
 
 addMoreBlanksToBatch <- function(records, msrawfilesIndex) {
   if (fieldAvailable(records, "additional_blank_path")) {
-    # Field is the same for the whole batch (see validation)
-    pathNewBlanks <- getField(records[1], "additional_blank_path")[[1]]
+    pathNewBlanks <- getField(records, "additional_blank_path") |> discard(\(x) is.na(x[1])) |> 
+      unlist() |> unique()
     screeningType <- stringr::str_match(class(records[[1]])[1], "^(\\w+)MsrawfilesRecord$")[,2]
     stopifnot(screeningType %in% c("nts", "dbas"))
-    recordsNewBlanks <- getTableAsRecords(
-      getDbComm(), msrawfilesIndex, 
-      searchBlock = list(query = list(terms = list(path = as.list(pathNewBlanks)))), sortField = "start", 
-      fields = msrawfilesFieldsForProcessing(screeningType),
-      recordConstructor = switch(screeningType, dbas = newDbasMsrawfilesRecord, nts = newNtsMsrawfilesRecord)
+    if (length(pathNewBlanks) > 1) {
+      sl <- list(query = list(terms = list(path = pathNewBlanks)))  
+    } else {
+      sl <- list(query = list(term = list(path = pathNewBlanks)))
+    }
+    recordsFound <- getNrow(getDbComm(), msrawfilesIndex, sl)
+    stopifnot(recordsFound == length(pathNewBlanks))
+    suppressMessages(
+      recordsNewBlanks <- getTableAsRecords(
+        getDbComm(), msrawfilesIndex, 
+        searchBlock = list(query = list(terms = list(path = as.list(pathNewBlanks)))), sortField = "start", 
+        fields = msrawfilesFieldsForProcessing(screeningType),
+        recordConstructor = switch(screeningType, dbas = newDbasMsrawfilesRecord, nts = newNtsMsrawfilesRecord)
+      )
     )
     c(records, recordsNewBlanks)
   } else {

@@ -125,8 +125,7 @@ fieldsToCheckUniformAllSamples.msrawfilesBatch <- function(msrawfilesBatch) {
     "pol",
     "data_source",
     "chrom_method",
-    "internal_standard",
-    "additional_blank_path"
+    "internal_standard"
   )
 }
 #' @export
