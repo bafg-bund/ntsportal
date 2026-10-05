@@ -110,6 +110,15 @@ addRawfiles(rfindex, "eIRBnYkBcjCrX8D7v4H5", newFiles[4:17], newStation = "filen
 Example `filename`: `OBF34910_20230821_Zschopau_pos.mzXML`  
 Example `dbas_station_regex`: `^(OBF\\d{5})_`
 
+## Adding quality control measurements
+
+QC measurements are made together with the samples in a batch but are added to separate processing batches to be processed differently. This is because there is usually only one QC measurement per batch but multiple measurements are needed for multiple detection filtering.
+
+**Important**: The name of the measurement batch, e.g., "donau_jochenstein_m/spm/p1m/2024/pos" is added to the `tag` array so that the batch from which the QC sample originated is recorded. 
+
+
+
+
 
 <!-- Copyright 2026 Bundesanstalt für Gewässerkunde -->
 <!-- This file is part of ntsportal -->

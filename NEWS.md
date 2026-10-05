@@ -15,27 +15,28 @@ with different instruments appear as separate series.
 * Run-time fields were removed from feature documents and instead are computed during ingest using the ingest pipeline 
 defined in `ingestPipelines/ingest-feature.json`. This increases ingest time slightly but greatly improves search performance.
 * Reorganization of batches holding measurement files for improved processing performance and for a more logical structure. This
-will impact results where the batch size has changed. In these cases the change is marked as a time-series annotation.
-The new batch structure is reported in the article Structure of NTSPortal, Section: Batch naming conventions.
+will impact results where the batch size has changed. The batch structure is explained on the time series dashboards and 
+in some cases is marked as a time-series annotation. The new batch structure and naming conventions is reported in the article 
+Structure of NTSPortal, Section: Batch naming conventions.
 * Blanks can be added to a batch by reference to blanks in other batches/directories using the `additional_blank_path` field in msrawfiles.
 Batches (directories) consisting only of blank files are not processed.
-* Bugfix in the processing of DBAS detections: improved blank correction and implementation of minimum detection thresholds.
+* Bugfix in the processing of DBAS detections: improvements to blank correction and filtering by minimum MS² detection thresholds.
 
 ## Minor changes (backend)
 
-* When no peaks are found in a batch, one feature record with the path and feature_table_alias of the first file is still
+* When no peaks are found in a batch, one feature record with the `path` and `feature_table_alias` of the first file is still
 ingested so that the processing attempt is documented. 
 * Changed field type to `long` for fields `area` and `intensity` in `feature` tables.
 * Added fields `proteowizard_version` and `proteowizard_settings` to `msrawfiles` to record measurement file conversion from vendor format.
-* Added a bash CLI script for standard processing and ingesting tasks. See `inst/shellInterface/ntsp`. Can be 
+* Added a bash CLI script for standard processing and ingesting tasks. See `inst/shellInterface/ntsp`. IT can be 
 linked into system path for access in the shell.
 * Removed deprecated functions from R-package `elastic`
 * Updated various dependencies to versions:
   + R = 4.6.1
   + R-tidyverse = 2.0.0
   + Python = 3.12.13
-  + ElasticSearch = 9.4.2
-  + Python-elasticsearch = 9.4.1
+  + ElasticSearch = 9.5.3
+  + Python-elasticsearch = 9.5.1
   + R-ntsworkflow = 0.2.11
   + CSL = 26.2
 

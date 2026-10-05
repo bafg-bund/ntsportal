@@ -2,7 +2,7 @@ library(ntsportal)
 library(testthat)
 
 tableName <- "ntsp26.1_feature*"
-
+tableName <- "ntsp26.1_index_feature_v260918151755_upb"
 test_that("All batches have at least 2 MS2-RT level matches", {
   batchesNoMs2 <- getTableByEsql(glue('
     FROM {tableName}

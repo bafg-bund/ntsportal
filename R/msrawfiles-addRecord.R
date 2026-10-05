@@ -120,7 +120,7 @@ addRawfiles <- function(
     ignoreValidation = FALSE
 ) {
   
-  checkArgumentValidity(rfIndex, templateId, newPaths, newStart, newStation, newStationList)
+  checkArgumentValidity(rfIndex, templateId, newPaths, newStart, newStation, newStationList, dirMeasurmentFiles)
   
   newPaths <- removePreviouslyAdded(rfIndex, newPaths)
   
@@ -195,8 +195,11 @@ addRawfiles <- function(
 }
 
 
-checkArgumentValidity <- function(rfIndex, templateId, newPaths, newStart, newStation, newStationList) {
+checkArgumentValidity <- function(rfIndex, templateId, newPaths, newStart, newStation, newStationList, dirMeasurmentFiles) {
   checkResult <- TRUE
+  if (!dir.exists(dirMeasurmentFiles)) {
+    checkResult <- addError(checkResult, "dirMeasurmentFiles does not exist")
+  }
   if (length(templateId) != 1) {
     checkResult <- addError(checkResult, "Only one templateId allowed")
   }

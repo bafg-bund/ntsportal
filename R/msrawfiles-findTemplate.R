@@ -8,15 +8,41 @@
 #' @param station Station ID name 
 #' @param matrix character default is "spm"
 #' @param duration numeric, default 365
+#' @param instrumentName instrument used for measurement
 #'
 #' @return ES-ID of template record in msrawfiles index
 #' @export
 #'
-findTemplateId <- function(rfIndex, blank = FALSE, pol = "pos", station = "rhein_ko_l", matrix = "spm", duration = "P1D") {
+findTemplateId <- function(rfIndex, blank = FALSE, pol = "pos", station = "rhein_ko_l", matrix = "spm", 
+                           duration = "P1D", instrumentName = "wasser_tof") {
   idTable <- getTableByEsql(glue('
    FROM {rfIndex} METADATA _id | 
-   WHERE blank == {blank} and pol == "{pol}" and station == "{station}" and matrix == "{matrix}" and 
-     duration == "{duration}" | 
+   WHERE blank == {blank} AND pol == "{pol}" AND station == "{station}" AND matrix == "{matrix}" AND 
+     duration == "{duration}" AND instrument_name == "{instrumentName}" | 
+   KEEP _id |
+   LIMIT 1
+  '))
+  ids <- pull(idTable, "_id")
+  if (length(ids) == 0) {
+    warning("Search returned no hits")
+    return("")
+  }
+  ids[1]
+}
+
+#' Get a template ID based on batchname pattern
+#'
+#' @param rfIndex index name for rawfiles index 
+#' @param batchName batchname pattern (wildcards allowed, uses ES|QL `LIKE` command)
+#' @param isBlank boolean default is FALSE
+#'
+#' @return ES-ID of template record in msrawfiles index
+#' @export
+#'
+findTemplateByBatchname <- function(rfIndex, batchName, blank = FALSE) {
+  idTable <- getTableByEsql(glue('
+   FROM {rfIndex} METADATA _id | 
+   WHERE blank == {blank} AND batchname LIKE """{batchName}""" | 
    KEEP _id |
    LIMIT 1
   '))
