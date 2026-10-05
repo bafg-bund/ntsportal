@@ -66,7 +66,8 @@ test_that("Location information is copied from msrawfiles based on dbas_station_
   saveDir <- withr::local_tempdir()
   newFilePath <- file.path(saveDir, newFileName)
   file.create(newFilePath)
-  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m")
+  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m", 
+                               instrumentName = "sediment_tof")
   suppressWarnings(addRawfiles(
     rfIndex = testIndexName, 
     templateId = templateId,
@@ -91,7 +92,8 @@ test_that("Batch with an unknown filename is not processed", {
   saveDir <- withr::local_tempdir()
   newFilePaths <- file.path(saveDir, newFileNames)
   file.create(newFilePaths)
-  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m")
+  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m",
+                               instrumentName = "sediment_tof")
   expect_snapshot_error(suppressWarnings(addRawfiles(
     rfIndex = testIndexName, 
     templateId = templateId,
@@ -112,7 +114,8 @@ test_that("A station can be passed as a list", {
   saveDir <- withr::local_tempdir()
   newFilePath <- file.path(saveDir, newFileName)
   file.create(newFilePath)
-  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m")
+  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m",
+                               instrumentName = "sediment_tof")
   suppressWarnings(addRawfiles(
     rfIndex = testIndexName, 
     templateId = templateId,
@@ -170,7 +173,8 @@ test_that("Batch with two different locations is correctly processed", {
   saveDir <- withr::local_tempdir()
   newFilePath <- file.path(saveDir, newFileName)
   file.create(newFilePath)
-  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m")
+  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m",
+                               instrumentName = "sediment_tof")
   rec <- getTableAsRecords(dbComm, testIndexName, list(query = list(ids = list(values = templateId))))
   rec[[1]]$station <- "foobar_station"
   rec[[1]]$loc$lon <- 1.2345
@@ -186,7 +190,8 @@ test_that("Batch with two different locations is correctly processed", {
     deleteRow(dbComm, testIndexName, qTest)
   newFilePaths <- file.path(saveDir, newFileNames)
   file.create(newFilePaths)
-  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m")
+  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m",
+                               instrumentName = "sediment_tof")
   suppressWarnings(addRawfiles(
     rfIndex = testIndexName, 
     templateId = templateId,

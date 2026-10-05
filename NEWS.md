@@ -19,9 +19,7 @@ will impact results where the batch size has changed. The batch structure is exp
 in some cases is marked as a time-series annotation. The new batch structure and naming conventions is reported in the article 
 Structure of NTSPortal, Section: Batch naming conventions.
 * Blanks can be added to a batch by reference to blanks in other batches/directories using the `additional_blank_path` field in msrawfiles.
-Blanks are not specific to a measurement file. All blanks in a batch, including all blanks found in the 
-`additional_blank_path` fields of all files in the batch are considered together when performing blank correction.
-Batches (directories) consisting only of blank files are not processed.
+Blanks are not specific to a measurement file. Additional blanks can be added to any file or all files in the batch. 
 * Bugfix in the processing of DBAS detections: improvements to blank correction and filtering by minimum MS² detection thresholds.
 
 ## Minor changes (backend)

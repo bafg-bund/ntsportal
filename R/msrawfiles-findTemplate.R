@@ -10,7 +10,7 @@
 #' @param duration numeric, default 365
 #' @param instrumentName instrument used for measurement
 #'
-#' @return ES-ID of template record in msrawfiles index
+#' @return ES-ID of template record in msrawfiles index, returns empty string when no id found
 #' @export
 #'
 findTemplateId <- function(rfIndex, blank = FALSE, pol = "pos", station = "rhein_ko_l", matrix = "spm", 
@@ -22,11 +22,12 @@ findTemplateId <- function(rfIndex, blank = FALSE, pol = "pos", station = "rhein
    KEEP _id |
    LIMIT 1
   '))
-  ids <- pull(idTable, "_id")
-  if (length(ids) == 0) {
+  if (nrow(idTable) == 0) {
     warning("Search returned no hits")
     return("")
   }
+  ids <- pull(idTable, "_id")
+  
   ids[1]
 }
 
@@ -46,11 +47,11 @@ findTemplateByBatchname <- function(rfIndex, batchName, blank = FALSE) {
    KEEP _id |
    LIMIT 1
   '))
-  ids <- pull(idTable, "_id")
-  if (length(ids) == 0) {
+  if (nrow(idTable) == 0) {
     warning("Search returned no hits")
     return("")
   }
+  ids <- pull(idTable, "_id")
   ids[1]
 }
 
