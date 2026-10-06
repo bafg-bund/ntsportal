@@ -94,7 +94,7 @@ test_that("Batch with an unknown filename is not processed", {
   file.create(newFilePaths)
   templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m",
                                instrumentName = "sediment_tof")
-  expect_snapshot_error(suppressWarnings(addRawfiles(
+  expect_snapshot_error(addRawfiles(
     rfIndex = testIndexName, 
     templateId = templateId,
     newPaths = newFilePaths, 
@@ -102,7 +102,7 @@ test_that("Batch with an unknown filename is not processed", {
     dirMeasurmentFiles = saveDir,
     prompt = F,
     saveDirectory = saveDir
-  )))
+  ))
   expect_equal(getNrow(dbComm, testIndexName, qTest), 0)
 })
 
@@ -213,6 +213,15 @@ test_that("Batch with two different locations is correctly processed", {
   # cleanup
   deleteRow(dbComm, testIndexName, qTest)
   deleteRow(dbComm, testIndexName, qTemplateFile)
+})
+
+test_that("checking additional blank paths results in an error if the records are not present", {
+  recDbas <- getMsrawfilesTestRecords("dbas")
+  expect_true(checkAdditionalBlankPathsAreRecords(recDbas, testIndexName))
+  expect_true(checkAdditionalBlankPathsAreRecords(recDbas[1], testIndexName))
+  recDbas[[1]]$additional_blank_path <- c("foo", "bar")
+  expect_error(checkAdditionalBlankPathsAreRecords(recDbas, testIndexName))
+  expect_error(checkAdditionalBlankPathsAreRecords(recDbas[1], testIndexName))
 })
 
 # Copyright 2026 Bundesanstalt für Gewässerkunde

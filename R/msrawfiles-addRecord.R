@@ -176,8 +176,9 @@ addRawfiles <- function(
     },
     stop("Unknown input, aborting.")
   )
+  if (validateRecordsMsrawfiles(newRecords) && checkAdditionalBlankPathsAreRecords(newRecords, rfIndex)) 
+    appendRecords(getDbComm(), rfIndex, newRecords) 
   
-  appendRecords(getDbComm(), rfIndex, newRecords)
   ids <- getIdsNewRecords(rfIndex, newRecords)
   message("Documents were uploaded with the IDs")
   message(quoteAndComma(ids))
@@ -193,6 +194,7 @@ addRawfiles <- function(
   
   invisible(ids)
 }
+
 
 
 checkArgumentValidity <- function(rfIndex, templateId, newPaths, newStart, newStation, newStationList, dirMeasurmentFiles) {
@@ -488,6 +490,16 @@ checkLocIsUniform <- function(stationHits) {
       }
     )
   }
+}
+
+checkAdditionalBlankPathsAreRecords <- function(recs, msr) {
+  paths <- getField(recs, "additional_blank_path", quiet = TRUE) |> unlist() |> unique() |> discard(is.na)
+  if (length(paths) == 0)
+    return(TRUE)
+  isOk <- all(map_lgl(paths, \(p) getNrow(getDbComm(), msr, list(query = list(term = list(path = p)))) == 1))
+  if (!isOk)
+    stop("additional_blank_path(s) ", paste(paths, collapse = ", "), " not entered as records.")
+  isOk
 }
 
 addOptionalStationField <- function(field, resListTemp, hits) {

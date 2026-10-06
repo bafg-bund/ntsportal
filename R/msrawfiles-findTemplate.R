@@ -55,5 +55,28 @@ findTemplateByBatchname <- function(rfIndex, batchName, blank = FALSE) {
   ids[1]
 }
 
+#' Get a template ID based on ES|QL search
+#'
+#' @param rfIndex index name for rawfiles index 
+#' @param esqlWhere ES|QL WHERE fragment as text
+#'
+#' @return ES-ID of template record in msrawfiles index, empty string for no hits
+#' @export
+#'
+getIdsByEsql <- function(rfIndex, where) {
+  idTable <- getTableByEsql(glue('
+   FROM {rfIndex} METADATA _id | 
+   WHERE {where} | 
+   KEEP _id |
+   LIMIT 10000
+  '))
+  if (nrow(idTable) == 0) {
+    warning("Search returned no hits")
+    return("")
+  }
+  pull(idTable, "_id")
+}
+
+
 # Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal
