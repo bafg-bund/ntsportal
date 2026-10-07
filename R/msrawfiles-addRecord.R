@@ -176,7 +176,8 @@ addRawfiles <- function(
     },
     stop("Unknown input, aborting.")
   )
-  if (validateRecordsMsrawfiles(newRecords) && checkAdditionalBlankPathsAreRecords(newRecords, rfIndex)) 
+  
+  if (checkNewRecordsValidity(newRecords, rfIndex)) 
     appendRecords(getDbComm(), rfIndex, newRecords) 
   
   ids <- getIdsNewRecords(rfIndex, newRecords)
@@ -312,6 +313,13 @@ newRecordFromTemplate <- function(pth, newStart, newStation, template, rfIndex, 
     warning("Record validation failed for file ", pth)
     
   rec
+}
+
+checkNewRecordsValidity <- function(newRecords, rfIndex) {
+  dbasTestRecs <- map(newRecords, newDbasMsrawfilesRecord)
+  ntsTestRecs <- map(newRecords, newNtsMsrawfilesRecord)
+  validateRecordsMsrawfiles(dbasTestRecs) && validateRecordsMsrawfiles(ntsTestRecs) &&
+    checkAdditionalBlankPathsAreRecords(newRecords, rfIndex)
 }
 
 addPathToRecord <- function(rec, pth) {

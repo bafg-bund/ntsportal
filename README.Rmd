@@ -1,5 +1,5 @@
 ---
-title: "ntsportal 25.3"
+title: "ntsportal 26.1"
 output: 
   github_document:
     toc: true
@@ -92,7 +92,7 @@ ping(getDbComm())
 
 # Citations
 
-- [Jewell, K.S. et al. (2026) Development of a retrospective processing and data aggregation platform for non-target screening of surface waters](https://doi.org/10.1186/s12302-026-01477-7)
+- [Jewell, K. S., N. Hermes, F. Prodöhl, O. Lessmann, G. Dierkes, B. Ehlig, T. Schulze, E. Winter, R. M. Wallis, A. L. Kronsbein, J. Koschorreck and A. Wick (2026) Development of a retrospective processing and data aggregation platform for non-target screening of surface waters](https://doi.org/10.1186/s12302-026-01477-7)
 
 # External links
 

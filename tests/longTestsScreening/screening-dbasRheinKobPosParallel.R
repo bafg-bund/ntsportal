@@ -2,7 +2,6 @@
 
 # nohup Rscript screening-dbasRheinKobPosParallel.R &> dbasRheinKobPosParallel.log &
 library(ntsportal)
-connectNtsportal()
 tempSaveDir <- "testResults-dbasRheinKobPosParallel/"
 unlink(tempSaveDir, recursive = T)
 dir.create(tempSaveDir)

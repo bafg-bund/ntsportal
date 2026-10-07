@@ -55,7 +55,7 @@ findTemplateByBatchname <- function(rfIndex, batchName, blank = FALSE) {
   ids[1]
 }
 
-#' Get a template ID based on ES|QL search
+#' Get a template ID based on ES|QL "where statement" search
 #'
 #' @param rfIndex index name for rawfiles index 
 #' @param esqlWhere ES|QL WHERE fragment as text
