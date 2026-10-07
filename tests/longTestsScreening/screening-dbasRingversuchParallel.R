@@ -1,5 +1,4 @@
 
-
 # nohup Rscript screening-dbasRingversuchParallel.R &> dbasRingversuchParallel.log &
 # nohup ntsp process -f -o "testResults-dbasRingversuchParallel" -p 4 -l "dbasRheinKobPosParallel.log" "/beegfs/nts/ntsportal/msrawfiles/bfg_lab/ringversuch/fants_2026" &
 library(ntsportal)

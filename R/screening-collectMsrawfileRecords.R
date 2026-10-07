@@ -35,7 +35,17 @@ addMoreBlanksToBatch <- function(records, msrawfilesIndex) {
       sl <- list(query = list(term = list(path = pathNewBlanks)))
     }
     recordsFound <- getNrow(getDbComm(), msrawfilesIndex, sl)
-    stopifnot(recordsFound == length(pathNewBlanks))
+    if (recordsFound != length(pathNewBlanks)) {
+      if (recordsFound == 0) {
+        stop("additional_blank_path not found: ", paste(pathNewBlanks, collapse = ", "))
+      } else if (recordsFound < length(pathNewBlanks)) {
+        pathsFound <- getTableByQuery(msrawfilesIndex, sl, fields = "path")$path
+        pathsNotFound <- setdiff(pathNewBlanks, pathsFound)
+        stop("additional_blank_path not found: ", paste(pathsNotFound, collapse = ", "))
+      } else {
+        stop("Error in additional_blank_path, files not found")
+      }
+    }
     suppressMessages(
       recordsNewBlanks <- getTableAsRecords(
         getDbComm(), msrawfilesIndex, 

@@ -51,6 +51,24 @@ test_that("Additional blank records are added to a batch if these are listed", {
   expect_contains(basename(paths), "BL_1_pos.mzXML")
 })
 
+test_that("A none-existant addition_blank_path returns an error", {
+  batchName <- "/beegfs/nts/ntsportal/msrawfiles/unit_tests/olmesartan-d6-bisoprolol"
+  tempTestIndex <-  "ntsp_test_msr"
+  if (isTable(dbComm, tempTestIndex))
+    deleteTable(dbComm, tempTestIndex)
+  suppressMessages(
+    copyTable(dbComm, testIndexName, tempTestIndex, "msrawfiles")
+  )
+  sl <- list(query = list(term = list(batchname = "/beegfs/nts/ntsportal/msrawfiles/unit_tests/olmesartan-d6-bisoprolol")))
+  suppressMessages(setValueInField(dbComm, tempTestIndex, "additional_blank_path", 
+                                   list("foobar"), sl))
+  expect_snapshot_error(suppressMessages(getSelectedMsrawfileBatches(tempTestIndex, batchName, "dbas")))
+  suppressMessages(setValueInField(dbComm, tempTestIndex, "additional_blank_path", 
+                                   list("foobar", "/beegfs/nts/ntsportal/msrawfiles/unit_tests/BL_1_pos.mzXML"), sl))
+  expect_snapshot_error(suppressMessages(getSelectedMsrawfileBatches(tempTestIndex, batchName, "dbas")))
+  suppressMessages(deleteTable(dbComm, tempTestIndex))
+})
+
 test_that("Different additional_blank_path in different records in a batch are collected (union)", {
   batchName <- "/beegfs/nts/ntsportal/msrawfiles/unit_tests/olmesartan-d6-bisoprolol"
   tempTestIndex <-  "ntsp_test_msr"
