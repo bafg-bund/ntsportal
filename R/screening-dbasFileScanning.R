@@ -38,6 +38,8 @@ scanBatch.dbasMsrawfilesBatch <- function(msrawfilesBatch, compsToProcess = NULL
   dataBox$reports <- map(msrawfilesBatch, \(rec) fileScanDbas(rec, compsToProcess = compsToProcess, progBar = progBar))
   dataBox <- removeEmptyReports(dataBox)
   dataBox$reports <- mergeReports(dataBox$reports)
+  # First of two delete backgrounds, correction needed before reintegration, otherwise detection in blank is gap-filled
+  dataBox <- performDeleteBackground(dataBox)   
   dataBox$reports <- reintegrateReport(dataBox$reports)
   dataBox <- cleanReport(dataBox)
   dbasResults <- convertToDbasResult(dataBox$reports)
@@ -136,8 +138,16 @@ blankCorrectionDbas <- function(dataBox) {
   blanks <- getField(dataBox$msrawfilesBatch, "blank")
   if (all(!blanks) || all(blanks))
     return(dataBox)
-  dataBox$reports$deleteBackground(which(!blanks), which(blanks))
+  dataBox <- performDeleteBackground(dataBox)
   dataBox$reports$remRawFiles(which(blanks))
+  dataBox
+}
+
+performDeleteBackground <- function(dataBox) {
+  blanks <- getField(dataBox$msrawfilesBatch, "blank")
+  if (all(!blanks) || all(blanks))
+    return(dataBox)
+  dataBox$reports$deleteBackground(which(!blanks), which(blanks))
   dataBox
 }
 

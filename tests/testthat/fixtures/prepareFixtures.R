@@ -197,6 +197,7 @@ reintegratedReport <- reintegrateReport(mergedReport)
 saveRDS(reintegratedReport, "tests/testthat/fixtures/screening-dbasFileScanning/reintegratedReportBimmen.RDS")
 
 # Test record for blank correction ####
+log_info("Section: test record for blank correction")
 tempSaveDir <- withr::local_tempdir()
 pathToFixturesDir <- test_path("fixtures", "screening-dbasFileScanning")
 bt <- getSelectedMsrawfileBatches(currentMsr, "/beegfs/nts/ntsportal/msrawfiles/saale_wettin_m/spm/p1y/2024_2033/pos", "dbas")
@@ -205,6 +206,21 @@ reports <- removeEmptyReports(reports)
 mergedReport <- mergeReports(reports)
 reintegratedReport <- reintegrateReport(mergedReport)
 saveRDS(reintegratedReport, file.path(pathToFixturesDir, "test2.RDS"))
+
+# testmzXML files for PEG-12-NH4-hessen (found only in blank)
+log_info("Section: test record for blank correction example PEG-12 in Hessen")
+batchDirectory <- "/beegfs/nts/ntsportal/msrawfiles/hessen/water/hessen_II/2021/202110/20211020/pos"
+bts <- getSelectedMsrawfileBatches(index, batchDirectory, "dbas")
+newFiles <- keep(bts[[1]], \(x) grepl("052_149_13-09-2021_Kinzig_pos", x$path) || 
+                   grepl("054_215_13-09-2021_Lahn_pos", x$path) || grepl("MQ_HessenII_Blank_20211021_pos", x$path))
+pathsToModify <- getField(newFiles, "path")
+fldr <- file.path("fixtures", "screening-dbasFileScanning", "measurement-files")
+newMeasFilePath <- test_path(fldr, basename(pathsToModify))
+purrr::walk2(pathsToModify, newMeasFilePath, \(x, y) subsetMzxml(x, y, c(6, 6.3)))
+newFiles <- newDbasMsrawfilesBatch(newFiles)
+batchRecordsPath <- test_path(fldr, "dbasMsrawfilesBatch.RDS")
+saveRDS(newFiles, batchRecordsPath)
+
 
 log_info("End")
 

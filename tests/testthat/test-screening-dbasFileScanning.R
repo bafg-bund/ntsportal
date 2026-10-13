@@ -160,7 +160,8 @@ test_that("When non unitary field missing in one record the ruturn value is a li
 })
 
 test_that("Removing compounds with no replicate detections works for level 1 and level 2 annotations", {
-  testReportBim <- ntsworkflow::loadReport(F, test_path("fixtures", "screening-dbasFileScanning", "reintegratedReportBimmen.RDS"))
+  testReportBim <- ntsworkflow::loadReport(F, test_path("fixtures", "screening-dbasFileScanning", 
+                                                        "reintegratedReportBimmen.RDS"))
   testRecordsBim <- readRDS(test_path("fixtures", "screening-dbasFileScanning", "batchBimmen.RDS"))
   # check that "3-Phenylpyridine" in B14
   before <- testReportBim$integRes
@@ -194,6 +195,20 @@ test_that("Duplicate detections are removed from peaklist and reintegration resu
   dataBoxDup$reports$integRes <- rbind(dataBoxDup$reports$integRes, newRowIr)
   dataBoxDup <- removeDuplicateDetections(dataBoxDup)
   expect_gt(nrow(dataBoxDup$reports$integRes), 10000)
+})
+
+test_that("A compound/adduct detected only in blank is not reintegrated accross all samples", {
+  batchModifiedFiles <- readRDS(test_path("fixtures", "screening-dbasFileScanning", "measurement-files", 
+                                          "dbasMsrawfilesBatch.RDS"))
+  folderPath <- file.path("fixtures", "screening-dbasFileScanning", "measurement-files")
+  filenames <- basename(getField(batchModifiedFiles, "path"))
+  newMeasFilePath <- test_path(folderPath, filenames)
+  batchModifiedFiles <- map2(batchModifiedFiles, newMeasFilePath, \(x, y) {x$path <- y; x})
+  batchModifiedFiles <- newDbasMsrawfilesBatch(batchModifiedFiles)
+  res <- scanBatch(batchModifiedFiles, compsToProcess = "PEG-12")
+  integrationRes <- distinct(res$reintegrationResults[, c("comp_name", "adduct")])
+  expect_disjoint("[M+NH4]+", integrationRes$adduct)
+  expect_contains("[M+H]+", integrationRes$adduct)
 })
 
 # Copyright 2026 Bundesanstalt für Gewässerkunde
