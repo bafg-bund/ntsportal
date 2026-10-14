@@ -1,0 +1,10 @@
+devtools::load_all("~/ntsportal_repo")
+options(ntsportal.elasticsearchHostUrl = "https://elastic.bafg.de")
+elastic_transport <- reticulate::import("elastic_transport")
+db <- getDbComm()
+elastic_transport$debug_logging()
+try(getTableByEsql('FROM ntsp26.1_msrawfiles | WHERE batchname LIKE """*frame*pos""" | KEEP filename'))
+msr <- "ntsp26.1_msrawfiles"
+try(getTableByQuery(msr, fields = "path"))
+try(createBackupMsrawfiles(msr))
+try(createNewTable(db, "foobar", "msrawfiles"))
