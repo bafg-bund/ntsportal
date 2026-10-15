@@ -18,8 +18,9 @@ knitr::opts_chunk$set(
 
 - Filenames always use lowercase letters (a-z) because Windows ignores capitalization while Linux does not.
 - Replicates are named `extrepX` or `injrepX` for extraction and injection replicates, respectively. X is a number 1-9.
-- Parameters to insert are indicated with `<...>` all other text is fixed and must be copied exactly.
-- Optional parameters are given additionally in square brackets `[...]`
+- In the examples below
+  + parameters to insert are indicated with `<...>` all other text is fixed and must be copied exactly.
+  + Optional parameters are given additionally in square brackets `[...]`
 
 ## General parameter descriptions
 - `<pol>`: polarity ("pos" or "neg")

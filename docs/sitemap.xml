@@ -26,6 +26,7 @@
 <url><loc>https://docs.ntsportal.bafg.de/reference/PythonDbComm.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/addRawfiles.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/addValueToArray.html</loc></url>
+<url><loc>https://docs.ntsportal.bafg.de/reference/appendRecords.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/changeAliasAddress.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/changeMsrawfileFilename.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/changeMsrawfilePath.html</loc></url>
@@ -38,11 +39,15 @@
 <url><loc>https://docs.ntsportal.bafg.de/reference/createBackupMsrawfiles.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/dbaScreeningNewBatches.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/dbaScreeningOneBatch.html</loc></url>
+<url><loc>https://docs.ntsportal.bafg.de/reference/deleteRow.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/deleteTable.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/esSearchPaged.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/executeEnrichPolicy.html</loc></url>
+<url><loc>https://docs.ntsportal.bafg.de/reference/findTemplateByBatchname.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/findTemplateId.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/getDbComm.html</loc></url>
+<url><loc>https://docs.ntsportal.bafg.de/reference/getField.html</loc></url>
+<url><loc>https://docs.ntsportal.bafg.de/reference/getIdsByEsql.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/getNrow.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/getTableAsRecords.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/getTableByEsql.html</loc></url>
@@ -50,6 +55,7 @@
 <url><loc>https://docs.ntsportal.bafg.de/reference/getUniqueValues.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/index.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/ingestFeatureRecords.html</loc></url>
+<url><loc>https://docs.ntsportal.bafg.de/reference/installShellInterface.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/isTable.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/makeMappingsTbl.html</loc></url>
 <url><loc>https://docs.ntsportal.bafg.de/reference/msrawfilesSetVersion.html</loc></url>

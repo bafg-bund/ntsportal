@@ -2,7 +2,7 @@
 % Please edit documentation in R/msrawfiles-findTemplate.R
 \name{getIdsByEsql}
 \alias{getIdsByEsql}
-\title{Get a template ID based on ES|QL search}
+\title{Get a template ID based on ES|QL "where statement" search}
 \usage{
 getIdsByEsql(rfIndex, where)
 }
@@ -15,5 +15,5 @@ getIdsByEsql(rfIndex, where)
 ES-ID of template record in msrawfiles index, empty string for no hits
 }
 \description{
-Get a template ID based on ES|QL search
+Get a template ID based on ES|QL "where statement" search
 }

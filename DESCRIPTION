@@ -47,4 +47,4 @@ VignetteBuilder: knitr
 Config/testthat/edition: 3
 URL: https://docs.ntsportal.bafg.de
 Config/Needs/website: rmarkdown
-Config/roxygen2/version: 8.1.0
+Config/roxygen2/version: 8.1.1

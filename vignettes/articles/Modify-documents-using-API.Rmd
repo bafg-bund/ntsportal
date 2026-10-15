@@ -20,15 +20,14 @@ The functions found in the `R/dbInterface-DbComm.R` module can cover typical wor
 
 # Using the Elasticsearch "Developer Tools" console
 
-Most tasks can be accomplished with `ntsportal`. If more flexibility is needed, use the "Developer Tools" console. 
+Most tasks can be accomplished with `ntsportal`. If more flexibility is needed, use the "Developer Tools" console in Kibana. 
 
 ## Overwrite a value 
 
 It is recommended to use `ntsportal::setValueInField()` or `ntsportal::replaceValueInField()`.
 
-IMPORTANT: Always run the query by itself first using `GET <INDEX>/_search` and check that results are correct. Then copy the query to the POST statement.
+IMPORTANT: Always run the query by itself first using `getNrow()` and check that results are correct. Then use the same query in the modification functions.
 
-Be careful when copying code from a previous command to change all the necessary values.
 
 Use the [update by query API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-update-by-query).
 
@@ -135,5 +134,5 @@ POST <INDEX>/_update_by_query
 }
 ```
 
-<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- Copyright 2026 Bundesanstalt für Gewässerkunde -->
 <!-- This file is part of ntsportal -->

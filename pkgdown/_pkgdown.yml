@@ -106,6 +106,8 @@ reference:
   desc:  Low level Generics for database communication
 - contents:
   - addValueToArray
+  - appendRecords
+  - deleteRow
   - deleteTable
   - DbComm-class
   - getDbComm
@@ -132,11 +134,12 @@ reference:
   desc:  Functions for manipulating msrawfiles tables
 - contents:
   - addRawfiles
-  - changeAliasAddress
   - changeMsrawfileFilename
   - changeMsrawfilePath
   - createBackupMsrawfiles
   - findTemplateId
+  - findTemplateByBatchname
+  - getIdsByEsql
   - msrawfilesSetVersion
 - title: ntspRecord-validation module
   desc:  Functions for validating records
@@ -161,4 +164,5 @@ reference:
 - contents:
   - getField
   - makeMappingsTbl
+  - installShellInterface
   - ntsportal
