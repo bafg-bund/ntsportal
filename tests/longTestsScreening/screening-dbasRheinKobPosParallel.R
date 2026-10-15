@@ -2,14 +2,13 @@
 
 # nohup Rscript screening-dbasRheinKobPosParallel.R &> dbasRheinKobPosParallel.log &
 library(ntsportal)
-connectNtsportal()
-tempSaveDir <- "testResults-dbasRheinKobPos-parallel/"
-if (!dir.exists(tempSaveDir))
-  dir.create(tempSaveDir)
-index <- "ntsp25.3_msrawfiles"
+tempSaveDir <- "testResults-dbasRheinKobPosParallel/"
+unlink(tempSaveDir, recursive = T)
+dir.create(tempSaveDir)
+index <- "ntsp26.1_msrawfiles"
 batchDirectory <- c(
-  "/beegfs/nts/ntsportal/msrawfiles/koblenz/wasser/2021/202105/pos/",
-  "/beegfs/nts/ntsportal/msrawfiles/koblenz/wasser/2021/202106/pos/"
+  "/beegfs/nts/ntsportal/msrawfiles/rhein_koblenz_l/water/tof/p1d/2021/202105/pos/",
+  "/beegfs/nts/ntsportal/msrawfiles/rhein_koblenz_l/water/tof/p1d/2021/202106/pos/"
 )
 
 startTime <- Sys.time()

@@ -5,6 +5,8 @@
 #' reprocessing with a new CSL version, this function must be run to update the reference table.
 #' @param rfTableName Name of the msrawfiles table
 #' @param specLibTableName Name for the new spectral library table (old table will be overwritten)
+#' @examples
+#' \dontrun{updateSpectralLibrary("ntsp26.1_msrawfiles", "ntsp25.3_spectral_library")}
 #' @export
 updateSpectralLibrary <- function(rfTableName, specLibTableName) {
   testConnection()

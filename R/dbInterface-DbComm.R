@@ -15,12 +15,24 @@ getDbComm <- function() {
 #' @param tableName Name of table in database, wildcards are permitted
 #' @param field table column (field) name see mappings
 #' @param value value to set or add
-#' @param searchBlock list coercible to json for Elasticsearch Search API (Query DSL)
+#' @param searchBlock list coercible to json for Elasticsearch Search API (Query DSL) to select a subset of rows to 
+#' query or change. Default is all table rows.
 #' @seealso \link{`removeValueFromArray`}
 #' @export
 setGeneric("addValueToArray", function(dbComm, tableName, field, value, searchBlock = list()) standardGeneric("addValueToArray"))
+
+#' Add row(s) to a table
+#' @inheritParams addValueToArray
+#' @param records list of records in NTSPortal format
+#' @export
 setGeneric("appendRecords", function(dbComm, tableName, records) standardGeneric("appendRecords"))
-setGeneric("deleteRow", function(dbComm, tableName, searchBlock = list()) standardGeneric("deleteRow"))
+
+#' Delete row(s) from a table
+#' @description Delete selected rows from a table. Warning: this function is non-interactive and will irreversibly 
+#' delete rows. A searchBlock must be provided.
+#' @inheritParams addValueToArray
+#' @export
+setGeneric("deleteRow", function(dbComm, tableName, searchBlock = NULL) standardGeneric("deleteRow"))
 
 #' Delete a table
 #' @description The named table is removed from the database

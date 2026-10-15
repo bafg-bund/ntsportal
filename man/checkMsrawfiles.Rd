@@ -4,7 +4,7 @@
 \alias{checkMsrawfiles}
 \title{Check `msrawfiles` for validity}
 \usage{
-checkMsrawfiles(indexName = "ntsp25.3_msrawfiles")
+checkMsrawfiles(indexName = "ntsp26.1_msrawfiles")
 }
 \arguments{
 \item{indexName}{default: ntspXX.X_msrawfiles}

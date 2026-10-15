@@ -15,7 +15,3 @@ When working on Linux in the console, this is the 'file'
 backend, on windows, 'wincred'.
 The backend can be set manually with `Sys.setenv("R_KEYRING_BACKEND" = "file")`.
 }
-\details{
-Will additionally create the `escon` connection object in the 
-global environment for use by all functions (deprecated, use DbComm interface)
-}

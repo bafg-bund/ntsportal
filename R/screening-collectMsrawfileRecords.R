@@ -13,12 +13,51 @@ getSelectedMsrawfileBatches <- function(msrawfilesIndex, rootDirs, screeningType
     fields = msrawfilesFieldsForProcessing(screeningType),
     recordConstructor = switch(screeningType, dbas = newDbasMsrawfilesRecord, nts = newNtsMsrawfilesRecord)
   )
-  recordsToBatches(allRecords)
+  recordsToBatches(allRecords, msrawfilesIndex)
 }
 
-recordsToBatches <- function(records) {
+recordsToBatches <- function(records, msrawfilesIndex) {
   groupedRecords <- splitRecordsByDir(records)
+  groupedRecords <- map(groupedRecords, \(recs) addMoreBlanksToBatch(recs, msrawfilesIndex))
+  groupedRecords <- discard(groupedRecords, \(recs) all(getField(recs, "blank")))
   map(groupedRecords, recordsToOneBatch)
+}
+
+addMoreBlanksToBatch <- function(records, msrawfilesIndex) {
+  if (fieldAvailable(records, "additional_blank_path")) {
+    pathNewBlanks <- getField(records, "additional_blank_path") |> discard(\(x) is.na(x[1])) |> 
+      unlist() |> unique()
+    screeningType <- stringr::str_match(class(records[[1]])[1], "^(\\w+)MsrawfilesRecord$")[,2]
+    stopifnot(screeningType %in% c("nts", "dbas"))
+    if (length(pathNewBlanks) > 1) {
+      sl <- list(query = list(terms = list(path = pathNewBlanks)))  
+    } else {
+      sl <- list(query = list(term = list(path = pathNewBlanks)))
+    }
+    recordsFound <- getNrow(getDbComm(), msrawfilesIndex, sl)
+    if (recordsFound != length(pathNewBlanks)) {
+      if (recordsFound == 0) {
+        stop("additional_blank_path not found: ", paste(pathNewBlanks, collapse = ", "))
+      } else if (recordsFound < length(pathNewBlanks)) {
+        pathsFound <- getTableByQuery(msrawfilesIndex, sl, fields = "path")$path
+        pathsNotFound <- setdiff(pathNewBlanks, pathsFound)
+        stop("additional_blank_path not found: ", paste(pathsNotFound, collapse = ", "))
+      } else {
+        stop("Error in additional_blank_path, files not found")
+      }
+    }
+    suppressMessages(
+      recordsNewBlanks <- getTableAsRecords(
+        getDbComm(), msrawfilesIndex, 
+        searchBlock = list(query = list(terms = list(path = as.list(pathNewBlanks)))), sortField = "start", 
+        fields = msrawfilesFieldsForProcessing(screeningType),
+        recordConstructor = switch(screeningType, dbas = newDbasMsrawfilesRecord, nts = newNtsMsrawfilesRecord)
+      )
+    )
+    c(records, recordsNewBlanks)
+  } else {
+    records
+  }
 }
 
 recordsToOneBatch <- function(records) {
@@ -53,13 +92,14 @@ warnNonExistentDirs <- function(rootDirs) {
 msrawfilesFieldsForProcessingGeneral <- function() {
   c(
     "blank",
+    "additional_blank_path",
     "chrom_method",
     "csl_instruments_allowed",
     "feature_table_alias",
     "internal_standard",
     "path",
     "pol",
-    "replicate_regex",
+    "replicate_group_name",
     "spectral_library_path",
     "start"
   )

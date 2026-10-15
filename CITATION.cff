@@ -17,9 +17,8 @@ authors:
 - family-names: "Wick"
   given-names: "Arne"
 title: "ntsportal - Functions for building and managing the NTSPortal database"
-version: 25.1
-doi: 10.5281/zenodo.1234
-date-released: 2025-05-27
+version: 26.1
+date-released: 2026-09-18
 url: "https://github.com/bafg-bund/ntsportal"
 preferred-citation:
   type: article
@@ -27,29 +26,39 @@ preferred-citation:
   - family-names: "Jewell"
     given-names: "Kevin Sean"
     orcid: "https://orcid.org/0000-0002-0758-0541"
-  - family-names: "Thron"
+  - family-names: "Prodöhl"
     given-names: "Franziska"
-  - family-names: "Schlüsener"
-    given-names: "Michael P."
-  - family-names: "Kramer"
-    given-names: "Kasjen"
-  - family-names: "Scharrenbach"
-    given-names: "Thomas"
-  - family-names: "Fettig"
-    given-names: "Ina"
+    orcid: "https://orcid.org/0009-0008-7476-5942"
+  - family-names: "Lessmann"
+    given-names: "Ole"
+    orcid: "https://orcid.org/0009-0003-6656-735X"
+  - family-names: "Dierkes"
+    given-names: "Georg"
+    orcid: "https://orcid.org/0000-0002-2561-1866"
+  - family-names: "Ehlig"
+    given-names: "Björn"
+  - family-names: "Schulze"
+    given-names: "Tobias"
+    orcid: "https://orcid.org/0000-0002-9744-8914"
+  - family-names: "Winter"
+    given-names: "Eric"
+    orcid: "https://orcid.org/0009-0004-3453-7305"
+  - family-names: "Wallis"
+    given-names: "Ronya Mona"
+    orcid: "https://orcid.org/0009-0002-2106-1710"
+  - family-names: "Kronsbein"
+    given-names: "Anna Lena"
+    orcid: "https://orcid.org/0009-0007-1316-5583"
   - family-names: "Koschorreck"
     given-names: "Jan"
-  - family-names: "Schulte"
-    given-names: "Christian"
-  - family-names: "Ternes"
-    given-names: "Thomas T."
+    orcid: "https://orcid.org/0000-0002-1043-3278"
   - family-names: "Wick"
     given-names: "Arne"
-  doi: "10.1002/vomw.202100020"
-  journal: "Vom Wasser"
-  start: 94 # First page number
-  end: 96 # Last page number
-  title: "Ein Datenbankmodell für aggregierte Non-Target-Screening-Ergebnisse"
-  issue: 3
-  volume: 119
-  year: 2021
+    orcid: "https://orcid.org/0000-0003-2301-2242"
+  doi: "10.1186/s12302-026-01477-7"
+  journal: "Environmental Sciences Europe"
+  title: "Development of a retrospective processing and data aggregation platform for non-target screening of surface waters"
+  volume: 38
+  issue: 154
+  year: 2026
+  

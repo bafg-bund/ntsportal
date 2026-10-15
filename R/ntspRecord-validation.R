@@ -7,7 +7,7 @@
 #' @param indexName default: ntspXX.X_msrawfiles
 #' @return TRUE if checks passed
 #' @export
-checkMsrawfiles <- function(indexName = "ntsp25.3_msrawfiles") {
+checkMsrawfiles <- function(indexName = "ntsp26.1_msrawfiles") {
   if (!grepl("msrawfiles", indexName))
     stop("This function is intended only for msrawfiles-type indices")
   runMsrawfileChecksForProcessingType(indexName, "dbas")
@@ -22,7 +22,7 @@ runMsrawfileChecksForProcessingType <- function(indexName, screeningType) {
     recordConstructor = switch(screeningType, dbas = newDbasMsrawfilesRecord, nts = newNtsMsrawfilesRecord)
   )
   validateRecordsMsrawfiles(allRecords)
-  recordsInBatches <- recordsToBatches(allRecords)
+  recordsInBatches <- recordsToBatches(allRecords, indexName)
   checkQualityBatchList(recordsInBatches)
 }
 
@@ -65,7 +65,8 @@ validateRecord.msrawfilesRecord <- function(record) {
     filesExist(record),
     correctRawfileLocation(record$path),
     correctReplicateRegex(record),
-    correctBlankRegex(record)
+    correctBlankRegex(record),
+    correctAdditionalBlankPath(record)
   )
 }
 
@@ -76,6 +77,12 @@ noDuplicatedFilenames <- function(records) {
 fieldsExistForSampleType <- function(rec) {
   fieldsFound <- fieldsExist(defineRequiredFieldsAnySample(rec), rec)
   all(fieldsFound)  
+}
+
+correctAdditionalBlankPath <- function(rec) {
+  if (!is.element("additional_blank_path", names(rec)))
+    return(TRUE)
+  checkFileExists("additional_blank_path", rec)
 }
 
 fieldsExist <- function(fields, rec) {
@@ -102,7 +109,9 @@ correctRawfileLocation <- function(path) {
     "G2/HRMS/Messdaten",
     "G2/3-Arbeitsgruppen_G2/3.5-NTS-Gruppe/db/ntsp/unit_tests/meas_files",
     "tests/testthat/fixtures/msrawfiles-addRecord",
-    "/beegfs/nts/ntsportal/msrawfiles"
+    "/beegfs/nts/ntsportal/msrawfiles",
+    "ntsportal/intern/msrawfiles",
+    ".*/tmp/.*/file.*"  # for unit tests
   )
   if (any(purrr::map_lgl(allowedPaths, grepl, x = path))) {
     TRUE
@@ -145,10 +154,10 @@ correctBlankRegex <- function(rec) {
 
 
 checkFileExists <- function(field, rec) {
-  if (file.exists(rec[[field]])) {
+  if (all(map_lgl(rec[[field]], file.exists))) {
     TRUE
   } else {
-    warning(field, " in record, ", rec$filename, " with value ", rec[[field]], " not found")
+    warning(field, " in record, ", rec$path, " with value ", paste(rec[[field]], collapse = ", "), " not found")
     FALSE
   }
 }
@@ -183,6 +192,7 @@ defineRequiredFieldsAnySample <- function(record) {
 defineRequiredFieldsAnySample.ntsMsrawfilesRecord <- function(record) {
   c(
     "nts_alig_filter_min_features",
+    "nts_eic_extraction_width",
     "nts_mz_min",
     "nts_mz_max",
     "nts_mz_step",

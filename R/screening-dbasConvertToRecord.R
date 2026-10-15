@@ -8,13 +8,13 @@
 #' dbComm <- getDbComm()
 #' recs <- getTableAsRecords(
 #'   dbComm, 
-#'   "ntsp25.3_msrawfiles", 
+#'   "ntsp26.1_msrawfiles", 
 #'   searchBlock = list(query = list(regexp = list(filename = "Des_.._.._pos.mzXML"))), 
 #'   newDbasMsrawfilesRecord
 #' )
 #' recsBlanks <- getTableAsRecords(
 #'   dbComm, 
-#'   "ntsp25.3_msrawfiles", 
+#'   "ntsp26.1_msrawfiles", 
 #'   searchBlock = list(query = list(regexp = list(path = ".*mud_pos/BW.*"))), 
 #'   newDbasMsrawfilesRecord
 #' )
@@ -332,5 +332,5 @@ getAnalyteIntensity <- function(peakId, peakList) {
   peakList[peakList$peakID == peakId, "int_h", drop = T]
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

@@ -33,114 +33,6 @@ free_gb <- function() {
   as.numeric(x[[1]][length(x[[1]])])
 }  
 
-#' Get search results for more than 10000 docs by pagination. 
-#' @description deprecated in favor of `getTableByQuery()`, `getTableByEsql()` or `getTableAsRecords()`, 
-#' @param indexName Name of ElasticSearch index (or wildcard pattern)
-#' @param searchBody search body, default will return all docs
-#' @param sort Sort argument passed onto elastic::Search. Defines which field 
-#' the results are sorted by (best if this is unique for all docs to avoid ties) 
-#' currently can only be one field and may not be '_id'.
-#' @param totalSize 
-#' @param ... further arguments to elastic::Search, asdf argument does not work.
-#' @export
-#' @return ElasticSearch API response as a list
-#' @examples
-#' \dontrun{
-#' connectNtsportal()
-#' res <- esSearchPaged("ntsp25.2_dbas*", searchBody = list(query = list(term = list(station = "mosel_ko_r"))), 
-#'   source = c("name", "inchikey", "pol", "start", "duration", "area"), sort = "mz")
-#' 
-#' # Convert the returned list to a data.frame
-#' temp <- lapply(res$hits$hits, function(x) as.data.frame(x[["_source"]]))
-#' df <- plyr::rbind.fill(temp)
-#' }
-#' @seealso \link{`getTableByQuery`}
-#' @seealso \link{`getTableByEsql`}
-#' @seealso \link{`getTableAsRecords`}
-esSearchPaged <- function(
-    indexName, 
-    searchBody = list(query = list(match_all = stats::setNames(list(), character(0)))), 
-    sort, 
-    totalSize = Inf, 
-    ...
-  ) {
-    
-  stopifnot(length(sort) == 1)
-  newSize <- 10000
-  if (totalSize < 10000)
-    newSize <- totalSize
-  createEscon()
-  res1 <- elastic::Search(escon, indexName, body = searchBody, sort = sort, 
-                          size = newSize, ...)
-  numHits <- length(res1$hits$hits)
-  
-  if (res1$hits$total$value < 10000 || numHits < 10000)
-    return(res1)
-  
-  # Get the rest of the results
-  searchAfter <- res1$hits$hits[[numHits]]$sort[[1]]
-  
-  if (!is.list(searchBody) && is.character(searchBody)) {
-    stop("Do not use a string-based search, convert to a list-based search")
-  } else if (is.list(searchBody)) {
-    searchBodyList <- searchBody
-  } else {
-    stop("Unknown searchBody format") 
-  }
-  
-  searchBodyList$search_after <- list(searchAfter)
-  
-  repeat {
-    nextRes <- elastic::Search(escon, indexName, body = searchBodyList, sort = sort, 
-                               size = 10000, ...)
-    newNumHits <- length(nextRes$hits$hits)
-    if (newNumHits > 0)
-      res1$hits$hits <- append(res1$hits$hits, nextRes$hits$hits)
-    
-    if (newNumHits < 10000) {
-      break
-    } else {
-      newSearchAfter <- nextRes$hits$hits[[newNumHits]]$sort[[1]]
-      searchBodyList$search_after <- list(newSearchAfter)
-    }
-      
-  }
-  res1  
-}
-
-es_remove_by_filename <- function(index, filenames) {
-  # Must be a dbas index, not msrawfiles, otherwise this function would be bad!
-  stopifnot(grepl("ntsp_index_dbas", index))
-  stopifnot(is.character(filenames), length(filenames) > 0)
-  qbod <- list(
-    query = list(
-      terms = list(
-        filename = as.list(filenames)
-      )
-    )
-  )
-  suc <- TRUE
-  if (elastic::Search(escon, index, body = qbod, size = 0)$hits$total$value == 0) {
-    logger::log_info("No docs found in index {index}")
-    return(invisible(FALSE))
-  }
-  
-  
-  tryCatch(
-    res <- elastic::docs_delete_by_query(escon, index, body = qbod, refresh = "true"),
-    error = function(cnd) {
-      logger::log_error("Could not remove docs from {index}, \
-                        {conditionMessage(cnd)}")
-      suc <<- FALSE
-    }
-  )
-  if (suc) {
-    invisible(TRUE)  
-  } else {
-    invisible(FALSE)
-  }
-}
-
 # Function to print a search query string to be used for log files
 # Takes a vector of esids and a vector of fields for _source
 build_es_query_for_ids <- function(ids, toShow) {
@@ -183,6 +75,12 @@ testConnection <- function() {
     stop("Unable to connect to elasticSearch")
 }
 
+#' Get a field from a list of NTSP-records
+#' @param listRecords list of `ntspRecord`
+#' @param fieldName name of field of interest
+#' @param quiet boolean, silence messages when nothing found
+#' @returns for unitary fields, a vector of appropriate type, otherwise a list
+#' @export
 getField <- function(listRecords, fieldName, quiet = FALSE) {
   if (!fieldAvailable(listRecords, fieldName)) {
     if (!quiet)
@@ -253,6 +151,36 @@ makeTblFromPropertiesList <- function(properties) {
     unit = map_chr(properties, \(p) ifelse(is.null(p$meta$unit), "", p$meta$unit)),
     example = map_chr(properties, \(p) ifelse(is.null(p$meta$example), "", p$meta$example))
   )
+}
+
+
+#' Install shell interface to path
+#'
+#' @param destDir path into which the script will be linked. Must be already in system PATH
+#'
+#' @export
+installShellInterface <- function(destDir = "~/bin") {
+  scriptPath <- fs::path_package("ntsportal", "shellInterface", "ntsp")
+  destDir <- normalizePath(destDir)
+  
+  # Check if destDir exists and is in system PATH
+  if (!dir.exists(destDir)) 
+    stop("destDir does not exist, create directory and add to system path")
+  pathEnv <- strsplit(Sys.getenv("PATH"), .Platform$path.sep)[[1]]
+  if (!is.element(destDir,normalizePath(pathEnv))) {
+    stop(destDir, " is not currently in your system PATH environment variable.")
+  }
+  
+  target <- file.path(destDir, "ntsp")
+  
+  if (file.exists(target)) 
+    file.remove(target)
+  res <- file.symlink(scriptPath, target)
+  if (res) {
+    message("Successfully symlinked 'ntsp' to ", target)
+  } else {
+    message("Failed symlinked 'ntsp' to ", target)
+  }
 }
 
 # Copyright 2026 Bundesanstalt für Gewässerkunde

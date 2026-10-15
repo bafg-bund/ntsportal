@@ -14,3 +14,11 @@ checkPngSyncronization(fileUrl, filePathHd)
 \description{
 Checks that a PNG file on the picture server and on disk are identical.
 }
+\examples{
+\dontrun{
+checkPngSyncronization(
+  "https:/ntsportal.bafg.de/picture/ABDMBNAKYBUEEX-UHFFFAOYSA-N.png", 
+  "~/myLinkToPictureSync/ABDMBNAKYBUEEX-UHFFFAOYSA-N.png"
+)
+}
+}

@@ -10,7 +10,8 @@ findTemplateId(
   pol = "pos",
   station = "rhein_ko_l",
   matrix = "spm",
-  duration = "P1D"
+  duration = "P1D",
+  instrumentName = "wasser_tof"
 )
 }
 \arguments{
@@ -24,10 +25,12 @@ findTemplateId(
 
 \item{duration}{numeric, default 365}
 
+\item{instrumentName}{instrument used for measurement}
+
 \item{isBlank}{boolean default is FALSE}
 }
 \value{
-ES-ID of template record in msrawfiles index
+ES-ID of template record in msrawfiles index, returns empty string when no id found
 }
 \description{
 Get ID based on search parameters

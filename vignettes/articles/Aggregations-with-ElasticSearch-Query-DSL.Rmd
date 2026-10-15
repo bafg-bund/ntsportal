@@ -98,7 +98,7 @@ GET ntsp25.2_dbas*/_search?size=0
 In this example a `term` query is used to filter only for data from suspended particulate matter (spm). The detections are then binned by station name (`terms` bucket aggregation) and for each station the latest file upload time is returned (`max` metric aggregation).
 
 ```json
-GET ntsp25.3_msrawfiles/_search?size=0
+GET ntsp26.1_msrawfiles/_search?size=0
 {
   "query": {
     "term": {
@@ -128,7 +128,7 @@ GET ntsp25.3_msrawfiles/_search?size=0
 In this example the query is for stations ulm or wettin, no blanks and the documents are split by station and polarity
 
 ```json
-GET ntsp25.3_msrawfiles/_search?size=0
+GET ntsp26.1_msrawfiles/_search?size=0
 {
   "query": {
     "bool": {
@@ -173,7 +173,7 @@ GET ntsp25.3_msrawfiles/_search?size=0
 In this example documents are searched by matching a pattern and the split by coordinates (geopoint)
 
 ```json
-GET ntsp25.3_msrawfiles/_search?size=0
+GET ntsp26.1_msrawfiles/_search?size=0
 {
   "query": {
     "regexp": {

@@ -43,10 +43,10 @@ addIntStdToDocs <- function(docs) {
 
 ingestNewDocs <- function(newDocs) {
   newDir <- withr::local_tempdir()
-  pathToJson <- file.path(newDir, "docsToIngest.json")
+  pathToRDS <- file.path(newDir, "docsToIngest.RDS")
   
-  writeRecord(newDocs, pathToJson)
-  compressJson(pathToJson)
-  indexNames <- ingestJson(newDir)
+  writeRecord(newDocs, pathToRDS)
+  compressJson(pathToRDS)
+  indexNames <- ingestFeatureRecords(newDir)
   indexNames
 }

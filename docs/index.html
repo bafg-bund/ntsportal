@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>ntsportal - a database for non-target-screening of surface water • ntsportal</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/Inter-0.4.10/font.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/Inter-0.4.10/font.css" rel="stylesheet">
 <link href="deps/JetBrains_Mono-0.4.10/font.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ntsportal</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,8 +50,8 @@
     <li><h6 class="dropdown-header" data-toc-skip>Database structure and algorithms</h6></li>
     <li><a class="dropdown-item" href="articles/structure-and-table-naming.html">Structure of NTSPortal</a></li>
     <li><a class="dropdown-item" href="articles/table-mappings.html">Document field descriptions for NTSPortal</a></li>
-    <li><a class="dropdown-item" href="articles/processing-by-library-screening.html">Processing by library screening</a></li>
-    <li><a class="dropdown-item" href="articles/processing-by-non-target-screening.html">Processing by non-target screening</a></li>
+    <li><a class="dropdown-item" href="articles/processing-by-library-screening.html">Processing by library screening (ntsworkflow)</a></li>
+    <li><a class="dropdown-item" href="articles/processing-by-non-target-screening.html">Processing by non-target screening (ntsworkflow)</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Database management</h6></li>
     <li><a class="dropdown-item" href="articles/add-measurement-file-to-msrawfiles.html">Adding measurement files to msrawfiles</a></li>
@@ -77,13 +77,14 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="ntsportal-253">ntsportal 25.3<a class="anchor" aria-label="anchor" href="#ntsportal-253"></a>
+<div class="page-header"><h1 id="ntsportal-261">ntsportal 26.1<a class="anchor" aria-label="anchor" href="#ntsportal-261"></a>
 </h1></div>
 <ul>
 <li><a href="#background">Background</a></li>
 <li><a href="#project-funding">Project Funding</a></li>
 <li><a href="#licence">Licence</a></li>
 <li><a href="#installation">Installation</a></li>
+<li><a href="#citations">Citations</a></li>
 <li><a href="#external-links">External links</a></li>
 </ul>
 <!-- README.md is generated from README.Rmd. Please edit README.Rmd -->
@@ -105,7 +106,7 @@
 <p>Copyright 2026 Bundesanstalt für Gewässerkunde (Federal Institute of Hydrology)</p>
 <p>ntsportal is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</p>
 <p>ntsportal is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</p>
-<p>You should have received a copy of the GNU General Public License along with ntsportal. If not, see <a href="https://www.gnu.org/licenses/" class="external-link uri">https://www.gnu.org/licenses/</a>.</p>
+<p>You should have received a copy of the GNU General Public License along with ntsportal. If not, see <a href="https://www.gnu.org/licenses/gpl-3.0.en.html" class="external-link uri">https://www.gnu.org/licenses/gpl-3.0.en.html</a>.</p>
 <p>If you use the package or any derivative thereof, please cite the work, see <code>citation("ntsportal")</code>.</p>
 </div>
 <div class="section level1">
@@ -143,6 +144,13 @@
 </div>
 </div>
 <div class="section level1">
+<h1 id="citations">Citations<a class="anchor" aria-label="anchor" href="#citations"></a>
+</h1>
+<ul>
+<li><a href="https://doi.org/10.1186/s12302-026-01477-7" class="external-link">Jewell, K. S., N. Hermes, F. Prodöhl, O. Lessmann, G. Dierkes, B. Ehlig, T. Schulze, E. Winter, R. M. Wallis, A. L. Kronsbein, J. Koschorreck and A. Wick (2026) Development of a retrospective processing and data aggregation platform for non-target screening of surface waters</a></li>
+</ul>
+</div>
+<div class="section level1">
 <h1 id="external-links">External links<a class="anchor" aria-label="anchor" href="#external-links"></a>
 </h1>
 <ul>
@@ -172,7 +180,7 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Kevin S. Jewell <br><small class="roles"> Author </small>   </li>
+<li>Kevin S. Jewell <br><small class="roles"> Author, maintainer </small>   </li>
 <li>Ole Lessmann <br><small class="roles"> Author </small>   </li>
 <li><a href="authors.html">More about authors...</a></li>
 </ul>
@@ -185,11 +193,11 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Developed by Kevin S. Jewell, Ole Lessmann, Franziska Prodöhl, Jonas Skottnik, Nina Hermes, Arne Wick. <a href="https://www.bafg.de/DE/Service/Impressum/impressum_node.html">Imprint</a>.</p>
+  <p>Developed by Kevin S. Jewell, Franziska Prodöhl, Ole Lessmann, Nina Hermes, Jonas Skottnik,  Arne Wick. <a href="https://www.bafg.de/DE/Service/Impressum/impressum_node.html">Imprint</a>.</p>
 </div>
 
     </footer>

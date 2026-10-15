@@ -9,74 +9,80 @@
 updateLinearRegressionTable <- function(sourceTableName) {
   dbComm <- getDbComm()
   stopifnot(grepl("feature.*upb", sourceTableName))
-  queryBlock = list(bool = list(must = list(
-    list(term = list(duration = "P1Y")),
-    list(exists = list(field = "area_internal_standard")),
-    list(exists = list(field = "area")),
-    list(nested = list(path = "compound_annotation", query = list(exists = list(field = "compound_annotation.name"))))
-  )))
+  records <- computeLinearRegressionAllEsiSpecs(sourceTableName)
   destTableName <- sub("^(ntsp\\d\\d\\.?\\d)_feature_(.*)$", "\\1_analysis_dbas_\\2", sourceTableName)
-  records <- computeLinearRegression(sourceTableName, queryBlock)
   deleteTable(dbComm, destTableName)
   createNewTable(dbComm, destTableName, "analysis_dbas")
   appendRecords(dbComm, destTableName, records)
 }
 
-computeLinearRegression <- function(sourceTableName, queryBlock = list()) {
+computeLinearRegressionAllEsiSpecs <- function(sourceTableName) {
+  allIonSpecs <- getUniqueValues(getDbComm(), sourceTableName, "esi_ion_spec")
+  recsList <- map(allIonSpecs, \(x) computeLinearRegressionOneEsiSpec(x, sourceTableName), .progress = TRUE)
+  unlist(recsList, recursive = FALSE)
+}
+
+computeLinearRegressionOneEsiSpec <- function(esiSpec, sourceTableName) {
   dbComm <- getDbComm()
-  if (length(queryBlock) == 0) 
-    queryBlock <- list(match_all = stats::setNames(list(), character(0)))
-  
   resp <- dbComm@client$search(
     index = sourceTableName, 
-    query = queryBlock,
+    query = getQueryForRegressionAnalysis(esiSpec),
     aggs = getAggsForRegressionAnalysis(), 
     size = 0
   )
   
-  res <- resp$body
   regressionDfList <- list()
-  
-  for (comp in res$aggregations$comps$buckets) {
-    comp_name <- comp$key
-    for (pol in comp$pols$buckets) {
-      pol_name <- pol$key
-      if (length(pol$stations$buckets) != 0) {
-        for (station in pol$stations$buckets) {
-          station_name <- station$key
-          time_buckets <- station$time_course$buckets
-          if (length(time_buckets) < 3)
-            next
-          # calculate regression and add this row to list
-          df <- data.frame(
-            norma = vapply(time_buckets, function(x) { 
-              if (is.null(x$average_area_relative_to_internal_standard$value)) {
-                NA
-              } else {
-                  x$average_area_relative_to_internal_standard$value
-              }
-            }, numeric(1)),
-            time = sapply(time_buckets, function(x) lubridate::ymd_hms(x$key_as_string, tz = "UTC"))
-          )
-          # Need to normalize the regression to the max area 
-          
-          df$norma <- df$norma / max(df$norma, na.rm = T)
-          model <- lm(norma ~ time, df)
-          slope <- model$coefficients["time"]
-          newRow <- data.frame(name = comp_name, pol = pol_name, station = station_name, change_per_ms = slope, datapoints = length(time_buckets))
-          regressionDfList[[length(regressionDfList) + 1]] <- newRow
-          
+  esiSpecSplit <- strsplit(esiSpec, "_")[[1]]
+  thisComp <- esiSpecSplit[1]
+  thisPol <- esiSpecSplit[2]
+  thisAdduct <- esiSpecSplit[3]
+  thisIsotop <- esiSpecSplit[4]
+  stationBuckets <- resp$body$aggregations$stations$buckets
+  if (length(stationBuckets) == 0)
+    return(list())
+  for (station in stationBuckets) {
+    thisStation <- station$key
+    time_buckets <- station$time_course$buckets
+    if (length(time_buckets) < 3)
+      next
+    # calculate regression and add this row to list
+    df <- data.frame(
+      norma = vapply(time_buckets, function(x) { 
+        if (is.null(x$average_area_relative_to_internal_standard$value)) {
+          NA
+        } else {
+          x$average_area_relative_to_internal_standard$value
         }
-      }
-    }
+      }, numeric(1)),
+      time = sapply(time_buckets, function(x) lubridate::ymd_hms(x$key_as_string, tz = "UTC"))
+    )
+    
+    # use semi-log regression to get % change
+    model <- lm(log(norma) ~ time, df)
+    slope <- model$coefficients["time"]
+    
+    newRow <- data.frame(
+      name = thisComp,
+      pol = thisPol,
+      adduct = thisAdduct,
+      isotopologue = thisIsotop,
+      station = thisStation,
+      change_per_s = (exp(slope) - 1) * 100,  # convert slope to % change per second
+      datapoints = length(time_buckets),
+      last_detection = lubridate::format_ISO8601(lubridate::as_datetime(max(df$time)), precision = "ymd")
+    )
+    
+    regressionDfList[[length(regressionDfList) + 1]] <- newRow
+    
   }
-  
+  if (length(regressionDfList) == 0)
+    return(list())
   regDf <- do.call("rbind", regressionDfList)
   rownames(regDf) <- NULL
-  regDf$lm <- regDf$change_per_ms * 1000 * 60 * 60 * 24 * 365
+  regDf$change_per_year <- round(regDf$change_per_s * 60 * 60 * 24 * 365)  # convert seconds to years
   
   # make data ready for elastic
-  regDf$change_per_ms <- NULL
+  regDf$change_per_s <- NULL
   regDf$datapoints <- NULL
   
   regDf$matrix <- "spm"
@@ -85,54 +91,50 @@ computeLinearRegression <- function(sourceTableName, queryBlock = list()) {
   lapply(regList, newNtspRecord)
 }
 
+getQueryForRegressionAnalysis <- function(esiIonSpec) {
+  list(bool = list(must = list(
+    list(term = list(esi_ion_spec = esiIonSpec)),
+    list(term = list(duration = "P1Y")),
+    list(exists = list(field = "area_internal_standard")),
+    list(exists = list(field = "area")),
+    list(nested = list(
+      path = "compound_annotation", query = list(exists = list(field = "compound_annotation.name"))
+    ))
+  )))
+}
+
 getAggsForRegressionAnalysis <- function() {
   list(
-    comps = list(
+    stations = list(
       terms = list(
-        field = "name", 
+        field = "station",
         size = 1000
       ),
       aggs = list(
-        pols = list(
-          terms = list(
-            field = "pol",
-            size = 2
+        time_course = list(
+          date_histogram = list(
+            field = "start",
+            calendar_interval = "year"
           ),
           aggs = list(
-            stations = list(
-              terms = list(
-                field = "station",
-                size = 1000
-              ),
-              aggs = list(
-                time_course = list(
-                  date_histogram = list(
-                    field = "start",
-                    calendar_interval = "year"
-                  ),
-                  aggs = list(
-                    average_area_relative_to_internal_standard = list(
-                      avg = list(
-                        field = "area_relative_to_internal_standard"
-                      )
-                    ),
-                    average_intensity_relative_to_internal_standard = list(
-                      avg = list(
-                        field = "intensity_relative_to_internal_standard"
-                      )
-                    ),
-                    average_area = list(
-                      avg = list(
-                        field = "area"
-                      )
-                    ),
-                    average_intensity = list(
-                      avg = list(
-                        field = "intensity"
-                      )
-                    )
-                  )
-                )
+            average_area_relative_to_internal_standard = list(
+              avg = list(
+                field = "area_relative_to_internal_standard"
+              )
+            ),
+            average_intensity_relative_to_internal_standard = list(
+              avg = list(
+                field = "intensity_relative_to_internal_standard"
+              )
+            ),
+            average_area = list(
+              avg = list(
+                field = "area"
+              )
+            ),
+            average_intensity = list(
+              avg = list(
+                field = "intensity"
               )
             )
           )

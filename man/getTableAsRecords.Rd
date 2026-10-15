@@ -18,7 +18,8 @@ getTableAsRecords(
 
 \item{tableName}{Name of table in database, wildcards are permitted}
 
-\item{searchBlock}{list coercible to json for Elasticsearch Search API (Query DSL)}
+\item{searchBlock}{list coercible to json for Elasticsearch Search API (Query DSL) to select a subset of rows to 
+query or change. Default is all table rows.}
 
 \item{fields}{Fields to include in the response, wildcards are permitted, default is all fields.}
 

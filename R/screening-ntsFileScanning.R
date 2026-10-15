@@ -114,19 +114,12 @@ filterAlignmentTable <- function(grouped, sampleList, idsOfUnknowns, recFirstUnk
       )
     },
     replicate = {
-      # Uses regexp to collect replicate groups. If min_features is larger than
-      # number of replicates (e.g. failed meas. files), min_features will be
-      # automatically reduced.
-      # This is a round-about way of doing this. To save the regex in the
-      # database and then use this in the code is risky. It would be better to
-      # save the replicate groups directly in the index (analogously to the
-      # way this is done for blanks)
-      
-      grouped <- ntsworkflow::keep_reps_regex(
+      # Uses fixed number of replicates and order of samples (excluding blanks)
+      # This requires that all replicates are exactly groups of 3
+      grouped <- ntsworkflow::keepReps(
         alignment = grouped,
         samples = idsOfUnknowns,
-        sampleList = sampleList,
-        regexp = recFirstUnknown$replicate_regex,
+        reps = 3,
         least = recFirstUnknown$nts_alig_filter_min_features
       )
     },

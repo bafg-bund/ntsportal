@@ -20,23 +20,23 @@ The NTSPortal system is made up of many components which can be grouped into thr
 
 |Software Component|Version|Description|
 |:-----------------|:------|:----------------------------------------------|
-|R|4.5.2|High level scripting, db management|
-|Python|3.12.11|Interface to Elasticsearch using Python package "elasticsearch"|
-|Elasticsearch|8.18.8|Database and search engine|
-|Kibana|8.18.8|Content management system|
-|ntsworkflow|0.2.9|R package for processing|
+|R|4.5.3|High level scripting, db management|
+|Python|3.12.12|Interface to Elasticsearch using Python package "elasticsearch"|
+|Elasticsearch|9.4.2|Database and search engine|
+|Kibana|9.2.3|Content management system|
+|ntsworkflow|0.2.10|R package for processing|
 |xcms|4.8.0|R package for interfacing with mzXML files|
-|Spectral library (CSL)|25.5|Library for MS2 spectra|
+|Spectral library (CSL)|26.1|Library for MS2 spectra|
 |Vega, vega-lite|v5|Custom graphics in Kibana|
-|rJava|1.0-11|R package interface to Java|
-|Java|1.8.0_472|openJDK is used for Java|
-|Rocky Linux|8.10|Operating system for servers|
+|rJava|1.0-14|R package interface to Java|
+|openJDK|1.8.0_482|openJDK is used for Java|
+|Rocky Linux|8.10|Operating system for R server and HPC|
 
 : Table: Versions of software components
 
 # Hardware architecture
 
-The hardware components used to run NTSPortal can be similarly categorized as the software. The core component of NTSPortal is a high-performance computing cluster (HPC) used for measurement file processing. This system consists of 7 compute nodes each with 64 CPUs and 503 GB of memory. The HPC is controlled by the HPC control server. Measurement files are stored on a network attached storage (NAS), which is synchronized with a fast, SSD-based storage (BeeGFS). The data management component consists of a separate server (R-server) and a 3-node cluster running Elasticsearch (containerized). The visualization component is accomplished with a server hosting the dashboards (Kibana). All traffic to and from the Internet runs through a reverse proxy for IT security reasons. All servers are virtualized and run Rocky Linux 8.10 and the Elasticsearch cluster, R and Kibana servers run on an HCI (hyper-converged infrastructure).
+The hardware components used to run NTSPortal can be similarly categorized as the software. The core component of NTSPortal is a high-performance computing cluster (HPC) used for measurement file processing. This system consists of 7 compute nodes each with 64 CPUs and 503 GB of memory. The HPC is controlled by the HPC control server. Measurement files are stored on a network attached storage (NAS), which is synchronized with a fast, SSD-based storage (BeeGFS). The data management component consists of a separate server (R-server) and a 3-node cluster running Elasticsearch (containerized). The visualization component is accomplished with a server hosting the dashboards (Kibana). All traffic to and from the Internet runs through a reverse proxy for IT security reasons. All servers are virtualized and run Rocky Linux 8.10 and the Elasticsearch cluster, R and Kibana servers run on an HCI (hyper-converged infrastructure) and are containerized with Docker.
 
 ![Figure: Hardware components of NTSPortal. Arrows indicate general data flow.](images/ntsportal-hardware.png){width=100%}
 
@@ -55,19 +55,19 @@ ElasticSearch uses **tables** to store data, these are known in Elasticsearch as
 The tables in NTSPortal are named using the convention:  
 `ntsp<version number>_index_<table type>_v<ingest time 'YYMMDDHHmmSS'>_<project or institute>`
 
-For example: `ntsp25.3_index_analysis_dbas_v240215101520_upb`, `ntsp25.3_index_feature_v240316101520_lanuv`
+For example: `ntsp26.1_index_analysis_dbas_v240215101520_upb`, `ntsp26.1_index_feature_v240316101520_lanuv`
 
 The ingest time is when the data was loaded into the database. There are defined codes for each project or institute. This code is used to manage the data access for each user.
 
 ## Exceptions
-For the index types `msrawfiles` and `spectral_library` there is only one table and there is no alias, so these are just called `ntsp25.3_msrawfiles` or `ntsp25.3_spectral_library`.
+For the index types `msrawfiles` and `spectral_library` there is only one table and there is no alias, so these are just called `ntsp26.1_msrawfiles` or `ntsp26.1_spectral_library`.
 
 # Aliases
 
 ElasticSearch uses aliases to manage access to a table. These are just links to a table and are designed to be shorter and not to change. The aliases have the following naming convention:  
 `ntsp<version number>_<table type>_<project or institute>`
 
-For example: `ntsp25.3_dbas_bfg`
+For example: `ntsp26.1_dbas_bfg`
 
 One alias includes all tables from different ingest times. Since the types `msrawfiles` and `spectral_library` only have one table each, there is no need for aliases.
 
@@ -75,21 +75,43 @@ One alias includes all tables from different ingest times. Since the types `msra
 
 Kibana uses data views to allow for granular data access rights. A data view is a name pattern potentially matching one or several indices (or aliases). A user has a role, and each role is given access to specific indices. The dashboards in Kibana are built with data views so that they are programmed only once and the users role determines which indices are visible in the dashboard. 
 
-An example of a data view is: `ntsp25.3_feature*`. This data view will access both the aliases `ntsp25.3_feature_bfg` and `ntsp25.3_feature_lanuk`, for example, via the wildcard (`*`) expansion. So a user with the role `ntsp_lanuk`, which has access to both aliases and therefore the linked indices, will see both datasets when viewing a dashboard visual using that data view. Similarly, the API can also accept this wildcard notation for accessing tables.
+An example of a data view is: `ntsp26.1_feature*`. This data view will access both the aliases `ntsp26.1_feature_bfg` and `ntsp26.1_feature_lanuk`, for example, via the wildcard (`*`) expansion. So a user with the role `ntsp_lanuk`, which has access to both aliases and therefore the linked indices, will see both datasets when viewing a dashboard visual using that data view. Similarly, the API can also accept this wildcard notation for accessing tables.
 
 It is important that alias names are not a subset of each other or indices. So, for example, the `ntsp_is_feature` alias for internal standard data is correct while `ntsp_feature_is` is incorrect. This is because this second alias would also match the data view `ntsp_feature*` and therefore the internal standard data would appear together with the results.  
 
 |Index|Alias|Data view|
 |-----|-----|---------|
-|ntsp25.3_index_feature_v240418101520_bfg|ntsp25.3_feature_bfg|ntsp25.3_feature*|
-|ntsp25.3_index_feature_v240422101520_bfg|ntsp25.3_feature_bfg|ntsp25.3_feature*|
-|ntsp25.3_spectral_library|-|ntsp25.3_spectral_library*|
-|ntsp25.3_index_analysis_dbas_v240418101520_upb|ntsp25.3_analysis_dbas_upb|ntsp25.3_analysis_dbas*|
-|ntsp25.3_msrawfiles|-|ntsp25.3_msrawfiles*|
-|ntsp25.3_index_is_dbas_v240218101520_bfg|ntsp25.3_is_dbas_bfg|ntsp25.3_is_dbas*|
-|ntsp25.3_index_test_dbas_v250408101520_bfg|ntsp25.3_test_dbas_bfg|ntsp25.3_test_dbas*|
+|ntsp26.1_index_feature_v240418101520_bfg|ntsp26.1_feature_bfg|ntsp26.1_feature*|
+|ntsp26.1_index_feature_v240422101520_bfg|ntsp26.1_feature_bfg|ntsp26.1_feature*|
+|ntsp26.1_spectral_library|-|ntsp26.1_spectral_library*|
+|ntsp26.1_index_analysis_dbas_v240418101520_upb|ntsp26.1_analysis_dbas_upb|ntsp26.1_analysis_dbas*|
+|ntsp26.1_msrawfiles|-|ntsp26.1_msrawfiles*|
+|ntsp26.1_index_is_dbas_v240218101520_bfg|ntsp26.1_is_dbas_bfg|ntsp26.1_is_dbas*|
+|ntsp26.1_index_test_dbas_v250408101520_bfg|ntsp26.1_test_dbas_bfg|ntsp26.1_test_dbas*|
 
 : Table: Examples of table/index naming conventions
+
+# Batch naming conventions
+
+Measurement files are stored on the network filesystem in directories for each batch. The following conventions are used to build the directory tree for storing measurement files. The `batchname` field in the `msrawfiles` table is the full path to the directory holding the files.
+
+Order of naming is generally: location/time/method/polarity. Where "/" are the (sub)directories.
+
+Order of naming in detail (optional divisions in brackets):
+
+`/station, region or river/matrix/(duration)/year(s)/month(s)/(batch_specification, method, instrument)/polarity`
+
+The additional / within time are optional, and further sub-directories are permitted, as long as polarity (pos or neg) is always the final subdirectory.
+
+Where possible, use the same keywords as used in the metadata fields for `matrix`, `duration`, etc. of the `msrawfiles` table. All text is lower-case, word separation only by underscore `_`. Not permitted: `-`, `,`, `.`, space or any other punctuation or special characters.
+
+## Examples
+
+- `rhein_bimmen_l/spm/p1y/2005_2013/pos`
+- `rhein_ko_l/water/p1d/2025/202501/pos`
+- `sachsen/water/p10/2021/paket15/pos`
+- `mosel/water/p10/2021/batch3/pos`
+- `mosel/water/p1d/2021/202109/pos`
 
 <!-- Copyright 2026 Bundesanstalt für Gewässerkunde -->
 <!-- This file is part of ntsportal -->

@@ -1,7 +1,7 @@
 {
   "match": {
-    "indices": "ntsp25.3_feature*", 
+    "indices": "ntsp26.1_feature*_unit_tests", 
     "match_field": "path",
-    "enrich_fields": ["date_import"]
+    "enrich_fields": ["date_import", "mz"]
   }
 }

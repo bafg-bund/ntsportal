@@ -40,9 +40,9 @@ navbar:
         href: articles/structure-and-table-naming.html
       - text: Document field descriptions for NTSPortal
         href: articles/table-mappings.html
-      - text: Processing by library screening
+      - text: Processing by library screening (ntsworkflow)
         href: articles/processing-by-library-screening.html
-      - text: Processing by non-target screening
+      - text: Processing by non-target screening (ntsworkflow)
         href: articles/processing-by-non-target-screening.html
       - text: --------
       - text: Database management
@@ -106,6 +106,8 @@ reference:
   desc:  Low level Generics for database communication
 - contents:
   - addValueToArray
+  - appendRecords
+  - deleteRow
   - deleteTable
   - DbComm-class
   - getDbComm
@@ -132,11 +134,12 @@ reference:
   desc:  Functions for manipulating msrawfiles tables
 - contents:
   - addRawfiles
-  - changeAliasAddress
   - changeMsrawfileFilename
   - changeMsrawfilePath
   - createBackupMsrawfiles
   - findTemplateId
+  - findTemplateByBatchname
+  - getIdsByEsql
   - msrawfilesSetVersion
 - title: ntspRecord-validation module
   desc:  Functions for validating records
@@ -159,6 +162,7 @@ reference:
 - title: utilities and ntsportal modules
   desc:  Miscellaneous and package initialization functions
 - contents:
-  - esSearchPaged
+  - getField
   - makeMappingsTbl
+  - installShellInterface
   - ntsportal

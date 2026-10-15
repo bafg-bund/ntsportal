@@ -3,7 +3,7 @@ connectNtsportal()
 dbComm <- getDbComm()
 
 rootDirectoryForTestMsrawfiles <- "/beegfs/nts/ntsportal/msrawfiles/unit_tests"
-ntspVersion <- "25.3"
+ntspVersion <- "26.1"
 
 testIndexName <- glue("ntsp{ntspVersion}_msrawfiles_unit_tests")
 
@@ -62,5 +62,5 @@ removeExtraTestFile <- function(filename) {
     deleteRow(dbComm, testIndexName, searchBlock)
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

@@ -28,5 +28,5 @@ makeBackupName <- function(tableName) {
   paste0(tableName, "_backup_", format(Sys.Date(), "%Y%m%d"))
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

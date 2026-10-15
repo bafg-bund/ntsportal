@@ -1,10 +1,10 @@
 {
   "match": {
-    "indices": "ntsp25.3_spectral_library", 
+    "indices": "ntsp26.1_spectral_library", 
     "match_field": "csl_experiment_id",
     "enrich_fields": [
       "mz",
-      "rt"
+      "rtt"
     ]
   }
 }

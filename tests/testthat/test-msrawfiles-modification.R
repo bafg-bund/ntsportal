@@ -31,5 +31,5 @@ test_that("A measurement file can be moved and name can be changed", {
   file.remove(list.files(saveDir, full.names = TRUE))
 })
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

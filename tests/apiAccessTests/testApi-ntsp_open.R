@@ -3,8 +3,9 @@
 
 resetConnectionCredentials()
 
-dbasBfgTable <- "ntsp25.3_feature_bfg"
-wildCardTable <- "ntsp25.3_feature*"
+dbasBfgTable <- "ntsp26.1_feature_bfg"
+wildCardTable <- "ntsp26.1_feature*"
+options(ntsportal.elasticsearchHostUrl = "https://elastic.dmz.bafg.de")
 
 # Once tests complete, return to old state
 resetConnectionCredentials()
@@ -36,5 +37,5 @@ test_that("The open user can specify a wildcard pattern to retrieve docs from mu
 })
 
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

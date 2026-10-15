@@ -15,7 +15,8 @@ removeValueFromArray(dbComm, tableName, field, value, searchBlock = list())
 
 \item{value}{value to set or add}
 
-\item{searchBlock}{list coercible to json for Elasticsearch Search API (Query DSL)}
+\item{searchBlock}{list coercible to json for Elasticsearch Search API (Query DSL) to select a subset of rows to 
+query or change. Default is all table rows.}
 }
 \description{
 Remove a value from an array field

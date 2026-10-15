@@ -2,15 +2,23 @@
 
 # Variables to be changed #################
 userEmail <- "jewell@bafg.de"
-dirTestResults <- "tests/slurmTesting/testResults-nts-olmesartan-d6-bisoprolol"
-msrawfileIndexName <- "ntsp25.3_msrawfiles_unit_tests"
+dirTestResults <- "testResults-nts-olmesartan-d6-bisoprolol"
+msrawfileIndexName <- "ntsp26.1_msrawfiles_unit_tests"
 ###########################################
 
 library(ntsportal)
-file.remove(list.files(dirTestResults, f = T))
+
+# Variables to be changed #################
+userEmail <- Sys.getenv("USER_EMAIL")
+dirTestResults <- "tests/slurmTesting/testResults-nts-olmesartan-d6-bisoprolol"
+msrawfileIndexName <- "ntsp26.1_msrawfiles_unit_tests"
+###########################################
+
 dirs <- c(
   "/beegfs/nts/ntsportal/msrawfiles/unit_tests/olmesartan-d6-bisoprolol/"
 )
+unlink(dirTestResults, recursive = T)
+dir.create(dirTestResults)
 
 screeningSelectedBatchesSlurm(
   msrawfileIndex = msrawfileIndexName, 
@@ -22,12 +30,7 @@ screeningSelectedBatchesSlurm(
 
 stopifnot(length(list.files(dirTestResults)) == 3)
 
-# User must manually submit job on SLURM terminal
+Sys.sleep(1)
 
-# Once processing complete:
-indexNames <- ingestFeatureRecords(dirTestResults)
+system("bash -c 'source /etc/profile.d/modules.sh && module load R/4.6.1 && sbatch tests/slurmTesting/testResults-nts-olmesartan-d6-bisoprolol/arrayScreening.sbatch'")
 
-# Cleanup
-dbComm <- getDbComm()
-deleteTable(dbComm, indexNames[[1]]$ntsp25.2_dbas_unit_tests)
-file.remove(list.files(dirTestResults, f = T))

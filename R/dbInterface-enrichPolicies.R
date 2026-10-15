@@ -3,7 +3,7 @@
 #' Update enrich policies in Elasticsearch
 #' @description
 #' Refresh (overwrite and re-execute) the enrich policies as stored in the ntsportal package (inst/enrichPolicies). Use
-#' `GET _cat/tasks?h=ac,ti,ts,time&actions=policy_execution` in the Elasticsearch console to track when the
+#' `GET _cat/tasks?h=ac,ti,ts,time&actions=policy_execution` in the dev tools console to track when the
 #' policies have finished.
 #' @return a vector of task IDs for all enrich policy execution tasks
 #' @export
@@ -16,6 +16,8 @@ updateEnrichPolicies <- function() {
   policyNames <- getEnrichPolicyNames()
   taskIds <- character()
   for (poliName in policyNames) {
+    if (isEnrichPolicyRunning(poliName))
+      next
     if (testForEnrichPolicy(poliName))
       deleteEnrichPolicy(poliName)
     Sys.sleep(1)
@@ -44,8 +46,13 @@ createEnrichPolicy <- function(policyName) {
 
 deleteEnrichPolicy <- function(policyName) {
   dbComm <- getDbComm()
-  res <- dbComm@client$enrich$delete_policy(name=policyName)
-  if (res$body$acknowledged) 
+  tryCatch(
+    res <- dbComm@client$enrich$delete_policy(name=policyName),
+    error = function(cnd) {
+      message("Error in deleteEnrichPolicy:", cnd)
+    }
+  )
+  if (exists("res") && res$body$acknowledged) 
     message("Enrich policy ", policyName, " successfully deleted") 
 }
 
@@ -64,16 +71,37 @@ testForEnrichPolicy <- function(policyName) {
 #' @export
 executeEnrichPolicy <- function(policyName, asBackgroundTask = TRUE) {
   dbComm <- getDbComm()
-  res <- dbComm@client$enrich$execute_policy(name = policyName, wait_for_completion=!asBackgroundTask)
+  if (isEnrichPolicyRunning(policyName))
+    return("already running")
+  tryCatch(
+    res <- dbComm@client$enrich$execute_policy(name = policyName, wait_for_completion=!asBackgroundTask),
+    error = function(cnd) {
+      message("Error in executeEnrichPolicy:", cnd)
+    }
+  )
+  if (!exists("res"))
+    return("failed")
   res$body$task
 }
 
 cancelTask <- function(taskId) {
   dbComm <- getDbComm()
   res <- dbComm@client$tasks$cancel(task_id=taskId)
-  if (res$body$nodes[[1]]$tasks[[taskId]]$cancelled)
-    message("task cancelled")
+  if (length(res$body$node_failures) > 0) {
+    warning("Task not cancelled. Error message: ", res$body$node_failures[[1]]$caused_by$reason)
+  } else if (res$body$nodes[[1]]$tasks[[taskId]]$cancelled) {
+    message("task [", taskId, "] cancelled")
+  }
 }
 
-# Copyright 2025 Bundesanstalt für Gewässerkunde
+isEnrichPolicyRunning <- function(policyName) {
+  dbComm <- getDbComm()
+  allTasks <- unlist(dbComm@client$tasks$list(detailed=TRUE)$body)
+  running <- any(grepl(glue("\\[{policyName}\\]"), allTasks))
+  if (running)
+    message(policyName, " is already running")
+  running
+}
+
+# Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

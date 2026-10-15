@@ -4,12 +4,18 @@
 \alias{ingestFeatureRecords}
 \title{Ingest featureRecords into Elasticsearch}
 \usage{
-ingestFeatureRecords(path, ingestPipeline = "ingest-feature")
+ingestFeatureRecords(
+  path,
+  ingestPipeline = "ingest-feature",
+  enrichPolicy = "date-import-policy"
+)
 }
 \arguments{
 \item{path}{Path to single RDS file or directory with RDS files.}
 
 \item{ingestPipeline}{ID of ingest pipeline to use (default is "ingest-feature" pipeline)}
+
+\item{enrichPolicy}{The name of the date-import-* enrich policy to update. The standard policy can take time}
 }
 \value{
 list with one top-level entry per batch (RDS file). The second level has one entry per

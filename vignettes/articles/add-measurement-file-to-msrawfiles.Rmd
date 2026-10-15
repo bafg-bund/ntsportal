@@ -14,38 +14,37 @@ knitr::opts_chunk$set(
 )
 ```
 
-`addRawfiles()` creates a new metadata entry for a measurment file in the `msrawfiles` table. It uses an existing entry as a template and dynamically changes certain fields based on data encoded in the filename or directly passed by the user. More details are found in the `addRawfiles()` documentation.
+`addRawfiles()` creates a new metadata entry for a measurement file in the `msrawfiles` table. It uses an existing entry as a template and dynamically changes certain fields based on data encoded in the filename or directly passed by the user. More details are found in the `addRawfiles()` documentation.
 
 # Step-by-step guide to using `addRawfiles()`
 
 1. Install the newest version of *ntsportal*, including the Python requirements.
-2. First, create a backup of `msrawfiles`. Use the function `createBackupMsrawfiles()`, a backup named `ntsp25.3_msrawfiles_backup_<YYYYMMDD>` is then created.
+2. First, create a backup of `msrawfiles`. Use the function `createBackupMsrawfiles()`, a backup named `ntsp26.1_msrawfiles_backup_<YYYYMMDD>` is then created.
 
 ```{r, eval=FALSE}
 
 library(ntsportal)
 
-rfIndex <- "ntsp25.3_msrawfiles"
+rfIndex <- "ntsp26.1_msrawfiles"
 
 createBackupMsrawfiles(rfIndex)
 ```
 
-3. Find the new mzXML measurement files - e.g. with Windows Explorer
+3. Find the new mz(X)ML measurement files - e.g. with Windows Explorer
 - If necessary, move files to the correct storage location[^storage-bfg].
-- Each batch (measurement sequence) is stored in its own directory. If batches become larger than ca. 60 files they should be split into several batches.
+- Each batch (measurement sequence) is stored in its own directory. If batches become larger than ca. 60 files they should be split into multiple batches.
 
-[^storage-bfg]: At the BfG, mzXML files are stored together with the original vendor files on a (slow) network attached storage (NAS). Only the mzXML are synchronized to a fast storage (BeeGFS). The BeeGFS path is added to `msrawfiles`. However, the `dirMeasurmentFiles` argument has to be in the original vendor file location on the NAS, since only mzXML files are transferred to BeeGFS.
+[^storage-bfg]: At the BfG, mz(X)ML files are stored together with the original vendor files on a (slow) network attached storage (NAS). Only the mz(X)ML are synchronized to a fast storage (BeeGFS). The BeeGFS path is added to `msrawfiles`. However, the `dirMeasurmentFiles` argument has to be in the original vendor file location on the NAS, since only mz(X)ML files are transferred to BeeGFS.
 
 4. Go to RStudio
 
-- Get the ID of a document to use as a template for the files you want to add either by using the Dev Tools console or `findTemplateId()`:
+- Get the ID of a document to use as a template for the files you want to add either by using `getIdsByEsql()` or `findTemplateId()`:
 ```{r, eval=FALSE}
 templateId <- findTemplateId(rfIndex, blank = F, pol ="pos", station = "rhein_ko_l", matrix = "water", duration = 1)
 ```
 
 - Get a vector of paths for the files to be added. In this case the positive measurement files of samples (not blanks)  
-```{r}
-#| eval: false
+```{r, eval=FALSE}
 pathsToAdd <- list.files(
   path = "/beegfs/nts/ntsportal/msrawfiles/koblenz/wasser/2024/202406/pos/", 
   pattern = "RH_pos_\\d{8}\\.mzXML", full.names = TRUE)
@@ -61,7 +60,7 @@ addRawfiles(
 )
 ```
 
-- Use the `dirMeasurmentFiles` argument to specify where to look for the original (vendor format) measurement files (root directory is sufficient). This is used to get the measurement time since this is not always written in the mzXML file, e.g. when converting wiff files[^storage-bfg].
+- Use the `dirMeasurmentFiles` argument to specify where to look for the original (vendor format) measurement files (root directory is sufficient). This is used to get the measurement time since this is not always written in the mz(X)ML file, e.g. when converting wiff files[^storage-bfg].
 
 5. Check `add-rawfiles-check.json` (e.g., `start`, `filename`, `pol`, `instrument`, `tag`, `comment` and `blank` fields)
 - If you want to make changes to `add-rawfiles-check.json`, these can be accepted only if you are adding one file (run `addRawfiles()` with just one file in the `newPaths` argument)
@@ -109,6 +108,12 @@ addRawfiles(rfindex, "eIRBnYkBcjCrX8D7v4H5", newFiles[4:17], newStation = "filen
 ```
 Example `filename`: `OBF34910_20230821_Zschopau_pos.mzXML`  
 Example `dbas_station_regex`: `^(OBF\\d{5})_`
+
+## Adding quality control measurements
+
+QC measurements are made together with the samples in a batch but are added to separate processing batches to be processed differently. This is because there is usually only one QC measurement per batch but multiple measurements are needed for multiple detection filtering.
+
+**Important**: The name of the measurement batch, e.g., "donau_jochenstein_m/spm/p1m/2024/pos" is added to the `tag` array so that the batch from which the QC sample originated is recorded. 
 
 
 <!-- Copyright 2026 Bundesanstalt für Gewässerkunde -->

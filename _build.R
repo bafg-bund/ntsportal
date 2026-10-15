@@ -7,10 +7,6 @@ message("URL checks")
 urlchecker::url_check(".")
 urlchecker::url_update(".")
 
-message("Build Vignettes")
-devtools::build_vignettes(".", clean = FALSE, install = FALSE)
-tools::compactPDF(paths = "doc", gs_quality = "ebook")
-
 message("Build website")
 pkgdown::build_site(".", preview = FALSE, new_process = TRUE)
 
@@ -25,7 +21,7 @@ for (a_file in files) {  # a_file <- files[1]
   # Add imprint to footer
   y <- gsub(
     'Developed by Kevin S\\. Jewell, Ole Lessmann\\.',
-     paste0('Developed by Kevin S. Jewell, Ole Lessmann, Franziska Prodöhl, Jonas Skottnik, Nina Hermes, ',  
+     paste0('Developed by Kevin S. Jewell, Franziska Prodöhl, Ole Lessmann, Nina Hermes, Jonas Skottnik,  ',  
      'Arne Wick. <a href="https://www.bafg.de/DE/Service/Impressum/impressum_node.html">Imprint</a>.'), 
      x
   )

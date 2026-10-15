@@ -13,7 +13,8 @@ removeFieldFromTable(dbComm, tableName, field, searchBlock = list())
 
 \item{field}{table column (field) name see mappings}
 
-\item{searchBlock}{list coercible to json for Elasticsearch Search API (Query DSL)}
+\item{searchBlock}{list coercible to json for Elasticsearch Search API (Query DSL) to select a subset of rows to 
+query or change. Default is all table rows.}
 }
 \description{
 Remove a field from a Table

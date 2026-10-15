@@ -10,7 +10,7 @@
 #SBATCH --tasks-per-node=1             # number of tasks per node
 #SBATCH --ntasks=1                     # number of tasks
 #SBATCH --cpus-per-task=1              # number of cpus per task (max = 48)
-#SBATCH --array=1-RVarNumBatches%10
+#SBATCH --array=1-RVarNumBatches%20
 
 
 #----------------------------------------------------------------
@@ -47,6 +47,7 @@ echo "Time: `date`"
 echo "Running on master node: `hostname`"
 echo "PATH: " $PATH
 echo "LD_LIBRARY_PATH: " $LD_LIBRARY_PATH
+echo "Rscript version: `Rscript --version`"
 echo "R_USER_LIB: `Rscript -e '.libPaths()'`"
 echo -e "Current directory:" $PWD
 echo "=========================================="

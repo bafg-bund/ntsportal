@@ -7,6 +7,7 @@
 #' 
 #' @param path Path to single RDS file or directory with RDS files.
 #' @param ingestPipeline ID of ingest pipeline to use (default is "ingest-feature" pipeline)
+#' @param enrichPolicy The name of the date-import-* enrich policy to update. The standard policy can take time
 #' 
 #' @details
 #' \strong{Ingest pipelines}
@@ -16,7 +17,7 @@
 #' @return list with one top-level entry per batch (RDS file). The second level has one entry per
 #' alias and this contains a character vector of the index name associated with that alias.
 #' @export
-ingestFeatureRecords <- function(path, ingestPipeline = "ingest-feature") {
+ingestFeatureRecords <- function(path, ingestPipeline = "ingest-feature", enrichPolicy = "date-import-policy") {
   if (!testForPipeline(ingestPipeline))
     stop("Ingest pipeline ", ingestPipeline, " does not exist")
   indexMappingPath <- fs::path_package("ntsportal", "mappings")
@@ -38,8 +39,8 @@ ingestFeatureRecords <- function(path, ingestPipeline = "ingest-feature") {
   if (length(aliasIndexPairs) == 0)
     return(list())
   walk(unlist(aliasIndexPairs), \(x) refreshTable(dbComm, x))
-  taskId <- executeEnrichPolicy("date-import-policy")
-  message("Refreshed date-import-policy with task id: ", taskId)
+  taskId <- executeEnrichPolicy(enrichPolicy)
+  message(glue("Refreshed {enrichPolicy} with task id: "), taskId)
   return(aliasIndexPairs)
 }
 

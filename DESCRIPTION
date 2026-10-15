@@ -1,7 +1,7 @@
 Package: ntsportal
 Type: Package
 Title: ntsportal - a database for non-target-screening of surface water
-Version: 25.3
+Version: 26.1
 Authors@R: c(
              person(c("Kevin", "S."), "Jewell", email = "jewell@bafg.de", role = c("aut", "cre"),
              comment = "Federal Institute of Hydrology (BfG) Koblenz, Germany"),
@@ -30,15 +30,9 @@ Imports:
     glue,
     keyring,
     reticulate,
-    elastic,
     digest,
-    rlang,
-    lubridate,
-    cli,
     RJSONIO,
-    zoo,
-    stringi
-RoxygenNote: 7.3.3
+    zoo
 Remotes:
     github::bafg-bund/ntsworkflow
 Suggests:
@@ -53,3 +47,4 @@ VignetteBuilder: knitr
 Config/testthat/edition: 3
 URL: https://docs.ntsportal.bafg.de
 Config/Needs/website: rmarkdown
+Config/roxygen2/version: 8.1.1

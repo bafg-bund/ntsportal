@@ -1,7 +1,7 @@
 
 
 test_that("Full validation of msrawfiles runs without error", {
-  expect_snapshot(checkMsrawfiles(testIndexName), error = TRUE)
+  expect_no_error(checkMsrawfiles(testIndexName))
 })
 
 test_that("Normal record validation returns true for dbas", {
@@ -21,7 +21,7 @@ test_that("An incorrect file path returns a warning", {
   expect_warning(correctRawfileLocation(records[[10]]$path))
 })
 
-test_that("An missing path returns a warning", {
+test_that("A missing path returns a warning", {
   records <- getMsrawfilesTestRecords("dbas")
   records[[10]]$path <- NULL
   expect_warning(fieldsExistForSampleType(records[[10]]))
@@ -44,8 +44,9 @@ test_that("Wrong replicate regex returns a warning", {
 
 test_that("Wrong blank returns a warning", {
   records <- getMsrawfilesTestRecords("dbas")
-  records[[10]]$blank <- TRUE
-  expect_warning(correctBlankRegex(records[[10]]))
+  indexNonBlank <- which(!getField(records, "blank"))[1]
+  records[[indexNonBlank]]$blank <- TRUE
+  expect_warning(correctBlankRegex(records[[indexNonBlank]]))
 })
 
 test_that("An incorrect field in featureRecord in a nested field results in an error", {
@@ -53,7 +54,7 @@ test_that("An incorrect field in featureRecord in a nested field results in an e
   oneFeatureRecord <- convertToRecord(rr$dbasResult, rr$msrRecords)[[1]]
   expect_true(validateRecord(oneFeatureRecord))
   oneFeatureRecord$ms2 <- c(oneFeatureRecord$ms2, error_field = "error")
-  expect_warning(expect_warning(validateRecord(oneFeatureRecord), "ms2"), "error_field")
+  expect_warning(validateRecord(oneFeatureRecord), "ms2.*error_field")
   expect_false(suppressWarnings(validateRecord(oneFeatureRecord)))
 })
 
@@ -65,4 +66,15 @@ test_that("Depending on the subclass of msrawfiles, different fields are require
   fieldsNts <- defineRequiredFieldsAnySample(recNts)
   expect_gt(length(setdiff(fieldsDbas, fieldsNts)), 1)
   expect_contains(intersect(fieldsDbas, fieldsNts), "path")
+})
+
+test_that("An additional_blank_path pointing to a non-existant record returns a validation error", {
+  recDbas <- getMsrawfilesTestRecords("dbas")
+  blankPaths <- getField(recDbas, "additional_blank_path")
+  expect_no_error(validateRecordsMsrawfiles(recDbas))
+  firstNa <- which(sapply(blankPaths, \(x) is.na(x[1])))[1]
+  firstThree <- which(sapply(blankPaths, length) == 3)[1]
+  recDbas[[firstNa]]$additional_blank_path <- "foo"
+  recDbas[[firstThree]]$additional_blank_path[3] <- "bar"
+  expect_error(suppressWarnings(validateRecordsMsrawfiles(recDbas)))
 })

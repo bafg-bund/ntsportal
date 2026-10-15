@@ -1,4 +1,45 @@
 
+# ntsportal 26.1
+
+## Major changes (frontend)
+
+* Linear regression analysis in the SPM time series dashboard shows the average percent change per year for the full 
+time period of annual sampling (field: `change_per_year`). This is computed using a semi-log regression analysis. 
+The table also shows the date of the last detection (field: `last_detection`).
+* Time series for analysis of water samples are additionally split by `instrument_name` so that measurements performed 
+with different instruments appear as separate series.
+* Time-series-annotations (events) now use codes to categorize the type of event. The codes are documented on the dashboard.
+
+## Major changes (backend)
+
+* Run-time fields were removed from feature documents and instead are computed during ingest using the ingest pipeline 
+defined in `ingestPipelines/ingest-feature.json`. This increases ingest time slightly but greatly improves search performance.
+* Reorganization of batches holding measurement files for improved processing performance and for a more logical structure. This
+will impact results where the batch size has changed. The batch structure is explained on the time series dashboards and 
+in some cases is marked as a time-series annotation. The new batch structure and naming conventions is reported in the article 
+Structure of NTSPortal, Section: Batch naming conventions.
+* Blanks can be added to a batch by reference to blanks in other batches/directories using the `additional_blank_path` field in msrawfiles.
+Blanks are not specific to a measurement file. Additional blanks can be added to any file or all files in the batch. 
+* Bugfix in the processing of DBAS detections: improvements to blank correction and filtering by minimum MS² detection thresholds.
+
+## Minor changes (backend)
+
+* When no peaks are found in a batch, one feature record with the `path` and `feature_table_alias` of the first file is still
+ingested so that the processing attempt is documented. 
+* Changed field type to `long` for fields `area` and `intensity` in `feature` tables.
+* Added fields `proteowizard_version` and `proteowizard_settings` to `msrawfiles` to record measurement file conversion from vendor format.
+* Added a bash CLI script for standard processing and ingesting tasks. See `inst/shellInterface/ntsp`. IT can be 
+linked into system path for access in the shell.
+* Removed deprecated functions from R-package `elastic`
+* Updated various dependencies to versions:
+  + R = 4.6.1
+  + R-tidyverse = 2.0.0
+  + Python = 3.12.13
+  + ElasticSearch = 9.5.3
+  + Python-elasticsearch = 9.5.1
+  + R-ntsworkflow = 0.2.11
+  + CSL = 26.2
+
 # ntsportal 25.3
 
 ## Major changes (backend)
@@ -72,6 +113,11 @@ annotation level (1 or 2 [gap-filled]) does not play a role.
   - `nts_alig_mz_tol_units`
 * Field names in `spectral_library` documents have changed
   - `frag_type` to `collision_type`
+* Field added to `analysis_dbas` documents:
+  - `adduct`
+  - `isotopologue`
+  - Runtime field `esi_ion_spec`
+  
 * Updated various dependencies to versions:
   + R = 4.5.2
   + Python = 3.12.12

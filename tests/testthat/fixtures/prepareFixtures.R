@@ -1,18 +1,22 @@
 
 
 # Script to create fixtures and other one-time setup for unit tests
+# Can only be run after you have created the msrawfiles for the current version (e.g. ntsp26.1_msrawfiles)
+
+# Bash commands to start script ####
+# nohup Rscript tests/testthat/fixtures/prepareFixtures.R &> tests/testthat/fixtures/prepareFixtures.log &
+# tail -f tests/testthat/fixtures/prepareFixtures.log
 
 # Setup ####
+devtools::load_all()
 library(ntspQaTools)
-source("tests/testthat/helper.R")
-dbComm <- getDbComm()
 
-# new msrawfiles_unit_tests index (use only when incrementing the version) ####
-copyTable(dbComm, tableName = "ntsp25.3_msrawfiles_unit_tests", newTableName = testIndexName, mappingType = "msrawfiles")
-changeAllDbasAliasNames(msrawfilesName = testIndexName, version = ntspVersion)
-# deleteIndex(testIndexName)
+currentMsr <- glue("ntsp{ntspVersion}_msrawfiles")
+
+log_info("Start")
 
 # msrawfiles allRecords ####
+log_info("Section: msrawfiles allRecords")
 allRecords <- getTableAsRecords(dbComm, testIndexName, recordConstructor = newMsrawfilesRecord)
 saveRDS(allRecords, test_path("fixtures", "msrawfilesTestRecords", "allRecords.RDS"))
 recordsNoClass <- lapply(allRecords, unclass)
@@ -29,41 +33,47 @@ allRecordsNts <- getTableAsRecords(
 saveRDS(allRecordsNts, test_path("fixtures", "msrawfilesTestRecords", "allNtsMsrawfileRecords.RDS"))
 
 # oneSampleDbasResult ####
+log_info("Section: oneSampleDbasResult")
 records <- getOneSampleRecords("dbas")
 records <- newDbasMsrawfilesBatch(records)
 result <- scanBatch(records)
 saveRDS(result, test_path("fixtures", "screening-dbasConvertToRecord", "oneSampleDbasResult.RDS"))
 
 # reportForCleaning ####
+log_info("Section: reportForCleaning")
 reports <- purrr::map(getRecordsTripicateBatch(), fileScanDbas)
-reports <- removeEmptyReports(reports)
-mergedReport <- mergeReports(reports)
-reintegratedReport <- reintegrateReport(mergedReport)
-saveRDS(reintegratedReport, test_path("fixtures", "screening-dbasFileScanning", "reportForCleaning.RDS"))
+dataBoxCleaning <- removeEmptyReports(list(reports = reports, msrawfilesBatch = getRecordsTripicateBatch()))
+dataBoxCleaning$reports <- mergeReports(dataBoxCleaning$reports)
+dataBoxCleaning$reports <- reintegrateReport(dataBoxCleaning$reports)
+saveRDS(dataBoxCleaning$reports, test_path("fixtures", "screening-dbasFileScanning", "reportForCleaning.RDS"))
 
-# report for testing false positive removal blankCorrectedReportTriplicate ####
+# Report for testing false positive removal blankCorrectedReportTriplicate ####
+log_info("Section: Report for testing false positive removal blankCorrectedReportTriplicate")
 records <- getMsrawfilesTestRecords("dbas")
 allBatches <- splitRecordsByDir(records)
 recs <- allBatches[[grep("unit_tests/olmesartan-d6-bisoprolol", names(allBatches))]]
 recsBatch <- newDbasMsrawfilesBatch(recs)
 reports <- map(recsBatch, fileScanDbas)
-reports <- removeEmptyReports(reports)
-mergedReport <- mergeReports(reports)
-reintegratedReport <- reintegrateReport(mergedReport)
-saveRDS(reintegratedReport, test_path("fixtures", "screening-dbasFileScanning", "blankCorrectedReportTriplicate.RDS"))
+dataBoxFP <- removeEmptyReports(list(reports = reports, msrawfilesBatch = recsBatch))
+dataBoxFP$reports <- mergeReports(dataBoxFP$reports)
+dataBoxFP$reports <- reintegrateReport(dataBoxFP$reports)
+saveRDS(dataBoxFP$reports, test_path("fixtures", "screening-dbasFileScanning", "blankCorrectedReportTriplicate.RDS"))
 
 # mergedReportSampleAndBlank ####
+log_info("Section: mergedReportSampleAndBlank")
 reports <- purrr::map(getOneSampleRecords("dbas"), fileScanDbas)
-reports <- removeEmptyReports(reports)
-mergedReport <- mergeReports(reports)
-saveRDS(mergedReport, test_path("fixtures", "screening-dbasFileScanning", "mergedReportSampleAndBlank.RDS"))
+dataBoxOneSamp <- removeEmptyReports(list(reports = reports, msrawfilesBatch = getOneSampleRecords("dbas")))
+dataBoxOneSamp$reports <- mergeReports(dataBoxOneSamp$reports)
+saveRDS(dataBoxOneSamp$reports, test_path("fixtures", "screening-dbasFileScanning", "mergedReportSampleAndBlank.RDS"))
 
 # ntsResultSampleAndBlank ####
+log_info("Section: ntsResultSampleAndBlank")
 testBatchRecords <- getOneSampleRecords("nts")
 testNtsResults <- scanBatch(testBatchRecords)  
 saveRDS(testNtsResults, test_path("fixtures", "screening-nts", "ntsResultSampleAndBlank.RDS"))
 
 # ntsResultBisoprololBatch ####
+log_info("Section: ntsResultBisoprololBatch")
 batchDirectory <- file.path(rootDirectoryForTestMsrawfiles, "olmesartan-d6-bisoprolol")
 recs <- getMsrawfilesTestRecords(screeningType = "nts")
 recs <- keep(recs, \(rec) grepl(batchDirectory, rec$path))
@@ -72,10 +82,11 @@ testNtsResults <- scanBatch(recs)
 saveRDS(testNtsResults, test_path("fixtures", "screening-nts", "ntsResultBisoprololBatch.RDS"))
 
 # reintegratedReportDessauBatch and recordsDessauBatch ####
+log_info("Section: reintegratedReportDessauBatch and recordsDessauBatch")
 recs <- getTableAsRecords(
   dbComm,
-  "ntsp25.3_msrawfiles",
-  list(query = list(regexp = list(path = ".*dessau.*/mud_pos/.*"))),
+  currentMsr,
+  list(query = list(regexp = list(path = ".*mulde_dessau_m/spm/p1y/2005_2013/pos.*"))),
   recordConstructor = newDbasMsrawfilesRecord
 )
 filePaths <- map_chr(recs, \(x) x$path)
@@ -87,16 +98,17 @@ recs2 <- map2(recs, newPaths, \(x, y) {x$path <- y; newDbasMsrawfilesRecord(x)})
 recs2 <- newDbasMsrawfilesBatch(recs2)
 progBar <- cli_progress_bar("Processing batch", total = length(recs2))
 reports <- purrr::map(recs2, fileScanDbas, progBar = progBar)
-reports <- removeEmptyReports(reports)
-mergedReport <- mergeReports(reports)
-reintegratedReport <- reintegrateReport(mergedReport)
-reintegratedReport$MS1 <- data.frame()
-reintegratedReport$MS2 <- data.frame()
-reintegratedReport$EIC <- data.frame()
-saveRDS(reintegratedReport, test_path("fixtures", "screening-dbasFileScanning", "reintegratedReportDessauBatch.RDS"))
+dataBoxDessau <- removeEmptyReports(list(reports = reports, msrawfilesBatch = recs2))
+dataBoxDessau$reports <- mergeReports(dataBoxDessau$reports)
+dataBoxDessau$reports <- reintegrateReport(dataBoxDessau$reports)
+dataBoxDessau$reports$MS1 <- data.frame()
+dataBoxDessau$reports$MS2 <- data.frame()
+dataBoxDessau$reports$EIC <- data.frame()
+saveRDS(dataBoxDessau$reports, test_path("fixtures", "screening-dbasFileScanning", "reintegratedReportDessauBatch.RDS"))
 saveRDS(recs2, test_path("fixtures", "screening-dbasFileScanning", "recordsDessauBatch.RDS"))
 
 # Create featureRecordExampleRds ####
+log_info("Section: Create featureRecordExampleRds")
 tempSaveDir <- withr::local_tempdir()
 pathToFixturesDir <- test_path("fixtures", "featureRecordExampleRds")
 file.remove(list.files(pathToFixturesDir, full.names = T))
@@ -104,19 +116,33 @@ file.remove(pathToFixturesDir)
 batchDirectory <- file.path(rootDirectoryForTestMsrawfiles, "olmesartan-d6-bisoprolol")
 pathRds <- screeningSelectedBatches(testIndexName, batchDirectory, tempSaveDir)
 dir.create(pathToFixturesDir)
-file.copy(pathRds, test_path("fixtures", "featureRecordExampleRds"))
+file.copy(pathRds, pathToFixturesDir)
 file.remove(list.files(tempSaveDir, full.names = T))
 # Test the result
-test <- readRDS(list.files(pathToFixturesDir, full.names = T))
+# test <- readRDS(list.files(pathToFixturesDir, full.names = T))
 
-# duplicate feature test (4 and 5 Benzotriazole, Olmesartan) for dbasConvertToRecord ####
+# Create ntsFeatureRecordExampleRds
+log_info("Section: Create ntsFeatureRecordExampleRds")
+tempSaveDir <- withr::local_tempdir()
+pathToFixturesDir <- test_path("fixtures", "ntsFeatureRecordExampleRds")
+file.remove(list.files(pathToFixturesDir, full.names = T))
+file.remove(pathToFixturesDir)
+batchDirectory <- file.path(rootDirectoryForTestMsrawfiles, "olmesartan-d6-bisoprolol")
+pathRds <- screeningSelectedBatches(testIndexName, batchDirectory, tempSaveDir, screeningType = "nts")
+dir.create(pathToFixturesDir)
+file.copy(pathRds, pathToFixturesDir)
+file.remove(list.files(tempSaveDir, full.names = T))
+
+
+# Duplicate feature test (4 and 5 Benzotriazole, Olmesartan) for dbasConvertToRecord ####
+log_info("Section: Duplicate feature test (4 and 5 Benzotriazole, Olmesartan) for dbasConvertToRecord")
 fldr <- file.path("fixtures", "screening-dbasConvertToRecord")
 measFilePath <- test_path(fldr, "OBF39601_20221114_Dorfbach_Oberschindmaas_neg_45benz.mzXML")
 subsetMzxml("/beegfs/nts/ntsportal/msrawfiles/sachsen/neg/paket33/OBF39601_20221114_Dorfbach_Oberschindmaas_neg.mzXML",
             measFilePath, c(6.8, 7.5))
 msRec <- getTableAsRecords(
   getDbComm(), 
-  "ntsp25.3_msrawfiles", 
+  currentMsr, 
   searchBlock = list(query = list(term = list(filename = "OBF39601_20221114_Dorfbach_Oberschindmaas_neg.mzXML"))),
   recordConstructor = newDbasMsrawfilesRecord
 )
@@ -126,18 +152,42 @@ saveRDS(msrBatch, test_path(fldr, "msrawfilesBatchOneSampleWithDuplicatePeaks.RD
 res1 <- scanBatch(msrBatch)
 saveRDS(res1, test_path(fldr, "scanResultOneSampleWithDuplicatePeaks.RDS"))
 
-# example data from Bimmen testing replicate injection filter reintegratedReportBimmen ####
-paths <- c(
-  "/beegfs/nts/ntsportal/msrawfiles/bimmen/schwebstoff/rhb_pos/B14_pos1.mzXML",
-  "/beegfs/nts/ntsportal/msrawfiles/bimmen/schwebstoff/rhb_pos/B14_pos2.mzXML",
-  "/beegfs/nts/ntsportal/msrawfiles/bimmen/schwebstoff/rhb_pos/B14_pos3.mzXML",
-  "/beegfs/nts/ntsportal/msrawfiles/bimmen/schwebstoff/rhb_pos/B21_pos1.mzXML",
-  "/beegfs/nts/ntsportal/msrawfiles/bimmen/schwebstoff/rhb_pos/B21_pos2.mzXML",
-  "/beegfs/nts/ntsportal/msrawfiles/bimmen/schwebstoff/rhb_pos/B21_pos3.mzXML"
+# Example data from Bimmen testing replicate injection filter reintegratedReportBimmen ####
+log_info("Section: Example data from Bimmen testing replicate injection filter reintegratedReportBimmen")
+
+recs <- getTableAsRecords(
+  getDbComm(), tableName = currentMsr, 
+  searchBlock = 
+    list(
+      query = list(
+        bool = list(
+          must = list(
+            list(
+              term = list(
+                station = "rhein_bi_l"
+              )
+            ),
+            list(
+              term = list(
+                duration = "P1Y"
+              )
+            ),
+            list(
+              term = list(
+                pol = "pos"
+              )
+            ),
+            list(
+              terms = list(
+                start = list("2014-01-01", "2021-01-01")
+              )
+            )
+          )
+        )
+      )
+    ), 
+    recordConstructor = newDbasMsrawfilesRecord
 )
-msri <- "ntsp25.3_msrawfiles"
-recs <- getTableAsRecords(getDbComm(), tableName = msri, searchBlock =  list(query = list(terms = list(path = paths))), 
-                          recordConstructor = newDbasMsrawfilesRecord)
 nbatch <- newDbasMsrawfilesBatch(recs)
 saveRDS(nbatch, "tests/testthat/fixtures/screening-dbasFileScanning/batchBimmen.RDS")
 reports <- purrr::map(nbatch, fileScanDbas, compsToProcess = c("3-Phenylpyridine", "Benzyl-triethylammonium"))
@@ -146,6 +196,33 @@ mergedReport <- mergeReports(reports)
 reintegratedReport <- reintegrateReport(mergedReport)
 saveRDS(reintegratedReport, "tests/testthat/fixtures/screening-dbasFileScanning/reintegratedReportBimmen.RDS")
 
+# Test record for blank correction ####
+log_info("Section: test record for blank correction")
+tempSaveDir <- withr::local_tempdir()
+pathToFixturesDir <- test_path("fixtures", "screening-dbasFileScanning")
+bt <- getSelectedMsrawfileBatches(currentMsr, "/beegfs/nts/ntsportal/msrawfiles/saale_wettin_m/spm/p1y/2024_2033/pos", "dbas")
+reports <- map(bt[[1]], \(rec) fileScanDbas(rec, compsToProcess = c("Bethanidine", "Sitagliptin", "Bezafibrate-d6")))
+reports <- removeEmptyReports(reports)
+mergedReport <- mergeReports(reports)
+reintegratedReport <- reintegrateReport(mergedReport)
+saveRDS(reintegratedReport, file.path(pathToFixturesDir, "test2.RDS"))
+
+# testmzXML files for PEG-12-NH4-hessen (found only in blank)
+log_info("Section: test record for blank correction example PEG-12 in Hessen")
+batchDirectory <- "/beegfs/nts/ntsportal/msrawfiles/hessen/water/hessen_II/2021/202110/20211020/pos"
+bts <- getSelectedMsrawfileBatches(index, batchDirectory, "dbas")
+newFiles <- keep(bts[[1]], \(x) grepl("052_149_13-09-2021_Kinzig_pos", x$path) || 
+                   grepl("054_215_13-09-2021_Lahn_pos", x$path) || grepl("MQ_HessenII_Blank_20211021_pos", x$path))
+pathsToModify <- getField(newFiles, "path")
+fldr <- file.path("fixtures", "screening-dbasFileScanning", "measurement-files")
+newMeasFilePath <- test_path(fldr, basename(pathsToModify))
+purrr::walk2(pathsToModify, newMeasFilePath, \(x, y) subsetMzxml(x, y, c(6, 6.3)))
+newFiles <- newDbasMsrawfilesBatch(newFiles)
+batchRecordsPath <- test_path(fldr, "dbasMsrawfilesBatch.RDS")
+saveRDS(newFiles, batchRecordsPath)
+
+
+log_info("End")
 
 # Copyright 2026 Bundesanstalt für Gewässerkunde
 # This file is part of ntsportal

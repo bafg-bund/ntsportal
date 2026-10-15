@@ -74,10 +74,7 @@ screeningOneBatch <- function(msrawfilesBatch, saveDirectory) {
 #' \dontrun{
 #' userEmail <- "example@bafg.de"
 #' dirResults <- "processingResults"
-#' msrawfileIndexName <- "ntsp25.2_msrawfiles"
-#' library(ntsportal)
-#' connectNtsportal()
-#' file.remove(list.files(dirResults, f = T))
+#' msrawfileIndexName <- "ntsp26.1_msrawfiles"
 #'
 #' screeningSelectedBatchesSlurm(
 #'   msrawfileIndex = msrawfileIndexName,
@@ -91,6 +88,7 @@ screeningSelectedBatchesSlurm <- function(msrawfileIndex, batchDirs, saveDirecto
   createSaveDir(saveDirectory)
   recordsInBatches <- getSelectedMsrawfileBatches(msrawfileIndex, batchDirs, screeningType)
   checkQualityBatchList(recordsInBatches)
+  recordsInBatches <- recordsInBatches[order(map_int(recordsInBatches, length), decreasing = TRUE)]
   saveFilesSlurm(recordsInBatches, saveDirectory)
   slurmJobFile <- file.path(saveDirectory, "arrayScreening.sbatch")
   

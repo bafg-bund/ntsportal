@@ -18,15 +18,15 @@ test_that("A dummy record can be added to msrawfiles", {
     )  
   )
   
-  importedRecord <- jsonlite::read_json(list.files(saveDir, f = T))
-  expect_length(importedRecord[[1]], 80)
+  importedRecord <- jsonlite::read_json(list.files(saveDir, full.names = TRUE))
+  expect_length(importedRecord[[1]], 82)
   recs <- getTableAsRecords(dbComm, testIndexName, queryForTestRecord)
   pathResult <- recs[[1]]$path
   expect_equal(normalizePath(testFile), pathResult)
   startResult <- recs[[1]]$start
   expect_equal(startResult, "2022-06-03")
   deleteRow(dbComm, testIndexName, queryForTestRecord)
-  file.remove(list.files(saveDir, f = T))
+  file.remove(list.files(saveDir, full.names = TRUE))
   refreshTable(dbComm, testIndexName)
   numFound <- getNrow(dbComm, testIndexName, queryForTestRecord)
   expect_equal(numFound, 0)
@@ -66,7 +66,8 @@ test_that("Location information is copied from msrawfiles based on dbas_station_
   saveDir <- withr::local_tempdir()
   newFilePath <- file.path(saveDir, newFileName)
   file.create(newFilePath)
-  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m")
+  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m", 
+                               instrumentName = "sediment_tof")
   suppressWarnings(addRawfiles(
     rfIndex = testIndexName, 
     templateId = templateId,
@@ -91,8 +92,9 @@ test_that("Batch with an unknown filename is not processed", {
   saveDir <- withr::local_tempdir()
   newFilePaths <- file.path(saveDir, newFileNames)
   file.create(newFilePaths)
-  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m")
-  expect_snapshot_error(suppressWarnings(addRawfiles(
+  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m",
+                               instrumentName = "sediment_tof")
+  expect_snapshot_error(addRawfiles(
     rfIndex = testIndexName, 
     templateId = templateId,
     newPaths = newFilePaths, 
@@ -100,7 +102,7 @@ test_that("Batch with an unknown filename is not processed", {
     dirMeasurmentFiles = saveDir,
     prompt = F,
     saveDirectory = saveDir
-  )))
+  ))
   expect_equal(getNrow(dbComm, testIndexName, qTest), 0)
 })
 
@@ -112,7 +114,8 @@ test_that("A station can be passed as a list", {
   saveDir <- withr::local_tempdir()
   newFilePath <- file.path(saveDir, newFileName)
   file.create(newFilePath)
-  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m")
+  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m",
+                               instrumentName = "sediment_tof")
   suppressWarnings(addRawfiles(
     rfIndex = testIndexName, 
     templateId = templateId,
@@ -138,6 +141,29 @@ test_that("A station can be passed as a list", {
   deleteRow(dbComm, testIndexName, qTemplateFile)
 })
 
+test_that("A fixed start date can be passed", {
+  queryForTestRecord <- list(query = list(regexp = list(path = ".*RH_pos_20220603_no_peaks_test_addRecord.mzXML")))
+  if (getNrow(dbComm, testIndexName, queryForTestRecord) > 0)
+    deleteRow(dbComm, testIndexName, queryForTestRecord)
+  testFile <- test_path("fixtures", "msrawfiles-addRecord", "RH_pos_20220603_no_peaks_test_addRecord.mzXML")
+  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "water", duration = "P1D", station = "rhein_ko_l")
+  saveDir <- withr::local_tempdir()
+  suppressMessages(
+    addRawfiles(
+      rfIndex = testIndexName, 
+      newStart = "2026-01-01",
+      templateId = templateId,
+      newPaths = testFile, 
+      dirMeasurmentFiles = test_path("fixtures", "msrawfiles-addRecord"),
+      prompt = F,
+      saveDirectory = saveDir
+    )  
+  )
+  recs <- getTableAsRecords(dbComm, testIndexName, queryForTestRecord)
+  expect_equal(recs[[1]]$start, "2026-01-01")
+  deleteRow(dbComm, testIndexName, queryForTestRecord)
+})
+
 test_that("Batch with two different locations is correctly processed", {
   # Add dummy record for fictitious station "foobar_station", which is encoded in the filename as just "Foo"
   newFileName <- "Foo_07_01_pos.mzXML"
@@ -147,7 +173,8 @@ test_that("Batch with two different locations is correctly processed", {
   saveDir <- withr::local_tempdir()
   newFilePath <- file.path(saveDir, newFileName)
   file.create(newFilePath)
-  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m")
+  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m",
+                               instrumentName = "sediment_tof")
   rec <- getTableAsRecords(dbComm, testIndexName, list(query = list(ids = list(values = templateId))))
   rec[[1]]$station <- "foobar_station"
   rec[[1]]$loc$lon <- 1.2345
@@ -163,7 +190,8 @@ test_that("Batch with two different locations is correctly processed", {
     deleteRow(dbComm, testIndexName, qTest)
   newFilePaths <- file.path(saveDir, newFileNames)
   file.create(newFilePaths)
-  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m")
+  templateId <- findTemplateId(testIndexName, blank = FALSE, matrix = "spm", duration = "P1Y", station = "mulde_de_m",
+                               instrumentName = "sediment_tof")
   suppressWarnings(addRawfiles(
     rfIndex = testIndexName, 
     templateId = templateId,
@@ -185,6 +213,15 @@ test_that("Batch with two different locations is correctly processed", {
   # cleanup
   deleteRow(dbComm, testIndexName, qTest)
   deleteRow(dbComm, testIndexName, qTemplateFile)
+})
+
+test_that("checking additional blank paths results in an error if the records are not present", {
+  recDbas <- getMsrawfilesTestRecords("dbas")
+  expect_true(checkAdditionalBlankPathsAreRecords(recDbas, testIndexName))
+  expect_true(checkAdditionalBlankPathsAreRecords(recDbas[1], testIndexName))
+  recDbas[[1]]$additional_blank_path <- c("foo", "bar")
+  expect_error(checkAdditionalBlankPathsAreRecords(recDbas, testIndexName))
+  expect_error(checkAdditionalBlankPathsAreRecords(recDbas[1], testIndexName))
 })
 
 # Copyright 2026 Bundesanstalt für Gewässerkunde

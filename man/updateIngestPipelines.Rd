@@ -7,5 +7,6 @@
 updateIngestPipelines()
 }
 \description{
-Update Ingest Pipelines needed for ntsportal on the elasticsearch cluster
+Refresh (overwrite) ingest pipelines based on those saved in the ntsportal installation directory. This does not
+execute the enrich policies.
 }

@@ -9,20 +9,16 @@
 #' When working on Linux in the console, this is the 'file'
 #' backend, on windows, 'wincred'.
 #' The backend can be set manually with `Sys.setenv("R_KEYRING_BACKEND" = "file")`.
-#' @details Will additionally create the `escon` connection object in the 
-#' global environment for use by all functions (deprecated, use DbComm interface)
 #' @export
 connectNtsportal <- function() {
   checkSystemRing()  # strange behavior in keyring, there must be a system ring
   if (haveCred()) {
-    createEscon()
+    message("Connection credentials found")
   } else if (!haveRing() && interactive()) {
     createRing()
     setCred()
-    createEscon()
   } else if (interactive()) {
     setCred()
-    createEscon()
   } else {
     warning("Please run connectNtsportal interactively, in order to set the credentials for accessing NTSPortal")
   }
@@ -34,25 +30,6 @@ connectNtsportal <- function() {
 resetConnectionCredentials <- function() {
   clearRing()
   connectNtsportal()
-}
-
-createEscon <- function(ring = "ntsportal") {
-  if (keyring::keyring_is_locked(ring))
-    keyring::keyring_unlock(ring, ring)
-  ntspCred <- getCred(ring)
-  escon <<- elastic::connect(
-    host = 'elastic.dmz.bafg.de', 
-    port = 443, 
-    user = ntspCred[1], 
-    pwd  = ntspCred[2],
-    transport_schema = "https",
-    ssl_verifypeer = F
-  )
-  
-  if (escon$ping()$cluster_name != "bfg-elastic-cluster") {
-    warning("Connection to Elasticsearch cluster not established")
-    rm(escon)
-  }
 }
 
 haveCred <- function(ring = "ntsportal") {

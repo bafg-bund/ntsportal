@@ -193,7 +193,8 @@ setMethod("setValueInField", "PythonDbComm", function(dbComm, tableName, field, 
   error = function(cnd)
     warning("Error in setValueInField: ", conditionMessage(cnd))
   )
-  numberUpdatedMessage(resp)
+  if (exists("resp"))
+    numberUpdatedMessage(resp) 
   refreshTable(dbComm, tableName)
 })
 

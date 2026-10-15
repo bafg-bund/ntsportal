@@ -51,7 +51,7 @@ curl -X GET "https://<hostname>:<port>/ntsp25.2_dbas*/_search" \
 
 ```{r, eval = FALSE}
 tb <- ntsportal::getTableByQuery(
-  tableName = "ntsp25.3_feature*", 
+  tableName = "ntsp26.1_feature*", 
   searchBlock = list(
     query = list(
       term = list(
@@ -207,5 +207,5 @@ temp <- lapply(res$hits$hits, function(x) as.data.frame(x[["_source"]]))
 df <- plyr::rbind.fill(temp)
 ```
 
-<!-- Copyright 2025 Bundesanstalt für Gewässerkunde -->
+<!-- Copyright 2026 Bundesanstalt für Gewässerkunde -->
 <!-- This file is part of ntsportal -->

@@ -14,7 +14,8 @@ addRawfiles(
   promptBeforeIngest = TRUE,
   saveDirectory = getwd(),
   newStationList = list(station = "example_new_station", loc = list(lat = 1.23456, lon =
-    1.23456), river = "example_new_river", gkz = 99999, km = 99999)
+    1.23456), river = "example_new_river", gkz = 99999, km = 99999),
+  ignoreValidation = FALSE
 )
 }
 \arguments{
@@ -41,6 +42,8 @@ current working dir)}
 
 \item{newStationList}{List with fields "station" and "loc" and optionally "river", "gkz" and "km" to add a new
 station. see details}
+
+\item{ignoreValidation}{boolean, should validation of template be ignored?}
 
 \item{rfindex}{index name for rawfiles index}
 }

@@ -39,13 +39,13 @@ e.g. in `screeningOneBatch()`.
 dbComm <- getDbComm()
 recs <- getTableAsRecords(
   dbComm, 
-  "ntsp25.3_msrawfiles", 
+  "ntsp26.1_msrawfiles", 
   searchBlock = list(query = list(regexp = list(filename = "Des_.._.._pos.mzXML"))), 
   newDbasMsrawfilesRecord
 )
 recsBlanks <- getTableAsRecords(
   dbComm, 
-  "ntsp25.3_msrawfiles", 
+  "ntsp26.1_msrawfiles", 
   searchBlock = list(query = list(regexp = list(path = ".*mud_pos/BW.*"))), 
   newDbasMsrawfilesRecord
 )

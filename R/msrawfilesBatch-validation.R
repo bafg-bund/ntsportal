@@ -4,14 +4,15 @@ checkQualityBatchList <- function(recordsInBatches) {
   batchesOk <- purrr::map_lgl(recordsInBatches, checkQualityBatch)
   if (!all(batchesOk))
     stop("Quality check batches failed")
-  invisible(batchesOk)
+  invisible(all(batchesOk))
 }
 
 checkQualityBatch <- function(msrawfilesBatch) {
   batchOk <- all(
     allFieldsUniform(msrawfilesBatch),
     blanksPresent(msrawfilesBatch),
-    enoughSamplesForMinFeatures(msrawfilesBatch)
+    enoughSamplesForMinFeatures(msrawfilesBatch),
+    checkThreeReplicates(msrawfilesBatch)
   )
   batchOk
 }
@@ -21,7 +22,7 @@ allFieldsUniform <- function(records) {
   
   recordsEnvSamples <- purrr::discard(records, getField(records, "blank"))
   uniformEnv <- eachFieldUniform(recordsEnvSamples, fieldsToCheckUniformEnvSamples(records)) 
-  
+ 
   uniform <- c(uniformAll, uniformEnv)
   
   if (!all(uniform)) {
@@ -35,7 +36,7 @@ allFieldsUniform <- function(records) {
 }
 
 blanksPresent <- function(records) {
-  if (!any(getField(records, "blank"))) {
+  if (!any(getField(records, "blank")) && !any(fieldAvailable(records, "additional_blank_path"))) {
     badBatchWarning(records, "No blank found")
     FALSE
   } else {
@@ -44,6 +45,9 @@ blanksPresent <- function(records) {
 }
 
 enoughSamplesForMinFeatures <- function(records) {
+  # A batch with only blanks is ignored
+  if (all(getField(records, "blank")))
+    return(TRUE)
   minFeat <- getField(records, "nts_alig_filter_min_features", quiet = TRUE)[1]
   if (is.na(minFeat))
     return(TRUE)
@@ -55,7 +59,24 @@ enoughSamplesForMinFeatures <- function(records) {
   }
 }
 
+checkThreeReplicates <- function(records) {
+  recordsEnvSamples <- purrr::discard(records, getField(records, "blank"))
+  if (length(recordsEnvSamples) == 0)
+    return(TRUE)
+  repGroupName <- getField(recordsEnvSamples, "replicate_group_name", quiet = T)
+  if (all(is.na(repGroupName)))
+    return(TRUE)
+  if (!all(table(repGroupName) == 3)) {
+    badBatchWarning(records, "Number of replicates must be exactly 3, check replicate_group_name")
+    FALSE
+  } else {
+    TRUE
+  }
+}
+
 eachFieldUniform <- function(records, fields) {
+  if (length(records) == 0)
+    return(TRUE)
   vapply(fields, fieldUniform, logical(1), records = records)
 }
 
@@ -63,6 +84,8 @@ fieldUniform <- function(records, fieldToCheck) {
   if (!all(fieldExistsRecords(records, fieldToCheck)))
     return(TRUE)
   allEntries <- getField(records, fieldToCheck)
+  if (is.list(allEntries))
+    allEntries <- map(allEntries, \(x) x[order(x)])
   length(unique(allEntries)) == 1
 }
 
@@ -97,7 +120,6 @@ fieldsToCheckUniformAllSamples.ntsMsrawfilesBatch <- function(msrawfilesBatch) {
 #' @export
 fieldsToCheckUniformAllSamples.msrawfilesBatch <- function(msrawfilesBatch) {
   c(
-    "blank_regex",
     "duration",
     "matrix",
     "pol",
@@ -112,9 +134,7 @@ fieldsToCheckUniformEnvSamples <- function(msrawfilesBatch) {
 }
 #' @export
 fieldsToCheckUniformEnvSamples.msrawfilesBatch <- function(msrawfilesBatch) {
-  c(
-    "replicate_regex"
-  )
+  character(0)
 }
 #' @export
 fieldsToCheckUniformEnvSamples.ntsMsrawfilesBatch <- function(msrawfilesBatch) {
@@ -141,7 +161,7 @@ ununiformFieldWarning <- function(records, field) {
 }
 
 badBatchWarning <- function(records, reason) {
-  batchName <- dirname(getField(records, "path")[1])
+  batchName <- paste(unique(dirname(getField(records, "path"))), collapse = ", ")
   warning(reason, " in batch ", batchName)
 }
 

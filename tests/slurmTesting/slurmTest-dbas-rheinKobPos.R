@@ -1,20 +1,23 @@
+library(ntsportal)
 
 # Variables to be changed #################
-userEmail <- "prodoehl@bafg.de"
+userEmail <- Sys.getenv("USER_EMAIL")
 dirTestResults <- "tests/slurmTesting/testResults-dbas-rheinKobPos"
-msrawfileIndexName <- "ntsp25.3_msrawfiles"
+msrawfileIndexName <- "ntsp26.1_msrawfiles"
 ###########################################
-library(logger)
-library(ntsportal)
-index <- "ntsp25.3_msrawfiles"
+
+if (userEmail == "")
+  stop("USER_EMAIL environment variable not correctly set")
+
 dirs <- c(
-  "/beegfs/nts/ntsportal/msrawfiles/koblenz/wasser/2021/202105/pos/",
-  "/beegfs/nts/ntsportal/msrawfiles/koblenz/wasser/2021/202106/pos/"
+  "/beegfs/nts/ntsportal/msrawfiles/rhein_koblenz_l/water/tof/p1d/2021/202105/pos/",
+  "/beegfs/nts/ntsportal/msrawfiles/rhein_koblenz_l/water/tof/p1d/2021/202106/pos/"
 )
-screeningSelectedBatchesSlurm(index, dirs, dirTestResults, userEmail)
 
+unlink(dirTestResults, recursive = T)
+dir.create(dirTestResults)
+screeningSelectedBatchesSlurm(msrawfileIndexName, dirs, dirTestResults, userEmail)
 
-# after completion
-log_info("started")
-ingestFeatureRecords(dirTestResults)
-log_info("ended")
+stopifnot(length(list.files(dirTestResults)) == 3)
+
+system("bash -c 'source /etc/profile.d/modules.sh && module load R/4.6.1 && sbatch tests/slurmTesting/testResults-dbas-rheinKobPos/arrayScreening.sbatch'")

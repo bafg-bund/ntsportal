@@ -1,10 +1,11 @@
-ntsportal 25.3
+ntsportal 26.1
 ================
 
 - [Background](#background)
 - [Project Funding](#project-funding)
 - [Licence](#licence)
 - [Installation](#installation)
+- [Citations](#citations)
 - [External links](#external-links)
 
 <!-- README.md is generated from README.Rmd. Please edit README.Rmd -->
@@ -62,7 +63,8 @@ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 more details.
 
 You should have received a copy of the GNU General Public License along
-with ntsportal. If not, see <https://www.gnu.org/licenses/>.
+with ntsportal. If not, see
+<https://www.gnu.org/licenses/gpl-3.0.en.html>.
 
 If you use the package or any derivative thereof, please cite the work,
 see `citation("ntsportal")`.
@@ -109,6 +111,14 @@ options(ntsportal.elasticsearchHostUrl = "https://my.elastic.cluster")
 connectNtsportal()  # first time: enter username and password
 ping(getDbComm())
 ```
+
+# Citations
+
+- [Jewell, K. S., N. Hermes, F. Prodöhl, O. Lessmann, G. Dierkes, B.
+  Ehlig, T. Schulze, E. Winter, R. M. Wallis, A. L. Kronsbein, J.
+  Koschorreck and A. Wick (2026) Development of a retrospective
+  processing and data aggregation platform for non-target screening of
+  surface waters](https://doi.org/10.1186/s12302-026-01477-7)
 
 # External links
 

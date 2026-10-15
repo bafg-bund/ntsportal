@@ -20,6 +20,7 @@
 #'   current working dir)
 #' @param newStationList List with fields "station" and "loc" and optionally "river", "gkz" and "km" to add a new
 #'   station. see details
+#' @param ignoreValidation boolean, should validation of template be ignored?
 #'   
 #' @details \strong{Adding location information (`station` and `loc` fields)}
 #'   newStation can be either "same_as_template", "filename" or "newStationList".
@@ -115,10 +116,11 @@ addRawfiles <- function(
       river = "example_new_river",
       gkz = 99999,
       km = 99999
-    )
+    ),
+    ignoreValidation = FALSE
 ) {
   
-  checkArgumentValidity(rfIndex, templateId, newPaths, newStart, newStation, newStationList)
+  checkArgumentValidity(rfIndex, templateId, newPaths, newStart, newStation, newStationList, dirMeasurmentFiles)
   
   newPaths <- removePreviouslyAdded(rfIndex, newPaths)
   
@@ -130,7 +132,7 @@ addRawfiles <- function(
           "\n will be added")
   
   templateRec <- getTemplateRecord(rfIndex, templateId)
-  checkTemplateRecord(newPaths, templateRec, promptBeforeIngest)
+  checkTemplateRecord(newPaths, templateRec, promptBeforeIngest, ignoreValidation)
   if (newStart == "filename")
     checkDateParsing(newPaths, templateRec, promptBeforeIngest)
   if (newStation == "filename")
@@ -167,7 +169,7 @@ addRawfiles <- function(
       if (length(newRecords) != 1)
         stop("You can only change one document and use this as template for others")
       message("Adding changed document")
-      newRecordsNew <- jsonlite::read_json("add-rawfiles-check.json")
+      newRecordsNew <- jsonlite::read_json(file.path(saveDirectory, "add-rawfiles-check.json"))
       if (all.equal(newRecordsNew, newRecords)[1] == TRUE)
         stop("There was no change made, aborting.")
       newRecords <- newRecordsNew
@@ -175,7 +177,9 @@ addRawfiles <- function(
     stop("Unknown input, aborting.")
   )
   
-  appendRecords(getDbComm(), rfIndex, newRecords)
+  if (checkNewRecordsValidity(newRecords, rfIndex)) 
+    appendRecords(getDbComm(), rfIndex, newRecords) 
+  
   ids <- getIdsNewRecords(rfIndex, newRecords)
   message("Documents were uploaded with the IDs")
   message(quoteAndComma(ids))
@@ -193,8 +197,12 @@ addRawfiles <- function(
 }
 
 
-checkArgumentValidity <- function(rfIndex, templateId, newPaths, newStart, newStation, newStationList) {
+
+checkArgumentValidity <- function(rfIndex, templateId, newPaths, newStart, newStation, newStationList, dirMeasurmentFiles) {
   checkResult <- TRUE
+  if (!dir.exists(dirMeasurmentFiles)) {
+    checkResult <- addError(checkResult, "dirMeasurmentFiles does not exist")
+  }
   if (length(templateId) != 1) {
     checkResult <- addError(checkResult, "Only one templateId allowed")
   }
@@ -216,8 +224,8 @@ checkArgumentValidity <- function(rfIndex, templateId, newPaths, newStart, newSt
   if (length(filePol) != 1) {
     checkResult <- addError(checkResult, "Only one polarity allowed per batch")
   }
-  if (!(newStart == "filename" || grepl("^\\d{8}$", newStart))) {
-    checkResult <- addError(checkResult, "'newStart' must be 'filename' or a fixed date in the form 'yyyymmdd'")
+  if (!(newStart == "filename" || grepl("^\\d{4}-\\d{2}-\\d{2}$", newStart))) {
+    checkResult <- addError(checkResult, "'newStart' must be 'filename' or a fixed date in the form 'yyyy-mm-dd'")
   }
   if (!is.element(newStation, c("same_as_template", "filename", "newStationList"))) {
     checkResult <- addError(checkResult, "newStation must be 'same_as_template' or 'filename' or a list 
@@ -229,13 +237,13 @@ checkArgumentValidity <- function(rfIndex, templateId, newPaths, newStart, newSt
   stopIfAnyErrors(checkResult)
 }
 
-checkTemplateRecord <- function(newPaths, templateRec, promptBeforeIngest) {
+checkTemplateRecord <- function(newPaths, templateRec, promptBeforeIngest, ignoreValidation) {
   checkResult <- TRUE
   if (templateRec$blank)
     message("Note: Template document is a blank file")
   
   polFromFilename <- getPolFromPaths(newPaths)
-  if (templateRec$pol != polFromFilename) {
+  if (!is.null(templateRec$pol) && templateRec$pol != polFromFilename) {
     message("New file(s) do not have the same polarity as the template, only 
             one file may be added")
     if (length(newPaths) > 1 || !promptBeforeIngest)
@@ -252,8 +260,8 @@ checkTemplateRecord <- function(newPaths, templateRec, promptBeforeIngest) {
   if (!validateRecord(templateRec)) {
     checkResult <- addError(checkResult, "validateRecord failed for template")
   }
-  
-  stopIfAnyErrors(checkResult)
+  if (!ignoreValidation)
+    stopIfAnyErrors(checkResult) 
 }
 
 
@@ -289,7 +297,10 @@ checkStationParsing <- function(newPaths, templateRec) {
 newRecordFromTemplate <- function(pth, newStart, newStation, template, rfIndex, newStationList, dirMeasurmentFiles) {
   rec <- template
   rec <- addPathToRecord(rec, pth)
-  rec <- addPolToRecord(rec)
+  if ("pol" %in% names(rec))
+    rec <- addPolToRecord(rec)
+  if ("replicate_regex" %in% names(rec))
+    rec <- addReplicateGroupToRecord(rec, pth)
   rec <- addStartToRecord(rec, newStart)
   rec <- addStationToRecord(rec, newStation, rfIndex, newStationList)
   rec <- addMeasurementTimeToRecord(rec, dirMeasurmentFiles)
@@ -304,6 +315,13 @@ newRecordFromTemplate <- function(pth, newStart, newStation, template, rfIndex, 
   rec
 }
 
+checkNewRecordsValidity <- function(newRecords, rfIndex) {
+  dbasTestRecs <- map(newRecords, newDbasMsrawfilesRecord)
+  ntsTestRecs <- map(newRecords, newNtsMsrawfilesRecord)
+  validateRecordsMsrawfiles(dbasTestRecs) && validateRecordsMsrawfiles(ntsTestRecs) &&
+    checkAdditionalBlankPathsAreRecords(newRecords, rfIndex)
+}
+
 addPathToRecord <- function(rec, pth) {
   rec$path <- normalizePath(pth)
   rec
@@ -314,11 +332,18 @@ addPolToRecord <- function(rec) {
   rec
 }
 
+addReplicateGroupToRecord <- function(rec, pth) {
+  replicateGroup <- stringr::str_replace(basename(pth), rec$replicate_regex, "\\1")
+  stopifnot(!is.null(replicateGroup), !is.na(replicateGroup), nchar(replicateGroup) > 0)
+  rec$replicate_group_name <- replicateGroup
+  rec
+}
+
 addStartToRecord <- function(rec, newStart) {
   if (newStart == "filename") {
     rec$start <- getFormatedStartFromFilename(basename(rec$path), rec$start_date_regex, rec$start_date_format)
   } else {
-    rec$start <- getFixedStart(newStart)
+    rec$start <- getFixedFormatedStart(newStart)
   }
   rec
 }
@@ -473,6 +498,16 @@ checkLocIsUniform <- function(stationHits) {
       }
     )
   }
+}
+
+checkAdditionalBlankPathsAreRecords <- function(recs, msr) {
+  paths <- getField(recs, "additional_blank_path", quiet = TRUE) |> unlist() |> unique() |> discard(is.na)
+  if (length(paths) == 0)
+    return(TRUE)
+  isOk <- all(map_lgl(paths, \(p) getNrow(getDbComm(), msr, list(query = list(term = list(path = p)))) == 1))
+  if (!isOk)
+    stop("additional_blank_path(s) ", paste(paths, collapse = ", "), " not entered as records.")
+  isOk
 }
 
 addOptionalStationField <- function(field, resListTemp, hits) {
